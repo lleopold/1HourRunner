@@ -1,0 +1,88 @@
+:root {
+  --bg: #151617;
+  --panel: #1f2124;
+  --panel-weak: #1a1b1d;
+  --text: #ffffff;
+  --muted: #b6bcc6;
+  --primary: #2f6fed;
+  --accent: #43A047;
+  --radius: 10px;
+  --gap: 12px;
+  --font-size: 14px;
+}
+
+.ws-screen {
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0);        /* lets 3D show through */
+  flex-direction: column;
+  padding: 16px;
+}
+
+.ws-topbar {
+  height: 44px;
+  align-items: center;
+  margin-bottom: var(--gap);
+}
+.ws-title {
+  color: var(--text);
+  font-size: 20px; unity-font-style: bold;
+}
+
+.ws-content {
+  flex-grow: 1; flex-direction: row; gap: var(--gap);
+}
+
+/* LEFT LIST */
+.ws-list {
+  width: 240px; min-width: 220px; max-width: 280px;
+  background-color: var(--panel);
+  border-radius: var(--radius); padding: 8px;
+}
+.ws-list .unity-button {
+  color: var(--text); background-color: transparent;
+  border-radius: 8px; margin-bottom: 6px;
+}
+.ws-list .unity-button:hover { background-color: rgba(255,255,255,0.08); }
+.ws-list .unity-button:focus { outline: 2px solid var(--primary); }
+
+/* MIDDLE PREVIEW (transparent & click-through) */
+.ws-preview {
+  flex-grow: 1;
+  background-color: rgba(0,0,0,0);
+  -unity-picking-mode: ignore;
+  border-radius: var(--radius);
+}
+
+/* RIGHT STATS */
+.ws-stats {
+  width: 340px; min-width: 300px;
+  background-color: var(--panel);
+  border-radius: var(--radius);
+  padding: 12px; gap: 8px;
+}
+.ws-section {
+  color: var(--muted); margin-bottom: 6px; letter-spacing: .5px;
+}
+.ws-row {
+  flex-direction: row; align-items: center; justify-content: space-between; gap: 8px;
+  background-color: var(--panel-weak);
+  border-radius: 8px; padding: 8px 10px;
+}
+.ws-row Label { color: var(--text); font-size: var(--font-size); }
+.ws-row .unity-float-field { width: 120px; }
+.ws-row .unity-base-field__input .unity-text-input {
+  color: var(--text); background-color: #0e0f10; border-radius: 6px;
+}
+
+/* BOTTOM ACTIONS */
+.ws-actions {
+  height: 80px; justify-content: center; align-items: center; gap: 16px;
+  margin-top: var(--gap);
+}
+.ws-cta {
+  background-color: var(--primary); color: #fff;
+  padding: 10px 28px; border-radius: 10px; font-size: 18px;
+}
+.ws-cta:hover { background-color: #2557c5; }
+.ws-cta.ghost { background-color: transparent; outline: 2px solid var(--primary); color: var(--text); }
+.ws-cta.ghost:hover { background-color: rgba(47,111,237,0.12); }

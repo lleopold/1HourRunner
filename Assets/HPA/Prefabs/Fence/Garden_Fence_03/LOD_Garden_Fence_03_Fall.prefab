@@ -1,0 +1,226 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5485610865909565565
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3430388502897868643}
+  m_Layer: 0
+  m_Name: Scale
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3430388502897868643
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5485610865909565565}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3609066023594761238}
+  - {fileID: 180231775211999076}
+  m_Father: {fileID: 2422778087460281991}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7456666536297079157
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2422778087460281991}
+  - component: {fileID: 1273787179815151914}
+  m_Layer: 0
+  m_Name: LOD_Garden_Fence_03_Fall
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2422778087460281991
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7456666536297079157}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3430388502897868643}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!205 &1273787179815151914
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7456666536297079157}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: -0.000001013279, y: 0.029977381, z: -0.00000029802322}
+  m_Size: 1.5093727
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.10450035
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 2476652904813160313}
+    - renderer: {fileID: 1354284984313066507}
+  - screenRelativeHeight: 0.026635874
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 2476652904813160313}
+  m_Enabled: 1
+--- !u!1001 &729912220683892385
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 3430388502897868643}
+    m_Modifications:
+    - target: {fileID: 282236081541997439, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+      propertyPath: m_Name
+      value: Fence_03_Break_Fall_Grid
+      objectReference: {fileID: 0}
+    - target: {fileID: 621888810869569989, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 621888810869569989, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 621888810869569989, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 621888810869569989, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 621888810869569989, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 621888810869569989, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 621888810869569989, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 621888810869569989, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 621888810869569989, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 621888810869569989, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 621888810869569989, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+--- !u!4 &180231775211999076 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 621888810869569989, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+  m_PrefabInstance: {fileID: 729912220683892385}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1354284984313066507 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1795326878516789930, guid: bba897c7fc6e595499e5dae4a022adc1, type: 3}
+  m_PrefabInstance: {fileID: 729912220683892385}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &3481268651423994509
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 3430388502897868643}
+    m_Modifications:
+    - target: {fileID: 169457872732196507, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 169457872732196507, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.1649863
+      objectReference: {fileID: 0}
+    - target: {fileID: 169457872732196507, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.11899856
+      objectReference: {fileID: 0}
+    - target: {fileID: 169457872732196507, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.008988209
+      objectReference: {fileID: 0}
+    - target: {fileID: 169457872732196507, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.99893117
+      objectReference: {fileID: 0}
+    - target: {fileID: 169457872732196507, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.04595829
+      objectReference: {fileID: 0}
+    - target: {fileID: 169457872732196507, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.004860882
+      objectReference: {fileID: 0}
+    - target: {fileID: 169457872732196507, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.0008770431
+      objectReference: {fileID: 0}
+    - target: {fileID: 169457872732196507, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -5.269
+      objectReference: {fileID: 0}
+    - target: {fileID: 169457872732196507, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0.554
+      objectReference: {fileID: 0}
+    - target: {fileID: 169457872732196507, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0.075
+      objectReference: {fileID: 0}
+    - target: {fileID: 653542723875820577, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+      propertyPath: m_Name
+      value: Fence_03_Break_Fall_Lod0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+--- !u!23 &2476652904813160313 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1301863364993447412, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+  m_PrefabInstance: {fileID: 3481268651423994509}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &3609066023594761238 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 169457872732196507, guid: 8d20e47561dd35c458603190fc880752, type: 3}
+  m_PrefabInstance: {fileID: 3481268651423994509}
+  m_PrefabAsset: {fileID: 0}

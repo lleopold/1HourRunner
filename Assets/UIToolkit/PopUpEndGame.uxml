@@ -1,0 +1,25 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UIToolkit/PreMainMenuButtons.uss?fileID=7433441132597879392&amp;guid=b2e2ccd3e254a354780aaf3585b2ec95&amp;type=3#PreMainMenuButtons" />
+    <ui:VisualElement style="flex-grow: 1; align-self: center; justify-content: center;">
+        <ui:VisualElement style="flex-grow: 1; align-items: stretch; justify-content: flex-start; flex-direction: column; max-height: 60%;">
+            <ui:Label tabindex="-1" text="Game ended:" parse-escape-sequences="true" display-tooltip-when-elided="true" class="button" style="font-size: 22px; -unity-text-align: upper-center; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px;" />
+            <ui:Label tabindex="-1" text="You survived, ye." parse-escape-sequences="true" display-tooltip-when-elided="true" name="lab_game_epilog" class="button" style="font-size: 22px; -unity-text-align: upper-center; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px;" />
+            <ui:VisualElement style="flex-grow: 1;" />
+            <ui:VisualElement class="button" style="flex-grow: 1; flex-direction: row; justify-content: center; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px;">
+                <ui:Label tabindex="-1" text="Time passed" parse-escape-sequences="true" display-tooltip-when-elided="true" style="font-size: 22px;" />
+                <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" name="lab_time_passed" style="font-size: 22px;" />
+            </ui:VisualElement>
+            <ui:VisualElement class="button" style="flex-grow: 1; flex-direction: row; justify-content: center; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px; height: 57px;">
+                <ui:Label tabindex="-1" text="Enemies defeated:" parse-escape-sequences="true" display-tooltip-when-elided="true" style="font-size: 22px;" />
+                <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" name="lab_enemies_defeated" style="font-size: 22px;" />
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; flex-direction: row; justify-content: center;">
+                <ui:Label tabindex="-1" text="Expirience earned:" parse-escape-sequences="true" display-tooltip-when-elided="true" class="button" style="font-size: 22px; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px;" />
+                <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" name="lab_expirience_earned" class="button" style="font-size: 22px; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px;" />
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; flex-direction: row; justify-content: center;">
+                <ui:Button text="OK" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_ok" class="button" style="width: 310px; font-size: 22px; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

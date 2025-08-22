@@ -1,0 +1,72 @@
+# Ignore everything by default
+*
+
+# ================
+# UNTRACK - Unity generated files
+# ================
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Pp]ackages/
+
+# ================
+# UNTRACK - IDE files
+# ================
+.[Aa]ssembly[Aa]ttributes.cs
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.opendb
+*.VC.db
+.idea/
+
+# ================
+# UNTRACK - OS files
+# ================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ================
+# TRACK - First, allow the Assets directory structure
+# ================
+!Assets/
+!Assets/**/
+
+# ================
+# TRACK - Then allow specific file types in Assets
+# ================
+!Assets/**/*.cs
+!Assets/**/*.json
+!Assets/**/*.xml
+!Assets/**/*.uss
+!Assets/**/*.txt
+
+# ================
+# TRACK - Root files
+# ================
+!.gitignore
+!README.md
+!LICENSE*
+
+# Allow Unity UI files
+!Assets/**/*.uxml
+!Assets/**/*.prefab
+!Assets/**/*.unity

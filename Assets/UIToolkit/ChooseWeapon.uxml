@@ -1,0 +1,45 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Resources/UI/(WeaponSelection.uss?fileID=7433441132597879392&amp;guid=6ee63f4a7a6fbd4438fdcd7214d51bd1&amp;type=3#(WeaponSelection" />
+    <ui:VisualElement name="ve_all" picking-mode="Ignore" class="weapon-screen" style="flex-grow: 1; max-width: 100%; max-height: 100%; min-width: 100%; min-height: 100%; flex-direction: column; background-color: rgba(30, 30, 30, 0);">
+        <ui:VisualElement name="ve_upper" style="flex-grow: 1; flex-direction: row; height: 80%; max-width: 100%; max-height: 100%; width: 100%;">
+            <ui:VisualElement name="ve_weapon_buttons" class="weapon-list" style="flex-grow: 1; align-items: center; min-width: 20%; min-height: 20%; width: 20%; justify-content: space-around;">
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_AP85" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_MK18" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_P350" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_Revolver" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_Hunter85" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_M4" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_M9" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_SMG5" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_PT8" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_R90" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_FBS" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_Eder22" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_DT22" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_CV47" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_C1911" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_M16" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_KM4" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_590A1" style="background-image: none; width: 100%; height: 5%;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_WPN_CX8" style="background-image: none; width: 100%; height: 5%;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="ve_middle" picking-mode="Ignore" class="weapon-preview" style="flex-grow: 1; width: 60%; background-color: rgba(0, 0, 0, 0);" />
+            <ui:VisualElement name="ve_stats" class="stats-panel" style="flex-grow: 1; width: 20%; justify-content: space-between;">
+                <ui:FloatField label="Damage" value="42,2" name="fl_damage" />
+                <ui:FloatField label="Fire rate" value="42,2" name="fl_fire_rate" />
+                <ui:FloatField label="Damage fluctuation" value="42,2" name="fl_damage_fluctuation" />
+                <ui:FloatField label="Clip size" value="42,2" name="fl_clip_size" />
+                <ui:FloatField label="Precision" value="42,2" name="fl_precision" />
+                <ui:FloatField label="Reload time" value="42,2" name="fl_reload_time" />
+                <ui:FloatField label="Simultanious bullets" value="42,2" name="fl_simultanious_bullets" />
+                <ui:FloatField label="Crit chance" value="42,2" name="fl_critical_chance" />
+                <ui:FloatField label="Stagger" value="42,2" name="fl_stagger" />
+                <ui:FloatField label="Recoil" value="42,2" name="fl_recoil" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="ve_bottom" class="action-buttons" style="flex-grow: 1; font-size: 20%; height: 20%; justify-content: center; align-items: center; flex-direction: row;">
+            <ui:Button text="Play" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_play" style="-unity-font: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/LiberationSans.ttf?fileID=12800000&amp;guid=e3265ab4bf004d28a9537516768c1c75&amp;type=3#LiberationSans&quot;); font-size: 44px;" />
+            <ui:Button text="Back" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_back" style="height: auto; width: auto; font-size: 44px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

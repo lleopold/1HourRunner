@@ -1,0 +1,363 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4975664186695130101
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4975664186695130091}
+  - component: {fileID: 4975664186695130100}
+  m_Layer: 0
+  m_Name: TerrainStarter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4975664186695130091
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4975664186695130101}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4975664186695130100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4975664186695130101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 166281dd2f8a20447a5029fabe5f25dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  seeInspector: 1
+  roadData: {fileID: 11400000, guid: 65c36ca5240e78f4f8767e3b8379d970, type: 2}
+  terrList: []
+  noisetexList: []
+  noiseOffsetHeight: {fileID: 2800000, guid: 1cafc7e6f9975fb4c9251fb66602ee2a, type: 3}
+  heightOffset: 0.001
+  spawnObjList: []
+  gridSize: 10
+  editorTabIndex: 6
+  layerParamsList:
+  - name: 01 Grass 01
+    terrainLayer: {fileID: 8574412962073106934, guid: 79ff58ebee5993145845fe61ded6e163, type: 2}
+    detailList:
+    - isShown: 0
+      name: 
+      probability: 70
+      threshold: 0.7
+      detailIntensity: 4
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+    - isShown: 0
+      name: 
+      probability: 30
+      threshold: 0.7
+      detailIntensity: 1
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+  - name: 02 Asphalt
+    terrainLayer: {fileID: 8574412962073106934, guid: bb40940ce7f47354eadb476bc42baf6d, type: 2}
+    detailList:
+    - isShown: 0
+      name: 
+      probability: 70
+      threshold: 0.7
+      detailIntensity: 4
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+    - isShown: 0
+      name: 
+      probability: 30
+      threshold: 0.7
+      detailIntensity: 1
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+  - name: 03 Floor Rock
+    terrainLayer: {fileID: 8574412962073106934, guid: 372a9e7cd5462fd4a9c693bbf7816fb3, type: 2}
+    detailList:
+    - isShown: 0
+      name: 
+      probability: 70
+      threshold: 0.7
+      detailIntensity: 4
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+    - isShown: 0
+      name: 
+      probability: 30
+      threshold: 0.7
+      detailIntensity: 1
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+  - name: 04 Ground 01
+    terrainLayer: {fileID: 8574412962073106934, guid: a159c22ea8cc1ce4aa98ebe14445d82e, type: 2}
+    detailList:
+    - isShown: 0
+      name: 
+      probability: 70
+      threshold: 0.7
+      detailIntensity: 4
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+    - isShown: 0
+      name: 
+      probability: 30
+      threshold: 0.7
+      detailIntensity: 1
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+  - name: 05 Ground 02
+    terrainLayer: {fileID: 8574412962073106934, guid: 163c88524072ae641afb129401ad85ee, type: 2}
+    detailList:
+    - isShown: 0
+      name: 
+      probability: 70
+      threshold: 0.7
+      detailIntensity: 4
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+    - isShown: 0
+      name: 
+      probability: 30
+      threshold: 0.7
+      detailIntensity: 1
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+  - name: 06 Large Rock
+    terrainLayer: {fileID: 8574412962073106934, guid: 1d7829abcf7f0df4486b71d316776aee, type: 2}
+    detailList:
+    - isShown: 0
+      name: 
+      probability: 70
+      threshold: 0.7
+      detailIntensity: 4
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+    - isShown: 0
+      name: 
+      probability: 30
+      threshold: 0.7
+      detailIntensity: 1
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+  - name: 07 Debris
+    terrainLayer: {fileID: 8574412962073106934, guid: 1fe39474b61c787418643558b3319996, type: 2}
+    detailList:
+    - isShown: 0
+      name: 
+      probability: 70
+      threshold: 0.7
+      detailIntensity: 4
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+    - isShown: 0
+      name: 
+      probability: 30
+      threshold: 0.7
+      detailIntensity: 1
+      detailTexture: {fileID: 0}
+      detailObject: {fileID: 0}
+      minWidth: 0
+      maxWidth: 0
+      minHeight: 0
+      maxHeight: 0
+      noiseSpread: 0
+      holeEdgePadding: 0
+      healthyColor: {r: 0, g: 0, b: 0, a: 0}
+      dryColor: {r: 0, g: 0, b: 0, a: 0}
+      detailRenderModeGrass: 0
+      detailRenderModeObj: 0
+  detailListRef:
+  - isShown: 0
+    name: 0_Grass 01_TIFF_02
+    probability: 70
+    threshold: 0.7
+    detailIntensity: 4
+    detailTexture: {fileID: 2800000, guid: 6a7788380dc45ec4bbb2614bd8a2bec5, type: 3}
+    detailObject: {fileID: 0}
+    minWidth: 0.3
+    maxWidth: 0.7
+    minHeight: 0.3
+    maxHeight: 0.7
+    noiseSpread: 15
+    holeEdgePadding: 0
+    healthyColor: {r: 1, g: 1, b: 1, a: 1}
+    dryColor: {r: 1, g: 1, b: 1, a: 1}
+    detailRenderModeGrass: 2
+    detailRenderModeObj: 1
+  - isShown: 0
+    name: 1_Grass 02
+    probability: 30
+    threshold: 0.7
+    detailIntensity: 1
+    detailTexture: {fileID: 2800000, guid: 6a7788380dc45ec4bbb2614bd8a2bec5, type: 3}
+    detailObject: {fileID: 0}
+    minWidth: 0.3
+    maxWidth: 0.7
+    minHeight: 0.3
+    maxHeight: 0.7
+    noiseSpread: 0
+    holeEdgePadding: 0
+    healthyColor: {r: 1, g: 1, b: 1, a: 1}
+    dryColor: {r: 1, g: 1, b: 1, a: 1}
+    detailRenderModeGrass: 2
+    detailRenderModeObj: 1
+  terrainSettings:
+    windSpeed: 0
+    windSize: 0
+    windBending: 0
+    windGrassTint: {r: 1, g: 1, b: 1, a: 1}
+    terrainWidth: 300
+    terrainLength: 300
+    terrainHeight: 250
+    detailResolutionPatch: 64
+    detailResolution: 512
+    heightmapResolution: 513
+    controlTextureResolution: 512
+    baseTextureResolution: 1024
+    scaleInLightmap: 0.01

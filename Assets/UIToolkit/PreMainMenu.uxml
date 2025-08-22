@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UIToolkit/PreMainMenuButtons.uss?fileID=7433441132597879392&amp;guid=b2e2ccd3e254a354780aaf3585b2ec95&amp;type=3#PreMainMenuButtons" />
+    <ui:VisualElement style="flex-grow: 1; flex-wrap: nowrap; align-items: center; justify-content: center;">
+        <ui:Button text="Play" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_play" class="button" />
+        <ui:Button text="Language: English" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_language" class="button" />
+        <ui:Button text="Options" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_options" class="button" />
+        <ui:Button text="Quit" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_quit" class="button" />
+    </ui:VisualElement>
+</ui:UXML>

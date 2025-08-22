@@ -1,0 +1,197 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &131387491980498648
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1679357436348892464}
+  - component: {fileID: 4477600013578294589}
+  m_Layer: 0
+  m_Name: LOD_Ironing_Board_01_Close
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1679357436348892464
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 131387491980498648}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3327836238184716481}
+  - {fileID: 3327836237207450799}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!205 &4477600013578294589
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 131387491980498648}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: 0.00000029802322, y: 0.000000074505806, z: 0}
+  m_Size: 1.6837432
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.16744183
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 4496269947377542062}
+  - screenRelativeHeight: 0.039000005
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 4496269946668699584}
+  m_Enabled: 1
+--- !u!1001 &6808790821561664364
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 1679357436348892464}
+    m_Modifications:
+    - target: {fileID: 8093942973415529389, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8093942973415529389, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8093942973415529389, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8093942973415529389, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8093942973415529389, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8093942973415529389, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8093942973415529389, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8093942973415529389, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8093942973415529389, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8093942973415529389, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8093942973415529389, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8870023001467502871, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+      propertyPath: m_Name
+      value: Ironing_Board_01_Close_Lod0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+--- !u!4 &3327836238184716481 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8093942973415529389, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+  m_PrefabInstance: {fileID: 6808790821561664364}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &4496269947377542062 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6924384055805632706, guid: 773739edec659174985c2f7afc2be7a6, type: 3}
+  m_PrefabInstance: {fileID: 6808790821561664364}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &8890909296535876258
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 1679357436348892464}
+    m_Modifications:
+    - target: {fileID: 4973996366701198690, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6146291487984387597, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6146291487984387597, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6146291487984387597, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6146291487984387597, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6146291487984387597, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6146291487984387597, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6146291487984387597, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6146291487984387597, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6146291487984387597, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6146291487984387597, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6146291487984387597, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6775616331575286967, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+      propertyPath: m_Name
+      value: Ironing_Board_01_Close_Lod1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+--- !u!4 &3327836237207450799 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6146291487984387597, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+  m_PrefabInstance: {fileID: 8890909296535876258}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &4496269946668699584 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4973996366701198690, guid: acfd61c921b9ef742b4c5371149187d3, type: 3}
+  m_PrefabInstance: {fileID: 8890909296535876258}
+  m_PrefabAsset: {fileID: 0}

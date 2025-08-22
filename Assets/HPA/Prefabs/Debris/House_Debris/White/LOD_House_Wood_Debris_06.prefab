@@ -1,0 +1,125 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2949137947439348662
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5379024372431729460}
+  - component: {fileID: 2257022757526004970}
+  m_Layer: 0
+  m_Name: LOD_House_Wood_Debris_06
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5379024372431729460
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2949137947439348662}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3660338845366953716}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!205 &2257022757526004970
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2949137947439348662}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: 0, y: 0, z: -0.0000048838556}
+  m_Size: 2.3235936
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.101973936
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 2487972806658547099}
+  m_Enabled: 1
+--- !u!1001 &6961776059591334882
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 5379024372431729460}
+    m_Modifications:
+    - target: {fileID: 5931540574039162134, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5931540574039162134, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5931540574039162134, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5931540574039162134, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5931540574039162134, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5931540574039162134, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5931540574039162134, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5931540574039162134, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5931540574039162134, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5931540574039162134, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5931540574039162134, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6420655415949518764, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+      propertyPath: m_Name
+      value: House_Wood_Debris_06
+      objectReference: {fileID: 0}
+    - target: {fileID: 6420655415949518764, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+--- !u!23 &2487972806658547099 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4763185960830912121, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+  m_PrefabInstance: {fileID: 6961776059591334882}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &3660338845366953716 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5931540574039162134, guid: 703249eb0d9f9664d92b445dc5fc0572, type: 3}
+  m_PrefabInstance: {fileID: 6961776059591334882}
+  m_PrefabAsset: {fileID: 0}

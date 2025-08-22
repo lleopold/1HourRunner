@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement style="flex-grow: 1; width: 50%; height: 50%; align-items: center; flex-direction: column; align-self: center;">
+        <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_pwr1" style="height: 20%; background-image: resource(&apos;PowerUp/Images/pikachu_test&apos;); align-self: stretch;" />
+        <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" name="lab_pwr1" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+        <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_pwr3" style="height: 20%; background-image: resource(&apos;PowerUp/Images/pikachu_test&apos;); align-self: stretch;" />
+        <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" name="lab_pwr2" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+        <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_pwr2" style="height: 20%; background-image: resource(&apos;PowerUp/Images/pikachu_test&apos;); align-self: stretch;" />
+        <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" name="lab_pwr3" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+        <ui:VisualElement style="flex-grow: 1; flex-direction: row; align-self: auto; justify-content: flex-start; height: 10%; align-items: center;">
+            <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_ok" text="OK" style="text-shadow: 0 0 0 rgba(0, 0, 0, 0); width: 40%;" />
+            <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_cancel" text="Cancel" style="white-space: nowrap; width: 40%;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

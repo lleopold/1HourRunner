@@ -1,0 +1,29 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UIToolkit/myBtn.uss?fileID=7433441132597879392&amp;guid=3fd1634d0f0778941bc63274a6fb06c3&amp;type=3#myBtn" />
+    <ui:VisualElement name="VisualElement" style="flex-grow: 1; flex-direction: column; align-items: auto; justify-content: flex-start; align-self: stretch;">
+        <ui:VisualElement style="flex-grow: 1;" />
+        <ui:VisualElement style="flex-grow: 1; justify-content: space-around; align-items: center; align-self: flex-start; flex-direction: column;">
+            <ui:Label tabindex="-1" text="Damage progress" parse-escape-sequences="true" display-tooltip-when-elided="true" name="lab_bullets" class="myBtn" />
+            <ui:Label tabindex="-1" text="Bullets" parse-escape-sequences="true" display-tooltip-when-elided="true" class="myBtn" />
+            <ui:Button text="Exit" parse-escape-sequences="true" display-tooltip-when-elided="true" name="bt_exit" class="myBtn" />
+            <ui:Button text="Main screen" parse-escape-sequences="true" display-tooltip-when-elided="true" name="bt_main_screen" class="myBtn" />
+            <ui:Button text="Zombie stumble" parse-escape-sequences="true" display-tooltip-when-elided="true" name="bt_zombie" class="myBtn" />
+            <ui:Button text="End Game" parse-escape-sequences="true" display-tooltip-when-elided="true" name="bt_end_game" class="myBtn" />
+            <ui:Button text="Level up" parse-escape-sequences="true" display-tooltip-when-elided="true" name="bt_level_up" class="myBtn" />
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-grow: 1; align-self: stretch; flex-direction: row-reverse;">
+            <ui:VisualElement style="flex-grow: 1; flex-direction: column-reverse;">
+                <ui:ProgressBar value="22" title="XP" name="pb_xp" style="-unity-background-image-tint-color: rgb(144, 75, 75); background-color: rgba(105, 34, 107, 0); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                <ui:ProgressBar value="22" title="Health" name="pb_health" style="margin-top: 1px; margin-right: 1px; margin-bottom: 1px; margin-left: 1px; background-image: url(&quot;project://database/Assets/JMO%20Assets/Cartoon%20FX%20Remaster/CFXR%20Assets/Graphics/cfxr%20card%20spade.png?fileID=2800000&amp;guid=495bf78b2a79c4049ba5feebcc016c39&amp;type=3#cfxr card spade&quot;); -unity-background-image-tint-color: rgb(255, 0, 0); background-color: rgba(255, 0, 0, 0); border-left-color: rgba(255, 175, 0, 0); border-right-color: rgba(255, 175, 0, 0); border-top-color: rgba(255, 175, 0, 0); border-bottom-color: rgba(255, 175, 0, 0); border-top-left-radius: 2px; border-top-right-radius: 2px; border-bottom-right-radius: 2px; border-bottom-left-radius: 2px;" />
+                <ui:VisualElement class="myBtn" style="flex-grow: 1; flex-direction: row; align-self: stretch;">
+                    <ui:VisualElement style="flex-grow: 1; flex-direction: column-reverse; align-self: flex-end;">
+                        <ui:ProgressBar value="22" title="Stamina" name="pb_stamina" class="myBtn" style="-unity-background-image-tint-color: rgb(233, 223, 24); text-shadow: 1px 1px 0 rgba(132, 75, 144, 0); background-image: resource(&apos;Thumbnails/Jennifer&apos;); background-color: rgba(59, 136, 111, 0);" />
+                    </ui:VisualElement>
+                    <ui:VisualElement style="flex-grow: 1; flex-direction: column-reverse;">
+                        <ui:ProgressBar value="22" title="Reload" name="pb_reload" class="myBtn" style="-unity-background-image-tint-color: rgba(234, 24, 24, 0.82); color: rgb(68, 140, 80); background-color: rgba(58, 217, 40, 0); background-image: url(&quot;project://database/Assets/JMO%20Assets/Cartoon%20FX%20(legacy)/Textures/CFX2_T_HeartBrokenSlice.png?fileID=2800000&amp;guid=9864efbfd97a1d141aaef379143ac011&amp;type=3#CFX2_T_HeartBrokenSlice&quot;);" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

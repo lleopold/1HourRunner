@@ -1,0 +1,63 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+  <Style src="WeaponScreenMock.uss" />
+
+  <!-- Root -->
+  <ui:VisualElement name="root" class="ws-screen">
+
+    <!-- Top bar (title) -->
+    <ui:VisualElement class="ws-topbar">
+      <ui:Label text="Loadout / Weapons" class="ws-title"/>
+    </ui:VisualElement>
+
+    <!-- Content -->
+    <ui:VisualElement class="ws-content">
+      <!-- Left: weapon list -->
+      <ui:ScrollView name="weapons" class="ws-list">
+        <ui:Button text="AP85" />
+        <ui:Button text="MK18" />
+        <ui:Button text="P350" />
+        <ui:Button text="Revolver" />
+        <ui:Button text="Hunter85" />
+        <ui:Button text="M4" />
+        <ui:Button text="M9" />
+        <ui:Button text="SMG5" />
+        <ui:Button text="PT8" />
+        <ui:Button text="R90" />
+        <ui:Button text="FBS" />
+        <ui:Button text="Eder22" />
+        <ui:Button text="DT22" />
+        <ui:Button text="CV47" />
+        <ui:Button text="C1911" />
+        <ui:Button text="M16" />
+        <ui:Button text="KM4" />
+        <ui:Button text="590A1" />
+        <ui:Button text="CX8" />
+      </ui:ScrollView>
+
+      <!-- Middle: 3D preview overlay area (transparent) -->
+      <ui:VisualElement name="preview" class="ws-preview"/>
+
+      <!-- Right: stats -->
+      <ui:VisualElement class="ws-stats">
+        <ui:Label text="Stats" class="ws-section"/>
+        <ui:VisualElement class="ws-row"><ui:Label text="Damage"/><ui:FloatField /></ui:VisualElement>
+        <ui:VisualElement class="ws-row"><ui:Label text="Fire rate"/><ui:FloatField /></ui:VisualElement>
+        <ui:VisualElement class="ws-row"><ui:Label text="Damage fluctuation"/><ui:FloatField /></ui:VisualElement>
+        <ui:VisualElement class="ws-row"><ui:Label text="Clip size"/><ui:FloatField /></ui:VisualElement>
+        <ui:VisualElement class="ws-row"><ui:Label text="Precision"/><ui:FloatField /></ui:VisualElement>
+        <ui:VisualElement class="ws-row"><ui:Label text="Reload time"/><ui:FloatField /></ui:VisualElement>
+        <ui:VisualElement class="ws-row"><ui:Label text="Simultaneous bullets"/><ui:FloatField /></ui:VisualElement>
+        <ui:VisualElement class="ws-row"><ui:Label text="Crit chance"/><ui:FloatField /></ui:VisualElement>
+        <ui:VisualElement class="ws-row"><ui:Label text="Stagger"/><ui:FloatField /></ui:VisualElement>
+        <ui:VisualElement class="ws-row"><ui:Label text="Recoil"/><ui:FloatField /></ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Bottom: actions -->
+    <ui:VisualElement class="ws-actions">
+      <ui:Button text="Play" class="ws-cta"/>
+      <ui:Button text="Back" class="ws-cta ghost"/>
+    </ui:VisualElement>
+
+  </ui:VisualElement>
+</ui:UXML>

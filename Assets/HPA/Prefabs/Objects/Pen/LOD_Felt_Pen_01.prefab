@@ -1,0 +1,197 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &871302654131506111
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6403973082195988481}
+  - component: {fileID: 1810463869529556634}
+  m_Layer: 0
+  m_Name: LOD_Felt_Pen_01
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6403973082195988481
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 871302654131506111}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4666046476044792711}
+  - {fileID: 2899902398519317959}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!205 &1810463869529556634
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 871302654131506111}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: -0.00000012107193, y: -0.00000007171184, z: 0.0000011324883}
+  m_Size: 0.14573428
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.14921848
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 5803464611751725288}
+  - screenRelativeHeight: 0.035320036
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 4068343661620096680}
+  m_Enabled: 1
+--- !u!1001 &1314223355565102426
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 6403973082195988481}
+    m_Modifications:
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6464916221603511399, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_Name
+      value: Felt_Pen_01
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+--- !u!4 &4666046476044792711 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+  m_PrefabInstance: {fileID: 1314223355565102426}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &5803464611751725288 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4807314963686874546, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+  m_PrefabInstance: {fileID: 1314223355565102426}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &8845820069455475482
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 6403973082195988481}
+    m_Modifications:
+    - target: {fileID: 4807314963686874546, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6464916221603511399, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+      propertyPath: m_Name
+      value: Felt_Pen_01 (1)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+--- !u!4 &2899902398519317959 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5979706776225195741, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+  m_PrefabInstance: {fileID: 8845820069455475482}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &4068343661620096680 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4807314963686874546, guid: 71866b64efa42974ba34391ad85371fe, type: 3}
+  m_PrefabInstance: {fileID: 8845820069455475482}
+  m_PrefabAsset: {fileID: 0}

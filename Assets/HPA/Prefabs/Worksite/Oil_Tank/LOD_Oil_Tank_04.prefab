@@ -1,0 +1,364 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3563572092302497235
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3563572092302497233}
+  - component: {fileID: 3563572092302497232}
+  m_Layer: 0
+  m_Name: LOD_Oil_Tank_04
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3563572092302497233
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3563572092302497235}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3962851642432829860}
+  - {fileID: 3962851643163366225}
+  - {fileID: 3962851643079720097}
+  - {fileID: 3962851643287465916}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!205 &3563572092302497232
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3563572092302497235}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: -0.000000834465, y: 0, z: 0.00000071525574}
+  m_Size: 0.9804982
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.09288505
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 2789360180424852171}
+  - screenRelativeHeight: 0.043816537
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 2789360181288151102}
+  - screenRelativeHeight: 0.023332523
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 2789360181472462798}
+  - screenRelativeHeight: 0.009055787
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 2789360181277299923}
+  m_Enabled: 1
+--- !u!1001 &2993792209947302598
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 3563572092302497233}
+    m_Modifications:
+    - target: {fileID: 1457237844989743917, guid: a16494c4906626541acd065ca38288df, type: 3}
+      propertyPath: m_Name
+      value: Oil_Tank_04_Lod1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266144824022190487, guid: a16494c4906626541acd065ca38288df, type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266144824022190487, guid: a16494c4906626541acd065ca38288df, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266144824022190487, guid: a16494c4906626541acd065ca38288df, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266144824022190487, guid: a16494c4906626541acd065ca38288df, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266144824022190487, guid: a16494c4906626541acd065ca38288df, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266144824022190487, guid: a16494c4906626541acd065ca38288df, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266144824022190487, guid: a16494c4906626541acd065ca38288df, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266144824022190487, guid: a16494c4906626541acd065ca38288df, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266144824022190487, guid: a16494c4906626541acd065ca38288df, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266144824022190487, guid: a16494c4906626541acd065ca38288df, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2266144824022190487, guid: a16494c4906626541acd065ca38288df, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a16494c4906626541acd065ca38288df, type: 3}
+--- !u!23 &2789360181288151102 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1097148130114220792, guid: a16494c4906626541acd065ca38288df, type: 3}
+  m_PrefabInstance: {fileID: 2993792209947302598}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &3962851643163366225 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2266144824022190487, guid: a16494c4906626541acd065ca38288df, type: 3}
+  m_PrefabInstance: {fileID: 2993792209947302598}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &5177627126808446565
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 3563572092302497233}
+    m_Modifications:
+    - target: {fileID: 8152712565190836161, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8152712565190836161, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8152712565190836161, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8152712565190836161, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8152712565190836161, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8152712565190836161, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8152712565190836161, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8152712565190836161, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8152712565190836161, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8152712565190836161, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8152712565190836161, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8822428862116816251, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+      propertyPath: m_Name
+      value: Oil_Tank_04_Lod0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+--- !u!23 &2789360180424852171 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 7020949360725705902, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+  m_PrefabInstance: {fileID: 5177627126808446565}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &3962851642432829860 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8152712565190836161, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+  m_PrefabInstance: {fileID: 5177627126808446565}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &4446513250052891422 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8822428862116816251, guid: b37b0b39ee051d349bc18604305c6ac9, type: 3}
+  m_PrefabInstance: {fileID: 5177627126808446565}
+  m_PrefabAsset: {fileID: 0}
+--- !u!136 &2174997984163898
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4446513250052891422}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.29
+  m_Height: 0.9804982
+  m_Direction: 1
+  m_Center: {x: -0.0000008493662, y: 0, z: 0.0000007003546}
+--- !u!1001 &7825138345190255246
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 3563572092302497233}
+    m_Modifications:
+    - target: {fileID: 5345127979833720413, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5849412733590757256, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+      propertyPath: m_Name
+      value: Oil_Tank_04_Lod3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6514062477110707506, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+      propertyPath: m_RootOrder
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6514062477110707506, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6514062477110707506, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6514062477110707506, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6514062477110707506, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6514062477110707506, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6514062477110707506, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6514062477110707506, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6514062477110707506, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6514062477110707506, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6514062477110707506, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+--- !u!23 &2789360181277299923 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5345127979833720413, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+  m_PrefabInstance: {fileID: 7825138345190255246}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &3962851643287465916 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6514062477110707506, guid: 9a2fb5b5b5346b042bdfd1cf9a5ff224, type: 3}
+  m_PrefabInstance: {fileID: 7825138345190255246}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &9043116614879056392
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 3563572092302497233}
+    m_Modifications:
+    - target: {fileID: 4668731534837691411, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+      propertyPath: m_Name
+      value: Oil_Tank_04_Lod2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5440764192205991593, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+      propertyPath: m_RootOrder
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5440764192205991593, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5440764192205991593, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5440764192205991593, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5440764192205991593, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5440764192205991593, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5440764192205991593, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5440764192205991593, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5440764192205991593, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5440764192205991593, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5440764192205991593, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6614194559243359686, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+--- !u!23 &2789360181472462798 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6614194559243359686, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+  m_PrefabInstance: {fileID: 9043116614879056392}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &3962851643079720097 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5440764192205991593, guid: 15ed4f998c77f64439f00552f7f3efe0, type: 3}
+  m_PrefabInstance: {fileID: 9043116614879056392}
+  m_PrefabAsset: {fileID: 0}

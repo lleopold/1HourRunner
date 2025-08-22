@@ -1,0 +1,192 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &513086275760620349
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5013403124996202743}
+  - component: {fileID: 689904929242969101}
+  m_Layer: 0
+  m_Name: LOD_SNAP_Bastion_Fence_02
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5013403124996202743
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513086275760620349}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 1422947494035492213}
+  - {fileID: 1422947493027877500}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!205 &689904929242969101
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513086275760620349}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: 0.000001385808, y: 0.000000059604645, z: -0.0000013709068}
+  m_Size: 1.6422361
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.06721315
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 284993311915865626}
+  - screenRelativeHeight: 0.022391004
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 284993310906018067}
+  m_Enabled: 1
+--- !u!1001 &798874247402260490
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 5013403124996202743}
+    m_Modifications:
+    - target: {fileID: 1432892886514090188, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+      propertyPath: m_Name
+      value: Bastion_Fence_02_Lod1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1777084369558248054, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1777084369558248054, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1777084369558248054, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1777084369558248054, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1777084369558248054, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1777084369558248054, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1777084369558248054, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1777084369558248054, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1777084369558248054, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1777084369558248054, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1777084369558248054, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+--- !u!4 &1422947493027877500 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1777084369558248054, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+  m_PrefabInstance: {fileID: 798874247402260490}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &284993310906018067 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 640166512848855321, guid: 382676818035afe44b3ca5f77d26b176, type: 3}
+  m_PrefabInstance: {fileID: 798874247402260490}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2206715010629739857
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 5013403124996202743}
+    m_Modifications:
+    - target: {fileID: 462551365914161822, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+      propertyPath: m_Name
+      value: Bastion_Fence_02_Lod0
+      objectReference: {fileID: 0}
+    - target: {fileID: 945897383560947748, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 945897383560947748, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 945897383560947748, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 945897383560947748, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 945897383560947748, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 945897383560947748, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 945897383560947748, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 945897383560947748, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 945897383560947748, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 945897383560947748, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 945897383560947748, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+--- !u!4 &1422947494035492213 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 945897383560947748, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+  m_PrefabInstance: {fileID: 2206715010629739857}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &284993311915865626 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2119977663975183179, guid: 56ceeb140e6878d4fb4cf8e677eb9b51, type: 3}
+  m_PrefabInstance: {fileID: 2206715010629739857}
+  m_PrefabAsset: {fileID: 0}

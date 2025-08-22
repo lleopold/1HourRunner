@@ -1,0 +1,151 @@
+/* Base font and colors */
+:root {
+    --bg-color: #1e1e1e;
+    --panel-bg: #2a2a2a;
+    --accent-color: #43A047;
+    --primary-color: #1E88E5;
+    --text-color: #FFFFFF;
+    --header-size: 20px;
+    --body-size: 14px;
+    unity-font-definition: url("Assets/Fonts/OpenSans-Regular.ttf");
+}
+
+/* Root background */
+.weapon-screen {
+    background-color: var(--bg-color);
+    padding: 16px;
+}
+
+/* Weapon list panel */
+.weapon-list {
+    background-color: var(--panel-bg);
+    border-radius: 8px;
+    padding: 8px;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 160px;
+    max-width: 200px;
+}
+
+/* Buttons for weapons */
+.weapon-list .unity-button {
+    background-color: transparent;
+    color: var(--text-color);
+    font-size: var(--body-size);
+    border-radius: 4px;
+}
+.weapon-list .unity-button:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+.weapon-list .unity-button:focus {
+    outline: 2px solid var(--primary-color);
+}
+
+.weapon-preview {
+  background-color: rgba(0,0,0,0);  /* transparent so the gun shows */
+  -unity-picking-mode: ignore;      /* so it doesn’t block clicks in world */
+  border-radius: 8px;
+  padding: 8px;
+}
+
+/* Stats panel */
+.stats-panel {
+    background-color: var(--panel-bg);
+    border-radius: 8px;
+    padding: 8px 12px;
+    min-width: 220px;
+    gap: 4px;
+}
+
+/* Stat labels */
+.stats-panel Label {
+    color: var(--text-color);
+    font-size: var(--body-size);
+}
+
+/* FloatFields styling */
+.unity-float-field {
+    background-color: #111111;
+    color: var(--text-color);
+    border-radius: 4px;
+}
+
+/* Play / Back buttons */
+.action-buttons {
+    justify-content: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+.action-buttons .unity-button {
+    background-color: var(--primary-color);
+    color: white;
+    font-size: var(--header-size);
+    padding: 6px 20px;
+    border-radius: 6px;
+}
+.action-buttons .unity-button:hover {
+    background-color: #1565C0;
+}
+
+/* Labels in the stats panel */
+.stats-panel Label {
+  color: #ffffff;
+}
+
+/* FloatField text input */
+.stats-panel .unity-base-field__input .unity-text-input {
+  color: #ffffff;
+  background-color: #111111;   /* keeps inputs readable */
+}
+
+/* Optional: the value’s placeholder/caret */
+.stats-panel .unity-text-input::selection {
+  background-color: #2a6fef;
+}
+
+.weapon-list .unity-button.selected {
+  background-color: #2f6fed;
+  color: #fff;
+  border-radius: 6px;
+}
+.weapon-list .unity-button:focus { outline: 2px solid #2f6fed; }
+
+.stats-panel { gap: 8px; padding: 12px; }
+.stats-row { flex-direction: row; align-items: center; justify-content: space-between; }
+.stats-row Label { color: #fff; font-size: 14px; }
+.stats-row .unity-float-field { width: 120px; }        /* consistent field width */
+.stats-row .unity-base-field__input .unity-text-input {
+  color: #fff; background-color: #111; border-radius: 4px;
+}
+
+.weapon-screen { padding: 16px; }
+.weapon-list { padding: 8px; gap: 6px; }
+.stats-panel { border-radius: 8px; background-color: rgba(0,0,0,0.35); }
+.action-buttons { margin-top: 16px; gap: 16px; }
+.action-buttons .unity-button { border-radius: 8px; padding: 8px 24px; }
+
+/* Targetuje input dio FloatField-a */
+.unity-float-field__input {
+    color: white; /* boja teksta */
+}
+
+/* Targetuje labelu FloatField-a */
+.unity-label {
+    color: white;
+}
+
+/* Label tekst sa lijeve strane */
+.unity-label {
+    color: white;
+}
+
+/* Tekst unutar input polja FloatField-a */
+.unity-float-field__input {
+    color: black; /* ili white ako želiš bijeli tekst */
+}
+
+/* Kada je fokusirano (edit mode) */
+.unity-float-field__input:focus {
+    color: yellow;
+}
+

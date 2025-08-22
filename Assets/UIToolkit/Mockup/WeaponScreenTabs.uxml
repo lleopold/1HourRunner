@@ -1,0 +1,34 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UIToolkit/Tabs.clean.uss?fileID=7433441132597879392&amp;guid=90ff54e6640bc6f458ad7fab28d08fce&amp;type=3#Tabs.clean" />
+    <Style src="project://database/Assets/Resources/UI/WeaponsScreen.uss?fileID=7433441132597879392&amp;guid=f042e9e913aa4c144b4a634150a7b58d&amp;type=3#WeaponsScreen" />
+    <ui:VisualElement name="ws_root" style="flex-direction: column; width: 100%; height: 100%;">
+        <ui:VisualElement name="ws_tabs" style="flex-direction: row; gap: 8px; padding: 8px; justify-content: center;">
+            <ui:Button text="Pistols" name="tab_pistols" class="tab" />
+            <ui:Button text="SMGs" name="tab_smgs" class="tab" style="-unity-text-align: middle-center;" />
+            <ui:Button text="Rifles" name="tab_rifles" class="tab" />
+            <ui:Button text="Shotguns" name="tab_shotguns" class="tab" style="white-space: pre;" />
+            <ui:Button text="Snipers" name="tab_snipers" class="tab" />
+        </ui:VisualElement>
+        <ui:VisualElement name="ws_main" style="flex-direction: row; flex-grow: 1; gap: 8px; padding: 8px;">
+            <ui:ScrollView name="ws_weapon_list" style="width: 280px; flex-shrink: 0;">
+                <ui:Button text="AP85" name="btn_ap85" />
+                <ui:Button text="MK18" name="btn_mk18" />
+                <ui:Button text="P350" name="btn_p350" />
+            </ui:ScrollView>
+<ui:VisualElement name="ws_right" style="flex-direction: column; flex-grow: 1; gap: 8px;">
+    <!-- TOP: preview takes 50% -->
+    <ui:VisualElement name="ws_preview"
+        style="flex-basis: 50%; flex-grow: 0; flex-shrink: 0; position: relative; background-color: rgba(0, 0, 0, 0); -unity-picking-mode: ignore;" />
+
+    <!-- BOTTOM: stats take the rest -->
+    <ui:VisualElement name="ws_stats"
+        style="flex-grow: 1; flex-direction: row; justify-content: space-around; padding: 8px;">
+        <ui:Label text="Damage: 42" />
+        <ui:Label text="Fire rate: 5.6" />
+        <ui:Label text="Reload: 1.8s" />
+        <ui:Label text="Clip: 30" />
+    </ui:VisualElement>
+</ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

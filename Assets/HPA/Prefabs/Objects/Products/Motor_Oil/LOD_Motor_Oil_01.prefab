@@ -1,0 +1,197 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7280884678732074170
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7487328612028733535}
+  - component: {fileID: 4829353702485721759}
+  m_Layer: 0
+  m_Name: LOD_Motor_Oil_01
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7487328612028733535
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7280884678732074170}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3209921473205344689}
+  - {fileID: 3201359931123683202}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!205 &4829353702485721759
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7280884678732074170}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: 0.0000006109476, y: 0, z: 0.0000048801303}
+  m_Size: 0.29316252
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.08162153
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 4377712478123090654}
+  - screenRelativeHeight: 0.025978459
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 4334344354913334509}
+  m_Enabled: 1
+--- !u!1001 &7882644092672769509
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 7487328612028733535}
+    m_Modifications:
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5351002309951023325, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_Name
+      value: Motor_Oil_01_Lod0 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5855357021746055432, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+--- !u!4 &3201359931123683202 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+  m_PrefabInstance: {fileID: 7882644092672769509}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &4334344354913334509 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5855357021746055432, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+  m_PrefabInstance: {fileID: 7882644092672769509}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &7891056956072340438
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 7487328612028733535}
+    m_Modifications:
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5351002309951023325, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+      propertyPath: m_Name
+      value: Motor_Oil_01_Lod0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+--- !u!4 &3209921473205344689 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4686352670315557479, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+  m_PrefabInstance: {fileID: 7891056956072340438}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &4377712478123090654 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5855357021746055432, guid: afacf8f4d46ca214cb47df74cd684084, type: 3}
+  m_PrefabInstance: {fileID: 7891056956072340438}
+  m_PrefabAsset: {fileID: 0}

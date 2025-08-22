@@ -1,0 +1,2714 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2498946692838429513
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4096426607733316126}
+  - component: {fileID: 2195417214751011138}
+  - component: {fileID: 5683572014017153223}
+  - component: {fileID: 7724990140970274578}
+  - component: {fileID: 9019821622613324005}
+  m_Layer: 0
+  m_Name: BorderR
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4096426607733316126
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2498946692838429513}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4837086347358658293}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &2195417214751011138
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2498946692838429513}
+  m_Mesh: {fileID: 0}
+--- !u!23 &5683572014017153223
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2498946692838429513}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 2680e52b0beecba43b1ea08c73bb1b0b, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &7724990140970274578
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2498946692838429513}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
+--- !u!114 &9019821622613324005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2498946692838429513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1531a7986df9fcc4bb4e8f2afe91c292, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ID: 4
+  roadType: 1
+--- !u!1 &4233632136107082412
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3262273860811689955}
+  - component: {fileID: 8823027550461790530}
+  - component: {fileID: 25182466795626723}
+  - component: {fileID: 779599255189120936}
+  - component: {fileID: 2676976482560233759}
+  m_Layer: 0
+  m_Name: RoadSection
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3262273860811689955
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4233632136107082412}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4837086347358658293}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &8823027550461790530
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4233632136107082412}
+  m_Mesh: {fileID: 0}
+--- !u!23 &25182466795626723
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4233632136107082412}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 2680e52b0beecba43b1ea08c73bb1b0b, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &779599255189120936
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4233632136107082412}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
+--- !u!114 &2676976482560233759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4233632136107082412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1531a7986df9fcc4bb4e8f2afe91c292, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ID: 3
+  roadType: 1
+--- !u!1 &5290996013595402682
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9182356890411978668}
+  - component: {fileID: 2381887302971775814}
+  - component: {fileID: 6898345980585675687}
+  - component: {fileID: 1199789611863949887}
+  - component: {fileID: 1986925805964745813}
+  m_Layer: 0
+  m_Name: BorderL
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9182356890411978668
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5290996013595402682}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4837086347358658293}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &2381887302971775814
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5290996013595402682}
+  m_Mesh: {fileID: 0}
+--- !u!23 &6898345980585675687
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5290996013595402682}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 2680e52b0beecba43b1ea08c73bb1b0b, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &1199789611863949887
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5290996013595402682}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
+--- !u!114 &1986925805964745813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5290996013595402682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1531a7986df9fcc4bb4e8f2afe91c292, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ID: 4
+  roadType: 1
+--- !u!1 &5862261333114416881
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4837086347358658293}
+  m_Layer: 0
+  m_Name: Grp_BordersSelection
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4837086347358658293
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5862261333114416881}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4096426607733316126}
+  - {fileID: 9182356890411978668}
+  - {fileID: 5995647376400027279}
+  - {fileID: 1119642106524189564}
+  - {fileID: 3262273860811689955}
+  m_Father: {fileID: 8273226074194458204}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6161374661309009294
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1119642106524189564}
+  - component: {fileID: 423212172606648511}
+  - component: {fileID: 4828342641177538430}
+  - component: {fileID: 1925193511177905696}
+  - component: {fileID: 2094179036851906547}
+  m_Layer: 0
+  m_Name: BorderLSlope
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1119642106524189564
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6161374661309009294}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4837086347358658293}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &423212172606648511
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6161374661309009294}
+  m_Mesh: {fileID: 0}
+--- !u!23 &4828342641177538430
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6161374661309009294}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 2680e52b0beecba43b1ea08c73bb1b0b, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &1925193511177905696
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6161374661309009294}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
+--- !u!114 &2094179036851906547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6161374661309009294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1531a7986df9fcc4bb4e8f2afe91c292, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ID: 2
+  roadType: 1
+--- !u!1 &6989743066649835243
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8273226074194458204}
+  - component: {fileID: 1748482333121761363}
+  - component: {fileID: 9029378697665309060}
+  - component: {fileID: 1952131214152154073}
+  - component: {fileID: 1869535307737139459}
+  - component: {fileID: 1021905740164116033}
+  - component: {fileID: 222483454444062442}
+  - component: {fileID: 1308888657304379683}
+  - component: {fileID: 3704784354931044961}
+  - component: {fileID: 2869947654937354002}
+  - component: {fileID: 2230349365119393383}
+  m_Layer: 0
+  m_Name: CrashBarrier_Metal
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8273226074194458204
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6989743066649835243}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4837086347358658293}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1748482333121761363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6989743066649835243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 333a868f5be6b144c88a9ab62643c80c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  seeInspector: 0
+  resetTransform: 1
+  resetBezierScript: 1
+  resetMesh: 1
+  resetCollider: 1
+  mirror: 1
+  mirrorType: 1
+--- !u!114 &9029378697665309060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6989743066649835243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33cbd88c709f7534bbeecc048f760cbe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  seeInspector: 0
+  moreOptions: 0
+  instantiateObjectUsingBezierCurve: {fileID: 1952131214152154073}
+  shapePosList:
+  - {x: 0.045, y: 0.394, z: 0}
+  - {x: -0.04, y: 0.454, z: 0}
+  - {x: 0.045, y: 0.514, z: 0}
+  - {x: 0.045, y: 0.584, z: 0}
+  - {x: -0.04, y: 0.644, z: 0}
+  - {x: 0.045, y: 0.704, z: 0}
+  - {x: -0.04, y: 0.644, z: 0}
+  - {x: 0.045, y: 0.584, z: 0}
+  - {x: 0.045, y: 0.514, z: 0}
+  - {x: -0.04, y: 0.454, z: 0}
+  - {x: 0.045, y: 0.394, z: 0}
+  tmpShapePosList:
+  - {x: -0.1, y: 0, z: 0}
+  - {x: -0.1, y: 0.7, z: 0}
+  - {x: -0.1, y: 0.7, z: 0}
+  - {x: 0.1, y: 0.7, z: 0}
+  - {x: 0.1, y: 0.7, z: 0}
+  - {x: 0.1, y: 0, z: 0}
+  - {x: 0.1, y: 0, z: 0}
+  - {x: -0.1, y: 0, z: 0}
+  pathPosList: []
+  interval: 3
+  startPathPos: 0
+  endPathPos: 12
+  flipTexture: 0
+  flipMesh: 0
+  overrideStartPos: {fileID: 0}
+  overrideEndPos: {fileID: 0}
+  flatFront: 0
+  smoothFlatFront: 1
+  flatBack: 0
+  smoothFlatBack: 1
+  startFaceList: 
+  enableUVPosition: 1
+  uvOffset: {x: -0.15, y: 0, z: 0}
+  atlasFaceSize: 0.47
+  flipFaceUVFront: {x: 1, y: 1}
+  flipFaceUVBack: {x: -1, y: 1}
+  uvPos:
+  - {x: 0.18085104, y: 0.5}
+  - {x: -0.000000029802322, y: 0.62765956}
+  - {x: 0.18085104, y: 0.7553191}
+  - {x: 0.18085104, y: 0.9042553}
+  - {x: -0.000000029802322, y: 1.031915}
+  - {x: 0.18085104, y: 1.1595745}
+  - {x: -0.000000029802322, y: 1.031915}
+  - {x: 0.18085104, y: 0.9042553}
+  - {x: 0.18085104, y: 0.7553191}
+  - {x: -0.000000029802322, y: 0.62765956}
+  - {x: 0.18085104, y: 0.5}
+  isNormalsDisplayed: 0
+  isTangentsDisplayed: 0
+  tileSizeZ: 3
+  generateOnlyASpecialCollider: 0
+  shapeColliderPosList:
+  - {x: -0.1, y: 0, z: 0}
+  - {x: -0.1, y: 0.7, z: 0}
+  - {x: 0.1, y: 0.7, z: 0}
+  - {x: 0.1, y: 0, z: 0}
+  - {x: -0.1, y: 0, z: 0}
+  colliderStartFaceList: 000000000100000002000000020000000300000000000000
+  colliderType: 1
+--- !u!114 &1952131214152154073
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6989743066649835243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e765423b549d8c44486bd783e4e48195, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  seeInspector: 0
+  moreOptions: 0
+  advanced: 1
+  objsList:
+  - {fileID: 4489495212442364627, guid: f100fb5d42794af4984fcdfbe50ab6c9, type: 3}
+  percentageProba: 20
+  objsRandomList: []
+  objExtraOffset: {x: -0.1, y: 0, z: 0.09}
+  objExtraRotation: {x: 0, y: 90, z: 0}
+  pointsList:
+  - points: {x: -21.97426, y: 0.00000023469329, z: 49.51707}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -21.855013, y: 0.00000022836697, z: 49.21015}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -21.74519, y: 0.0000002225761, z: 48.9268}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -21.648819, y: 0.00000021754049, z: 48.677258}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -21.527945, y: 0.00000021130226, z: 48.362743}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -21.423319, y: 0.00000020598515, z: 48.08887}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -21.315569, y: 0.00000020060038, z: 47.80502}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -21.20509, y: 0.00000019518573, z: 47.51187}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -21.115004, y: 0.00000019085785, z: 47.271107}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -21.000599, y: 0.00000018548442, z: 46.96292}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -20.907885, y: 0.00000018123842, z: 46.711006}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -20.790833, y: 0.00000017602844, z: 46.389977}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -20.696505, y: 0.00000017196206, z: 46.128662}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -20.601793, y: 0.0000001680069, z: 45.86373}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -20.48316, y: 0.00000016324879, z: 45.52802}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -20.388308, y: 0.00000015961447, z: 45.256226}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -20.293722, y: 0.00000015615416, z: 44.981945}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -20.199602, y: 0.00000015288714, z: 44.705517}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -20.10615, y: 0.00000014983272, z: 44.4273}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -20.01357, y: 0.00000014701024, z: 44.147625}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.92206, y: 0.00000014443899, z: 43.866856}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.831821, y: 0.00000014213828, z: 43.585323}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.743055, y: 0.00000014012741, z: 43.303375}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.634483, y: 0.00000013805086, z: 42.95091}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.549772, y: 0.00000013676281, z: 42.669308}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.467186, y: 0.00000013582735, z: 42.388424}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.386932, y: 0.00000013526383, z: 42.1086}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.309208, y: 0.00000013509157, z: 41.830185}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.234215, y: 0.00000013532986, z: 41.553516}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.162153, y: 0.000000135998, z: 41.278946}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.076513, y: 0.00000013746711, z: 40.939224}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.01179, y: 0.00000013917307, z: 40.670647}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.950651, y: 0.00000014137166, z: 40.405277}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.879587, y: 0.00000014484209, z: 40.078655}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.827255, y: 0.0000001482197, z: 39.8218}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.767838, y: 0.00000015322502, z: 39.506897}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.715437, y: 0.00000015913585, z: 39.19946}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.670458, y: 0.00000016598995, z: 38.900158}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.633287, y: 0.00000017382496, z: 38.609665}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.604319, y: 0.00000018267868, z: 38.328625}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.580952, y: 0.0000001947009, z: 38.004875}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.570654, y: 0.00000020830952, z: 37.696896}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.574116, y: 0.00000022356967, z: 37.405876}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.5914, y: 0.00000024066003, z: 37.12907}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.615183, y: 0.00000026100994, z: 36.811707}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.637804, y: 0.0000002806187, z: 36.50541}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.65746, y: 0.00000029792244, z: 36.23454}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.678291, y: 0.00000031657223, z: 35.9419}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.700113, y: 0.00000033648394, z: 35.62858}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.722733, y: 0.00000035757358, z: 35.295685}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.740107, y: 0.0000003741133, z: 35.03383}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.763655, y: 0.0000003970621, z: 34.66932}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.781507, y: 0.00000041489966, z: 34.385017}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.79943, y: 0.00000043323436, z: 34.091866}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.817345, y: 0.0000004520307, z: 33.79033}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.835167, y: 0.00000047125326, z: 33.48087}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.85282, y: 0.0000004908666, z: 33.163948}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.86445, y: 0.0000005041418, z: 32.94876}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.881638, y: 0.0000005243276, z: 32.620445}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.898436, y: 0.0000005448096, z: 32.285904}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.91477, y: 0.0000005655524, z: 31.945606}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.925356, y: 0.0000005795083, z: 31.71577}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.940731, y: 0.00000060060694, z: 31.366907}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.950605, y: 0.0000006147672, z: 31.131792}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.964794, y: 0.00000063612316, z: 30.775644}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.973804, y: 0.0000006504221, z: 30.53611}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.986588, y: 0.0000006719369, z: 30.173967}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.994587, y: 0.00000068630897, z: 29.930868}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.005737, y: 0.0000007078841, z: 29.564022}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.012571, y: 0.00000072226356, z: 29.318216}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.021866, y: 0.00000074380046, z: 28.947954}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.027386, y: 0.0000007581217, z: 28.70029}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.032343, y: 0.0000007724012, z: 28.452139}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.038664, y: 0.0000007937194, z: 28.079258}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.042095, y: 0.0000008078487, z: 27.830458}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.046019, y: 0.0000008288923, z: 27.45725}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.047781, y: 0.0000008428059, z: 27.208664}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.049086, y: 0.00000086347654, z: 26.836416}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.049026, y: 0.0000008771085, z: 26.588894}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.048197, y: 0.0000008906096, z: 26.342047}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.045458, y: 0.00000091059263, z: 25.973309}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.042599, y: 0.0000009237202, z: 25.728737}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.036701, y: 0.0000009430938, z: 25.364054}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.031664, y: 0.0000009557824, z: 25.122614}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.022383, y: 0.0000009744482, z: 24.763273}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.015017, y: 0.000000986632, z: 24.525824}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -19.002129, y: 0.0000010044914, z: 24.173111}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.992281, y: 0.000001016105, z: 23.940516}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.975567, y: 0.0000010330596, z: 23.595732}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.956444, y: 0.000001049424, z: 23.256308}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.942322, y: 0.0000010599882, z: 23.033258}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.919012, y: 0.0000010752904, z: 22.70383}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.893082, y: 0.0000010899076, z: 22.381006}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.864447, y: 0.0000011038047, z: 22.065239}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.843822, y: 0.000001112652, z: 21.858917}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.810509, y: 0.00000112527, z: 21.555986}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.774288, y: 0.0000011370735, z: 21.261395}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.72131, y: 0.0000011514826, z: 20.882277}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.677969, y: 0.0000011612472, z: 20.60886}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.631454, y: 0.0000011700788, z: 20.345343}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.564333, y: 0.0000011803418, z: 20.010052}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.510098, y: 0.0000011868585, z: 19.771372}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.4324, y: 0.0000011939067, z: 19.47092}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.348427, y: 0.0000011990021, z: 19.191944}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.234291, y: 0.0000012024975, z: 18.874893}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -18.135595, y: 0.0000012028922, z: 18.648287}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -17.97464, y: 0.0000011992847, z: 18.355433}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -17.797386, y: 0.0000011903855, z: 18.12206}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -17.593697, y: 0.0000011769046, z: 17.9137}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -17.392944, y: 0.0000011635371, z: 17.709461}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -17.165325, y: 0.0000011483655, z: 17.477888}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -16.964895, y: 0.0000011349964, z: 17.273973}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -16.748991, y: 0.0000011205883, z: 17.054317}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -16.51838, y: 0.000001105192, z: 16.819696}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -16.336226, y: 0.0000010930275, z: 16.634378}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -16.08171, y: 0.0000010760263, z: 16.375443}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -15.882509, y: 0.0000010627167, z: 16.17278}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -15.676537, y: 0.0000010489524, z: 15.963228}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -15.46412, y: 0.0000010347552, z: 15.747119}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -15.245578, y: 0.0000010201466, z: 15.524778}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -15.021232, y: 0.0000010051482, z: 15.296535}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -14.868605, y: 0.0000009949434, z: 15.141253}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -14.6353035, y: 0.0000009793438, z: 14.903899}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -14.397062, y: 0.0000009634122, z: 14.661516}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -14.235646, y: 0.00000095261726, z: 14.497298}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -13.989883, y: 0.0000009361804, z: 14.247263}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -13.8237505, y: 0.0000009250688, z: 14.078245}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -13.571361, y: 0.00000090818685, z: 13.821469}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -13.401111, y: 0.00000089679867, z: 13.648262}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -13.142991, y: 0.0000008795318, z: 13.3856535}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -12.969219, y: 0.00000086790703, z: 13.208862}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -12.706263, y: 0.0000008503155, z: 12.941337}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -12.529565, y: 0.00000083849426, z: 12.761569}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -12.351866, y: 0.0000008266056, z: 12.580781}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -12.083645, y: 0.0000008086605, z: 12.307899}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -11.903854, y: 0.0000007966315, z: 12.124985}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -11.723397, y: 0.00000078455764, z: 11.941392}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -11.451666, y: 0.00000076637673, z: 11.664937}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -11.269954, y: 0.0000007542187, z: 11.480069}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -11.087909, y: 0.0000007420382, z: 11.29486}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -10.814423, y: 0.0000007237394, z: 11.016621}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -10.631959, y: 0.00000071153084, z: 10.830987}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -10.449493, y: 0.0000006993222, z: 10.645351}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -10.176008, y: 0.0000006810234, z: 10.367112}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -9.993962, y: 0.000000668843, z: 10.181903}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -9.81225, y: 0.0000006566849, z: 9.997034}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -9.54052, y: 0.000000638504, z: 9.720581}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -9.360062, y: 0.0000006264301, z: 9.536987}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -9.180271, y: 0.0000006144012, z: 9.354073}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -8.91205, y: 0.000000596456, z: 9.081191}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -8.73435, y: 0.0000005845674, z: 8.900403}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -8.557653, y: 0.0000005727461, z: 8.720635}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -8.294697, y: 0.00000055515454, z: 8.453109}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -8.120925, y: 0.00000054352984, z: 8.276318}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -7.8628044, y: 0.00000052626297, z: 8.013711}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -7.6925535, y: 0.0000005148747, z: 7.840503}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -7.4401636, y: 0.0000004979928, z: 7.583727}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -7.2740326, y: 0.0000004868812, z: 7.4147086}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -7.028269, y: 0.00000047044432, z: 7.1646743}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -6.8668537, y: 0.00000045964944, z: 7.000454}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -6.6286106, y: 0.00000044371774, z: 6.758071}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -6.395311, y: 0.00000042811803, z: 6.520717}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -6.2426825, y: 0.0000004179133, z: 6.365437}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -6.0183377, y: 0.00000040291502, z: 6.1371927}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -5.799794, y: 0.00000038830638, z: 5.9148517}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -5.587376, y: 0.0000003741091, z: 5.6987424}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -5.3814044, y: 0.0000003603448, z: 5.4891915}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -5.182203, y: 0.00000034703527, z: 5.2865276}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -4.9900923, y: 0.00000033420196, z: 5.091079}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -4.745534, y: 0.00000031786925, z: 4.8422713}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -4.571225, y: 0.00000030623153, z: 4.664933}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -4.351572, y: 0.0000002915715, z: 4.441463}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -4.1472006, y: 0.0000002779379, z: 4.23354}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -3.9143908, y: 0.00000026241736, z: 3.996685}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -3.7081454, y: 0.00000024868103, z: 3.7868552}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  - points: {x: -3.497817, y: 0.00000023469362, z: 3.572872}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+  totalDistance: 0
+  distVecList:
+  - spotPos: {x: -21.983582, y: 0.00000023469329, z: 49.51345}
+    firstSpot: 0
+    distanceFromSpot: 0
+    segLength: 0
+  - spotPos: {x: -21.864338, y: 0.00000022836697, z: 49.20654}
+    firstSpot: 0
+    distanceFromSpot: 0.034999996
+    segLength: 0
+  - spotPos: {x: -21.754519, y: 0.0000002225761, z: 48.9232}
+    firstSpot: 0
+    distanceFromSpot: 0.06499999
+    segLength: 0
+  - spotPos: {x: -21.658154, y: 0.00000021754049, z: 48.67367}
+    firstSpot: 0
+    distanceFromSpot: 0.09
+    segLength: 0
+  - spotPos: {x: -21.537287, y: 0.00000021130226, z: 48.359173}
+    firstSpot: 0
+    distanceFromSpot: 0.12000002
+    segLength: 0
+  - spotPos: {x: -21.432669, y: 0.00000020598515, z: 48.085323}
+    firstSpot: 0
+    distanceFromSpot: 0.145
+    segLength: 0
+  - spotPos: {x: -21.324926, y: 0.00000020060038, z: 47.801495}
+    firstSpot: 0
+    distanceFromSpot: 0.16999997
+    segLength: 0
+  - spotPos: {x: -21.214455, y: 0.00000019518573, z: 47.508366}
+    firstSpot: 0
+    distanceFromSpot: 0.19499995
+    segLength: 0
+  - spotPos: {x: -21.124378, y: 0.00000019085785, z: 47.267628}
+    firstSpot: 0
+    distanceFromSpot: 0.21499993
+    segLength: 0
+  - spotPos: {x: -21.009983, y: 0.00000018548442, z: 46.95947}
+    firstSpot: 0
+    distanceFromSpot: 0.2399999
+    segLength: 0
+  - spotPos: {x: -20.91728, y: 0.00000018123842, z: 46.70758}
+    firstSpot: 0
+    distanceFromSpot: 0.2599999
+    segLength: 0
+  - spotPos: {x: -20.800238, y: 0.00000017602844, z: 46.38658}
+    firstSpot: 0
+    distanceFromSpot: 0.28499988
+    segLength: 0
+  - spotPos: {x: -20.705921, y: 0.00000017196206, z: 46.125298}
+    firstSpot: 0
+    distanceFromSpot: 0.30499986
+    segLength: 0
+  - spotPos: {x: -20.611221, y: 0.0000001680069, z: 45.8604}
+    firstSpot: 0
+    distanceFromSpot: 0.32499984
+    segLength: 0
+  - spotPos: {x: -20.492601, y: 0.00000016324879, z: 45.524723}
+    firstSpot: 0
+    distanceFromSpot: 0.34999982
+    segLength: 0
+  - spotPos: {x: -20.39776, y: 0.00000015961447, z: 45.252964}
+    firstSpot: 0
+    distanceFromSpot: 0.3699998
+    segLength: 0
+  - spotPos: {x: -20.303188, y: 0.00000015615416, z: 44.97872}
+    firstSpot: 0
+    distanceFromSpot: 0.38999978
+    segLength: 0
+  - spotPos: {x: -20.209082, y: 0.00000015288714, z: 44.70233}
+    firstSpot: 0
+    distanceFromSpot: 0.40999976
+    segLength: 0
+  - spotPos: {x: -20.115643, y: 0.00000014983272, z: 44.424156}
+    firstSpot: 0
+    distanceFromSpot: 0.42999974
+    segLength: 0
+  - spotPos: {x: -20.023079, y: 0.00000014701024, z: 44.144527}
+    firstSpot: 0
+    distanceFromSpot: 0.44999972
+    segLength: 0
+  - spotPos: {x: -19.931583, y: 0.00000014443899, z: 43.863804}
+    firstSpot: 0
+    distanceFromSpot: 0.4699997
+    segLength: 0
+  - spotPos: {x: -19.84136, y: 0.00000014213828, z: 43.58232}
+    firstSpot: 0
+    distanceFromSpot: 0.48999968
+    segLength: 0
+  - spotPos: {x: -19.752613, y: 0.00000014012741, z: 43.30043}
+    firstSpot: 0
+    distanceFromSpot: 0.5099997
+    segLength: 0
+  - spotPos: {x: -19.64406, y: 0.00000013805086, z: 42.94803}
+    firstSpot: 0
+    distanceFromSpot: 0.53499967
+    segLength: 0
+  - spotPos: {x: -19.559366, y: 0.00000013676281, z: 42.66649}
+    firstSpot: 0
+    distanceFromSpot: 0.55499965
+    segLength: 0
+  - spotPos: {x: -19.476799, y: 0.00000013582735, z: 42.385666}
+    firstSpot: 0
+    distanceFromSpot: 0.57499963
+    segLength: 0
+  - spotPos: {x: -19.396564, y: 0.00000013526383, z: 42.10591}
+    firstSpot: 0
+    distanceFromSpot: 0.5949996
+    segLength: 0
+  - spotPos: {x: -19.31886, y: 0.00000013509157, z: 41.827568}
+    firstSpot: 0
+    distanceFromSpot: 0.6149996
+    segLength: 0
+  - spotPos: {x: -19.243887, y: 0.00000013532986, z: 41.55098}
+    firstSpot: 0
+    distanceFromSpot: 0.6349996
+    segLength: 0
+  - spotPos: {x: -19.17185, y: 0.000000135998, z: 41.2765}
+    firstSpot: 0
+    distanceFromSpot: 0.65499955
+    segLength: 0
+  - spotPos: {x: -19.086235, y: 0.00000013746711, z: 40.936882}
+    firstSpot: 0
+    distanceFromSpot: 0.67999953
+    segLength: 0
+  - spotPos: {x: -19.021534, y: 0.00000013917307, z: 40.6684}
+    firstSpot: 0
+    distanceFromSpot: 0.6999995
+    segLength: 0
+  - spotPos: {x: -18.960423, y: 0.00000014137166, z: 40.403152}
+    firstSpot: 0
+    distanceFromSpot: 0.7199995
+    segLength: 0
+  - spotPos: {x: -18.889385, y: 0.00000014484209, z: 40.07666}
+    firstSpot: 0
+    distanceFromSpot: 0.74499947
+    segLength: 0
+  - spotPos: {x: -18.837082, y: 0.0000001482197, z: 39.819946}
+    firstSpot: 0
+    distanceFromSpot: 0.76499945
+    segLength: 0
+  - spotPos: {x: -18.777695, y: 0.00000015322502, z: 39.50522}
+    firstSpot: 0
+    distanceFromSpot: 0.7899994
+    segLength: 0
+  - spotPos: {x: -18.725327, y: 0.00000015913585, z: 39.19797}
+    firstSpot: 0
+    distanceFromSpot: 0.8149994
+    segLength: 0
+  - spotPos: {x: -18.680376, y: 0.00000016598995, z: 38.898888}
+    firstSpot: 0
+    distanceFromSpot: 0.8399994
+    segLength: 0
+  - spotPos: {x: -18.643234, y: 0.00000017382496, z: 38.60864}
+    firstSpot: 0
+    distanceFromSpot: 0.86499935
+    segLength: 0
+  - spotPos: {x: -18.614292, y: 0.00000018267868, z: 38.327904}
+    firstSpot: 0
+    distanceFromSpot: 0.88999933
+    segLength: 0
+  - spotPos: {x: -18.590946, y: 0.0000001947009, z: 38.00454}
+    firstSpot: 0
+    distanceFromSpot: 0.9199993
+    segLength: 0
+  - spotPos: {x: -18.580654, y: 0.00000020830952, z: 37.697014}
+    firstSpot: 0
+    distanceFromSpot: 0.9499993
+    segLength: 0
+  - spotPos: {x: -18.584097, y: 0.00000022356967, z: 37.406498}
+    firstSpot: 0
+    distanceFromSpot: 0.97999924
+    segLength: 0
+  - spotPos: {x: -18.601372, y: 0.00000024066003, z: 37.129818}
+    firstSpot: 3
+    distanceFromSpot: 0.01
+    segLength: 0
+  - spotPos: {x: -18.625156, y: 0.00000026100994, z: 36.812443}
+    firstSpot: 3
+    distanceFromSpot: 0.039999995
+    segLength: 0
+  - spotPos: {x: -18.647778, y: 0.0000002806187, z: 36.506134}
+    firstSpot: 3
+    distanceFromSpot: 0.06499999
+    segLength: 0
+  - spotPos: {x: -18.667435, y: 0.00000029792244, z: 36.23525}
+    firstSpot: 3
+    distanceFromSpot: 0.085
+    segLength: 0
+  - spotPos: {x: -18.688267, y: 0.00000031657223, z: 35.942593}
+    firstSpot: 3
+    distanceFromSpot: 0.10500001
+    segLength: 0
+  - spotPos: {x: -18.71009, y: 0.00000033648394, z: 35.629257}
+    firstSpot: 3
+    distanceFromSpot: 0.12500001
+    segLength: 0
+  - spotPos: {x: -18.73271, y: 0.00000035757358, z: 35.29635}
+    firstSpot: 3
+    distanceFromSpot: 0.145
+    segLength: 0
+  - spotPos: {x: -18.750086, y: 0.0000003741133, z: 35.034473}
+    firstSpot: 3
+    distanceFromSpot: 0.15999998
+    segLength: 0
+  - spotPos: {x: -18.773636, y: 0.0000003970621, z: 34.669945}
+    firstSpot: 3
+    distanceFromSpot: 0.17999996
+    segLength: 0
+  - spotPos: {x: -18.791489, y: 0.00000041489966, z: 34.385628}
+    firstSpot: 3
+    distanceFromSpot: 0.19499995
+    segLength: 0
+  - spotPos: {x: -18.809414, y: 0.00000043323436, z: 34.092457}
+    firstSpot: 3
+    distanceFromSpot: 0.20999993
+    segLength: 0
+  - spotPos: {x: -18.827328, y: 0.0000004520307, z: 33.790905}
+    firstSpot: 3
+    distanceFromSpot: 0.22499992
+    segLength: 0
+  - spotPos: {x: -18.845152, y: 0.00000047125326, z: 33.481426}
+    firstSpot: 3
+    distanceFromSpot: 0.2399999
+    segLength: 0
+  - spotPos: {x: -18.862804, y: 0.0000004908666, z: 33.164486}
+    firstSpot: 3
+    distanceFromSpot: 0.2549999
+    segLength: 0
+  - spotPos: {x: -18.874437, y: 0.0000005041418, z: 32.949284}
+    firstSpot: 3
+    distanceFromSpot: 0.2649999
+    segLength: 0
+  - spotPos: {x: -18.891624, y: 0.0000005243276, z: 32.620945}
+    firstSpot: 3
+    distanceFromSpot: 0.27999988
+    segLength: 0
+  - spotPos: {x: -18.908424, y: 0.0000005448096, z: 32.286385}
+    firstSpot: 3
+    distanceFromSpot: 0.29499987
+    segLength: 0
+  - spotPos: {x: -18.924759, y: 0.0000005655524, z: 31.946066}
+    firstSpot: 3
+    distanceFromSpot: 0.30999985
+    segLength: 0
+  - spotPos: {x: -18.935347, y: 0.0000005795083, z: 31.716211}
+    firstSpot: 3
+    distanceFromSpot: 0.31999984
+    segLength: 0
+  - spotPos: {x: -18.950722, y: 0.00000060060694, z: 31.367327}
+    firstSpot: 3
+    distanceFromSpot: 0.33499983
+    segLength: 0
+  - spotPos: {x: -18.960598, y: 0.0000006147672, z: 31.13219}
+    firstSpot: 3
+    distanceFromSpot: 0.34499982
+    segLength: 0
+  - spotPos: {x: -18.974787, y: 0.00000063612316, z: 30.77602}
+    firstSpot: 3
+    distanceFromSpot: 0.3599998
+    segLength: 0
+  - spotPos: {x: -18.983799, y: 0.0000006504221, z: 30.536463}
+    firstSpot: 3
+    distanceFromSpot: 0.3699998
+    segLength: 0
+  - spotPos: {x: -18.996582, y: 0.0000006719369, z: 30.174295}
+    firstSpot: 3
+    distanceFromSpot: 0.38499978
+    segLength: 0
+  - spotPos: {x: -19.004581, y: 0.00000068630897, z: 29.931171}
+    firstSpot: 3
+    distanceFromSpot: 0.39499977
+    segLength: 0
+  - spotPos: {x: -19.015734, y: 0.0000007078841, z: 29.5643}
+    firstSpot: 3
+    distanceFromSpot: 0.40999976
+    segLength: 0
+  - spotPos: {x: -19.022568, y: 0.00000072226356, z: 29.318468}
+    firstSpot: 3
+    distanceFromSpot: 0.41999975
+    segLength: 0
+  - spotPos: {x: -19.031864, y: 0.00000074380046, z: 28.948177}
+    firstSpot: 3
+    distanceFromSpot: 0.43499973
+    segLength: 0
+  - spotPos: {x: -19.037384, y: 0.0000007581217, z: 28.70049}
+    firstSpot: 3
+    distanceFromSpot: 0.44499972
+    segLength: 0
+  - spotPos: {x: -19.042341, y: 0.0000007724012, z: 28.452309}
+    firstSpot: 3
+    distanceFromSpot: 0.45499972
+    segLength: 0
+  - spotPos: {x: -19.048662, y: 0.0000007937194, z: 28.079395}
+    firstSpot: 3
+    distanceFromSpot: 0.4699997
+    segLength: 0
+  - spotPos: {x: -19.052095, y: 0.0000008078487, z: 27.830563}
+    firstSpot: 3
+    distanceFromSpot: 0.4799997
+    segLength: 0
+  - spotPos: {x: -19.056019, y: 0.0000008288923, z: 27.457321}
+    firstSpot: 3
+    distanceFromSpot: 0.49499968
+    segLength: 0
+  - spotPos: {x: -19.057781, y: 0.0000008428059, z: 27.208698}
+    firstSpot: 3
+    distanceFromSpot: 0.5049997
+    segLength: 0
+  - spotPos: {x: -19.059086, y: 0.00000086347654, z: 26.836414}
+    firstSpot: 3
+    distanceFromSpot: 0.5199997
+    segLength: 0
+  - spotPos: {x: -19.059027, y: 0.0000008771085, z: 26.58886}
+    firstSpot: 3
+    distanceFromSpot: 0.5299997
+    segLength: 0
+  - spotPos: {x: -19.058197, y: 0.0000008906096, z: 26.341972}
+    firstSpot: 3
+    distanceFromSpot: 0.53999966
+    segLength: 0
+  - spotPos: {x: -19.055458, y: 0.00000091059263, z: 25.973192}
+    firstSpot: 3
+    distanceFromSpot: 0.55499965
+    segLength: 0
+  - spotPos: {x: -19.052597, y: 0.0000009237202, z: 25.728575}
+    firstSpot: 3
+    distanceFromSpot: 0.56499964
+    segLength: 0
+  - spotPos: {x: -19.0467, y: 0.0000009430938, z: 25.363846}
+    firstSpot: 3
+    distanceFromSpot: 0.5799996
+    segLength: 0
+  - spotPos: {x: -19.04166, y: 0.0000009557824, z: 25.122356}
+    firstSpot: 3
+    distanceFromSpot: 0.5899996
+    segLength: 0
+  - spotPos: {x: -19.032377, y: 0.0000009744482, z: 24.762962}
+    firstSpot: 3
+    distanceFromSpot: 0.6049996
+    segLength: 0
+  - spotPos: {x: -19.02501, y: 0.000000986632, z: 24.52546}
+    firstSpot: 3
+    distanceFromSpot: 0.6149996
+    segLength: 0
+  - spotPos: {x: -19.01212, y: 0.0000010044914, z: 24.172688}
+    firstSpot: 3
+    distanceFromSpot: 0.6299996
+    segLength: 0
+  - spotPos: {x: -19.00227, y: 0.000001016105, z: 23.940031}
+    firstSpot: 3
+    distanceFromSpot: 0.63999957
+    segLength: 0
+  - spotPos: {x: -18.985552, y: 0.0000010330596, z: 23.59517}
+    firstSpot: 3
+    distanceFromSpot: 0.65499955
+    segLength: 0
+  - spotPos: {x: -18.966423, y: 0.000001049424, z: 23.255676}
+    firstSpot: 3
+    distanceFromSpot: 0.66999954
+    segLength: 0
+  - spotPos: {x: -18.952297, y: 0.0000010599882, z: 23.032553}
+    firstSpot: 3
+    distanceFromSpot: 0.67999953
+    segLength: 0
+  - spotPos: {x: -18.92898, y: 0.0000010752904, z: 22.70303}
+    firstSpot: 3
+    distanceFromSpot: 0.6949995
+    segLength: 0
+  - spotPos: {x: -18.90304, y: 0.0000010899076, z: 22.380104}
+    firstSpot: 3
+    distanceFromSpot: 0.7099995
+    segLength: 0
+  - spotPos: {x: -18.874397, y: 0.0000011038047, z: 22.064243}
+    firstSpot: 3
+    distanceFromSpot: 0.7249995
+    segLength: 0
+  - spotPos: {x: -18.853762, y: 0.000001112652, z: 21.857824}
+    firstSpot: 3
+    distanceFromSpot: 0.7349995
+    segLength: 0
+  - spotPos: {x: -18.820435, y: 0.00000112527, z: 21.554766}
+    firstSpot: 3
+    distanceFromSpot: 0.74999946
+    segLength: 0
+  - spotPos: {x: -18.784191, y: 0.0000011370735, z: 21.26001}
+    firstSpot: 3
+    distanceFromSpot: 0.76499945
+    segLength: 0
+  - spotPos: {x: -18.731186, y: 0.0000011514826, z: 20.88071}
+    firstSpot: 3
+    distanceFromSpot: 0.78499943
+    segLength: 0
+  - spotPos: {x: -18.687817, y: 0.0000011612472, z: 20.607122}
+    firstSpot: 3
+    distanceFromSpot: 0.7999994
+    segLength: 0
+  - spotPos: {x: -18.64126, y: 0.0000011700788, z: 20.34338}
+    firstSpot: 3
+    distanceFromSpot: 0.8149994
+    segLength: 0
+  - spotPos: {x: -18.574085, y: 0.0000011803418, z: 20.007835}
+    firstSpot: 3
+    distanceFromSpot: 0.8349994
+    segLength: 0
+  - spotPos: {x: -18.51978, y: 0.0000011868585, z: 19.768867}
+    firstSpot: 3
+    distanceFromSpot: 0.84999937
+    segLength: 0
+  - spotPos: {x: -18.441975, y: 0.0000011939067, z: 19.468039}
+    firstSpot: 3
+    distanceFromSpot: 0.86999935
+    segLength: 0
+  - spotPos: {x: -18.357836, y: 0.0000011990021, z: 19.188557}
+    firstSpot: 3
+    distanceFromSpot: 0.88999933
+    segLength: 0
+  - spotPos: {x: -18.243458, y: 0.0000012024975, z: 18.8709}
+    firstSpot: 3
+    distanceFromSpot: 0.9149993
+    segLength: 0
+  - spotPos: {x: -18.144358, y: 0.0000012028922, z: 18.643467}
+    firstSpot: 3
+    distanceFromSpot: 0.9349993
+    segLength: 0
+  - spotPos: {x: -17.982601, y: 0.0000011992847, z: 18.349382}
+    firstSpot: 3
+    distanceFromSpot: 0.96499926
+    segLength: 0
+  - spotPos: {x: -17.804537, y: 0.0000011903855, z: 18.11507}
+    firstSpot: 3
+    distanceFromSpot: 0.99499923
+    segLength: 0
+  - spotPos: {x: -17.600828, y: 0.0000011769046, z: 17.90669}
+    firstSpot: 6
+    distanceFromSpot: 0.024999999
+    segLength: 0
+  - spotPos: {x: -17.400076, y: 0.0000011635371, z: 17.702452}
+    firstSpot: 6
+    distanceFromSpot: 0.049999993
+    segLength: 0
+  - spotPos: {x: -17.172457, y: 0.0000011483655, z: 17.470879}
+    firstSpot: 6
+    distanceFromSpot: 0.074999996
+    segLength: 0
+  - spotPos: {x: -16.972027, y: 0.0000011349964, z: 17.266964}
+    firstSpot: 6
+    distanceFromSpot: 0.095000006
+    segLength: 0
+  - spotPos: {x: -16.756123, y: 0.0000011205883, z: 17.047308}
+    firstSpot: 6
+    distanceFromSpot: 0.11500002
+    segLength: 0
+  - spotPos: {x: -16.52551, y: 0.000001105192, z: 16.812687}
+    firstSpot: 6
+    distanceFromSpot: 0.135
+    segLength: 0
+  - spotPos: {x: -16.343357, y: 0.0000010930275, z: 16.627369}
+    firstSpot: 6
+    distanceFromSpot: 0.14999999
+    segLength: 0
+  - spotPos: {x: -16.088842, y: 0.0000010760263, z: 16.368433}
+    firstSpot: 6
+    distanceFromSpot: 0.16999997
+    segLength: 0
+  - spotPos: {x: -15.889641, y: 0.0000010627167, z: 16.16577}
+    firstSpot: 6
+    distanceFromSpot: 0.18499996
+    segLength: 0
+  - spotPos: {x: -15.683668, y: 0.0000010489524, z: 15.956219}
+    firstSpot: 6
+    distanceFromSpot: 0.19999994
+    segLength: 0
+  - spotPos: {x: -15.4712515, y: 0.0000010347552, z: 15.740109}
+    firstSpot: 6
+    distanceFromSpot: 0.21499993
+    segLength: 0
+  - spotPos: {x: -15.252709, y: 0.0000010201466, z: 15.517769}
+    firstSpot: 6
+    distanceFromSpot: 0.22999991
+    segLength: 0
+  - spotPos: {x: -15.028363, y: 0.0000010051482, z: 15.289525}
+    firstSpot: 6
+    distanceFromSpot: 0.2449999
+    segLength: 0
+  - spotPos: {x: -14.875736, y: 0.0000009949434, z: 15.134244}
+    firstSpot: 6
+    distanceFromSpot: 0.2549999
+    segLength: 0
+  - spotPos: {x: -14.642435, y: 0.0000009793438, z: 14.89689}
+    firstSpot: 6
+    distanceFromSpot: 0.2699999
+    segLength: 0
+  - spotPos: {x: -14.404194, y: 0.0000009634122, z: 14.654507}
+    firstSpot: 6
+    distanceFromSpot: 0.28499988
+    segLength: 0
+  - spotPos: {x: -14.242778, y: 0.00000095261726, z: 14.490289}
+    firstSpot: 6
+    distanceFromSpot: 0.29499987
+    segLength: 0
+  - spotPos: {x: -13.997015, y: 0.0000009361804, z: 14.240253}
+    firstSpot: 6
+    distanceFromSpot: 0.30999985
+    segLength: 0
+  - spotPos: {x: -13.830882, y: 0.0000009250688, z: 14.071236}
+    firstSpot: 6
+    distanceFromSpot: 0.31999984
+    segLength: 0
+  - spotPos: {x: -13.578492, y: 0.00000090818685, z: 13.81446}
+    firstSpot: 6
+    distanceFromSpot: 0.33499983
+    segLength: 0
+  - spotPos: {x: -13.408242, y: 0.00000089679867, z: 13.6412525}
+    firstSpot: 6
+    distanceFromSpot: 0.34499982
+    segLength: 0
+  - spotPos: {x: -13.150123, y: 0.0000008795318, z: 13.378644}
+    firstSpot: 6
+    distanceFromSpot: 0.3599998
+    segLength: 0
+  - spotPos: {x: -12.976351, y: 0.00000086790703, z: 13.201853}
+    firstSpot: 6
+    distanceFromSpot: 0.3699998
+    segLength: 0
+  - spotPos: {x: -12.713394, y: 0.0000008503155, z: 12.934327}
+    firstSpot: 6
+    distanceFromSpot: 0.38499978
+    segLength: 0
+  - spotPos: {x: -12.536696, y: 0.00000083849426, z: 12.7545595}
+    firstSpot: 6
+    distanceFromSpot: 0.39499977
+    segLength: 0
+  - spotPos: {x: -12.358997, y: 0.0000008266056, z: 12.573771}
+    firstSpot: 6
+    distanceFromSpot: 0.40499976
+    segLength: 0
+  - spotPos: {x: -12.090776, y: 0.0000008086605, z: 12.30089}
+    firstSpot: 6
+    distanceFromSpot: 0.41999975
+    segLength: 0
+  - spotPos: {x: -11.910986, y: 0.0000007966315, z: 12.117975}
+    firstSpot: 6
+    distanceFromSpot: 0.42999974
+    segLength: 0
+  - spotPos: {x: -11.730529, y: 0.00000078455764, z: 11.934382}
+    firstSpot: 6
+    distanceFromSpot: 0.43999973
+    segLength: 0
+  - spotPos: {x: -11.458797, y: 0.00000076637673, z: 11.6579275}
+    firstSpot: 6
+    distanceFromSpot: 0.45499972
+    segLength: 0
+  - spotPos: {x: -11.277085, y: 0.0000007542187, z: 11.47306}
+    firstSpot: 6
+    distanceFromSpot: 0.4649997
+    segLength: 0
+  - spotPos: {x: -11.09504, y: 0.0000007420382, z: 11.28785}
+    firstSpot: 6
+    distanceFromSpot: 0.4749997
+    segLength: 0
+  - spotPos: {x: -10.821554, y: 0.0000007237394, z: 11.009611}
+    firstSpot: 6
+    distanceFromSpot: 0.48999968
+    segLength: 0
+  - spotPos: {x: -10.639091, y: 0.00000071153084, z: 10.823977}
+    firstSpot: 6
+    distanceFromSpot: 0.49999967
+    segLength: 0
+  - spotPos: {x: -10.456625, y: 0.0000006993222, z: 10.638342}
+    firstSpot: 6
+    distanceFromSpot: 0.5099997
+    segLength: 0
+  - spotPos: {x: -10.18314, y: 0.0000006810234, z: 10.360103}
+    firstSpot: 6
+    distanceFromSpot: 0.5249997
+    segLength: 0
+  - spotPos: {x: -10.001094, y: 0.000000668843, z: 10.174893}
+    firstSpot: 6
+    distanceFromSpot: 0.53499967
+    segLength: 0
+  - spotPos: {x: -9.819382, y: 0.0000006566849, z: 9.990025}
+    firstSpot: 6
+    distanceFromSpot: 0.54499966
+    segLength: 0
+  - spotPos: {x: -9.547651, y: 0.000000638504, z: 9.713572}
+    firstSpot: 6
+    distanceFromSpot: 0.55999964
+    segLength: 0
+  - spotPos: {x: -9.367193, y: 0.0000006264301, z: 9.529978}
+    firstSpot: 6
+    distanceFromSpot: 0.56999964
+    segLength: 0
+  - spotPos: {x: -9.187403, y: 0.0000006144012, z: 9.347063}
+    firstSpot: 6
+    distanceFromSpot: 0.5799996
+    segLength: 0
+  - spotPos: {x: -8.919182, y: 0.000000596456, z: 9.074182}
+    firstSpot: 6
+    distanceFromSpot: 0.5949996
+    segLength: 0
+  - spotPos: {x: -8.741482, y: 0.0000005845674, z: 8.8933935}
+    firstSpot: 6
+    distanceFromSpot: 0.6049996
+    segLength: 0
+  - spotPos: {x: -8.564785, y: 0.0000005727461, z: 8.713626}
+    firstSpot: 6
+    distanceFromSpot: 0.6149996
+    segLength: 0
+  - spotPos: {x: -8.301828, y: 0.00000055515454, z: 8.446099}
+    firstSpot: 6
+    distanceFromSpot: 0.6299996
+    segLength: 0
+  - spotPos: {x: -8.128057, y: 0.00000054352984, z: 8.269308}
+    firstSpot: 6
+    distanceFromSpot: 0.63999957
+    segLength: 0
+  - spotPos: {x: -7.869936, y: 0.00000052626297, z: 8.006701}
+    firstSpot: 6
+    distanceFromSpot: 0.65499955
+    segLength: 0
+  - spotPos: {x: -7.699685, y: 0.0000005148747, z: 7.833493}
+    firstSpot: 6
+    distanceFromSpot: 0.66499954
+    segLength: 0
+  - spotPos: {x: -7.447295, y: 0.0000004979928, z: 7.576717}
+    firstSpot: 6
+    distanceFromSpot: 0.67999953
+    segLength: 0
+  - spotPos: {x: -7.281164, y: 0.0000004868812, z: 7.4076986}
+    firstSpot: 6
+    distanceFromSpot: 0.6899995
+    segLength: 0
+  - spotPos: {x: -7.0354004, y: 0.00000047044432, z: 7.1576643}
+    firstSpot: 6
+    distanceFromSpot: 0.7049995
+    segLength: 0
+  - spotPos: {x: -6.8739853, y: 0.00000045964944, z: 6.993444}
+    firstSpot: 6
+    distanceFromSpot: 0.7149995
+    segLength: 0
+  - spotPos: {x: -6.635742, y: 0.00000044371774, z: 6.751061}
+    firstSpot: 6
+    distanceFromSpot: 0.7299995
+    segLength: 0
+  - spotPos: {x: -6.4024425, y: 0.00000042811803, z: 6.513707}
+    firstSpot: 6
+    distanceFromSpot: 0.74499947
+    segLength: 0
+  - spotPos: {x: -6.249814, y: 0.0000004179133, z: 6.358427}
+    firstSpot: 6
+    distanceFromSpot: 0.75499946
+    segLength: 0
+  - spotPos: {x: -6.0254693, y: 0.00000040291502, z: 6.1301827}
+    firstSpot: 6
+    distanceFromSpot: 0.76999944
+    segLength: 0
+  - spotPos: {x: -5.806926, y: 0.00000038830638, z: 5.9078417}
+    firstSpot: 6
+    distanceFromSpot: 0.78499943
+    segLength: 0
+  - spotPos: {x: -5.5945077, y: 0.0000003741091, z: 5.6917324}
+    firstSpot: 6
+    distanceFromSpot: 0.7999994
+    segLength: 0
+  - spotPos: {x: -5.388536, y: 0.0000003603448, z: 5.4821815}
+    firstSpot: 6
+    distanceFromSpot: 0.8149994
+    segLength: 0
+  - spotPos: {x: -5.1893344, y: 0.00000034703527, z: 5.2795177}
+    firstSpot: 6
+    distanceFromSpot: 0.8299994
+    segLength: 0
+  - spotPos: {x: -4.997224, y: 0.00000033420196, z: 5.0840693}
+    firstSpot: 6
+    distanceFromSpot: 0.8449994
+    segLength: 0
+  - spotPos: {x: -4.7526655, y: 0.00000031786925, z: 4.8352613}
+    firstSpot: 6
+    distanceFromSpot: 0.86499935
+    segLength: 0
+  - spotPos: {x: -4.5783567, y: 0.00000030623153, z: 4.657923}
+    firstSpot: 6
+    distanceFromSpot: 0.87999934
+    segLength: 0
+  - spotPos: {x: -4.3587036, y: 0.0000002915715, z: 4.434453}
+    firstSpot: 6
+    distanceFromSpot: 0.8999993
+    segLength: 0
+  - spotPos: {x: -4.154332, y: 0.0000002779379, z: 4.22653}
+    firstSpot: 6
+    distanceFromSpot: 0.9199993
+    segLength: 0
+  - spotPos: {x: -3.9215226, y: 0.00000026241736, z: 3.989675}
+    firstSpot: 6
+    distanceFromSpot: 0.9449993
+    segLength: 0
+  - spotPos: {x: -3.7152772, y: 0.00000024868103, z: 3.7798452}
+    firstSpot: 6
+    distanceFromSpot: 0.96999925
+    segLength: 0
+  - spotPos: {x: -3.5049489, y: 0.00000023469362, z: 3.565862}
+    firstSpot: 6
+    distanceFromSpot: 0.9999992
+    segLength: 0
+  - spotPos: {x: -3.5049438, y: 0.00000023469329, z: 3.565857}
+    firstSpot: 9
+    distanceFromSpot: 1
+    segLength: 0
+  distanceBetweenDistVec: 0.3
+  distVecOffset: 0.01
+  distVecListPlusOffsetFinal:
+  - spotPos: {x: -21.97426, y: 0.00000023469329, z: 49.51707}
+    firstSpot: 0
+    distanceFromSpot: 0
+    segLength: 0
+  - spotPos: {x: -21.864502, y: 0.00000022888119, z: 49.234367}
+    firstSpot: 0
+    distanceFromSpot: 0.31499985
+    segLength: 0
+  - spotPos: {x: -21.75636, y: 0.00000022317913, z: 48.955345}
+    firstSpot: 0
+    distanceFromSpot: 0.64499956
+    segLength: 0
+  - spotPos: {x: -21.64882, y: 0.00000021754049, z: 48.677258}
+    firstSpot: 0
+    distanceFromSpot: 0.9999992
+    segLength: 0
+  - spotPos: {x: -21.540514, y: 0.00000021197503, z: 48.394966}
+    firstSpot: 3
+    distanceFromSpot: 0.30999985
+    segLength: 0
+  - spotPos: {x: -21.433247, y: 0.00000020651775, z: 48.11431}
+    firstSpot: 3
+    distanceFromSpot: 0.6349996
+    segLength: 0
+  - spotPos: {x: -21.326874, y: 0.0000002011656, z: 47.834793}
+    firstSpot: 3
+    distanceFromSpot: 0.96499926
+    segLength: 0
+  - spotPos: {x: -21.221972, y: 0.0000001960374, z: 47.556187}
+    firstSpot: 6
+    distanceFromSpot: 0.29499987
+    segLength: 0
+  - spotPos: {x: -21.116787, y: 0.00000019098071, z: 47.27514}
+    firstSpot: 6
+    distanceFromSpot: 0.63999957
+    segLength: 0
+  - spotPos: {x: -21.010832, y: 0.00000018596529, z: 46.99048}
+    firstSpot: 6
+    distanceFromSpot: 0.96999925
+    segLength: 0
+  - spotPos: {x: -20.90876, y: 0.00000018132052, z: 46.71255}
+    firstSpot: 9
+    distanceFromSpot: 0.30999985
+    segLength: 0
+  - spotPos: {x: -20.80502, y: 0.00000017670007, z: 46.42809}
+    firstSpot: 9
+    distanceFromSpot: 0.63999957
+    segLength: 0
+  - spotPos: {x: -20.70362, y: 0.00000017226915, z: 46.148373}
+    firstSpot: 9
+    distanceFromSpot: 0.97499925
+    segLength: 0
+  - spotPos: {x: -20.602947, y: 0.00000016810966, z: 45.86588}
+    firstSpot: 12
+    distanceFromSpot: 0.30999985
+    segLength: 0
+  - spotPos: {x: -20.502533, y: 0.00000016407557, z: 45.581856}
+    firstSpot: 12
+    distanceFromSpot: 0.6249996
+    segLength: 0
+  - spotPos: {x: -20.402708, y: 0.00000016016783, z: 45.29746}
+    firstSpot: 12
+    distanceFromSpot: 0.9499993
+    segLength: 0
+  - spotPos: {x: -20.304728, y: 0.00000015660305, z: 45.012936}
+    firstSpot: 15
+    distanceFromSpot: 0.29499987
+    segLength: 0
+  - spotPos: {x: -20.208736, y: 0.00000015326135, z: 44.731216}
+    firstSpot: 15
+    distanceFromSpot: 0.6349996
+    segLength: 0
+  - spotPos: {x: -20.113161, y: 0.00000015006219, z: 44.448166}
+    firstSpot: 15
+    distanceFromSpot: 0.97499925
+    segLength: 0
+  - spotPos: {x: -20.018988, y: 0.00000014724087, z: 44.162697}
+    firstSpot: 18
+    distanceFromSpot: 0.31499985
+    segLength: 0
+  - spotPos: {x: -19.925665, y: 0.00000014461533, z: 43.876423}
+    firstSpot: 18
+    distanceFromSpot: 0.65499955
+    segLength: 0
+  - spotPos: {x: -19.833176, y: 0.00000014217282, z: 43.589546}
+    firstSpot: 18
+    distanceFromSpot: 0.99499923
+    segLength: 0
+  - spotPos: {x: -19.743406, y: 0.00000014024516, z: 43.302307}
+    firstSpot: 21
+    distanceFromSpot: 0.31499985
+    segLength: 0
+  - spotPos: {x: -19.655731, y: 0.0000001385524, z: 43.017998}
+    firstSpot: 21
+    distanceFromSpot: 0.6149996
+    segLength: 0
+  - spotPos: {x: -19.567898, y: 0.00000013704461, z: 42.72944}
+    firstSpot: 21
+    distanceFromSpot: 0.9299993
+    segLength: 0
+  - spotPos: {x: -19.483389, y: 0.00000013608681, z: 42.442028}
+    firstSpot: 24
+    distanceFromSpot: 0.2699999
+    segLength: 0
+  - spotPos: {x: -19.401287, y: 0.0000001354705, z: 42.156555}
+    firstSpot: 24
+    distanceFromSpot: 0.6099996
+    segLength: 0
+  - spotPos: {x: -19.319717, y: 0.0000001351172, z: 41.867783}
+    firstSpot: 24
+    distanceFromSpot: 0.95499927
+    segLength: 0
+  - spotPos: {x: -19.240938, y: 0.00000013544009, z: 41.57571}
+    firstSpot: 27
+    distanceFromSpot: 0.30499986
+    segLength: 0
+  - spotPos: {x: -19.164497, y: 0.00000013617458, z: 41.28393}
+    firstSpot: 27
+    distanceFromSpot: 0.63999957
+    segLength: 0
+  - spotPos: {x: -19.090523, y: 0.00000013723191, z: 40.994698}
+    firstSpot: 27
+    distanceFromSpot: 0.9449993
+    segLength: 0
+  - spotPos: {x: -19.020779, y: 0.00000013909458, z: 40.704803}
+    firstSpot: 30
+    distanceFromSpot: 0.28999987
+    segLength: 0
+  - spotPos: {x: -18.953108, y: 0.00000014155216, z: 40.4106}
+    firstSpot: 30
+    distanceFromSpot: 0.63999957
+    segLength: 0
+  - spotPos: {x: -18.88807, y: 0.0000001444317, z: 40.11756}
+    firstSpot: 30
+    distanceFromSpot: 0.95999926
+    segLength: 0
+  - spotPos: {x: -18.829296, y: 0.00000014843103, z: 39.824997}
+    firstSpot: 33
+    distanceFromSpot: 0.30999985
+    segLength: 0
+  - spotPos: {x: -18.774101, y: 0.0000001531379, z: 39.53134}
+    firstSpot: 33
+    distanceFromSpot: 0.63999957
+    segLength: 0
+  - spotPos: {x: -18.720964, y: 0.00000015851856, z: 39.23177}
+    firstSpot: 33
+    distanceFromSpot: 0.96499926
+    segLength: 0
+  - spotPos: {x: -18.67768, y: 0.00000016545879, z: 38.936893}
+    firstSpot: 36
+    distanceFromSpot: 0.29499987
+    segLength: 0
+  - spotPos: {x: -18.639297, y: 0.00000017338915, z: 38.64011}
+    firstSpot: 36
+    distanceFromSpot: 0.6349996
+    segLength: 0
+  - spotPos: {x: -18.605627, y: 0.00000018228093, z: 38.341278}
+    firstSpot: 36
+    distanceFromSpot: 0.98499924
+    segLength: 0
+  - spotPos: {x: -18.586838, y: 0.00000019392874, z: 38.041542}
+    firstSpot: 39
+    distanceFromSpot: 0.29999986
+    segLength: 0
+  - spotPos: {x: -18.57599, y: 0.0000002070953, z: 37.740368}
+    firstSpot: 39
+    distanceFromSpot: 0.6249996
+    segLength: 0
+  - spotPos: {x: -18.573767, y: 0.00000022174635, z: 37.44088}
+    firstSpot: 39
+    distanceFromSpot: 0.95999926
+    segLength: 0
+  - spotPos: {x: -18.591526, y: 0.0000002400035, z: 37.142742}
+    firstSpot: 42
+    distanceFromSpot: 0.30499986
+    segLength: 0
+  - spotPos: {x: -18.612942, y: 0.0000002590454, z: 36.84272}
+    firstSpot: 42
+    distanceFromSpot: 0.6349996
+    segLength: 0
+  - spotPos: {x: -18.634743, y: 0.00000027796733, z: 36.54682}
+    firstSpot: 42
+    distanceFromSpot: 0.95499927
+    segLength: 0
+  - spotPos: {x: -18.656418, y: 0.0000002970967, z: 36.247253}
+    firstSpot: 45
+    distanceFromSpot: 0.30999985
+    segLength: 0
+  - spotPos: {x: -18.677889, y: 0.00000031632933, z: 35.94544}
+    firstSpot: 45
+    distanceFromSpot: 0.65499955
+    segLength: 0
+  - spotPos: {x: -18.698807, y: 0.0000003352907, z: 35.647354}
+    firstSpot: 45
+    distanceFromSpot: 0.97999924
+    segLength: 0
+  - spotPos: {x: -18.719053, y: 0.0000003542417, z: 35.348053}
+    firstSpot: 48
+    distanceFromSpot: 0.29499987
+    segLength: 0
+  - spotPos: {x: -18.738857, y: 0.00000037307552, z: 35.049923}
+    firstSpot: 48
+    distanceFromSpot: 0.6199996
+    segLength: 0
+  - spotPos: {x: -18.758455, y: 0.0000003920021, z: 34.749676}
+    firstSpot: 48
+    distanceFromSpot: 0.9249993
+    segLength: 0
+  - spotPos: {x: -18.777325, y: 0.00000041080423, z: 34.45011}
+    firstSpot: 51
+    distanceFromSpot: 0.2549999
+    segLength: 0
+  - spotPos: {x: -18.795849, y: 0.00000042969893, z: 34.148117}
+    firstSpot: 51
+    distanceFromSpot: 0.5999996
+    segLength: 0
+  - spotPos: {x: -18.81385, y: 0.00000044837122, z: 33.849022}
+    firstSpot: 51
+    distanceFromSpot: 0.9349993
+    segLength: 0
+  - spotPos: {x: -18.83111, y: 0.00000046698528, z: 33.54936}
+    firstSpot: 54
+    distanceFromSpot: 0.2599999
+    segLength: 0
+  - spotPos: {x: -18.847744, y: 0.0000004853406, z: 33.25302}
+    firstSpot: 54
+    distanceFromSpot: 0.5949996
+    segLength: 0
+  - spotPos: {x: -18.864275, y: 0.0000005039422, z: 32.951996}
+    firstSpot: 54
+    distanceFromSpot: 0.99499923
+    segLength: 0
+  - spotPos: {x: -18.879812, y: 0.00000052238806, z: 32.65161}
+    firstSpot: 57
+    distanceFromSpot: 0.29999986
+    segLength: 0
+  - spotPos: {x: -18.89495, y: 0.00000054078845, z: 32.35117}
+    firstSpot: 57
+    distanceFromSpot: 0.5999996
+    segLength: 0
+  - spotPos: {x: -18.909609, y: 0.00000055902706, z: 32.05261}
+    firstSpot: 57
+    distanceFromSpot: 0.8949993
+    segLength: 0
+  - spotPos: {x: -18.923447, y: 0.00000057713856, z: 31.754549}
+    firstSpot: 60
+    distanceFromSpot: 0.2499999
+    segLength: 0
+  - spotPos: {x: -18.936775, y: 0.0000005953457, z: 31.453632}
+    firstSpot: 60
+    distanceFromSpot: 0.5999996
+    segLength: 0
+  - spotPos: {x: -18.949701, y: 0.0000006134744, z: 31.153254}
+    firstSpot: 60
+    distanceFromSpot: 0.96999925
+    segLength: 0
+  - spotPos: {x: -18.961504, y: 0.0000006313597, z: 30.854807}
+    firstSpot: 63
+    distanceFromSpot: 0.27999988
+    segLength: 0
+  - spotPos: {x: -18.97282, y: 0.0000006492105, z: 30.555918}
+    firstSpot: 63
+    distanceFromSpot: 0.6099996
+    segLength: 0
+  - spotPos: {x: -18.983772, y: 0.0000006672118, z: 30.253483}
+    firstSpot: 63
+    distanceFromSpot: 0.9249993
+    segLength: 0
+  - spotPos: {x: -18.993608, y: 0.0000006848702, z: 29.954813}
+    firstSpot: 66
+    distanceFromSpot: 0.2699999
+    segLength: 0
+  - spotPos: {x: -19.002775, y: 0.0000007024758, z: 29.655617}
+    firstSpot: 66
+    distanceFromSpot: 0.5999996
+    segLength: 0
+  - spotPos: {x: -19.011517, y: 0.00000072005446, z: 29.355965}
+    firstSpot: 66
+    distanceFromSpot: 0.9499993
+    segLength: 0
+  - spotPos: {x: -19.019, y: 0.0000007374506, z: 29.05684}
+    firstSpot: 69
+    distanceFromSpot: 0.2549999
+    segLength: 0
+  - spotPos: {x: -19.025917, y: 0.00000075478664, z: 28.757565}
+    firstSpot: 69
+    distanceFromSpot: 0.5999996
+    segLength: 0
+  - spotPos: {x: -19.032269, y: 0.000000772187, z: 28.455862}
+    firstSpot: 69
+    distanceFromSpot: 0.99499923
+    segLength: 0
+  - spotPos: {x: -19.037195, y: 0.00000078947824, z: 28.152979}
+    firstSpot: 72
+    distanceFromSpot: 0.28999987
+    segLength: 0
+  - spotPos: {x: -19.041391, y: 0.00000080632276, z: 27.856583}
+    firstSpot: 72
+    distanceFromSpot: 0.6049996
+    segLength: 0
+  - spotPos: {x: -19.04497, y: 0.0000008233683, z: 27.555176}
+    firstSpot: 72
+    distanceFromSpot: 0.9099993
+    segLength: 0
+  - spotPos: {x: -19.047216, y: 0.0000008401327, z: 27.255926}
+    firstSpot: 75
+    distanceFromSpot: 0.2449999
+    segLength: 0
+  - spotPos: {x: -19.048418, y: 0.0000008567157, z: 26.957634}
+    firstSpot: 75
+    distanceFromSpot: 0.56999964
+    segLength: 0
+  - spotPos: {x: -19.049013, y: 0.00000087348826, z: 26.654564}
+    firstSpot: 75
+    distanceFromSpot: 0.9149993
+    segLength: 0
+  - spotPos: {x: -19.047894, y: 0.00000088992266, z: 26.353832}
+    firstSpot: 78
+    distanceFromSpot: 0.28499988
+    segLength: 0
+  - spotPos: {x: -19.045784, y: 0.00000090602396, z: 26.05695}
+    firstSpot: 78
+    distanceFromSpot: 0.6099996
+    segLength: 0
+  - spotPos: {x: -19.042898, y: 0.0000009223172, z: 25.754864}
+    firstSpot: 78
+    distanceFromSpot: 0.96499926
+    segLength: 0
+  - spotPos: {x: -19.037909, y: 0.00000093820006, z: 25.455551}
+    firstSpot: 81
+    distanceFromSpot: 0.2699999
+    segLength: 0
+  - spotPos: {x: -19.03181, y: 0.0000009541079, z: 25.153322}
+    firstSpot: 81
+    distanceFromSpot: 0.5999996
+    segLength: 0
+  - spotPos: {x: -19.02479, y: 0.0000009695444, z: 24.857609}
+    firstSpot: 81
+    distanceFromSpot: 0.9099993
+    segLength: 0
+  - spotPos: {x: -19.015524, y: 0.0000009851083, z: 24.5546}
+    firstSpot: 84
+    distanceFromSpot: 0.2649999
+    segLength: 0
+  - spotPos: {x: -19.004847, y: 0.000001000154, z: 24.257858}
+    firstSpot: 84
+    distanceFromSpot: 0.6049996
+    segLength: 0
+  - spotPos: {x: -18.993025, y: 0.0000010152224, z: 23.958181}
+    firstSpot: 84
+    distanceFromSpot: 0.97499925
+    segLength: 0
+  - spotPos: {x: -18.977837, y: 0.0000010300937, z: 23.654593}
+    firstSpot: 87
+    distanceFromSpot: 0.27999988
+    segLength: 0
+  - spotPos: {x: -18.961702, y: 0.0000010444282, z: 23.358646}
+    firstSpot: 87
+    distanceFromSpot: 0.5899996
+    segLength: 0
+  - spotPos: {x: -18.943823, y: 0.0000010588578, z: 23.057104}
+    firstSpot: 87
+    distanceFromSpot: 0.96499926
+    segLength: 0
+  - spotPos: {x: -18.922125, y: 0.0000010726801, z: 22.758102}
+    firstSpot: 90
+    distanceFromSpot: 0.27999988
+    segLength: 0
+  - spotPos: {x: -18.898308, y: 0.0000010863505, z: 22.45716}
+    firstSpot: 90
+    distanceFromSpot: 0.5899996
+    segLength: 0
+  - spotPos: {x: -18.872955, y: 0.000001099614, z: 22.160183}
+    firstSpot: 90
+    distanceFromSpot: 0.8999993
+    segLength: 0
+  - spotPos: {x: -18.84354, y: 0.0000011123415, z: 21.863922}
+    firstSpot: 93
+    distanceFromSpot: 0.28999987
+    segLength: 0
+  - spotPos: {x: -18.810337, y: 0.0000011247544, z: 21.564966}
+    firstSpot: 93
+    distanceFromSpot: 0.65499955
+    segLength: 0
+  - spotPos: {x: -18.774832, y: 0.0000011368963, z: 21.265816}
+    firstSpot: 93
+    distanceFromSpot: 0.99499923
+    segLength: 0
+  - spotPos: {x: -18.7325, y: 0.0000011479844, z: 20.97061}
+    firstSpot: 96
+    distanceFromSpot: 0.2749999
+    segLength: 0
+  - spotPos: {x: -18.68657, y: 0.0000011587955, z: 20.672447}
+    firstSpot: 96
+    distanceFromSpot: 0.5999996
+    segLength: 0
+  - spotPos: {x: -18.637022, y: 0.0000011690142, z: 20.377018}
+    firstSpot: 96
+    distanceFromSpot: 0.95999926
+    segLength: 0
+  - spotPos: {x: -18.577305, y: 0.0000011779124, z: 20.082945}
+    firstSpot: 99
+    distanceFromSpot: 0.27999988
+    segLength: 0
+  - spotPos: {x: -18.51183, y: 0.0000011859762, z: 19.791222}
+    firstSpot: 99
+    distanceFromSpot: 0.6249996
+    segLength: 0
+  - spotPos: {x: -18.439331, y: 0.0000011932736, z: 19.497799}
+    firstSpot: 99
+    distanceFromSpot: 0.96999925
+    segLength: 0
+  - spotPos: {x: -18.349913, y: 0.0000011980201, z: 19.213034}
+    firstSpot: 102
+    distanceFromSpot: 0.29999986
+    segLength: 0
+  - spotPos: {x: -18.24918, y: 0.0000012012566, z: 18.930456}
+    firstSpot: 102
+    distanceFromSpot: 0.6299996
+    segLength: 0
+  - spotPos: {x: -18.137077, y: 0.0000012028861, z: 18.651693}
+    firstSpot: 102
+    distanceFromSpot: 0.99499923
+    segLength: 0
+  - spotPos: {x: -17.983484, y: 0.0000011981347, z: 18.395947}
+    firstSpot: 105
+    distanceFromSpot: 0.30499986
+    segLength: 0
+  - spotPos: {x: -17.806665, y: 0.0000011898005, z: 18.153528}
+    firstSpot: 105
+    distanceFromSpot: 0.6349996
+    segLength: 0
+  - spotPos: {x: -17.605886, y: 0.000001177708, z: 17.926231}
+    firstSpot: 105
+    distanceFromSpot: 0.97999924
+    segLength: 0
+  - spotPos: {x: -17.397678, y: 0.0000011638481, z: 17.714277}
+    firstSpot: 108
+    distanceFromSpot: 0.31499985
+    segLength: 0
+  - spotPos: {x: -17.186214, y: 0.0000011497547, z: 17.49914}
+    firstSpot: 108
+    distanceFromSpot: 0.64499956
+    segLength: 0
+  - spotPos: {x: -16.976954, y: 0.0000011358007, z: 17.286242}
+    firstSpot: 108
+    distanceFromSpot: 0.97999924
+    segLength: 0
+  - spotPos: {x: -16.76503, y: 0.000001121657, z: 17.070635}
+    firstSpot: 111
+    distanceFromSpot: 0.30499986
+    segLength: 0
+  - spotPos: {x: -16.555119, y: 0.0000011076437, z: 16.857075}
+    firstSpot: 111
+    distanceFromSpot: 0.6299996
+    segLength: 0
+  - spotPos: {x: -16.344456, y: 0.0000010935771, z: 16.642752}
+    firstSpot: 111
+    distanceFromSpot: 0.98499924
+    segLength: 0
+  - spotPos: {x: -16.13408, y: 0.0000010795237, z: 16.42872}
+    firstSpot: 114
+    distanceFromSpot: 0.27999988
+    segLength: 0
+  - spotPos: {x: -15.924427, y: 0.0000010655167, z: 16.215427}
+    firstSpot: 114
+    distanceFromSpot: 0.5999996
+    segLength: 0
+  - spotPos: {x: -15.7135515, y: 0.000001051426, z: 16.000887}
+    firstSpot: 114
+    distanceFromSpot: 0.9399993
+    segLength: 0
+  - spotPos: {x: -15.503146, y: 0.0000010373632, z: 15.786824}
+    firstSpot: 117
+    distanceFromSpot: 0.2699999
+    segLength: 0
+  - spotPos: {x: -15.294228, y: 0.0000010233982, z: 15.574274}
+    firstSpot: 117
+    distanceFromSpot: 0.5899996
+    segLength: 0
+  - spotPos: {x: -15.085012, y: 0.0000010094122, z: 15.361425}
+    firstSpot: 117
+    distanceFromSpot: 0.9049993
+    segLength: 0
+  - spotPos: {x: -14.87283, y: 0.0000009952257, z: 15.145555}
+    firstSpot: 120
+    distanceFromSpot: 0.28499988
+    segLength: 0
+  - spotPos: {x: -14.662362, y: 0.0000009811525, z: 14.931426}
+    firstSpot: 120
+    distanceFromSpot: 0.6199996
+    segLength: 0
+  - spotPos: {x: -14.454107, y: 0.0000009672268, z: 14.719553}
+    firstSpot: 120
+    distanceFromSpot: 0.9199993
+    segLength: 0
+  - spotPos: {x: -14.242294, y: 0.0000009530616, z: 14.504061}
+    firstSpot: 123
+    distanceFromSpot: 0.28499988
+    segLength: 0
+  - spotPos: {x: -14.032556, y: 0.00000093903424, z: 14.290678}
+    firstSpot: 123
+    distanceFromSpot: 0.6299996
+    segLength: 0
+  - spotPos: {x: -13.819972, y: 0.00000092481594, z: 14.0744}
+    firstSpot: 126
+    distanceFromSpot: 0.005
+    segLength: 0
+  - spotPos: {x: -13.610913, y: 0.0000009108323, z: 13.861709}
+    firstSpot: 126
+    distanceFromSpot: 0.30499986
+    segLength: 0
+  - spotPos: {x: -13.402028, y: 0.0000008968597, z: 13.649194}
+    firstSpot: 126
+    distanceFromSpot: 0.6299996
+    segLength: 0
+  - spotPos: {x: -13.192258, y: 0.0000008828274, z: 13.435777}
+    firstSpot: 126
+    distanceFromSpot: 0.9349993
+    segLength: 0
+  - spotPos: {x: -12.9798975, y: 0.00000086862127, z: 13.219727}
+    firstSpot: 129
+    distanceFromSpot: 0.27999988
+    segLength: 0
+  - spotPos: {x: -12.771778, y: 0.00000085469827, z: 13.007991}
+    firstSpot: 129
+    distanceFromSpot: 0.5999996
+    segLength: 0
+  - spotPos: {x: -12.559474, y: 0.0000008404952, z: 12.791998}
+    firstSpot: 129
+    distanceFromSpot: 0.9449993
+    segLength: 0
+  - spotPos: {x: -12.350027, y: 0.00000082648256, z: 12.57891}
+    firstSpot: 132
+    distanceFromSpot: 0.29999986
+    segLength: 0
+  - spotPos: {x: -12.140623, y: 0.00000081247254, z: 12.3658695}
+    firstSpot: 132
+    distanceFromSpot: 0.6149996
+    segLength: 0
+  - spotPos: {x: -11.928647, y: 0.00000079829033, z: 12.150209}
+    firstSpot: 132
+    distanceFromSpot: 0.95499927
+    segLength: 0
+  - spotPos: {x: -11.718407, y: 0.0000007842238, z: 11.936315}
+    firstSpot: 135
+    distanceFromSpot: 0.30499986
+    segLength: 0
+  - spotPos: {x: -11.509516, y: 0.0000007702473, z: 11.723793}
+    firstSpot: 135
+    distanceFromSpot: 0.6149996
+    segLength: 0
+  - spotPos: {x: -11.297864, y: 0.00000075608614, z: 11.508464}
+    firstSpot: 135
+    distanceFromSpot: 0.9499993
+    segLength: 0
+  - spotPos: {x: -11.086351, y: 0.000000741934, z: 11.293276}
+    firstSpot: 138
+    distanceFromSpot: 0.29999986
+    segLength: 0
+  - spotPos: {x: -10.876152, y: 0.00000072786963, z: 11.079423}
+    firstSpot: 138
+    distanceFromSpot: 0.6099996
+    segLength: 0
+  - spotPos: {x: -10.668643, y: 0.0000007139854, z: 10.868309}
+    firstSpot: 138
+    distanceFromSpot: 0.9349993
+    segLength: 0
+  - spotPos: {x: -10.457995, y: 0.0000006998911, z: 10.654}
+    firstSpot: 141
+    distanceFromSpot: 0.28499988
+    segLength: 0
+  - spotPos: {x: -10.248023, y: 0.0000006858418, z: 10.440378}
+    firstSpot: 141
+    distanceFromSpot: 0.5949996
+    segLength: 0
+  - spotPos: {x: -10.036389, y: 0.0000006716817, z: 10.225067}
+    firstSpot: 141
+    distanceFromSpot: 0.9249993
+    segLength: 0
+  - spotPos: {x: -9.827397, y: 0.00000065769837, z: 10.012444}
+    firstSpot: 144
+    distanceFromSpot: 0.2749999
+    segLength: 0
+  - spotPos: {x: -9.61556, y: 0.0000006435247, z: 9.796925}
+    firstSpot: 144
+    distanceFromSpot: 0.5899996
+    segLength: 0
+  - spotPos: {x: -9.405031, y: 0.0000006294389, z: 9.582739}
+    firstSpot: 144
+    distanceFromSpot: 0.9199993
+    segLength: 0
+  - spotPos: {x: -9.195394, y: 0.000000615413, z: 9.369458}
+    firstSpot: 147
+    distanceFromSpot: 0.2749999
+    segLength: 0
+  - spotPos: {x: -8.986238, y: 0.0000006014195, z: 9.156668}
+    firstSpot: 147
+    distanceFromSpot: 0.5899996
+    segLength: 0
+  - spotPos: {x: -8.775785, y: 0.0000005873395, z: 8.942558}
+    firstSpot: 147
+    distanceFromSpot: 0.9249993
+    segLength: 0
+  - spotPos: {x: -8.56314, y: 0.00000057311325, z: 8.726217}
+    firstSpot: 150
+    distanceFromSpot: 0.28999987
+    segLength: 0
+  - spotPos: {x: -8.3545265, y: 0.0000005591572, z: 8.513978}
+    firstSpot: 150
+    distanceFromSpot: 0.6099996
+    segLength: 0
+  - spotPos: {x: -8.14491, y: 0.0000005451344, z: 8.30072}
+    firstSpot: 150
+    distanceFromSpot: 0.95499927
+    segLength: 0
+  - spotPos: {x: -7.934423, y: 0.00000053105396, z: 8.086575}
+    firstSpot: 153
+    distanceFromSpot: 0.2599999
+    segLength: 0
+  - spotPos: {x: -7.7241015, y: 0.0000005169852, z: 7.8725986}
+    firstSpot: 153
+    distanceFromSpot: 0.5849996
+    segLength: 0
+  - spotPos: {x: -7.513587, y: 0.00000050290396, z: 7.6584263}
+    firstSpot: 153
+    distanceFromSpot: 0.8999993
+    segLength: 0
+  - spotPos: {x: -7.3031964, y: 0.000000488832, z: 7.44438}
+    firstSpot: 156
+    distanceFromSpot: 0.2499999
+    segLength: 0
+  - spotPos: {x: -7.093586, y: 0.000000474813, z: 7.2311263}
+    firstSpot: 156
+    distanceFromSpot: 0.5949996
+    segLength: 0
+  - spotPos: {x: -6.8816047, y: 0.00000046063593, z: 7.0154614}
+    firstSpot: 156
+    distanceFromSpot: 0.96999925
+    segLength: 0
+  - spotPos: {x: -6.6729994, y: 0.00000044668639, z: 6.803231}
+    firstSpot: 159
+    distanceFromSpot: 0.2749999
+    segLength: 0
+  - spotPos: {x: -6.462792, y: 0.0000004326305, z: 6.5893707}
+    firstSpot: 159
+    distanceFromSpot: 0.5949996
+    segLength: 0
+  - spotPos: {x: -6.251937, y: 0.00000041853204, z: 6.374852}
+    firstSpot: 159
+    distanceFromSpot: 0.97999924
+    segLength: 0
+  - spotPos: {x: -6.0423474, y: 0.00000040452065, z: 6.16162}
+    firstSpot: 162
+    distanceFromSpot: 0.29999986
+    segLength: 0
+  - spotPos: {x: -5.8321686, y: 0.00000039047103, z: 5.9477887}
+    firstSpot: 162
+    distanceFromSpot: 0.6199996
+    segLength: 0
+  - spotPos: {x: -5.6192856, y: 0.00000037624181, z: 5.731206}
+    firstSpot: 162
+    distanceFromSpot: 0.9499993
+    segLength: 0
+  - spotPos: {x: -5.409897, y: 0.0000003622494, z: 5.5181785}
+    firstSpot: 165
+    distanceFromSpot: 0.28999987
+    segLength: 0
+  - spotPos: {x: -5.2003136, y: 0.00000034824612, z: 5.304954}
+    firstSpot: 165
+    distanceFromSpot: 0.63999957
+    segLength: 0
+  - spotPos: {x: -4.9900928, y: 0.00000033420199, z: 5.0910797}
+    firstSpot: 165
+    distanceFromSpot: 0.9999992
+    segLength: 0
+  - spotPos: {x: -4.779463, y: 0.0000003201362, z: 4.8767896}
+    firstSpot: 168
+    distanceFromSpot: 0.30999985
+    segLength: 0
+  - spotPos: {x: -4.5674686, y: 0.00000030598238, z: 4.661112}
+    firstSpot: 168
+    distanceFromSpot: 0.65499955
+    segLength: 0
+  - spotPos: {x: -4.3581486, y: 0.0000002920104, z: 4.4481535}
+    firstSpot: 168
+    distanceFromSpot: 0.98999923
+    segLength: 0
+  - spotPos: {x: -4.1484413, y: 0.00000027802386, z: 4.2348027}
+    firstSpot: 171
+    distanceFromSpot: 0.31999984
+    segLength: 0
+  - spotPos: {x: -3.9386525, y: 0.0000002640387, z: 4.0213685}
+    firstSpot: 171
+    distanceFromSpot: 0.63999957
+    segLength: 0
+  - spotPos: {x: -3.7267783, y: 0.00000024992207, z: 3.805812}
+    firstSpot: 171
+    distanceFromSpot: 0.96999925
+    segLength: 0
+  - spotPos: {x: -3.497817, y: 0.00000023469362, z: 3.572872}
+    firstSpot: 175
+    distanceFromSpot: 1
+    segLength: 0
+  interval: 10
+  startPathPos: 0
+  endPathPos: 37
+  roadStyle: 2
+  showGizmo: 0
+  terrList: []
+  prefabRotation: 0
+  createFolderInside: 1
+  grpThatContainInstantiateObjects: {fileID: 0}
+--- !u!114 &1869535307737139459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6989743066649835243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1f49499637e8dd468a030d871d65497, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  seeInspector: 0
+  seeCustomEditor: 0
+  toolbarIndex: 3
+  roadData: {fileID: 11400000, guid: 65c36ca5240e78f4f8767e3b8379d970, type: 2}
+  roadID: 1026
+  pointsList: []
+  linkControlPoints: 1
+  loop: 0
+  tileSize: 1.5
+  roadSize: 1.5
+  totalDistance: 52.539013
+  distVecList: []
+  crossRoadpoint: {fileID: 0}
+  crossRoadpointIn: {fileID: 0}
+  crossDirection: 0
+  crossDirectionIn: 0
+  lastAnchorDist: 1
+  anchorDistWhenNewPointCreated: 3
+  colorList:
+  - {r: 0, g: 0.9811321, b: 0.027304092, a: 1}
+  - {r: 0.008009953, g: 0.5660378, b: 0.023634797, a: 1}
+  - {r: 1, g: 0.7260463, b: 0, a: 1}
+  - {r: 1, g: 0, b: 0, a: 1}
+  isChangeDone: 1
+  smoothRotSteps: 15
+  autoDisableColliderBorders: 1
+  bSelection: 1
+  selectStart: -1
+  selectStop: -1
+  selectBorderInfo:
+    borderLeftStart: 0
+    borderLeftStop: 0.1
+    borderLeftSlopeSize: 0.3
+    borderRightStart: 0
+    borderRightStop: 0.1
+    borderRightSlopeSize: 0.3
+    bShowRoad: 1
+    bShowBorder: 1
+    bShowSlope: 1
+  selectBorderTrans:
+  - {fileID: 4096426607733316126}
+  - {fileID: 9182356890411978668}
+  - {fileID: 5995647376400027279}
+  - {fileID: 1119642106524189564}
+  - {fileID: 3262273860811689955}
+  hotControlID: 11113
+  closestPoint: -1
+  closestPointList: 
+  indexCreatorCrossRoad: 1
+  indexCrossRoadTab: 0
+  indexConnectionCrossRoadTab: 0
+  indexCrossRoadGroundPrefab: 5
+  isRoadMeshUpdated: 0
+  vert: 0
+  roadSubdivisionWhenGenerated: 3
+--- !u!114 &1021905740164116033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6989743066649835243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1531a7986df9fcc4bb4e8f2afe91c292, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ID: 0
+  roadType: 1
+--- !u!33 &222483454444062442
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6989743066649835243}
+  m_Mesh: {fileID: 0}
+--- !u!23 &1308888657304379683
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6989743066649835243}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 6a9d8b365a6c5a9458e524f7292065af, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &3704784354931044961
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6989743066649835243}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
+--- !u!114 &2869947654937354002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6989743066649835243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 274307e25943cc044806174d4448b15f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  seeInspector: 1
+  terrList: []
+  roadOffsetHeight: 0.03
+--- !u!114 &2230349365119393383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6989743066649835243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b731c0e6e6411d4f92fd9c166133ecb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &7007543071705657380
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5995647376400027279}
+  - component: {fileID: 6166290117069266491}
+  - component: {fileID: 1341354191260968928}
+  - component: {fileID: 8931344768720918065}
+  - component: {fileID: 5002763912105648674}
+  m_Layer: 0
+  m_Name: BorderRSlope
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5995647376400027279
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7007543071705657380}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4837086347358658293}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &6166290117069266491
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7007543071705657380}
+  m_Mesh: {fileID: 0}
+--- !u!23 &1341354191260968928
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7007543071705657380}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 2680e52b0beecba43b1ea08c73bb1b0b, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &8931344768720918065
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7007543071705657380}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
+--- !u!114 &5002763912105648674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7007543071705657380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1531a7986df9fcc4bb4e8f2afe91c292, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ID: 2
+  roadType: 1

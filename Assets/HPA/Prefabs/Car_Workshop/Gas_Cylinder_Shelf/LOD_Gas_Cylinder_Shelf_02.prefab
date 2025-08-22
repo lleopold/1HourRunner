@@ -1,0 +1,207 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &9113712344024844776
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4613145224225723579}
+  - component: {fileID: 7869486709523242295}
+  m_Layer: 0
+  m_Name: LOD_Gas_Cylinder_Shelf_02
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4613145224225723579
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9113712344024844776}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6973782716379090274}
+  - {fileID: 5113828027406043141}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!205 &7869486709523242295
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9113712344024844776}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: 0, y: -0.000000059604645, z: -0.000004887581}
+  m_Size: 1.5619018
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.02527471
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 8110128273932367373}
+  m_Enabled: 1
+--- !u!1001 &393102687066464293
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 4613145224225723579}
+    m_Modifications:
+    - target: {fileID: 4864841632222046240, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4864841632222046240, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4864841632222046240, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4864841632222046240, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4864841632222046240, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4864841632222046240, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4864841632222046240, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4864841632222046240, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4864841632222046240, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4864841632222046240, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4864841632222046240, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5244638699375833754, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+      propertyPath: m_Name
+      value: Gas_Cylinder_Shelf_02_Collider
+      objectReference: {fileID: 0}
+    - target: {fileID: 6037162626524353359, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+--- !u!4 &5113828027406043141 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4864841632222046240, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+  m_PrefabInstance: {fileID: 393102687066464293}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &5601395826909319871 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5244638699375833754, guid: f7d02c179b870c14e9852d3d88dbbfec, type: 3}
+  m_PrefabInstance: {fileID: 393102687066464293}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &8431478048959965468
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5601395826909319871}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -1274368925541408876, guid: c135c2ae5075ca5488b85c3cc68fcd01, type: 3}
+--- !u!1001 &2971571464465702534
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 4613145224225723579}
+    m_Modifications:
+    - target: {fileID: 4805673141203552606, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+      propertyPath: m_Name
+      value: Gas_Cylinder_Shelf_02_Lod0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330853407951590372, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330853407951590372, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330853407951590372, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330853407951590372, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330853407951590372, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330853407951590372, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330853407951590372, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330853407951590372, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330853407951590372, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330853407951590372, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330853407951590372, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+--- !u!4 &6973782716379090274 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5330853407951590372, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+  m_PrefabInstance: {fileID: 2971571464465702534}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8110128273932367373 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6463178055106783371, guid: 58b59a7175edfa1489cd2ec52ef8bb2e, type: 3}
+  m_PrefabInstance: {fileID: 2971571464465702534}
+  m_PrefabAsset: {fileID: 0}

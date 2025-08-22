@@ -1,0 +1,11 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UIToolkit/WeaponButton.uss?fileID=7433441132597879392&amp;guid=0b060cae0d1dfd24a93847231e167aff&amp;type=3#WeaponaButton" />
+    <engine:VisualElement name="WeaponButtonRoot" class="weapon-btn weapon-btn__frame">
+        <engine:VisualElement name="topbar" class="weapon-btn__topbar" />
+        <engine:VisualElement name="img" class="weapon-btn__image" style="background-image: resource(&apos;Weapons/Thumbnails/gun_thumbnail_1&apos;);" />
+        <engine:Label name="tl" text="PRIMARY" class="weapon-btn__tl" />
+        <engine:Label name="name" text="XM4" class="weapon-btn__name" />
+        <engine:Label name="tr" text="GUNSMITH" class="weapon-btn__tr" />
+        <engine:Label name="br" text="LVL 1" class="weapon-btn__br" />
+    </engine:VisualElement>
+</engine:UXML>

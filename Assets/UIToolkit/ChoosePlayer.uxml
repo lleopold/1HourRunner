@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UIToolkit/PlayerButton.uss?fileID=7433441132597879392&amp;guid=e33ac43f8e9b6f04aa51f359fe765f9c&amp;type=3#PlayerButton" />
+    <ui:VisualElement style="flex-grow: 1; flex-direction: column;">
+        <ui:VisualElement style="flex-grow: 1; flex-direction: row; align-items: center; justify-content: space-around; height: -159px; width: 300px; align-self: center;">
+            <ui:Label tabindex="-1" text="Survivors revenge" parse-escape-sequences="true" display-tooltip-when-elided="true" style="white-space: normal; text-overflow: ellipsis;" />
+            <ui:Button text="Play" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_play" style="background-color: rgb(58, 123, 54); height: 39px; width: 155px;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="MainContent" style="flex-grow: 1; height: 80%; width: auto; align-items: flex-end; justify-content: space-around; align-self: center; flex-direction: row;">
+            <ui:VisualElement name="choose_char" style="flex-grow: 1; align-items: center; justify-content: center; align-self: stretch; flex-direction: column; width: 10%;">
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_jennifer" style="background-image: resource(&apos;Thumbnails/Jennifer&apos;); width: 90%; height: 12%; margin-top: 6px; margin-right: 6px; margin-bottom: 6px; margin-left: 6px;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_swat" style="width: 90%; height: 12%; background-image: resource(&apos;Thumbnails/Swat&apos;);" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_steel" style="width: 90%; height: 12%; background-image: resource(&apos;Thumbnails/Steel&apos;); align-items: stretch; align-self: auto; justify-content: flex-start; margin-top: 6px; margin-bottom: 6px; margin-right: 6px; margin-left: 6px;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_business_girl" style="width: 90%; height: 12%; background-image: resource(&apos;Thumbnails/businessGirl&apos;); margin-top: 6px; margin-right: 6px; margin-bottom: 6px; margin-left: 6px;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_dr" style="width: 90%; height: 12%; background-image: resource(&apos;Thumbnails/Dr&apos;); margin-top: 6px; margin-right: 6px; margin-bottom: 6px; margin-left: 6px;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_solider" style="height: 12%; width: 90%; background-image: resource(&apos;Thumbnails/Solider&apos;); margin-top: 6px; margin-right: 6px; margin-bottom: 6px; margin-left: 6px;" />
+                <ui:Button text="Green Hat" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_green_hat" style="width: 90%; height: 12%;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="visual_rep" style="flex-grow: 1; align-self: stretch; width: 30%;" />
+            <ui:VisualElement name="stats" style="flex-grow: 1; align-self: stretch; width: 30%; height: auto; align-items: stretch; justify-content: space-around;">
+                <ui:FloatField label="Health" value="42,2" name="fl_health" />
+                <ui:FloatField label="Weight" value="42,2" name="fl_weight" />
+                <ui:FloatField label="Strength" value="42,2" name="fl_strength" />
+                <ui:FloatField label="Stamina" value="42,2" name="fl_stamina" />
+                <ui:FloatField label="Stamina regen" value="42,2" name="fl_stamina_regen" />
+                <ui:FloatField label="Stamina speed" value="42,2" name="fl_stamina_speed" />
+                <ui:FloatField label="Speed" value="42,2" name="fl_speed" />
+                <ui:FloatField label="Acceleration" value="42,2" name="fl_acceleration" />
+                <ui:FloatField label="Running pct" value="42,2" name="fl_running_pct" />
+                <ui:FloatField label="Back move" value="42,2" name="fl_back_move" />
+                <ui:FloatField label="Aim" value="42,2" name="fl_aim" />
+                <ui:FloatField label="Recoil" value="42,2" name="fl_recoil" />
+                <ui:FloatField label="Reload speed" value="42,2" name="fl_reload" />
+                <ui:FloatField label="Vision" value="42,2" name="fl_vision" />
+                <ui:FloatField label="Injured penalty" value="42,2" name="fl_injured" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-grow: 1;" />
+        <ui:IntegerField label="Weapon 1,2,3... (nema3)" value="1" name="int_weapon" style="align-self: center;" />
+    </ui:VisualElement>
+</ui:UXML>

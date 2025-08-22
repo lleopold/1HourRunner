@@ -1,0 +1,53 @@
+/* Base text-style tab */
+.tab {
+    background-color: rgba(0,0,0,0);
+    border-width: 0;
+    border-radius: 0;
+    padding: 4px 10px;
+    color: #e7e7e7;
+    unity-font-style: normal;
+    unity-text-align: middle-left;
+    unity-font-definition: var(--unity-default-font);
+    unity-focus-outline-color: transparent; /* remove default focus ring */
+    opacity: 0.85;
+    transition-property: color, opacity, background-color, transform, border-bottom-width, border-bottom-color;
+    transition-duration: 0.12s;
+}
+.tab:hover { opacity: 1; }
+
+/* Active center tab uses bottom border as an "underline" */
+.tab.is-active {
+    color: #ffffff;
+    font-weight: 600;
+    border-bottom-width: 2px;
+    border-bottom-color: #57c5ff;
+}
+
+/* Side tabs get subtly dimmed (C# also adjusts opacity) */
+.tab.is-side { opacity: 0.7; }
+
+/* Hidden when beyond window (optional, also controlled from C#) */
+.tab.is-hidden { visibility: hidden; }
+
+/* Optional: modern pill/chip variant (add class="tab tab--pill") */
+.tab--pill {
+    background-color: rgba(255,255,255,0.08);
+    border-radius: 9999px;
+    padding: 6px 14px;
+    color: #eaeaea;
+    border-width: 0;
+}
+.tab--pill:hover { background-color: rgba(255,255,255,0.12); }
+.tab--pill.is-active {
+    background-color: #ffffff;
+    color: #111214;
+    font-weight: 600;
+}
+
+/* Container (optional): place your strip where you want it */
+#ws_tabs {
+    /* The script uses absolute positioning for children; position the strip itself as needed */
+    margin-top: 24px;
+    margin-left: 24px;
+    overflow: visible; /* neighbors peeking in */
+}
