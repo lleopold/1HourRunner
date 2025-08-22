@@ -25,7 +25,6 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
     private Button _btn_revolver;
     private Button _btn_shotgun;
     private Button _btn_m4;
-    private Button _btn_sniper;
 
     private Button _btn_WPN_AP85;
     private Button _btn_WPN_MK18;
@@ -109,7 +108,6 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
         //_btn_revolver = _root.Q<Button>("btn_revolver");
         //_btn_shotgun = _root.Q<Button>("btn_shotgun");
         //_btn_m4 = _root.Q<Button>("btn_m4");
-        //_btn_sniper = _root.Q<Button>("btn_sniper");
 
 
         _btn_WPN_AP85.RegisterCallback<ClickEvent>(ev => ClickAssignData(WeaponEnum.WPN_AP85));
