@@ -1,0 +1,93 @@
+﻿/* =========================
+   ChoosePlayer — full file
+   ========================= */
+
+/* Basic layout (unchanged) */
+.choose-root, .weapon-screen, #root { background-color: transparent; }
+.topbar { height:56px; flex-direction:row; justify-content:space-between; align-items:center; padding:0 8px; }
+.title { font-size:22px; unity-font-style:bold; color:#E8EEF7; }
+
+.btn { height:36px; padding:0 14px; border-radius:12px; background:#20262e; color:#E6EDF6; font-size:14px; border-width:1px; border-color:#2f3742; transition-property:background-color,scale,translate; transition-duration:.12s; }
+.btn:hover { background:#2b323c; translate:0 -1px; }
+.btn:active { scale:.985; }
+.btn--primary { background:#5EE1A5; color:#0f1318; border-width:0; }
+
+.row { flex-direction:row; align-items:stretch; gap:16px; flex-grow:1; }
+#visual_rep { flex-grow:1; flex-basis:0; min-width:35%; align-self:stretch; background-color:transparent; border-width:0; picking-mode:ignore; }
+
+#choose_char { width:18%; min-width:180px; max-width:320px; padding:10px; background:rgba(255,255,255,.03); border-radius:12px; border-width:1px; border-color:rgba(255,255,255,.09); }
+.thumb { height:88px; margin-bottom:10px; border-radius:10px; background:rgba(255,255,255,.06); background-size:cover; background-position:center; background-repeat:no-repeat; }
+
+.stats { width:28%; min-width:260px; max-width:520px; padding:12px 16px; background:rgba(255,255,255,.03); border-radius:12px; border-width:1px; border-color:rgba(255,255,255,.09); gap:8px; }
+.stat-row { flex-direction:row; justify-content:space-between; align-items:center; padding:6px 4px; border-bottom-width:1px; border-bottom-color:rgba(255,255,255,.06); }
+.stat-row:last-child { border-bottom-width:0; }
+.stat-name { color:#AEB9C8; font-size:13px; }
+.stat-val  { color:#E5ECF7; font-size:13px; unity-font-style:bold; }
+
+.bottom { height:48px; align-items:flex-start; justify-content:center; }
+
+/* Scrollbars on left */
+#choose_char .unity-scroll-view__horizontal-scroller { display:none; height:0; }
+#choose_char .unity-scroller__low-button, #choose_char .unity-scroller__high-button { display:none; }
+#choose_char .unity-scroll-view__vertical-scroller { width:6px; margin-right:3px; background:transparent; }
+#choose_char .unity-scroller__slider .unity-slider__tracker { background:rgba(255,255,255,.08); border-radius:3px; }
+#choose_char .unity-scroller__slider .unity-slider__dragger { background:rgba(255,255,255,.35); border-radius:3px; min-height:28px; }
+
+/* =========================================================
+   INPUTS: force LIGHT box + DARK text (overrides theme)
+   ========================================================= */
+
+/* Comfortable control height */
+.weapon-screen .stats :is(.unity-float-field, .unity-integer-field) { min-height:32px; }
+
+/* Light input background (container behind text) */
+.weapon-screen .stats :is(.unity-float-field, .unity-integer-field) > .unity-base-field__input {
+    background-color:#F5F7FA !important;   /* light */
+    border-radius:6px;
+    border-width:1px;
+    border-color:#2a2f38;
+    opacity:1 !important;
+    align-items:center;                     /* vertical center */
+}
+
+/* On focus keep it light */
+.weapon-screen .stats :is(.unity-float-field, .unity-integer-field):focus-within > .unity-base-field__input {
+    background-color:#FFFFFF !important;
+    border-color:#3b82f6;                   /* subtle highlight */
+}
+
+/* Actual editable text element — force dark text always */
+.weapon-screen .stats :is(.unity-float-field, .unity-integer-field)
+  :is(#unity-text-input, .unity-base-text-field__input, .unity-text-input) {
+    color:#111111 !important;
+    caret-color:#111111 !important;
+    background-color:transparent !important;
+    opacity:1 !important;
+    height:100%;
+    min-height:28px;
+    padding:6px 8px;
+    overflow:visible;
+    white-space:nowrap;
+}
+
+/* Placeholder, just in case */
+.weapon-screen .stats :is(.unity-float-field, .unity-integer-field)
+  .unity-text-element__placeholder {
+    color:#6b7280 !important;
+}
+
+/* Stepper buttons + numeric width */
+.stat-edit { flex-direction:row; align-items:center; gap:6px; }
+.step { width:22px; height:22px; padding:0; border-radius:6px; background:#20262e; color:#e6edf6; border-width:1px; border-color:#2f3742; unity-text-align:center; }
+.num { width:100px; min-width:100px; }
+
+/* Darker rows so inputs pop */
+.weapon-screen .stats .stat-row { background:rgba(30,33,39,.55); border-radius:8px; }
+
+/* If overlay labels existed */
+.weapon-screen .stat-val { pointer-events:none; }
+
+
+.stat-row .num .unity-base-field__input {
+    color: grey;
+}

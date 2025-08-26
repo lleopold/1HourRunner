@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 0}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -203,15 +203,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ca865557f505484ba3f26e8f8e518d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  smokeFollowsCamera: 1
+  smokeDistance: 0.1
+  smokeScreenOffset: {x: 0, y: -0.1}
+  minShowTime: 5
+  holdWhenReady: 1
+  readyHoldSeconds: 1.5
+  showPressAnyKey: 0
   preloadBudgetSeconds: 1.5
   continuePreloadAfterActivation: 1
   sceneToLoad: Start
-  minShowTime: 4
   uiDocument: {fileID: 78401431}
-  loadingLabelName: Loading!
+  loadingLabelName: loading_text
   smokePrefabPath: FX/Smoke
-  smokeOffset: {x: 0, y: 0, z: 3}
-  smokeFollowsCamera: 1
+  smokeOffset: {x: 0, y: 0, z: 1}
   weaponIdsToPrecache:
   - WPN_AP85
   - WPN_C1911
@@ -328,8 +333,8 @@ Camera:
   m_GameObject: {fileID: 855414633}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.07297968, g: 0.08907082, b: 0.11320752, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -378,9 +383,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 855414633}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.19423315, y: -0.1114155, z: 0.022587925, w: 0.97434586}
-  m_LocalPosition: {x: 4.1667957, y: 12.26, z: -17.994404}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.61, y: 1.27, z: -0.19}
+  m_LocalScale: {x: 1.1002, y: 1.1002, z: 6.6279354}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}

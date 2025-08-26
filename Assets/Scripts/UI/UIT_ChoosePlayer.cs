@@ -1,6 +1,6 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 
@@ -39,8 +39,9 @@ public class UIT_ChoosePlayer : MonoBehaviour
     private Button _btn_solider;
     private Button _btn_green_hat_basic;
     private Button _btn_play;
+    private Button _btn_choose_level;
 
-
+    private readonly Dictionary<string, Label> _statLabels = new();
 
 
     private void Awake()
@@ -123,9 +124,49 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _fl_vision.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.vision = ev.newValue);
         _fl_injured_penalty.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.InjuredPenalty = ev.newValue);
 
-
+        _btn_choose_level = _root.Q<Button>("btn_choose_level");
+        _btn_choose_level?.RegisterCallback<ClickEvent>(ev => ClickChooseLevel());
 
         LoadSettingsToUI();
+
+        // Wire steppers: fieldName, minusBtn, plusBtn, step, min, max
+        WireStepper("fl_health", "btn_fl_health_minus", "btn_fl_health_plus", 5f, 0f, 500f);
+        WireStepper("fl_weight", "btn_fl_weight_minus", "btn_fl_weight_plus", 1f, 0f, 500f);
+        WireStepper("fl_strength", "btn_fl_strength_minus", "btn_fl_strength_plus", 1f, 0f, 200f);
+        WireStepper("fl_stamina", "btn_fl_stamina_minus", "btn_fl_stamina_plus", 5f, 0f, 500f);
+        WireStepper("fl_stamina_regen", "btn_fl_stamina_regen_minus", "btn_fl_stamina_regen_plus", 0.1f, 0f, 10f);
+        WireStepper("fl_stamina_speed", "btn_fl_stamina_speed_minus", "btn_fl_stamina_speed_plus", 0.1f, 0f, 10f);
+        WireStepper("fl_speed", "btn_fl_speed_minus", "btn_fl_speed_plus", 0.1f, 0f, 50f);
+        WireStepper("fl_acceleration", "btn_fl_acceleration_minus", "btn_fl_acceleration_plus", 0.1f, 0f, 50f);
+        WireStepper("fl_running_pct", "btn_fl_running_pct_minus", "btn_fl_running_pct_plus", 1f, 0f, 100f);
+        WireStepper("fl_back_move", "btn_fl_back_move_minus", "btn_fl_back_move_plus", 1f, 0f, 100f);
+        WireStepper("fl_aim", "btn_fl_aim_minus", "btn_fl_aim_plus", 0.5f, 0f, 100f);
+        WireStepper("fl_recoil", "btn_fl_recoil_minus", "btn_fl_recoil_plus", 0.5f, 0f, 100f);
+        WireStepper("fl_reload", "btn_fl_reload_minus", "btn_fl_reload_plus", 0.1f, 0f, 10f);
+        WireStepper("fl_vision", "btn_fl_vision_minus", "btn_fl_vision_plus", 1f, 0f, 100f);
+        WireStepper("fl_injured", "btn_fl_injured_minus", "btn_fl_injured_plus", 1f, 0f, 100f);
+
+    }
+    void WireStepper(string floatFieldName, string minusBtnName, string plusBtnName, float step, float min, float max)
+    {
+        var ff = _root.Q<FloatField>(floatFieldName);
+        var minus = _root.Q<Button>(minusBtnName);
+        var plus = _root.Q<Button>(plusBtnName);
+        if (ff == null || minus == null || plus == null) return;
+
+        void ClampAndSet(float v) => ff.value = Mathf.Clamp(v, min, max);
+
+        minus.RegisterCallback<ClickEvent>(_ => ClampAndSet(ff.value - step));
+        plus.RegisterCallback<ClickEvent>(_ => ClampAndSet(ff.value + step));
+    }
+
+    private void ClickChooseLevel()
+    {
+        // If you have a dedicated scene picker:
+        // Loader.Load(Loader.Scene.LevelSelect);
+
+        // Temporary: jump to Level1 directly (rename to your scene):
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Level1");
     }
 
     private static GameObject LoadModel()
@@ -146,20 +187,13 @@ public class UIT_ChoosePlayer : MonoBehaviour
     }
     void AttachWeaponSelectionStyles()
     {
-        // Load "Assets/Resources/UI/WeaponSelection.uss"
-        var ss = Resources.Load<StyleSheet>("UI/WeaponSelection");
-        if (ss == null)
-        {
-            Debug.LogError("UI/WeaponSelection.uss not found in Resources.");
-            return;
-        }
+        var weaponSel = Resources.Load<StyleSheet>("UI/WeaponSelection");
+        var choosePlayer = Resources.Load<StyleSheet>("UI/ChoosePlayer");
 
-        // Add the stylesheet to the root visual element
-        _root.styleSheets.Add(ss);
-
-        // Add the root class used by the theme (matches .weapon-screen in the USS)
-        _root.AddToClassList("weapon-screen");
+        if (weaponSel != null) _root.styleSheets.Add(weaponSel);
+        if (choosePlayer != null) _root.styleSheets.Add(choosePlayer); // added LAST to override
     }
+
 
     private void ClickPlay()
     {
@@ -190,7 +224,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _fl_acceleration.value = playerConfig.acceleration;
         _fl_running_pct.value = playerConfig.RunningSpeed_pct;
         _fl_running_bck.value = playerConfig.BackMovementPenalty_pct;
-        //_fl_precision.value = playerConfig.aimingPrecision;
+        //stfl_precision.value = playerConfig.aimingPrecision;
         _fl_recoil.value = playerConfig.recoilReduction;
         _fl_reload_speed.value = playerConfig.reloadSpeed;
         _fl_vision.value = playerConfig.vision;

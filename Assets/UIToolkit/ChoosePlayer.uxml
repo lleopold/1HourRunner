@@ -1,40 +1,197 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/UIToolkit/PlayerButton.uss?fileID=7433441132597879392&amp;guid=e33ac43f8e9b6f04aa51f359fe765f9c&amp;type=3#PlayerButton" />
-    <ui:VisualElement style="flex-grow: 1; flex-direction: column;">
-        <ui:VisualElement style="flex-grow: 1; flex-direction: row; align-items: center; justify-content: space-around; height: -159px; width: 300px; align-self: center;">
-            <ui:Label tabindex="-1" text="Survivors revenge" parse-escape-sequences="true" display-tooltip-when-elided="true" style="white-space: normal; text-overflow: ellipsis;" />
-            <ui:Button text="Play" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_play" style="background-color: rgb(58, 123, 54); height: 39px; width: 155px;" />
-        </ui:VisualElement>
-        <ui:VisualElement name="MainContent" style="flex-grow: 1; height: 80%; width: auto; align-items: flex-end; justify-content: space-around; align-self: center; flex-direction: row;">
-            <ui:VisualElement name="choose_char" style="flex-grow: 1; align-items: center; justify-content: center; align-self: stretch; flex-direction: column; width: 10%;">
-                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_jennifer" style="background-image: resource(&apos;Thumbnails/Jennifer&apos;); width: 90%; height: 12%; margin-top: 6px; margin-right: 6px; margin-bottom: 6px; margin-left: 6px;" />
-                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_swat" style="width: 90%; height: 12%; background-image: resource(&apos;Thumbnails/Swat&apos;);" />
-                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_steel" style="width: 90%; height: 12%; background-image: resource(&apos;Thumbnails/Steel&apos;); align-items: stretch; align-self: auto; justify-content: flex-start; margin-top: 6px; margin-bottom: 6px; margin-right: 6px; margin-left: 6px;" />
-                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_business_girl" style="width: 90%; height: 12%; background-image: resource(&apos;Thumbnails/businessGirl&apos;); margin-top: 6px; margin-right: 6px; margin-bottom: 6px; margin-left: 6px;" />
-                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_dr" style="width: 90%; height: 12%; background-image: resource(&apos;Thumbnails/Dr&apos;); margin-top: 6px; margin-right: 6px; margin-bottom: 6px; margin-left: 6px;" />
-                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_solider" style="height: 12%; width: 90%; background-image: resource(&apos;Thumbnails/Solider&apos;); margin-top: 6px; margin-right: 6px; margin-bottom: 6px; margin-left: 6px;" />
-                <ui:Button text="Green Hat" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_green_hat" style="width: 90%; height: 12%;" />
-            </ui:VisualElement>
-            <ui:VisualElement name="visual_rep" style="flex-grow: 1; align-self: stretch; width: 30%;" />
-            <ui:VisualElement name="stats" style="flex-grow: 1; align-self: stretch; width: 30%; height: auto; align-items: stretch; justify-content: space-around;">
-                <ui:FloatField label="Health" value="42,2" name="fl_health" />
-                <ui:FloatField label="Weight" value="42,2" name="fl_weight" />
-                <ui:FloatField label="Strength" value="42,2" name="fl_strength" />
-                <ui:FloatField label="Stamina" value="42,2" name="fl_stamina" />
-                <ui:FloatField label="Stamina regen" value="42,2" name="fl_stamina_regen" />
-                <ui:FloatField label="Stamina speed" value="42,2" name="fl_stamina_speed" />
-                <ui:FloatField label="Speed" value="42,2" name="fl_speed" />
-                <ui:FloatField label="Acceleration" value="42,2" name="fl_acceleration" />
-                <ui:FloatField label="Running pct" value="42,2" name="fl_running_pct" />
-                <ui:FloatField label="Back move" value="42,2" name="fl_back_move" />
-                <ui:FloatField label="Aim" value="42,2" name="fl_aim" />
-                <ui:FloatField label="Recoil" value="42,2" name="fl_recoil" />
-                <ui:FloatField label="Reload speed" value="42,2" name="fl_reload" />
-                <ui:FloatField label="Vision" value="42,2" name="fl_vision" />
-                <ui:FloatField label="Injured penalty" value="42,2" name="fl_injured" />
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         engine="UnityEngine.UIElements"
+         editor="UnityEditor.UIElements"
+         noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+    <Style src="project://database/Assets/UIToolkit/ChoosePlayer.uss?fileID=7433441132597879392&amp;guid=82b70eb753ffc5e479eabab8fd538c88&amp;type=3#ChoosePlayer" />
+
+    <ui:VisualElement class="choose-root">
+        <ui:VisualElement class="topbar">
+            <ui:Label class="title" text="Survivors Revenge" />
+            <ui:VisualElement style="flex-direction:row; gap:8px;">
+                <ui:Button name="btn_choose_level" class="btn" text="Choose Level" />
+                <ui:Button name="btn_play" class="btn btn--primary" text="Play" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement style="flex-grow: 1;" />
-        <ui:IntegerField label="Weapon 1,2,3... (nema3)" value="1" name="int_weapon" style="align-self: center;" />
+
+        <ui:VisualElement class="row">
+            <ui:ScrollView name="choose_char" class="thumbs">
+                <ui:Button name="btn_jennifer" class="thumb" />
+                <ui:Button name="btn_swat" class="thumb" />
+                <ui:Button name="btn_steel" class="thumb" />
+                <ui:Button name="btn_business_girl" class="thumb" />
+                <ui:Button name="btn_dr" class="thumb" />
+                <ui:Button name="btn_solider" class="thumb" />
+                <ui:Button name="btn_green_hat" class="thumb" text="Green Hat" />
+            </ui:ScrollView>
+
+            <!-- Center: big preview (texture or 3D camera behind UI) -->
+            <ui:VisualElement name="visual_rep" class="preview" />
+
+<ui:VisualElement name="stats" class="stats">
+    <!-- REPLACE EVERYTHING INSIDE WITH THIS -->
+    <!-- Health -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Health" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_health_minus" class="step step--minus" text="−" />
+               <ui:FloatField name="fl_health"
+               class="num"
+               show-mixed-value="false"
+               is-delayed="false"
+               format-string="0.##" 
+               value="100"/>
+               <ui:Button name="btn_fl_health_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Weight -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Weight" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_weight_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_weight" class="num" format-string="0.#" />
+            <ui:Button name="btn_fl_weight_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Strength -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Strength" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_strength_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_strength" class="num" format-string="0.#" />
+            <ui:Button name="btn_fl_strength_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Stamina -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Stamina" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_stamina_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_stamina" class="num" />
+            <ui:Button name="btn_fl_stamina_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Stamina regen -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Stamina regen" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_stamina_regen_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_stamina_regen" class="num" />
+            <ui:Button name="btn_fl_stamina_regen_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Stamina speed -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Stamina speed" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_stamina_speed_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_stamina_speed" class="num" />
+            <ui:Button name="btn_fl_stamina_speed_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Speed -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Speed" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_speed_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_speed" class="num" />
+            <ui:Button name="btn_fl_speed_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Acceleration -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Acceleration" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_acceleration_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_acceleration" class="num" />
+            <ui:Button name="btn_fl_acceleration_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Running % -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Running %" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_running_pct_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_running_pct" class="num" />
+            <ui:Button name="btn_fl_running_pct_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Back move -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Back move" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_back_move_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_back_move" class="num" />
+            <ui:Button name="btn_fl_back_move_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Aim -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Aim" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_aim_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_aim" class="num" />
+            <ui:Button name="btn_fl_aim_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Recoil -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Recoil" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_recoil_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_recoil" class="num" />
+            <ui:Button name="btn_fl_recoil_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Reload speed -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Reload speed" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_reload_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_reload" class="num" />
+            <ui:Button name="btn_fl_reload_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Vision -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Vision" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_vision_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_vision" class="num" />
+            <ui:Button name="btn_fl_vision_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Injured penalty -->
+    <ui:VisualElement class="stat-row">
+        <ui:Label class="stat-name" text="Injured penalty" />
+        <ui:VisualElement class="stat-edit">
+            <ui:Button name="btn_fl_injured_minus" class="step step--minus" text="−" />
+            <ui:FloatField name="fl_injured" class="num" />
+            <ui:Button name="btn_fl_injured_plus"  class="step step--plus"  text="+" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <ui:VisualElement class="bottom">
+            <ui:IntegerField name="int_weapon" class="weapon-field" label="Weapon slot" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

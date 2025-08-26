@@ -7,17 +7,11 @@ using UnityEngine.UIElements;
 public class PreLoad : MonoBehaviour
 {
     // ---------- Static cache that survives scene load ----------
-    public static class Precache
-    {
-        // Keep strong refs so GC/UnloadUnusedAssets won’t evict them.
-        private static readonly Dictionary<string, Object> _cache = new();
+    [SerializeField] private bool smokeFollowsCamera = true;
+    [SerializeField] private float smokeDistance = 2.5f;   // how far in front of camera
+    [SerializeField] private Vector2 smokeScreenOffset = new Vector2(0f, -0.1f); // x,y in viewport (-0.1 puts it a bit lower)
 
-        public static bool Has(string key) => _cache.ContainsKey(key);
-        public static T Get<T>(string key) where T : Object => _cache.TryGetValue(key, out var o) ? o as T : null;
-        public static void Put(string key, Object obj) { if (obj) _cache[key] = obj; }
-        public static int Count => _cache.Count;
-    }
-    // Add these fields (top of class)
+
     [SerializeField] private float minShowTime = 2.0f;     // already there; increase to 2–3s
     [SerializeField] private HoldMode holdWhenReady = HoldMode.FixedSeconds;
     [SerializeField] private float readyHoldSeconds = 1.5f; // extra time AFTER loading is ready
@@ -38,7 +32,6 @@ public class PreLoad : MonoBehaviour
     [Tooltip("Resources path to a smoke/FX prefab. Leave empty to skip.")]
     [SerializeField] private string smokePrefabPath = "FX/Smoke";
     [SerializeField] private Vector3 smokeOffset = new(0, 0, 3);
-    [SerializeField] private bool smokeFollowsCamera = true;
 
     [Header("Pre-cache (background; nothing is shown)")]
     [Tooltip("Prefab IDs under Resources/Models/Weapons that should be preloaded and cached.")]
@@ -90,15 +83,16 @@ public class PreLoad : MonoBehaviour
         // Wait until async load reaches "ready" (0.9)
         while (op.progress < 0.9f)
         {
-            AnimateDots("Loading…");
+            float pct = Mathf.Clamp01(op.progress / 0.9f); // normalize 0..1
+            int dots = (int)((Time.unscaledTime * 3f) % 4f);
+            SetText($"Loading… {(int)(pct * 100f)}%{new string('.', dots)}");
             yield return null;
         }
 
-        // Ensure minimum visible time overall
         float tStart = Time.unscaledTime;
         while (Time.unscaledTime - tStart < minShowTime)
         {
-            AnimateDots("Loading…");
+            SetText("Loading… 100%");
             yield return null;
         }
 
@@ -114,9 +108,15 @@ public class PreLoad : MonoBehaviour
             while (t < readyHoldSeconds) { t += Time.unscaledDeltaTime; yield return null; }
         }
 
+        SetText("Loading… 100%");
+        yield return null;         // let UI paint once
+
         // (Optional) quick fade out so transition feels smooth
         yield return StartCoroutine(FadeOutUITK(0.25f));
 
+        SetText("Loading… 100%");
+        yield return null;           // let UI paint once
+                                     // optional fade...
         op.allowSceneActivation = true;
     }
     private IEnumerator FadeOutUITK(float duration)
@@ -211,30 +211,41 @@ public class PreLoad : MonoBehaviour
 
     private void SetText(string s)
     {
+        EnsureLabelHooked();            // <-- add this line
         if (_loadingLabel != null) _loadingLabel.text = s;
     }
-
     private void TrySpawnSmoke()
     {
-        Debug.Log("Trying to spawn smoke.");
         if (string.IsNullOrWhiteSpace(smokePrefabPath)) return;
 
-        var smoke = Resources.Load<GameObject>(smokePrefabPath);
-        if (!smoke) return;
+        var smokePrefab = Resources.Load<GameObject>(smokePrefabPath);
+        if (!smokePrefab) { Debug.LogWarning($"Smoke prefab not found at Resources/{smokePrefabPath}"); return; }
 
         var cam = Camera.main;
-        Vector3 spawnAt = transform.position + smokeOffset;
-        if (smokeFollowsCamera && cam)
-            spawnAt = cam.transform.position + cam.transform.forward * smokeOffset.z
-                      + cam.transform.right * smokeOffset.x
-                      + cam.transform.up * smokeOffset.y;
-
-        var inst = Instantiate(smoke, spawnAt, Quaternion.identity);
-        inst.name = "PreloadSmoke";
-        if (smokeFollowsCamera && cam)
+        if (!cam)
         {
-            // Parent to camera so it stays on screen subtly
-            inst.transform.SetParent(cam.transform, worldPositionStays: true);
+            // Fallback: just drop at origin
+            Instantiate(smokePrefab, transform.position + Vector3.forward * 3f, Quaternion.identity);
+            return;
+        }
+
+        // Place smoke at a specific viewport point in front of the camera
+        // Viewport (0.5,0.5) = center; add offset to nudge it
+        var vp = new Vector3(0.5f + smokeScreenOffset.x, 0.5f + smokeScreenOffset.y, smokeDistance);
+        var worldPos = cam.ViewportToWorldPoint(vp);
+
+        var inst = Instantiate(smokePrefab, worldPos, Quaternion.LookRotation(cam.transform.forward));
+
+        if (smokeFollowsCamera)
+        {
+            // Parent (no world-space baking) so it moves with the camera
+            inst.transform.SetParent(cam.transform, worldPositionStays: false);
+            inst.transform.localPosition = new Vector3(0f + smokeScreenOffset.x * smokeDistance,
+                                                       0f + smokeScreenOffset.y * smokeDistance,
+                                                       smokeDistance);
+            inst.transform.localRotation = Quaternion.identity; // face same direction as camera
+                                                                // Optional: scale normalization if the prefab is huge/tiny
+                                                                // inst.transform.localScale = Vector3.one;
         }
     }
     private (List<ResourceRequest> reqs, List<string> keys) KickAllPreloads()
@@ -284,6 +295,14 @@ public class PreLoad : MonoBehaviour
 
         // If this object only exists to preload, you can self‑destruct here:
         Destroy(gameObject);
+    }
+    private void EnsureLabelHooked()
+    {
+        if (_loadingLabel != null) return;
+
+        if (!uiDocument) uiDocument = FindFirstObjectByType<UIDocument>();
+        if (uiDocument != null)
+            _loadingLabel = uiDocument.rootVisualElement?.Q<Label>(loadingLabelName);
     }
 }
 // ---------- Safe, minimal cache (inside PreLoad) ----------

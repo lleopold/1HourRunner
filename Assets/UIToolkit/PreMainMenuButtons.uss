@@ -1,0 +1,59 @@
+/* Root positions children bottom-left */
+.screen-root {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: flex-end;   /* bottom */
+    align-items: flex-start;     /* left */
+    padding: 40px;               /* margin from edges */
+    background-color: rgba(0,0,0,0); /* fully transparent behind */
+}
+
+/* Buttons keep the modern style */
+.btn {
+    height: 44px;
+    margin-top: 10px;
+    padding: 0 16px;
+    border-radius: 10px;
+    background-color: rgba(33,38,46,0.95);
+    color: #D6DFEA;
+    font-size: 16px;
+    transition-property: background-color, translate, scale;
+    transition-duration: 0.12s, 0.12s, 0.12s;
+    transition-timing-function: ease, ease, ease;
+    transition-delay: 0s, 0s, 0s;
+}
+
+.btn:hover { translate: 0px -1px; }
+.btn:active { translate: 0px 0px; scale: 0.98; }
+
+/* Variants */
+.btn--primary {
+    background-color: #5EE1A5;
+    color: #101317;
+    font-weight: bold;
+}
+.btn--primary:hover { background-color: #6cf0b3; }
+.btn--primary:active { background-color: #47c98f; }
+
+.btn--ghost {
+    background-color: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #9AA4B2;
+}
+.btn--ghost:hover { background-color: rgba(255,255,255,0.05); color: #CFD6E1; }
+
+
+/* FloatField sizing + make the inner text visible (no ellipsis) */
+.num {
+    width: 96px;        /* was too narrow; give it room */
+    min-width: 96px;
+}
+
+.num .unity-text-input {
+    color: #E6EDF6;
+    background-color: transparent;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;   /* stop showing … */
+    unity-font-style: normal;
+}
