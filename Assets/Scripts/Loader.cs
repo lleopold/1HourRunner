@@ -1,7 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,7 +10,8 @@ public static class Loader
         Level_1,
         Loading,
         ChoosePlayer,
-        ChooseWeapon
+        ChooseWeapon,
+        ChooseLevel
     }
     private class LoadingMonoBehaviour : MonoBehaviour { }
     private static Action OnLoaderCallback;

@@ -1,0 +1,22 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UIToolkit/ChooseLevel.uss?fileID=7433441132597879392&amp;guid=a622e1076cecd6f499f2868bff6e9ca8&amp;type=3#ChooseLevel" />
+    <ui:VisualElement name="level-screen" class="layout">
+        <ui:VisualElement name="levels-panel">
+            <ui:Label text="Choose Level" class="title" />
+            <ui:ScrollView name="levels-list" vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" />
+        </ui:VisualElement>
+        <ui:VisualElement name="preview-area">
+            <ui:Label text="Preview" class="subtitle" />
+            <ui:Image name="preview-image" />
+            <ui:VisualElement name="preview-rt-surface" />
+            <ui:VisualElement name="preview-meta">
+                <ui:Label name="preview-title" text="-" class="preview-title" />
+                <ui:Label name="preview-desc" text="-" class="preview-desc" />
+            </ui:VisualElement>
+            <ui:VisualElement name="preview-actions">
+                <ui:Button name="btn_play_level" text="Play" />
+                <ui:Button name="btn_back" text="Back" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

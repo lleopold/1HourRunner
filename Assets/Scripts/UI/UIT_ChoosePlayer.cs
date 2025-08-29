@@ -38,7 +38,6 @@ public class UIT_ChoosePlayer : MonoBehaviour
     private Button _btn_dr;
     private Button _btn_solider;
     private Button _btn_green_hat_basic;
-    private Button _btn_play;
     private Button _btn_choose_level;
 
     private readonly Dictionary<string, Label> _statLabels = new();
@@ -96,7 +95,6 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _btn_steel = _root.Q<Button>("btn_steel");
         _btn_solider = _root.Q<Button>("btn_solider");
         _btn_green_hat_basic = _root.Q<Button>("btn_green_hat");
-        _btn_play = _root.Q<Button>("btn_play");
         _btn_business_girl.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.BusinessGirl));
         _btn_dr.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Dr));
         _btn_jennifer.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Jennifer));
@@ -104,7 +102,6 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _btn_steel.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Jackson_Steel_Reynolds));
         _btn_solider.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Solider));
         _btn_green_hat_basic.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.GreenHat_basic));
-        _btn_play.RegisterCallback<ClickEvent>(ev => ClickPlay());
 
 
 
@@ -124,8 +121,8 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _fl_vision.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.vision = ev.newValue);
         _fl_injured_penalty.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.InjuredPenalty = ev.newValue);
 
-        _btn_choose_level = _root.Q<Button>("btn_choose_level");
-        _btn_choose_level?.RegisterCallback<ClickEvent>(ev => ClickChooseLevel());
+        _btn_choose_level = _root.Q<Button>("btn_choose_weapon");
+        _btn_choose_level?.RegisterCallback<ClickEvent>(ev => ClickChooseWeapon());
 
         LoadSettingsToUI();
 
@@ -160,13 +157,13 @@ public class UIT_ChoosePlayer : MonoBehaviour
         plus.RegisterCallback<ClickEvent>(_ => ClampAndSet(ff.value + step));
     }
 
-    private void ClickChooseLevel()
+    private void ClickChooseWeapon()
     {
         // If you have a dedicated scene picker:
         // Loader.Load(Loader.Scene.LevelSelect);
 
         // Temporary: jump to Level1 directly (rename to your scene):
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Level1");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("ChooseWeapon");
     }
 
     private static GameObject LoadModel()

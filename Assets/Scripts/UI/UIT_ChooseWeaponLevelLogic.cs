@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
-using static Unity.Burst.Intrinsics.Arm;
 
 public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
 {
@@ -62,6 +61,9 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
         _critical_chance = _root.Q<FloatField>("fl_critical_chance");
         _stagger = _root.Q<FloatField>("fl_stagger");
         _recoil = _root.Q<FloatField>("fl_recoil");
+
+        var btnChooseLevel = _root.Q<Button>("btn_choose_level");
+        btnChooseLevel?.RegisterCallback<ClickEvent>(_ => Loader.Load(Loader.Scene.ChooseLevel));
 
         _btn_WPN_AP85 = _root.Q<Button>("btn_WPN_AP85");
         _btn_WPN_AP85.text = "AP85";
@@ -325,7 +327,11 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
             }
         });
     }
-
+    private void ClickChooseLevel()
+    {
+        Loader.Load(Loader.Scene.ChooseLevel);
+        // or SceneManager.LoadScene("ChooseLevel");
+    }
 }
 
 public enum WeaponEnum

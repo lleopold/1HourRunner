@@ -15,20 +15,24 @@
                 <ui:Button text="MK18" name="btn_mk18" />
                 <ui:Button text="P350" name="btn_p350" />
             </ui:ScrollView>
-<ui:VisualElement name="ws_right" style="flex-direction: column; flex-grow: 1; gap: 8px;">
-    <!-- TOP: preview takes 50% -->
-    <ui:VisualElement name="ws_preview"
-        style="flex-basis: 50%; flex-grow: 0; flex-shrink: 0; position: relative; background-color: rgba(0, 0, 0, 0); -unity-picking-mode: ignore;" />
+            <ui:VisualElement name="ws_right" style="flex-direction: column; flex-grow: 1; gap: 8px;">
+                    <!-- TOP: preview takes 50% -->
+                    <ui:VisualElement name="ws_preview"
+                    style="flex-basis: 50%; flex-grow: 0; flex-shrink: 0; position: relative; background-color: rgba(0, 0, 0, 0); -unity-picking-mode: ignore;" />
 
-    <!-- BOTTOM: stats take the rest -->
-    <ui:VisualElement name="ws_stats"
-        style="flex-grow: 1; flex-direction: row; justify-content: space-around; padding: 8px;">
-        <ui:Label text="Damage: 42" />
-        <ui:Label text="Fire rate: 5.6" />
-        <ui:Label text="Reload: 1.8s" />
-        <ui:Label text="Clip: 30" />
-    </ui:VisualElement>
-</ui:VisualElement>
+                    <!-- BOTTOM: stats take the rest -->
+                    <ui:VisualElement name="ws_stats"
+                        style="flex-grow: 1; flex-direction: row; justify-content: space-around; padding: 8px;">
+                        <ui:Label text="Damage: 42" />
+                        <ui:Label text="Fire rate: 5.6" />
+                        <ui:Label text="Reload: 1.8s" />
+                        <ui:Label text="Clip: 30" />
+                    </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
+        <ui:VisualElement name="ws_footer" style="flex-direction: row; justify-content: left; padding: 8px;">
+            <ui:Button text="Choose Level" name="btn_choose_level" />
+        </ui:VisualElement>
+
     </ui:VisualElement>
 </ui:UXML>
