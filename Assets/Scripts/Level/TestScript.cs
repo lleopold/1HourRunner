@@ -1,11 +1,16 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Splines;
 
 public class TestScript : MonoBehaviour
 {
+    // Add near your spawner fields
+    [SerializeField] float minFromPlayer = 12f;
+    [SerializeField] float maxFromPlayer = 28f;
+    [SerializeField] LayerMask containerMask;     // set to Containers layer in Inspector
+    [SerializeField] float navSampleMax = 6f;     // how far to search for nearest NavMesh point
+    [SerializeField] int maxTries = 20;
+
     public float spawnRadius = 5f;   // Radius around the player to spawn zombies
 
     public GameObject zombiePrefab;
@@ -51,44 +56,66 @@ public class TestScript : MonoBehaviour
     public void SpawnZombies()
     {
         string zombiePrefabName = zombiePrefabNames[Random.Range(0, zombiePrefabNames.Count)];
-        EnemyConfigManager configManager = Resources.Load<EnemyConfigManager>("Config/Enemy/EnemyConfigManager"); // Load the config manager
-        EnemyConfig enemyConfig = configManager.GetConfig(zombiePrefabName);
-        GameObject zombiePrefab = Resources.Load<GameObject>("Enemies/" + zombiePrefabName);
-        if (zombiePrefab == null)
+        var configManager = Resources.Load<EnemyConfigManager>("Config/Enemy/EnemyConfigManager");
+        var enemyConfig = configManager.GetConfig(zombiePrefabName);
+        var prefab = enemyConfig.prefab ?? Resources.Load<GameObject>("Enemies/" + zombiePrefabName);
+        if (!prefab) { Debug.LogError($"Zombie prefab not found: {zombiePrefabName}"); return; }
+
+        var player = GameObject.Find("Player");
+        var cam = Camera.main;
+        if (!player || !cam) return;
+
+        if (!TryGetSpawnPoint(player.transform.position, cam, out var pos))
         {
-            Debug.LogError("Zombie prefab not found: " + zombiePrefabName);
-            return;
+            // fallback: spawn behind camera on NavMesh
+            var back = cam.transform.position - cam.transform.forward * 10f;
+            if (!UnityEngine.AI.NavMesh.SamplePosition(back, out var hit, navSampleMax, UnityEngine.AI.NavMesh.AllAreas))
+                return;
+            pos = hit.position;
         }
-        // Get the position of the player
-        GameObject player = GameObject.Find("Player");
-        GameObject cam = Camera.main.gameObject;
-        Vector3 playerPosition = player.transform.position;
 
-        // Calculate a random position outside the camera's view
-        float cameraHeight = cam.GetComponent<Camera>().orthographicSize;
-        float cameraWidth = cameraHeight * cam.GetComponent<Camera>().aspect;
-        float spawnOffset = spawnRadius + Mathf.Max(cameraWidth, cameraHeight);
-
-        // Generate random offsets for x and z coordinates
-        float randomX = Random.Range(-spawnOffset, spawnOffset);
-        float randomZ = Random.Range(-spawnOffset, spawnOffset);
-
-        // Instantiate the zombie at the player's position with the random offset
-        Vector3 zombiePosition = new Vector3(playerPosition.x + randomX, 0f, playerPosition.z + randomZ);
-
-        // Instantiate the zombie prefab
-        if (enemyConfig.prefab == null)
-        {
-            enemyConfig.prefab = Resources.Load<GameObject>("Enemies/" + zombiePrefabName);
-            return;
-        }
-        GameObject newZombie = Instantiate(enemyConfig.prefab, zombiePosition, Quaternion.identity);
-        newZombie.GetComponent<Enemy>()._player = player;
-        newZombie.GetComponentInChildren<BillbBoard>().cam = cam.transform;
+        var go = Instantiate(prefab, pos, Quaternion.identity);
+        go.GetComponent<Enemy>()._player = player;
+        go.GetComponentInChildren<BillbBoard>().cam = cam.transform;
         DataHolder.EnemiesSpawned++;
-        newZombie.name = zombiePrefabName + DataHolder.EnemiesSpawned.ToString();
-        newZombie.tag = "Zombie";
-        newZombie.active = true;
+        go.name = zombiePrefabName + DataHolder.EnemiesSpawned;
+        go.tag = "Zombie";
+
+        // ensure agent is validly placed
+        var agent = go.GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (agent) agent.Warp(pos);
+    }
+    bool TryGetSpawnPoint(Vector3 playerPos, Camera cam, out Vector3 spawnPos)
+    {
+        spawnPos = default;
+        for (int i = 0; i < maxTries; i++)
+        {
+            // pick random point in ring around player
+            float r = Random.Range(minFromPlayer, maxFromPlayer);
+            float ang = Random.value * Mathf.PI * 2f;
+            Vector3 p = playerPos + new Vector3(Mathf.Cos(ang) * r, 2f, Mathf.Sin(ang) * r); // y up a bit
+
+            // project to NavMesh
+            if (!UnityEngine.AI.NavMesh.SamplePosition(p, out var hit, navSampleMax, UnityEngine.AI.NavMesh.AllAreas))
+                continue;
+
+            Vector3 candidate = hit.position;
+
+            // not inside a container (uses container colliders)
+            if (Physics.CheckSphere(candidate + Vector3.up * 0.5f, 0.5f, containerMask, QueryTriggerInteraction.Ignore))
+                continue;
+
+            // path to player must exist
+            var path = new UnityEngine.AI.NavMeshPath();
+            if (!UnityEngine.AI.NavMesh.CalculatePath(candidate, playerPos, UnityEngine.AI.NavMesh.AllAreas, path))
+                continue;
+            if (path.status != UnityEngine.AI.NavMeshPathStatus.PathComplete)
+                continue;
+
+            spawnPos = candidate;
+            return true;
+        }
+        return false;
     }
 
 

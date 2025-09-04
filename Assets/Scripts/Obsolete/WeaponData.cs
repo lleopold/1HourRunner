@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public class WeaponData
 {
     public string Name { get; set; }
@@ -9,7 +5,6 @@ public class WeaponData
     /// <summary>
     /// Name of settings file
     /// </summary>
-    public string SettingsName { get; set; }
     public float Damage { get; set; }
     public float DamageFluctuation { get; set; }
     public float ClipSize { get; set; }

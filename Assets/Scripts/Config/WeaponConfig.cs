@@ -8,7 +8,6 @@ public class WeaponConfig : ScriptableObject
     /// <summary>
     /// Name of settings file
     /// </summary>
-    public string SettingsName;
     public float Damage;
     public float FireRate;//How many shots per second
     public float DamageFluctuation;

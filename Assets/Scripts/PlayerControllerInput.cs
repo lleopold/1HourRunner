@@ -1,17 +1,13 @@
 ﻿using Assets.Scripts.Game;
-using Assets.Scripts.HealthSystem;
 using CodeMonkey.HealthSystemCM;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.UIElements;
-using UnityEngine.Windows;
 using static StickDirectionAnalyzer;
 
 [RequireComponent(typeof(CharacterController))]
@@ -20,6 +16,17 @@ using static StickDirectionAnalyzer;
 
 public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
 {
+    public enum PowerupType { Health, Reload, Running, ClipSize /* more later */ }
+    public enum Rarity { Common, Uncommon, Rare, Epic, Legendary }
+    public struct PowerupOffer
+    {
+        public PowerupType type;
+        public Rarity rarity;
+        public string title;
+        public string description;
+        public string iconPath;
+    }
+
     [SerializeField] private float _sweepDuration = 2f;
     [SerializeField] private float _sweepLineWidthPct = 0.05f;
     [SerializeField] private float _sweepTrailWidthPct = 0.6f;
@@ -1386,11 +1393,14 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
             GameObject levelUpPrefab = Resources.Load<GameObject>("LevelUp/UILevelUp");
             //_LevelUpGameObject = Instantiate(levelUpPrefab, transform.position + new Vector3(0f, 1f, 0f), Quaternion.identity);
             var v = Instantiate(levelUpPrefab, transform.position + new Vector3(0f, 1f, 0f), Quaternion.identity);
-            _uiT_LevelUp = FindObjectOfType<UIT_LevelUp>();
-            _uiT_LevelUp._root.visible = true;
-            _uiT_LevelUp.enabled = true;
-            _uiT_LevelUp._root.SetEnabled(true);
-            //PauseGame(true);
+            _uiT_LevelUp = FindFirstObjectByType<UIT_LevelUp>();
+            //_uiT_LevelUp._root.visible = true;
+            //_uiT_LevelUp.enabled = true;
+            //_uiT_LevelUp._root.SetEnabled(true);
+            PauseGame(true);
+            //_uiT_LevelUp.SetOffers(GenerateOffers());
+            //_uiT_LevelUp = FindObjectOfType<UIT_LevelUp>();
+            _uiT_LevelUp.SetOffers(_uiT_LevelUp.GenerateDefaultOffers());
         }
         Debug.Log("Player received " + coinValue + " coins");
     }
