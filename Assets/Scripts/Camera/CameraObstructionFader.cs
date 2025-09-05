@@ -20,6 +20,15 @@ public class CameraObstructionFader : MonoBehaviour
     [Header("Debug / Forcing")]
     public bool forceSwap; // Force using fallback swap path even if material seems editable
 
+    [Header("Filtering")]
+    [Tooltip("Also require renderer to overlap player's screen position (tightens lateral filtering).")]
+    public bool useScreenSpaceFilter = true;
+    [Range(0.001f, 0.25f)]
+    [Tooltip("Screen-space padding around player viewport point (0..1 units).")]
+    public float screenPadding = 0.06f;
+    [Tooltip("If true, only fade renderers whose own collider was hit (no parent/child expansion).")]
+    public bool limitToDirectHits = false;
+
     void OnEnable() => StartCoroutine(BindPlayerByTag());
     IEnumerator BindPlayerByTag()
     {
@@ -52,15 +61,15 @@ public class CameraObstructionFader : MonoBehaviour
             public float zwrite;
             public int srcBlend;
             public int dstBlend;
-            public float alphaClip; // _AlphaClip toggle (bool stored as float) or -1 if not present
+            public float alphaClip;
             public bool kwTransparent, kwAlphaPremul, kwAlphaTest;
         }
         public readonly List<MatState> originalStates = new();
 
         // Swap state
-        public Material[] originalSharedMats; // for full restore
+        public Material[] originalSharedMats;
         public bool usingSwap;
-        public Material[] swapMats;           // URP/Lit Transparent clones
+        public Material[] swapMats;
 
         public static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
         public static readonly int StdColor = Shader.PropertyToID("_Color");
@@ -71,8 +80,8 @@ public class CameraObstructionFader : MonoBehaviour
         public static readonly int Blend = Shader.PropertyToID("_Blend");
         public static readonly int SrcBlend = Shader.PropertyToID("_SrcBlend");
         public static readonly int DstBlend = Shader.PropertyToID("_DstBlend");
-        public static readonly int AlphaClip = Shader.PropertyToID("_AlphaClip");         // bool (float)
-        public static readonly int Cutoff = Shader.PropertyToID("_Cutoff");               // threshold (leave as-is)
+        public static readonly int AlphaClip = Shader.PropertyToID("_AlphaClip");
+        public static readonly int Cutoff = Shader.PropertyToID("_Cutoff");
     }
 
     readonly Dictionary<Renderer, Faded> map = new();
@@ -81,7 +90,6 @@ public class CameraObstructionFader : MonoBehaviour
 
     void OnDisable()
     {
-        // Ensure full restore if object disabled
         foreach (var kv in map)
         {
             var f = kv.Value;
@@ -92,7 +100,6 @@ public class CameraObstructionFader : MonoBehaviour
         toRemove.Clear();
     }
 
-    // Optional external trigger if materials changed at runtime
     public void ForceRefresh()
     {
         foreach (var kv in map)
@@ -118,8 +125,12 @@ public class CameraObstructionFader : MonoBehaviour
         if (dist <= 0.001f) return;
 
         var hits = Physics.SphereCastAll(camPos, sphereRadius, dir.normalized, dist, occluders, QueryTriggerInteraction.Ignore);
-        GatherFrameRenderers(hits, frame);
-        FilterBetweenCameraAndTarget(frame, transform.position, target.position, sphereRadius);
+        if (limitToDirectHits)
+            GatherDirectRendererHits(hits, frame);
+        else
+            GatherFrameRenderers(hits, frame);
+
+        FilterBetweenCameraAndTarget(frame, camPos, target.position, sphereRadius);
 
         if (verboseLogs)
             Debug.Log($"CameraObstructionFader: frame renderer count={frame.Count}");
@@ -206,16 +217,14 @@ public class CameraObstructionFader : MonoBehaviour
         }
     }
 
-    // --- Ensure the renderer can show transparency, else swap to URP/Lit Transparent ---
+    // --- Ensure renderer transparency (unchanged main logic) ---
     void EnsureTransparentCapable(Faded f)
     {
-        // If already assigned swap mats (e.g. re-entry), skip
         if (f.usingSwap) return;
 
-        var instancedMats = f.r.materials; // force instancing
+        var instancedMats = f.r.materials;
         bool attemptInPlace = !forceSwap;
 
-        // Require URP-style surface property OR URP shader name heuristic, otherwise prefer swap
         if (attemptInPlace)
         {
             for (int i = 0; i < instancedMats.Length; i++)
@@ -240,7 +249,6 @@ public class CameraObstructionFader : MonoBehaviour
             return;
         }
 
-        // Fallback / swap path
         if (verboseLogs) Debug.Log($"CameraObstructionFader: Falling back to swap for {f.r.name}");
         if (!transparentFallback)
             transparentFallback = Shader.Find("Universal Render Pipeline/Lit");
@@ -332,7 +340,6 @@ public class CameraObstructionFader : MonoBehaviour
             m.renderQueue = (int)RenderQueue.Transparent;
         }
 
-        // Verify
         for (int i = 0; i < mats.Length; i++)
         {
             var m = mats[i];
@@ -340,7 +347,6 @@ public class CameraObstructionFader : MonoBehaviour
             if (!IsRuntimeTransparent(m))
             {
                 if (verboseLogs) Debug.Log($"CameraObstructionFader: In-place verification failed on {m.name}; will swap.");
-                // Restore immediately before swap
                 RestoreRenderer(f);
                 return false;
             }
@@ -371,7 +377,6 @@ public class CameraObstructionFader : MonoBehaviour
             return;
         }
 
-        // In-place restore of original render states
         for (int i = 0; i < f.originalStates.Count; i++)
         {
             var st = f.originalStates[i];
@@ -394,7 +399,7 @@ public class CameraObstructionFader : MonoBehaviour
         f.originalStates.Clear();
     }
 
-    // ---- Utility: collect Renderers and keep only those between camera and player ----
+    // ---- Gatherers ----
     void GatherFrameRenderers(RaycastHit[] hits, List<Renderer> outList)
     {
         var seen = new HashSet<Renderer>();
@@ -413,27 +418,123 @@ public class CameraObstructionFader : MonoBehaviour
         }
     }
 
+    // Direct only (no parent/child expansion)
+    void GatherDirectRendererHits(RaycastHit[] hits, List<Renderer> outList)
+    {
+        var seen = new HashSet<Renderer>();
+        for (int i = 0; i < hits.Length; i++)
+        {
+            var r = hits[i].collider.GetComponent<Renderer>();
+            if (r && seen.Add(r)) outList.Add(r);
+        }
+    }
+
+    // ---- Improved filtering between camera and target ----
     void FilterBetweenCameraAndTarget(List<Renderer> list, Vector3 camPos, Vector3 tgtPos, float radius)
     {
-        var dir = tgtPos - camPos;
-        float dist = dir.magnitude;
-        if (dist <= 0f) { list.Clear(); return; }
-        Vector3 dn = dir / dist;
+        if (list.Count == 0) return;
+
+        Vector3 seg = tgtPos - camPos;
+        float segLen = seg.magnitude;
+        if (segLen < 0.0001f) { list.Clear(); return; }
+        Vector3 segDir = seg / segLen;
+        Camera cam = useScreenSpaceFilter ? (GetComponent<Camera>() ?? Camera.main) : null;
+        Vector3 targetViewport = Vector3.zero;
+        if (useScreenSpaceFilter && cam)
+        {
+            targetViewport = cam.WorldToViewportPoint(tgtPos);
+            if (targetViewport.z <= 0f) { list.Clear(); return; }
+        }
+
+        float radiusSqr = radius * radius;
 
         for (int i = list.Count - 1; i >= 0; i--)
         {
             var r = list[i];
             if (!r) { list.RemoveAt(i); continue; }
-            float t = Vector3.Dot(r.bounds.center - camPos, dn);
-            if (t < 0f || t > dist) { list.RemoveAt(i); continue; }
-            Vector3 p = camPos + dn * t;
-            if (DistancePointToBounds(p, r.bounds) > radius) list.RemoveAt(i);
+            Bounds b = r.bounds;
+
+            // Depth gate: any part of bounds must lie in front of camera and closer than target
+            float frontT = Vector3.Dot((b.center - b.extents) - camPos, segDir);
+            float backT = Vector3.Dot((b.center + b.extents) - camPos, segDir);
+            if (backT < 0f || frontT > segLen)
+            {
+                list.RemoveAt(i);
+                continue;
+            }
+
+            // Precise capsule distance test (segment cam->target, radius)
+            float distSqr = CapsuleDistanceToBoundsSqr(camPos, tgtPos, b);
+            if (distSqr > radiusSqr)
+            {
+                list.RemoveAt(i);
+                continue;
+            }
+
+            // Optional screen-space overlap (reduces lateral false positives)
+            if (useScreenSpaceFilter && cam)
+            {
+                if (!BoundsOverlapsPlayerViewport(b, cam, targetViewport, screenPadding))
+                {
+                    list.RemoveAt(i);
+                }
+            }
         }
     }
 
-    static float DistancePointToBounds(Vector3 p, Bounds b)
+    // Returns squared distance from a bounds to a segment (approximates capsule test)
+    static float CapsuleDistanceToBoundsSqr(Vector3 a, Vector3 b, Bounds bounds)
     {
-        Vector3 cp = b.ClosestPoint(p);
-        return Vector3.Distance(p, cp);
+        // Get closest point on segment to bounds center first (fast reject)
+        Vector3 seg = b - a;
+        float len = seg.magnitude;
+        if (len < 1e-6f) return (bounds.ClosestPoint(a) - a).sqrMagnitude;
+        Vector3 dir = seg / len;
+
+        // Clamp t by projecting bounds center
+        float t = Vector3.Dot(bounds.center - a, dir);
+        t = Mathf.Clamp(t, 0f, len);
+        Vector3 closest = a + dir * t;
+
+        // Real closest point from segment to bounds: approach by clamping each axis
+        // We can sample the actual closest point on bounds to segment closest point
+        Vector3 p = bounds.ClosestPoint(closest);
+        return (p - closest).sqrMagnitude;
+    }
+
+    bool BoundsOverlapsPlayerViewport(Bounds b, Camera cam, Vector3 playerVp, float pad)
+    {
+        // Sample 8 corners in viewport
+        Vector3 c = b.center;
+        Vector3 e = b.extents;
+        Vector3[] corners =
+        {
+            c + new Vector3( e.x,  e.y,  e.z),
+            c + new Vector3( e.x,  e.y, -e.z),
+            c + new Vector3( e.x, -e.y,  e.z),
+            c + new Vector3( e.x, -e.y, -e.z),
+            c + new Vector3(-e.x,  e.y,  e.z),
+            c + new Vector3(-e.x,  e.y, -e.z),
+            c + new Vector3(-e.x, -e.y,  e.z),
+            c + new Vector3(-e.x, -e.y, -e.z),
+        };
+
+        float minX = 10f, minY = 10f, minZ = float.MaxValue;
+        float maxX = -10f, maxY = -10f, maxZ = float.MinValue;
+
+        for (int i = 0; i < corners.Length; i++)
+        {
+            var vp = cam.WorldToViewportPoint(corners[i]);
+            if (vp.z <= 0f) continue; // behind camera
+            minX = Mathf.Min(minX, vp.x); maxX = Mathf.Max(maxX, vp.x);
+            minY = Mathf.Min(minY, vp.y); maxY = Mathf.Max(maxY, vp.y);
+            minZ = Mathf.Min(minZ, vp.z); maxZ = Mathf.Max(maxZ, vp.z);
+        }
+
+        if (maxX < 0f || minX > 1f || maxY < 0f || minY > 1f) return false; // completely off screen
+        if (minZ >= playerVp.z) return false; // entirely behind player depth
+
+        return !(maxX < playerVp.x - pad || minX > playerVp.x + pad ||
+                 maxY < playerVp.y - pad || minY > playerVp.y + pad);
     }
 }
