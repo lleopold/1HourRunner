@@ -1,6 +1,6 @@
 #if (UNITY_EDITOR)
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace HP.Generics
 {
@@ -86,7 +86,7 @@ namespace HP.Generics
                 grpFolder.transform.SetAsLastSibling();
             }
 
-                Selection.activeObject = grpFolder;
+            Selection.activeObject = grpFolder;
             #endregion
         }
 
@@ -112,7 +112,7 @@ namespace HP.Generics
             else if (menuCommand.context == Selection.objects[0])
                 if (EditorUtility.DisplayDialog("This action is not possible", "Select at least 2 objects to create a group", "Continue")) { }
 
-          
+
             #endregion
         }
 
