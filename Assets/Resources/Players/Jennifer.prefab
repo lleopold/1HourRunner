@@ -81,6 +81,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: cc0aaf444faf6d94f8747143c250d619, type: 3}
       insertIndex: -1
       addedObject: {fileID: -2837873646160745933}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: cc0aaf444faf6d94f8747143c250d619, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6438256158345320241}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: cc0aaf444faf6d94f8747143c250d619, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8033307405867065435}
   m_SourcePrefab: {fileID: 100100000, guid: cc0aaf444faf6d94f8747143c250d619, type: 3}
 --- !u!1 &1928796354353557095 stripped
 GameObject:
@@ -102,7 +108,6 @@ CharacterController:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -112,7 +117,7 @@ CharacterController:
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.91, z: 0}
+  m_Center: {x: 0, y: 1.03, z: 0}
 --- !u!114 &-6830081803549112916
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -125,17 +130,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f28a204c2f1f5f94d96d3f8a173f78b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 5
-  _rotationSpeed: 500
-  _velocity: 5
-  _jumpPower: 3
-  _maxNumberOfJumps: 3
-  movement:
-    isSprinting: 0
-    speed: 5
-    multiplier: 1
-    acceleration: 1
-    currentSpeed: 0
+  _sweepDuration: 2
+  _sweepLineWidthPct: 0.05
+  _sweepTrailWidthPct: 0.6
+  _sweepLineAlpha: 3
+  _sweepTrailAlpha: 0.05
+  _sweepPauseDuration: 1
+  _sweepColor: {r: 0, g: 1, b: 0, a: 1}
+  _resolution: 30
+  _outerRadius: 10
+  _pointyTipFactor: 0.25
+  baseWidth: 0.045
+  scrollSpeed: 1.6
+  pulseSpeed: 2.2
+  pulseMin: 0.85
+  pulseMax: 1.15
+  laserColor: {r: 1, g: 0.2, b: 0.05, a: 1}
+  emissionBase: 1.4
+  emissionPulse: 1
+  aimLinePixels: 0
+  minWorldWidth: 0.02
+  maxWorldWidth: 0.25
+  laserSmokePrefabPath: VFX/LaserSmoke
+  _muzzleFlash: {fileID: 0}
+  _impactEffect: {fileID: 0}
+  lineRendererLeft: {fileID: 0}
+  lineRendererRight: {fileID: 0}
+  baseRadius: 2
+  lengthMultiplier: 3
+  maxAngle: 90
+  minAngle: 0.1
+  innerRadius: 1
+  _aimingType: 0
 --- !u!65 &-2837873646160745933
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -157,3 +183,59 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &6438256158345320241
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928796354353557095}
+  m_Mesh: {fileID: 0}
+--- !u!23 &8033307405867065435
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928796354353557095}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}

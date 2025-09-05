@@ -172,7 +172,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
         {
             Destroy(GameObject.Find("PresentedModel"));
         }
-        GameObject model = Resources.Load<GameObject>("Models/" + DataHolder.ChosenPlayer.ToString() + "_model");
+        GameObject model = Resources.Load<GameObject>("Models/Player/" + DataHolder.ChosenPlayer.ToString() + "_model");
         GameObject pos = GameObject.Find("CharPositionSpot");
         GameObject character = Instantiate(model, pos.transform.position, Quaternion.identity);
         character.transform.Rotate(0f, -180f, 0f);
