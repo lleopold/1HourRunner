@@ -119,7 +119,7 @@ public class CameraObstructionFader : MonoBehaviour
 
         var hits = Physics.SphereCastAll(camPos, sphereRadius, dir.normalized, dist, occluders, QueryTriggerInteraction.Ignore);
         GatherFrameRenderers(hits, frame);
-        //FilterBetweenCameraAndTarget(frame, transform.position, target.position, sphereRadius);
+        FilterBetweenCameraAndTarget(frame, transform.position, target.position, sphereRadius);
 
         if (verboseLogs)
             Debug.Log($"CameraObstructionFader: frame renderer count={frame.Count}");
