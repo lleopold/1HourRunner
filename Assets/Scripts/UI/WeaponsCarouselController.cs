@@ -43,14 +43,20 @@ public class WeaponsCarouselController : MonoBehaviour
     private bool _dragging;
     private Vector3 _lastPointer;
 
-    // ----- Data (all in one file) -----
+    // New: stat fields (optional)
+    private FloatField _fDamage, _fFireRate, _fDamageFluct, _fClip, _fPrecision,
+                       _fReload, _fSimul, _fCrit, _fStagger, _fRecoil;
+
+    // Optional: external observers
+    public static event System.Action<WeaponEnum> WeaponChanged;
+
     public enum Cat { Pistols, SMG, Rifles, Shotguns, Snipers }
     private static readonly Cat[] Order = { Cat.Pistols, Cat.SMG, Cat.Rifles, Cat.Shotguns, Cat.Snipers };
 
     private struct WeaponDef
     {
-        public string id;      // internal/model id (also prefab name)
-        public string display; // button label
+        public string id;
+        public string display;
         public WeaponDef(string id, string display) { this.id = id; this.display = display; }
     }
 
@@ -94,6 +100,8 @@ public class WeaponsCarouselController : MonoBehaviour
     private WeaponDef _selectedWeapon;
     private Cat _current = Cat.Pistols;
 
+    private Button _btnChooseLevel; // add
+
     void Awake()
     {
         if (!uiDoc) uiDoc = GetComponent<UIDocument>() ?? GetComponentInParent<UIDocument>();
@@ -116,6 +124,7 @@ public class WeaponsCarouselController : MonoBehaviour
             enabled = false; return;
         }
 
+        QueryStatFields(root);
         EnsurePreviewImage();
 
         // Tabs carousel events
@@ -156,11 +165,37 @@ public class WeaponsCarouselController : MonoBehaviour
         var root = uiDoc.rootVisualElement;
         root.UnregisterCallback<GeometryChangedEvent>(OnRootReady);
 
+        // Hook "Choose Level" here
+        _btnChooseLevel = root.Q<Button>("btn_choose_level");
+        if (_btnChooseLevel != null)
+        {
+            _btnChooseLevel.clicked += () => Loader.Load(Loader.Scene.ChooseLevel);
+        }
+        else
+        {
+            Debug.LogWarning("WeaponsCarouselController: Button 'btn_choose_level' not found in UXML.");
+        }
+
         BindTabs(root);
         HookCarouselCategoryEvents();
         ShowCategory(_current);
 
         HookPreviewPointerEvents();
+    }
+
+    private void QueryStatFields(VisualElement root)
+    {
+        // Safe: if the fields aren’t on this screen, all stay null and we skip updates.
+        _fDamage = root.Q<FloatField>("fl_damage");
+        _fFireRate = root.Q<FloatField>("fl_fire_rate");
+        _fDamageFluct = root.Q<FloatField>("fl_damage_fluctuation");
+        _fClip = root.Q<FloatField>("fl_clip_size");
+        _fPrecision = root.Q<FloatField>("fl_precision");
+        _fReload = root.Q<FloatField>("fl_reload_time");
+        _fSimul = root.Q<FloatField>("fl_simultanious_bullets");
+        _fCrit = root.Q<FloatField>("fl_critical_chance");
+        _fStagger = root.Q<FloatField>("fl_stagger");
+        _fRecoil = root.Q<FloatField>("fl_recoil");
     }
 
     // ---------- Tabs & list ----------
@@ -258,7 +293,50 @@ public class WeaponsCarouselController : MonoBehaviour
         _selectedWeapon = w;
         _selectedBtn.AddToClassList("is-active");
 
-        UpdatePreview_3D(w); // swap from thumbnails to real 3D
+        // OLD: just visual preview
+        UpdatePreview_3D(w);
+
+        // NEW: full selection logic
+        if (TryMapToEnum(w.id, out var weaponEnum))
+            ApplyWeaponSelection(weaponEnum);
+        else
+            Debug.LogWarning($"No WeaponEnum match for id '{w.id}'");
+    }
+
+    private bool TryMapToEnum(string id, out WeaponEnum we)
+    {
+        // id strings already match enum names (e.g. WPN_AP85)
+        return System.Enum.TryParse(id, out we);
+    }
+
+    private void ApplyWeaponSelection(WeaponEnum weaponEnum)
+    {
+        DataHolder.chosenWeapon = weaponEnum;
+
+        // Weapon type logic (former ClickAssignData)
+        if (weaponEnum == WeaponEnum.WPN_M4 || weaponEnum == WeaponEnum.WPN_M16)
+            DataHolder.weaponType = WeaponType.H2;
+        else
+            DataHolder.weaponType = WeaponType.H1;
+
+        var cfg = WeaponConfigSingleton.Instance.WeaponConfig;
+
+        // Push current config into UI fields (if present)
+        if (_fDamage != null)
+        {
+            _fDamage.value = cfg.Damage;
+            _fFireRate.value = cfg.FireRate;
+            _fDamageFluct.value = cfg.DamageFluctuation;
+            _fClip.value = cfg.ClipSize;
+            _fPrecision.value = cfg.Precision;
+            _fReload.value = cfg.ReloadTime;
+            _fSimul.value = cfg.SimultaniousBullets;
+            _fCrit.value = cfg.CritChance;
+            _fStagger.value = cfg.Stagger;
+            _fRecoil.value = cfg.Recoil;
+        }
+
+        WeaponChanged?.Invoke(weaponEnum);
     }
 
     // ---------- Preview image holder (UI Toolkit) ----------
