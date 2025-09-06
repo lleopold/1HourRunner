@@ -3,10 +3,8 @@ using DamageNumbersPro;
 using LUZEMRIK.BloodDecals;
 using System;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 
@@ -263,7 +261,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         _health = _health - damage;
         //_healthSystem.Damage(damage);
         healthBarScroll.healthSystemArmour.Damage(damage);
-        DamagePopUp.Create(transform.position, (int)damage);
+        //DamagePopUp.Create(transform.position, (int)damage);
         //New damage numbers pro
         Vector3 damagePosition = transform.position + Vector3.up * 1.5f; // Adjust height for visibility
         _damageNumberPrefab.Spawn(damagePosition, damage);
@@ -493,9 +491,36 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     public void SpawnCoin(int value)
     {
         GameObject coinPrefab = Resources.Load<GameObject>("Enemies/Coins/CopperCoin");
-        GameObject coin = Instantiate(coinPrefab, transform.position, Quaternion.identity);
-        coin.GetComponent<Coin>().CoinAmount = value;
+        if (!coinPrefab)
+        {
+            Debug.LogWarning("CopperCoin prefab not found at Resources/Enemies/Coins/CopperCoin");
+            return;
+        }
 
+        // Optional: disable own collider to avoid physics pushing the coin upward on spawn
+        var enemyCollider = GetComponent<Collider>();
+        if (enemyCollider && enemyCollider.enabled)
+        {
+            enemyCollider.enabled = false;
+        }
+
+        // Raycast to ground to place coin on the surface
+        Vector3 spawnPos = transform.position;
+        Vector3 rayOrigin = transform.position + Vector3.up * 1.5f;
+
+        // Ignore the Zombies layer to avoid hitting ourselves
+        int zombiesLayer = LayerMask.NameToLayer("Zombies");
+        int mask = ~(1 << zombiesLayer);
+
+        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 10f, mask, QueryTriggerInteraction.Ignore))
+        {
+            // Small lift to prevent z-fighting if coin pivot is at center/bottom
+            spawnPos = hit.point + Vector3.up * 0.25f;
+        }
+
+        GameObject coin = Instantiate(coinPrefab, spawnPos, Quaternion.identity);
+        var coinComp = coin.GetComponent<Coin>();
+        if (coinComp != null) coinComp.CoinAmount = value;
     }
 
     //referenced from the animation

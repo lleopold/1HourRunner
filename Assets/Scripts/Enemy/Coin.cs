@@ -33,12 +33,12 @@ public class Coin : MonoBehaviour
         _coinSound = Resources.Load<AudioClip>("Enemies/Coins/cashRegister");
         _player = GameObject.Find("Player");
         transform.Rotate(0, 0, 90);
-        transform.position += new Vector3(0, 3, 0);
+        //transform.position += new Vector3(0, 3, 0);
     }
 
     void Update()
     {
-        transform.Rotate(12, 0, 0);
+        transform.Rotate(6, 0, 0);
         if (isMagnetized && _player != null && !_pickedUp)
         {
             transform.position = Vector3.MoveTowards(transform.position, _player.transform.position, movementSpeed * Time.deltaTime);

@@ -18,7 +18,7 @@ public class UIT_ChooseLevel : MonoBehaviour
     // Place screenshots as PNG in: Assets/Resources/UI/LevelShots/<SceneName>.png
     private readonly List<LevelDef> _levels = new List<LevelDef>
     {
-        new LevelDef("Level_1", "Abandoned Outskirts", "Slums at dawn; lighter enemy density."),
+        new LevelDef("Level_1", "Container Port", "Container port at sunset"),
         new LevelDef("Level_1", "Industrial Yard",     "Closer quarters, higher spawn rates."),
         new LevelDef("Level_1", "Old Town",            "Maze-like alleys, tougher elites."),
     };
@@ -99,8 +99,19 @@ public class UIT_ChooseLevel : MonoBehaviour
     private void PlayCurrent()
     {
         if (_current < 0 || _current >= _levels.Count) return;
+
         var sceneName = _levels[_current].SceneName;
-        SceneManager.LoadScene(sceneName); // Or use your Loader helper if you prefer
+
+        // Prefer Loader.Scene when possible; fallback to direct load by name
+        if (System.Enum.TryParse<Loader.Scene>(sceneName, ignoreCase: true, out var target))
+        {
+            Loader.Load(target);
+        }
+        else
+        {
+            Debug.LogWarning($"[ChooseLevel] Scene '{sceneName}' not found in Loader.Scene enum; loading by name.");
+            SceneManager.LoadScene(sceneName);
+        }
     }
 
     private void GoBack()
