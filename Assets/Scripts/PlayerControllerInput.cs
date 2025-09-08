@@ -496,17 +496,23 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
     /// <returns></returns>
     private Quaternion ProcessRotation()
     {
-        Quaternion rotationL = Quaternion.identity;
-        if (_aim && AimingType.Mouse == _aimingType && 1 == 2)
+        // Start from current rotation so we never snap to identity
+        Quaternion rotationL = transform.rotation;
+
+        if (!_aim) return rotationL;
+
+        if (_aimingType == AimingType.Mouse)
         {
             rotationL = MouseRotation();
+            return rotationL;
         }
 
-
-        if (_aim && AimingType.ControllerRightStick == _aimingType)
+        if (_aimingType == AimingType.ControllerRightStick)
         {
             rotationL = ControllerRotation();
+            return rotationL;
         }
+
         return rotationL;
     }
 
@@ -568,23 +574,39 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
 
     private Quaternion MouseRotation()
     {
-        Debug.Log("Mouse rotation");
+        if (_mainCamera == null) return transform.rotation;
+
         var ray = _mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-        int layerMask = LayerMask.GetMask("Ground"); // Make sure the ground has this layer
 
-        if (Physics.Raycast(ray, out _raycastHit, Mathf.Infinity, layerMask))
+        // Try Ground layer first (if you use it)
+        int groundMask = LayerMask.GetMask("Ground");
+        if (groundMask != 0 && Physics.Raycast(ray, out _raycastHit, Mathf.Infinity, groundMask, QueryTriggerInteraction.Ignore))
         {
-            var target = _raycastHit.point;
-            target.y = transform.position.y; // Keep player at the same height
+            Vector3 target = _raycastHit.point;
+            target.y = transform.position.y;
 
-            var direction = target - transform.position;
-            direction.y = 0f; // Ignore vertical movement
-            direction.Normalize();
+            Vector3 dir = target - transform.position;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.0001f) return transform.rotation;
 
-            var targetRotation = Quaternion.LookRotation(direction, Vector3.up);
-            return Quaternion.RotateTowards(transform.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
+            Quaternion targetRot = Quaternion.LookRotation(dir.normalized, Vector3.up);
+            return Quaternion.RotateTowards(transform.rotation, targetRot, _rotationSpeed * Time.deltaTime);
         }
-        return Quaternion.identity;
+
+        // Fallback: intersect with a horizontal plane at player height
+        var plane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
+        if (plane.Raycast(ray, out float enter))
+        {
+            Vector3 target = ray.GetPoint(enter);
+            Vector3 dir = target - transform.position;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.0001f) return transform.rotation;
+
+            Quaternion targetRot = Quaternion.LookRotation(dir.normalized, Vector3.up);
+            return Quaternion.RotateTowards(transform.rotation, targetRot, _rotationSpeed * Time.deltaTime);
+        }
+
+        return transform.rotation;
     }
 
 
@@ -856,12 +878,12 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
     //re
     public void Aiming(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.started)
         {
             _aimingType = AimingType.Mouse;
             _aim = true;
         }
-        if (context.canceled || !context.performed)
+        else if (context.canceled)
         {
             _aim = false;
         }
