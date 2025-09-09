@@ -445,12 +445,9 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
         Aim();
         Shoot();
         RestoreStamina();
-        //Roll();
-        UpdateLineRenderersTriangle();
+
         RefreshAimLineWidth();
 
-        //FollowPlayer();
-        //_stick_direction = stickAnalyzer.AnalyzeInput(_aimControllerInput);
         if (_stick_direction == RotationCW.NONE)
         {
             //_stick_direction = stickAnalyzer.CheckDirectInputTurn(_aimControllerInput, transform.forward);
@@ -460,16 +457,12 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
             //_stick_direction = stickAnalyzer.AnalyzeInput(_aimControllerInput);
         }
 
-
-
         if (_uiT_EndGamePopUp._root.visible && !isGamePaused)
         {
-            // Pause the game
             PauseGame(true);
         }
-        //AnimateLaser(lineRendererLeft, laserMat);
-        //AnimateLaser(lineRendererRight, laserMat);
-        UpdateAimingVisuals();
+
+        UpdateAimingVisuals(); // single source of truth for aiming visuals/spread
     }
 
     public void Move(InputAction.CallbackContext context)
@@ -1721,7 +1714,6 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
 
 
 
-
     private IEnumerator ApplyMovementPenalty(float percentageIncrease, float interval)
     {
         while (true)
@@ -1746,21 +1738,27 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
 
     void UpdateMovementPenalty(bool isWalking, bool isRunning, bool isStrafing)
     {
-        // Stop any existing penalty coroutine
-        if (_movementPenaltyCoroutine != null)
-        {
-            StopCoroutine(_movementPenaltyCoroutine);
-            _movementPenaltyCoroutine = null;
-        }
+        float pctPerSecond = 0f;
 
         if (isRunning)
-        {
-            _movementPenaltyCoroutine = StartCoroutine(ApplyMovementPenalty(15f, 0.5f)); // 15% every 0.5s
-        }
+            pctPerSecond = 30f;       // running increases spread faster
         else if (isWalking || isStrafing)
+            pctPerSecond = 10f;       // walking/strafe increases spread slower
+
+        if (pctPerSecond > 0f && _aim)
         {
-            _movementPenaltyCoroutine = StartCoroutine(ApplyMovementPenalty(5f, 0.8f)); // 5% every 0.8s
+            // Increase current spread by a percentage per second of the current (at least min) value.
+            float baseForGrowth = Mathf.Max(_currentAngleLineRenderers, gameStats._precisionMin);
+            float delta = baseForGrowth * (pctPerSecond / 100f) * Time.deltaTime;
+            _currentAngleLineRenderers = Mathf.Min(_currentAngleLineRenderers + delta, gameStats._precisionMax);
         }
+        else if (_aim)
+        {
+            // Optional: small decay while stationary but still aiming (handled in UpdateAimingVisuals already).
+            // Keep empty to avoid fighting with that logic.
+        }
+
+        // Note: _movementPenaltyCoroutine is no longer used.
     }
 
     private IEnumerator DashCoroutine()
@@ -2092,34 +2090,46 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
     {
         if (_aim)
         {
-            // Uključi linije samo dok se nišani
             SetAimLinesActive(true);
 
-            // Ažuriraj ugao i pozicije
-            _currentAngleLineRenderers = Mathf.MoveTowards(
+            bool isMoving = _input.magnitude > 0f;
+            // Only relax toward min when not moving. If moving, let movement penalty increase spread.
+            if (!isMoving)
+            {
+                _currentAngleLineRenderers = Mathf.MoveTowards(
+                    _currentAngleLineRenderers,
+                    gameStats._precisionMin,
+                    gameStats._aimingSpeed * Time.deltaTime
+                );
+            }
+
+            // Apply recoil as a raise, not as a hard set
+            if (_recoil > 0f)
+            {
+                _currentAngleLineRenderers = Mathf.Max(_currentAngleLineRenderers, _recoil);
+                _recoil = 0f;
+            }
+
+            // Clamp final spread
+            _currentAngleLineRenderers = Mathf.Clamp(
                 _currentAngleLineRenderers,
                 gameStats._precisionMin,
-                gameStats._aimingSpeed * Time.deltaTime
+                gameStats._precisionMax
             );
-
-            if (_recoil > 0) { _currentAngleLineRenderers = _recoil; _recoil = 0; }
 
             UpdateLinePoints(_currentAngleLineRenderers);
             ApplyVisuals(lineRendererLeft, _meshRendererAimingCircle, _currentAngleLineRenderers);
             ApplyVisuals(lineRendererRight, _meshRendererAimingCircle, _currentAngleLineRenderers);
 
-            // Laser animacija samo kad je upaljeno nišanjenje
             AnimateLaser(lineRendererLeft, laserMat);
             AnimateLaser(lineRendererRight, laserMat);
         }
         else
         {
-            // Skloni linije kad bežiš / ne nišaniš
             SetAimLinesActive(false);
             _currentAngleLineRenderers = gameStats._precisionStartingAim;
             if (_laserSmokeLeft.isPlaying) _laserSmokeLeft.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             if (_laserSmokeRight.isPlaying) _laserSmokeRight.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-
         }
     }
 
