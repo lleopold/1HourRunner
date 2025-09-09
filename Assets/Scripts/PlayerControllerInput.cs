@@ -1416,6 +1416,7 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
             //_uiT_LevelUp.SetOffers(GenerateOffers());
             //_uiT_LevelUp = FindObjectOfType<UIT_LevelUp>();
             _uiT_LevelUp.SetOffers(_uiT_LevelUp.GenerateDefaultOffers());
+
         }
         Debug.Log("Player received " + coinValue + " coins");
     }

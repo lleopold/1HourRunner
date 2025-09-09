@@ -51,9 +51,13 @@ public class UIT_LevelUp : MonoBehaviour
         _desc3 = _btn3.Q<Label>(className: "choice__desc");
 
         // Clicks
-        _btn1?.RegisterCallback<ClickEvent>(_ => OnPick(_o1));
-        _btn2?.RegisterCallback<ClickEvent>(_ => OnPick(_o2));
-        _btn3?.RegisterCallback<ClickEvent>(_ => OnPick(_o3));
+        //_btn1?.RegisterCallback<ClickEvent>(_ => OnPick(_o1));
+        //_btn2?.RegisterCallback<ClickEvent>(_ => OnPick(_o2));
+        //_btn3?.RegisterCallback<ClickEvent>(_ => OnPick(_o3));
+
+        _btn1.clicked += () => OnPick(_o1);
+        _btn2.clicked += () => OnPick(_o2);
+        _btn3.clicked += () => OnPick(_o3);
 
         // Start hidden by default
         _root.visible = false;
@@ -85,6 +89,7 @@ public class UIT_LevelUp : MonoBehaviour
         _root.visible = true;
         _root.SetEnabled(true);
         enabled = true;
+        _root.schedule.Execute(() => _btn1.Focus()); // focus first button
     }
 
     // Optional helper to generate standard 3 offers (Health/Reload/Running).
