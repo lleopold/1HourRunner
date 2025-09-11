@@ -4,35 +4,32 @@ using UnityEngine;
 
 public class EnemyDissolve : MonoBehaviour
 {
-    [Header("Assign a material that uses your Shader Graph dissolve")]
-    public Material dissolveTemplate;              // create 1 material from your dissolve graph
+    [Header("Material using your Shader Graph dissolve")]
+    public Material dissolveTemplate;
 
     [Header("Timing")]
-    public float delayBefore = 0.0f;               // wait before starting dissolve
-    public float dissolveSeconds = 1.2f;           // dissolve duration
+    public float delayBefore = 0.0f;
+    public float dissolveSeconds = 1.2f;
 
-    [Header("Property names in your graph")]
-    public string propDissolve = "_DissolveAmount";    // match your graph property
-    public string propBaseMap = "_BaseMap";            // URP Lit base texture
-    public string propBaseColor = "_BaseColor";        // URP Lit base color
+    [Header("Graph property names")]
+    public string propDissolve = "_DissolveAmount";
+    public string propBaseMap = "_BaseMap";
+    public string propBaseColor = "_BaseColor";
+
+    [Header("Direction guard")]
+    [Tooltip("If your graph dissolves when the value DECREASES, turn this on.")]
+    public bool invertDirection = false; // true = animate 1->0, false = 0->1
 
     Renderer[] _renderers;
-    List<Material[]> _originals;     // optional if you want to restore instead of destroy
-    List<Material[]> _replaced;      // per-renderer material arrays we assign
+    List<Material[]> _replaced;
 
     void Awake()
     {
         _renderers = GetComponentsInChildren<Renderer>(includeInactive: true);
-        _originals = new List<Material[]>(_renderers.Length);
         _replaced = new List<Material[]>(_renderers.Length);
-        foreach (var r in _renderers)
-        {
-            _originals.Add(r.sharedMaterials);
-            _replaced.Add(null);
-        }
+        foreach (var r in _renderers) _replaced.Add(null);
     }
 
-    // Call this from your death code
     public void TriggerDissolveAndDestroy(float? seconds = null)
     {
         if (seconds.HasValue) dissolveSeconds = seconds.Value;
@@ -49,18 +46,19 @@ public class EnemyDissolve : MonoBehaviour
             yield break;
         }
 
-        // 1) Build new material arrays using the dissolve shader, copy base color/texture
+        // Build per-renderer material arrays using the dissolve shader
         for (int i = 0; i < _renderers.Length; i++)
         {
             var r = _renderers[i];
             var srcMats = r.sharedMaterials;
             var dstMats = new Material[srcMats.Length];
+
             for (int m = 0; m < srcMats.Length; m++)
             {
                 var src = srcMats[m];
-                var dst = new Material(dissolveTemplate); // per-submesh instance
-                // Copy common visuals
-                if (src != null)
+                var dst = new Material(dissolveTemplate);
+
+                if (src)
                 {
                     if (src.HasProperty(propBaseMap) && dst.HasProperty(propBaseMap))
                         dst.SetTexture(propBaseMap, src.GetTexture(propBaseMap));
@@ -72,34 +70,42 @@ public class EnemyDissolve : MonoBehaviour
                     else if (src.HasProperty("_Color") && dst.HasProperty(propBaseColor))
                         dst.SetColor(propBaseColor, src.GetColor("_Color"));
                 }
-                // start fully visible
-                if (dst.HasProperty(propDissolve)) dst.SetFloat(propDissolve, 0f);
+
+                // Start value: fully visible for both modes
+                if (dst.HasProperty(propDissolve))
+                    dst.SetFloat(propDissolve, invertDirection ? 1f : 0f);
+
                 dstMats[m] = dst;
             }
+
             r.sharedMaterials = dstMats;
             _replaced[i] = dstMats;
         }
 
         if (delayBefore > 0f) yield return new WaitForSeconds(delayBefore);
 
-        // 2) Animate DissolveAmount 0→1
+        // Animate in the correct direction
         float t = 0f;
         while (t < dissolveSeconds)
         {
             t += Time.deltaTime;
             float a = Mathf.Clamp01(t / dissolveSeconds);
+            float value = invertDirection ? (1f - a) : a;
+
             for (int i = 0; i < _replaced.Count; i++)
             {
                 var mats = _replaced[i];
                 if (mats == null) continue;
                 for (int m = 0; m < mats.Length; m++)
-                    if (mats[m] && mats[m].HasProperty(propDissolve))
-                        mats[m].SetFloat(propDissolve, a);
+                {
+                    var mat = mats[m];
+                    if (mat && mat.HasProperty(propDissolve))
+                        mat.SetFloat(propDissolve, value);
+                }
             }
             yield return null;
         }
 
-        // 3) Done
         Destroy(gameObject);
     }
 }

@@ -351,10 +351,11 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         float clipLength = GetAnimationClip("Death").length;
         StartCoroutine(WaitForAnimationAndSpawnBloodPool(clipLength));
 
-        var dissolveComponent = gameObject.GetComponent<EnemyDissolve>();
-        dissolveComponent.TriggerDissolveAndDestroy();
+        //var dissolveComponent = gameObject.GetComponent<EnemyDissolve>();
+        //dissolveComponent.TriggerDissolveAndDestroy();
         //GetComponent<EnemyDissolve>().TriggerDissolveAndDestroy();// start dissolve effect and destroy object when done TODO igors LATER
-        Destroy(gameObject, clipLength + 10f);
+
+        //Destroy(gameObject, clipLength + 50f); //trebace destroy nakon dissolve
     }
     private void KickbackRagdoll(float forceMagnitude)
     {
@@ -395,6 +396,13 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         ed.propDissolve = src.propDissolve;
         ed.propBaseMap = src.propBaseMap;
         ed.propBaseColor = src.propBaseColor;
+
+        // Ensure dissolve starts from zero
+        if (ed.dissolveTemplate.HasProperty(ed.propDissolve))
+        {
+            ed.dissolveTemplate.SetFloat(ed.propDissolve, 0f);
+        }
+
         ed.TriggerDissolveAndDestroy();
     }
 
