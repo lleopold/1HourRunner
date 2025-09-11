@@ -377,21 +377,27 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         ApplyExplosionForce(headRigidbodies, awayFromPlayerDirection, 5f, 15f, 15f, 0.5f);
         ApplyExplosionForce(bodyRigidbodies, awayFromPlayerDirection, 5f, 15f, 15f, 0.5f);
 
-        //Vector3 hitDir = (transform.position - _player.transform.position).normalized;
-
-        //// Ensure ragdoll bones are active
-        ////EnableRagdoll();
-
-        //// Apply the impulse to every ragdoll body
-        //foreach (var rb in _ragdollBodies)
-        //{
-        //    if (rb == null) continue;
-        //    rb.isKinematic = false;
-        //    rb.useGravity = true;
-        //    // force at center of mass
-        //    rb.AddForce(hitDir * forceMagnitude, ForceMode.Impulse);
-        //}
+        // Add dissolve to spawned ragdoll parts (copy settings from this Enemy if available)
+        var srcDissolve = GetComponent<EnemyDissolve>();
+        if (srcDissolve != null && srcDissolve.dissolveTemplate != null)
+        {
+            AddDissolveAndTrigger(zombie_head, srcDissolve, delay: 2f);
+            AddDissolveAndTrigger(zombie_body, srcDissolve, delay: 2f);
+        }
     }
+
+    private static void AddDissolveAndTrigger(GameObject target, EnemyDissolve src, float delay)
+    {
+        var ed = target.AddComponent<EnemyDissolve>();
+        ed.dissolveTemplate = src.dissolveTemplate;
+        ed.delayBefore = delay;
+        ed.dissolveSeconds = src.dissolveSeconds;
+        ed.propDissolve = src.propDissolve;
+        ed.propBaseMap = src.propBaseMap;
+        ed.propBaseColor = src.propBaseColor;
+        ed.TriggerDissolveAndDestroy();
+    }
+
     private void ApplyExplosionForce(Rigidbody[] rigidbodies, Vector3 forceDirection, float forceMin, float forceMax, float torqueMagnitude, float upFactor)
     {
         foreach (var rb in rigidbodies)
