@@ -1,10 +1,8 @@
 ﻿using MoreMountains.Feedbacks;
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
-using static UnityEngine.EventSystems.StandaloneInputModule;
 
 public class UITKCarousel : MonoBehaviour
 {
@@ -306,7 +304,7 @@ public class UITKCarousel : MonoBehaviour
             btn.style.left = 0;
             btn.style.top = 0;
             btn.style.translate = new Translate(x, y, 0);
-            btn.style.rotate = new Rotate(new Angle(yAngle, AngleUnit.Degree));
+            btn.style.rotate = new UnityEngine.UIElements.Rotate(new Angle(yAngle, AngleUnit.Degree));
             btn.style.scale = new Scale(new Vector2(s, s));
             btn.style.opacity = alpha;
         }

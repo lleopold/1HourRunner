@@ -6,40 +6,33 @@ public class UIT_PreMainScreen : MonoBehaviour
 {
     [SerializeField] private UIDocument _uiDocument;
     private VisualElement _root;
-    private Button _btn_play;
-    private Button _btn_language;
-    private Button _btn_options;
-    private Button _btn_quit;
+    private Button _btn_play, _btn_language, _btn_options, _btn_quit;
 
-    private void OnEnable()
+    void OnEnable()
     {
         _root = _uiDocument.rootVisualElement;
+
         _btn_play = _root.Q<Button>("btn_play");
         _btn_language = _root.Q<Button>("btn_language");
         _btn_options = _root.Q<Button>("btn_options");
         _btn_quit = _root.Q<Button>("btn_quit");
 
-        _btn_play.RegisterCallback<ClickEvent>(GoToGameScreen);
-        _btn_language.RegisterCallback<ClickEvent>(GoToLanguageScreen);
-        _btn_options.RegisterCallback<ClickEvent>(GoToOptionsScreen);
-        _btn_quit.RegisterCallback<ClickEvent>(QuitApplication);
+        // Use Button.clicked -> works with mouse, keyboard Submit, and gamepad South (A)
+        _btn_play.clicked += () => SceneManager.LoadScene("ChoosePlayer");
+        _btn_language.clicked += () => { /* SceneManager.LoadScene("LanguageScreen"); */ };
+        _btn_options.clicked += () => { /* SceneManager.LoadScene("OptionsScreen");  */ };
+        _btn_quit.clicked += Application.Quit;
+
+        // Give focus so D-pad/Left Stick navigate and Submit activates
+        _root.schedule.Execute(() => _btn_play.Focus());
     }
 
-    private void GoToGameScreen(ClickEvent evt)
+    void OnDisable()
     {
-        SceneManager.LoadScene("ChoosePlayer");
+        // Unsubscribe to avoid duplicate bindings if the document is re-enabled
+        if (_btn_play != null) _btn_play.clicked -= () => SceneManager.LoadScene("ChoosePlayer");
+        if (_btn_language != null) _btn_language.clicked -= () => { };
+        if (_btn_options != null) _btn_options.clicked -= () => { };
+        if (_btn_quit != null) _btn_quit.clicked -= Application.Quit;
     }
-    private void GoToLanguageScreen(ClickEvent evt)
-    {
-        //SceneManager.LoadScene("LanguageScreen");
-    }
-    private void GoToOptionsScreen(ClickEvent evt)
-    {
-        //SceneManager.LoadScene("OptionsScreen");
-    }
-    private void QuitApplication(ClickEvent evt)
-    {
-        Application.Quit();
-    }
-
 }

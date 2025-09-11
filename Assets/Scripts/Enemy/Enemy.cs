@@ -351,6 +351,9 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         float clipLength = GetAnimationClip("Death").length;
         StartCoroutine(WaitForAnimationAndSpawnBloodPool(clipLength));
 
+        var dissolveComponent = gameObject.GetComponent<EnemyDissolve>();
+        dissolveComponent.TriggerDissolveAndDestroy();
+        //GetComponent<EnemyDissolve>().TriggerDissolveAndDestroy();// start dissolve effect and destroy object when done TODO igors LATER
         Destroy(gameObject, clipLength + 10f);
     }
     private void KickbackRagdoll(float forceMagnitude)
@@ -371,8 +374,8 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         Rigidbody[] bodyRigidbodies = zombie_body.GetComponentsInChildren<Rigidbody>();
 
         // Apply forces
-        ApplyExplosionForce(headRigidbodies, awayFromPlayerDirection, 15f, 25f, 15f, 0.5f);
-        ApplyExplosionForce(bodyRigidbodies, awayFromPlayerDirection, 15f, 25f, 15f, 0.5f);
+        ApplyExplosionForce(headRigidbodies, awayFromPlayerDirection, 5f, 15f, 15f, 0.5f);
+        ApplyExplosionForce(bodyRigidbodies, awayFromPlayerDirection, 5f, 15f, 15f, 0.5f);
 
         //Vector3 hitDir = (transform.position - _player.transform.position).normalized;
 
