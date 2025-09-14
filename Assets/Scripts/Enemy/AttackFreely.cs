@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AttackFreely : IState
@@ -11,6 +9,9 @@ public class AttackFreely : IState
     private float _nextAttack;
     private bool _attacking;
     private MonoBehaviour _monoBehaviour;
+
+    private float _attackCooldown = 1.5f; // seconds
+    private float _lastAttackTime = -999f;
 
 
     public AttackFreely(Enemy enemy, GameObject victim, Animator animator, EnemyConfig enemyConfig, MonoBehaviour monoBehaviour)
@@ -25,7 +26,7 @@ public class AttackFreely : IState
 
     public void OnEnter()
     {
-        if (_attacking)
+        if (_attacking || Time.time < _lastAttackTime + _attackCooldown)
             return;
 
         if (Random.Range(1, 3) == 1)
@@ -37,22 +38,12 @@ public class AttackFreely : IState
             _animator.SetTrigger("ZombieAttack");
         }
         _attacking = true;
-        //_enemy.AttackFinished = true; //For people with cheaper tickets
-
-        //if (_victim != null)
-        //{
-        //    // Check if it's time for the next attack and the enemy is not already attacking
-        //    if (!_attacking && Time.time >= _nextAttack)
-        //    {
-        //        _animator.SetInteger("Attack", 3);
-        //        _attacking = true;
-        //    }
-        //}
-        //Debug.Log("AttackFreely OnEnter");
+        _lastAttackTime = Time.time;
     }
 
     public void OnExit()
     {
+        _attacking = false;
         //Debug.Log("AttackFreely OnExit");
     }
 

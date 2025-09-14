@@ -96,7 +96,8 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         At(stop, searchForVictim, HasTarget);
         At(searchForVictim, walkToSelected, FarToPlayer);
         //At(searchForVictim, walkToSelected, HasTarget);
-        At(walkToSelected, fullStop, CloseToPlayer);
+
+        //At(walkToSelected, fullStop, CloseToPlayer);
 
         //At(walkToSelected, stop, CloseToPlayer);
         //At(attackFreely, stop, FinishedAttack);
@@ -104,7 +105,9 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
 
 
-        //At(walkToSelected, attackFreely, CloseToPlayer);
+        At(walkToSelected, attackFreely, CloseToPlayer);
+        At(attackFreely, walkToSelected, FinishedAttack);
+
         //At(searchForGatheringSpot, walkToGathering, FarToGathering);
         //At(attackFreely, walkToGathering, CloseToGather);
         //At(walkToGathering, stop, CloseToGather); //TODO
@@ -544,11 +547,22 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     public void AnimationZombieAttack(string strIn)
     {
         zombieNavMeshAgent.isStopped = true;
+
+        // Spawn sword trail before attack
+        if (strIn != "end")
+        {
+            SpawnSwordTrail();
+        }
+
         if (strIn != "end" && PlayerIsInMeleeRange() && IsFacingPlayer())
         {
             _player.GetComponent<PlayerControllerInput>().HitReceived(_enemyConfig.meleeDamage, strIn);
             Debug.Log("AnimationZombieAttack: str " + strIn);
+
+            // Spawn impact effect at player's position on successful hit
+            SpawnImpactEffect(_player.transform.position);
         }
+
         GameObject hitEffectPrefab = Resources.Load<GameObject>("Weapons/Hit_02");
         if (hitEffectPrefab)
         {
@@ -563,6 +577,27 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
             AttackFinished = true;
         }
     }
+
+    private void SpawnSwordTrail()
+    {
+        GameObject trailPrefab = Resources.Load<GameObject>("FX/Sword_Trail_FIRE");
+        if (trailPrefab)
+        {
+            // Spawn at zombie's hand or weapon position if available, otherwise at zombie's position
+            Transform handTransform = transform.Find("Hand_R") ?? transform; // Adjust "Hand_R" to your hand bone name
+            Instantiate(trailPrefab, handTransform.position, handTransform.rotation);
+        }
+    }
+
+    private void SpawnImpactEffect(Vector3 position)
+    {
+        GameObject impactPrefab = Resources.Load<GameObject>("FX/Impact_1");
+        if (impactPrefab)
+        {
+            Instantiate(impactPrefab, position, Quaternion.identity);
+        }
+    }
+
     private bool PlayerIsInMeleeRange()
     {
         return Vector3.Distance(transform.position, _player.transform.position) < _enemyConfig.meleeRadius;
