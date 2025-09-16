@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 public class AttackFreely : IState
 {
@@ -6,28 +7,31 @@ public class AttackFreely : IState
     private GameObject _victim;
     private Animator _animator;
     private EnemyConfig _enemyConfig;
-    private float _nextAttack;
     private bool _attacking;
     private MonoBehaviour _monoBehaviour;
-
-    private float _attackCooldown = 1.5f; // seconds
-    private float _lastAttackTime = -999f;
-
+    private NavMeshAgent _navMeshAgent;
+    private Coroutine _attackTimeoutCo;
 
     public AttackFreely(Enemy enemy, GameObject victim, Animator animator, EnemyConfig enemyConfig, MonoBehaviour monoBehaviour)
     {
         _enemy = enemy;
         _victim = victim;
         _animator = animator;
-        this._enemyConfig = enemyConfig;
+        _enemyConfig = enemyConfig;
         _monoBehaviour = monoBehaviour;
-
+        _navMeshAgent = enemy.GetComponent<NavMeshAgent>();
     }
 
     public void OnEnter()
     {
-        if (_attacking || Time.time < _lastAttackTime + _attackCooldown)
-            return;
+        // Stop moving while we swing
+        if (_navMeshAgent != null)
+        {
+            _navMeshAgent.isStopped = true;
+            _navMeshAgent.updateRotation = false; // we rotate manually while attacking
+        }
+
+        if (_attacking) return;
 
         if (Random.Range(1, 3) == 1)
         {
@@ -37,28 +41,57 @@ public class AttackFreely : IState
         {
             _animator.SetTrigger("ZombieAttack");
         }
+
+        // Fail-safe: ensure we exit attack even if animation event “end” doesn’t fire
+        _attackTimeoutCo = _monoBehaviour.StartCoroutine(AttackEndFailSafe(2.0f));
+
         _attacking = true;
-        _lastAttackTime = Time.time;
     }
 
     public void OnExit()
     {
         _attacking = false;
-        //Debug.Log("AttackFreely OnExit");
-    }
 
+        // Resume movement control
+        if (_navMeshAgent != null)
+        {
+            _navMeshAgent.isStopped = false;
+            _navMeshAgent.updateRotation = true;
+        }
+
+        // Clear attack params
+        _animator.ResetTrigger("ZombieAttack");
+        _animator.SetInteger("Kick", 0);
+
+        if (_attackTimeoutCo != null)
+        {
+            _monoBehaviour.StopCoroutine(_attackTimeoutCo);
+            _attackTimeoutCo = null;
+        }
+    }
 
     public void Tick()
     {
-
+        // Face the player while attacking
+        if (_victim != null)
+        {
+            Vector3 direction = _victim.transform.position - _enemy.transform.position;
+            direction.y = 0f;
+            if (direction.sqrMagnitude > 0.0001f)
+            {
+                Quaternion lookRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+                _enemy.transform.rotation = Quaternion.Slerp(_enemy.transform.rotation, lookRotation, 10f * Time.deltaTime);
+            }
+        }
     }
-    void Start()
-    {
-        Debug.Log("AttackFreely Start");
-    }
 
-    void Update()
+    private System.Collections.IEnumerator AttackEndFailSafe(float seconds)
     {
-        Debug.Log("AttackFreely Update");
+        yield return new WaitForSeconds(seconds);
+        if (!_enemy.AttackFinished)
+        {
+            // If animation didn’t signal end, force it
+            _enemy.AttackFinished = true;
+        }
     }
 }

@@ -13,7 +13,9 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     private NavMeshAgent zombieNavMeshAgent;
     public bool dieCondition = false;
     [SerializeField] float _health = 100;
+    [SerializeField] Quaternion rotationModification = Quaternion.Euler(270f, 0f, 0f);
     //private HealthSystemArmour _healthSystem;
+
     EnemyConfig _enemyConfig = null;
     public GameObject _player;
     GameObject _gathering;
@@ -548,7 +550,6 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     {
         zombieNavMeshAgent.isStopped = true;
 
-        // Spawn sword trail before attack
         if (strIn != "end")
         {
             SpawnSwordTrail();
@@ -557,74 +558,67 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         if (strIn != "end" && PlayerIsInMeleeRange() && IsFacingPlayer())
         {
             _player.GetComponent<PlayerControllerInput>().HitReceived(_enemyConfig.meleeDamage, strIn);
-            Debug.Log("AnimationZombieAttack: str " + strIn);
-
-            // Spawn impact effect at player's position on successful hit
             SpawnImpactEffect(_player.transform.position);
         }
 
-        GameObject hitEffectPrefab = Resources.Load<GameObject>("Weapons/Hit_02");
-        if (hitEffectPrefab)
-        {
-            Instantiate(hitEffectPrefab, _player.transform.position, Quaternion.identity);
-        }
-        if (!PlayerIsInMeleeRange())
-        {
-            Debug.Log("AnimationZombieAttack: PlayerIsInMeleeRange " + PlayerIsInMeleeRange());
-        }
+        var hitEffectPrefab = Resources.Load<GameObject>("Weapons/Hit_02");
+        if (hitEffectPrefab) Instantiate(hitEffectPrefab, _player.transform.position, Quaternion.identity);
+
         if (strIn == "end")
         {
             AttackFinished = true;
+            zombieNavMeshAgent.isStopped = false; // let chase resume immediately
         }
     }
 
     private void SpawnSwordTrail()
     {
         GameObject trailPrefab = Resources.Load<GameObject>("FX/Sword_Trail_FIRE");
-        if (trailPrefab)
-        {
-            // Spawn at zombie's hand or weapon position if available, otherwise at zombie's position
-            Transform handTransform = transform.Find("Hand_R") ?? transform; // Adjust "Hand_R" to your hand bone name
-            Instantiate(trailPrefab, handTransform.position, handTransform.rotation);
-        }
+        if (!trailPrefab) return;
+
+        float height = GetApproxHalfHeight() * 0.6f; // chest-ish height
+        const float forwardOffset = 0.5f;            // little in front of zombie
+        Vector3 pos = transform.position + transform.up * height + transform.forward * forwardOffset;
+
+        // Match zombie rotation exactly, then apply FX authoring adjustment
+        Quaternion rot = transform.rotation * rotationModification;
+
+        // Parent to enemy so it follows the swing
+        Instantiate(trailPrefab, pos, rot, transform);
     }
 
-    private void SpawnImpactEffect(Vector3 position)
+
+    // Approximate half-height of the zombie from collider or renderers
+    private float GetApproxHalfHeight()
     {
-        GameObject impactPrefab = Resources.Load<GameObject>("FX/Impact_1");
-        if (impactPrefab)
-        {
-            Instantiate(impactPrefab, position, Quaternion.identity);
-        }
+        var capsule = GetComponent<CapsuleCollider>();
+        if (capsule) return Mathf.Max(0.5f, capsule.height * 0.5f);
+
+        if (TryGetCombinedRendererBounds(out Bounds b))
+            return Mathf.Max(0.5f, b.size.y * 0.5f);
+
+        return 1.0f; // fallback
     }
 
-    private bool PlayerIsInMeleeRange()
+    private bool TryGetCombinedRendererBounds(out Bounds combined)
     {
-        return Vector3.Distance(transform.position, _player.transform.position) < _enemyConfig.meleeRadius;
-    }
-    private bool IsFacingPlayer()
-    {
-        //Vector3 directionToPlayer = (_player.transform.position - transform.position).normalized;
-        //Vector3 zombieForward = transform.forward;
-        //float angle = Vector3.Angle(zombieForward, directionToPlayer);
-        // Zombie's forward direction (Red line)
-
-        Vector3 forwardDirection = transform.forward;
-        Vector3 movementDirection = zombieNavMeshAgent.velocity.normalized;
-        Vector3 directionToPlayer = (_player.transform.position - transform.position).normalized;
-        float angleToPlayer = Vector3.Angle(forwardDirection, directionToPlayer);
-
-        Debug.Log("Angle to Player: " + angleToPlayer);
-
-        if (angleToPlayer < 60f)
+        combined = new Bounds();
+        var renderers = GetComponentsInChildren<Renderer>();
+        bool hasAny = false;
+        foreach (var r in renderers)
         {
-            return true;
+            if (!r.enabled) continue;
+            if (!hasAny)
+            {
+                combined = r.bounds;
+                hasAny = true;
+            }
+            else
+            {
+                combined.Encapsulate(r.bounds);
+            }
         }
-        else
-        {
-            Debug.Log("IsFacingPlayer: false" + "angle: " + angleToPlayer);
-            return false;
-        }
+        return hasAny;
     }
 
     void SetRagdollState(bool state)
@@ -723,4 +717,32 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
             }
         }
     }
+
+    private bool PlayerIsInMeleeRange()
+    {
+        return Vector3.Distance(transform.position, _player.transform.position) <= _enemyConfig.meleeRadius;
+    }
+
+    private bool IsFacingPlayer()
+    {
+        Vector3 directionToPlayer = (_player.transform.position - transform.position).normalized;
+        float angle = Vector3.Angle(transform.forward, directionToPlayer);
+        // You can adjust the angle threshold as needed (e.g., 45 degrees)
+        return angle < 45f;
+    }
+
+    private void SpawnImpactEffect(Vector3 position)
+    {
+        // You can customize this to use your own impact effect prefab
+        GameObject impactEffectPrefab = Resources.Load<GameObject>("FX/ImpactEffect");
+        if (impactEffectPrefab != null)
+        {
+            Instantiate(impactEffectPrefab, position, Quaternion.identity);
+        }
+        else
+        {
+            Debug.LogWarning("ImpactEffect prefab not found at Resources/FX/ImpactEffect");
+        }
+    }
+
 }

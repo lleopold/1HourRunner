@@ -24,19 +24,17 @@ public class WalkToSelected : IState
 
     public void OnEnter()
     {
-        TimeStuck = 0f;
+        _enemy.AttackFinished = false; // reset for next attack cycle
 
+        TimeStuck = 0f;
         if (!_navMeshAgent.enabled) _navMeshAgent.enabled = true;
         _navMeshAgent.isStopped = false;
         _navMeshAgent.updatePosition = true;
         _navMeshAgent.updateRotation = true;
 
-        // Ensure we have a non-zero speed
         _navMeshAgent.speed = (_enemyConfig.speed > 0.01f) ? _enemyConfig.speed : 3.5f;
-
         _navMeshAgent.ResetPath();
 
-        // Prefer the current player transform if available
         var playerT = _enemy._player != null ? _enemy._player.transform : _target;
         if (playerT != null) _navMeshAgent.SetDestination(playerT.position);
 
