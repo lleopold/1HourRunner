@@ -35,6 +35,8 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     private Outline _outline;
     public HealthBarScroll healthBarScroll;
     private Transform healthBarUI;
+    private bool _healthBarVisible = false; // Added: track reveal state
+
 
     public BloodDecalAsset _puddles;
 
@@ -68,6 +70,11 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         GameObject healthBarCanvas = healthBarCanvasTransform.gameObject;
         healthBarUI = healthBarCanvas.transform.Find("HealthBarUI");
         healthBarScroll = healthBarUI.GetComponent<HealthBarScroll>();
+
+        var cg = healthBarUI.GetComponent<CanvasGroup>();
+        if (cg) cg.alpha = 1f;
+
+        _healthBarVisible = false;
 
         string prefabName = gameObject.name;
         _player = GameObject.Find("Player");
@@ -217,14 +224,19 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
     void Start()
     {
-        //        SetRagdollState(false); // Disable at start
-
         healthBarScroll.healthSystemArmour.Initialize(_health, 0);
         dieCondition = false;
         zombieNavMeshAgent.speed = _enemyConfig.speed;
         if (_player == null)
         {
             Debug.LogError("Player reference is not assigned to the ZombieMovement script.");
+        }
+
+        // Hide health bar until first damage
+        if (healthBarUI != null)
+        {
+            healthBarUI.gameObject.SetActive(false);
+            _healthBarVisible = false;
         }
     }
 
@@ -257,27 +269,38 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
     public void DamageReceived(float damage, Vector3 hitDirection)
     {
-        if (_health < 0) //dead or dying
-        {
+        if (_health <= 0) // already dead or dying
             return;
+
+        // First time damage: apply damage BEFORE showing the UI so it appears already reduced
+        bool firstReveal = !_healthBarVisible;
+
+        // Apply damage to internal values
+        _health -= damage;
+        healthBarScroll.healthSystemArmour.Damage(damage);
+
+        // Clamp (just in case overkill damage was large)
+        if (_health < 0) _health = 0;
+
+        if (firstReveal && healthBarUI != null)
+        {
+            healthBarUI.gameObject.SetActive(true);
+            _healthBarVisible = true;
         }
 
+        // Visual feedback / animation after health state is correct
         Hit();
-        _health = _health - damage;
-        //_healthSystem.Damage(damage);
-        healthBarScroll.healthSystemArmour.Damage(damage);
-        //DamagePopUp.Create(transform.position, (int)damage);
-        //New damage numbers pro
-        Vector3 damagePosition = transform.position + Vector3.up * 1.5f; // Adjust height for visibility
+
+        // Damage number (uses already reduced value contextually)
+        Vector3 damagePosition = transform.position + Vector3.up * 1.5f;
         _damageNumberPrefab.Spawn(damagePosition, damage);
 
-
-        if (_health < 0 && !_spawnedCoin)
+        if (_health <= 0 && !_spawnedCoin)
         {
             _spawnedCoin = true;
             SpawnCoin(30);
-            Collider zombieCollider = GetComponent<Collider>();
-            zombieCollider.enabled = false;
+            var zombieCollider = GetComponent<Collider>();
+            if (zombieCollider) zombieCollider.enabled = false;
             Die();
         }
     }

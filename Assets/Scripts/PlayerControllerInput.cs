@@ -177,6 +177,8 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
     private List<StickInputSample> _stickInputBuffer = new List<StickInputSample>();
     private float _inputBufferDuration = 0.5f;
     RaycastHit _raycastHit;
+    // Add near other private fields:
+    private float _rawInputMagnitude;
 
     public float Health
     {
@@ -468,13 +470,11 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
     public void Move(InputAction.CallbackContext context)
     {
         _input = context.ReadValue<Vector2>();
-        if (_input == null) Debug.LogError("_input is null");
+        _rawInputMagnitude = Mathf.Clamp01(_input.magnitude); // Preserve raw stick magnitude (analog friendly)
         _direction = new Vector3(_input.x, 0, _input.y);
-        _direction.Normalize();
+        if (_direction.sqrMagnitude > 1f) _direction.Normalize(); // Only normalize if truly >1 (diagonals on keyboard)
         _velocityZ = Vector3.Dot(_direction.normalized, transform.forward);
         _velocityX = Vector3.Dot(_direction.normalized, transform.right);
-
-
     }
 
 
@@ -755,33 +755,46 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
 
     private void ApplyMovement()
     {
-
-        //if (_input.sqrMagnitude > 0){
         if (!isDashing)
         {
             int sprinting = movement.isSprinting ? 1 : 0;
-            var targetSpeed = GetMoveSpeed(_input.magnitude, sprinting);
-            movement.currentSpeed = Mathf.MoveTowards(movement.currentSpeed, targetSpeed, PlayerConfigSingleton.Instance.PlayerConfig.speed * Time.deltaTime);
-            //_characterController.Move(_direction * movement.currentSpeed * Time.deltaTime);
-            float moveStep = movement.currentSpeed * Time.deltaTime;//reorder for better performance
+            var targetSpeed = GetMoveSpeed(_rawInputMagnitude, sprinting);
+            movement.currentSpeed = Mathf.MoveTowards(
+                movement.currentSpeed,
+                targetSpeed,
+                PlayerConfigSingleton.Instance.PlayerConfig.speed * Time.deltaTime);
+            float moveStep = movement.currentSpeed * Time.deltaTime;
             _characterController.Move(_direction * moveStep);
         }
 
         MoveAimingCircle();
 
-        //verovatno ne treba
-        //float angle = GetAngleBetweenVectors(_direction, GetNormalizedMousePosition(transform.position));
-        //angle = DegreesToRadians(angle);
-
-
         _animator.SetFloat("MoveZ", _velocityZ, 0.2f, Time.deltaTime);
         _animator.SetFloat("MoveX", _velocityX, 0.2f, Time.deltaTime);
-        _animator.SetFloat("moveAmount", _input.magnitude, 0.2f, Time.deltaTime);
 
-        // Update aiming penalty based on movement
-        bool isWalking = _input.magnitude > 0 && !movement.isSprinting;
+        // ----- New moveAmount logic -----
+        float walkBase = PlayerConfigSingleton.Instance.PlayerConfig.speed; // Your configured base speed
+        float runMultiplier = (PlayerConfigSingleton.Instance.PlayerConfig.RunningSpeed_pct / 100f) + 1f;
+        float runMax = walkBase * runMultiplier;
+
+        // movement.currentSpeed is already easing toward target; use it for animation smoothness
+        float denom = movement.isSprinting ? runMax : walkBase;
+        float speedRatio = denom > 0f ? Mathf.Clamp01(movement.currentSpeed / denom) : 0f;
+
+        float moveAmount = movement.isSprinting
+            ? 0.5f + 0.5f * speedRatio          // 0.5 → 1 while running
+            : 0.5f * speedRatio;                // 0 → 0.5 while walking
+
+        // Optional: if analog stick is very slight, force a tiny walk to avoid popping idle <-> walk
+        if (!movement.isSprinting && _rawInputMagnitude > 0f && moveAmount < 0.05f)
+            moveAmount = 0.05f;
+
+        _animator.SetFloat("moveAmount", moveAmount, 0.15f, Time.deltaTime);
+        // --------------------------------
+
+        bool isWalking = _rawInputMagnitude > 0 && !movement.isSprinting;
         bool isRunning = movement.isSprinting;
-        bool isStrafing = _input.magnitude > 0; // Can be separate check if needed
+        bool isStrafing = _rawInputMagnitude > 0;
 
         UpdateMovementPenalty(isWalking, isRunning, isStrafing);
     }
@@ -840,8 +853,12 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
         _numberOfJumps = 0;
     }
     private bool IsGrounded() => _characterController.isGrounded;
-    private float GetMoveSpeed(float moveAmount, int runningLocal)
+    private float GetMoveSpeed(float inputMagnitude, int runningLocal)
     {
+        // Early exit: no input => no movement speed
+        if (inputMagnitude <= 0.001f)
+            return 0f;
+
         float localWalkingSpeedForward;
         float localRunningSpeedForward;
         float localWalkingSpeedBack;
@@ -855,17 +872,15 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
         {
             localWalkingSpeedForward = ((PlayerConfigSingleton.Instance.PlayerConfig.speed / 100) + 1) * tempWalking;
             localRunningSpeedForward = ((PlayerConfigSingleton.Instance.PlayerConfig.RunningSpeed_pct / 100) + 1) * runningLocal;
-            //returnSpeed = returnSpeed * (localWalkingSpeedForward + localRunningSpeedForward);
             returnSpeed *= (localWalkingSpeedForward + localRunningSpeedForward);
         }
         if (Math.Sign(fwdBck) == -1)
         {
             localWalkingSpeedBack = ((PlayerConfigSingleton.Instance.PlayerConfig.speed / 100) + 1) * tempWalking;
             localRunningSpeedBack = ((PlayerConfigSingleton.Instance.PlayerConfig.BackMovementPenalty_pct * PlayerConfigSingleton.Instance.PlayerConfig.speed / 100) + 1) * runningLocal;
-            //returnSpeed = returnSpeed * (localWalkingSpeedBack + localRunningSpeedBack);
             returnSpeed *= (localWalkingSpeedBack + localRunningSpeedBack);
-
         }
+
         return returnSpeed;
     }
     //re
@@ -1527,8 +1542,18 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
         // Apply to LineRenderer
         Gradient gradient = new();
         gradient.SetKeys(
-            new GradientColorKey[] { new(darkerColor, 0f), new(darkerColor, 1f) },
-            new GradientAlphaKey[] { new(0.9f, 0f), new(0.9f, 1f) } // Increased alpha to make it more solid
+            new[] {
+            new GradientColorKey(Color.white, 0f),
+            new GradientColorKey(laserColor, 0.35f),
+            new GradientColorKey(laserColor, 0.65f),
+            new GradientColorKey(Color.white, 1f),
+            },
+            new[] {
+            new GradientAlphaKey(0.0f, 0f),
+            new GradientAlphaKey(1.0f, 0.08f),
+            new GradientAlphaKey(1.0f, 0.92f),
+            new GradientAlphaKey(0.0f, 1f),
+            }
         );
         lineRenderer.colorGradient = gradient;
 
@@ -1553,7 +1578,6 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
             meshRenderer.material.SetColor("_EmissionColor", newColor * 2f); // Glow effect
         }
     }
-
 
 
 
@@ -1714,7 +1738,6 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
 
 
 
-
     private IEnumerator ApplyMovementPenalty(float percentageIncrease, float interval)
     {
         while (true)
@@ -1756,7 +1779,7 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
         else if (_aim)
         {
             // Optional: small decay while stationary but still aiming (handled in UpdateAimingVisuals already).
-            // Keep empty to avoid fighting with that logic.
+            // Keep empty to avoid fighting with that logic
         }
 
         // Note: _movementPenaltyCoroutine is no longer used.
@@ -2079,7 +2102,7 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
         if (lineRendererLeft != null) lineRendererLeft.enabled = on;
         if (lineRendererRight != null) lineRendererRight.enabled = on;
 
-        // (opciono) ugasi emisiju kad nije aktivno, da ne “sija”
+        // (opciono) ugasi emisiju kad nije aktivno, da ne “sija” 
         if (laserMat != null)
         {
             var e = on ? (emissionBase) : 0f;
