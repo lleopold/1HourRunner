@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Game;
 using CodeMonkey.HealthSystemCM;
+using DamageNumbersPro;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -177,8 +178,14 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
     private List<StickInputSample> _stickInputBuffer = new List<StickInputSample>();
     private float _inputBufferDuration = 0.5f;
     RaycastHit _raycastHit;
-    // Add near other private fields:
+    // Add near other private fields (after _rawInputMagnitude for example)
+    private bool _isDecelerating;
+    private float _decelRate;
+    private bool _lastWasRunning;
+    private const float WALK_STOP_TIME = 0.2f;
+    private const float RUN_STOP_TIME = 0.4f;
     private float _rawInputMagnitude;
+    private static DamageNumber _damageNumberPrefab;
 
     public float Health
     {
@@ -406,7 +413,25 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
         _uiT_EndGamePopUp._root.visible = false;
         _uiT_EndGamePopUp.enabled = false;
 
+        CreateDamageNumber();
+
+
     }
+    public static void CreateDamageNumber()
+    {
+        // Load once and reuse
+        if (_damageNumberPrefab == null)
+        {
+            _damageNumberPrefab = Resources.Load<DamageNumber>("DamageNumbers/DamageNumbers_2");
+            //_damageNumberPrefab = Instantiate(_damageNumberPrefab, transform.position, Quaternion.identity);
+            if (_damageNumberPrefab == null)
+            {
+                Debug.LogError("DamageNumber prefab not found in Prefabs!");
+                return;
+            }
+        }
+    }
+
 
 
     private void OnDestroy()
@@ -757,41 +782,71 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
 
     private void ApplyMovement()
     {
+        bool hasInput = _rawInputMagnitude > 0.01f;
+
+        // Cancel deceleration if player gives new input
+        if (hasInput && _isDecelerating)
+            _isDecelerating = false;
+
         if (!isDashing)
         {
             int sprinting = movement.isSprinting ? 1 : 0;
-            var targetSpeed = GetMoveSpeed(_rawInputMagnitude, sprinting);
+            var targetSpeed = hasInput ? GetMoveSpeed(_rawInputMagnitude, sprinting) : 0f;
 
-            // Use acceleration mapping (0 = no change, 100 = instant)
-            UpdateCurrentSpeed(targetSpeed);
+            if (hasInput)
+            {
+                // Track last state (used when input stops)
+                _lastWasRunning = movement.isSprinting;
+
+                // Accelerate toward target
+                UpdateCurrentSpeed(targetSpeed);
+            }
+            else
+            {
+                // No input: start deceleration if moving and not already decelerating
+                if (!_isDecelerating && movement.currentSpeed > 0.01f)
+                {
+                    float stopTime = _lastWasRunning ? RUN_STOP_TIME : WALK_STOP_TIME;
+                    stopTime = Mathf.Max(0.01f, stopTime);
+                    _decelRate = movement.currentSpeed / stopTime; // constant linear decel
+                    _isDecelerating = true;
+                }
+
+                if (_isDecelerating)
+                {
+                    movement.currentSpeed = Mathf.Max(0f, movement.currentSpeed - _decelRate * Time.deltaTime);
+                    if (movement.currentSpeed <= 0.0001f)
+                    {
+                        movement.currentSpeed = 0f;
+                        _isDecelerating = false;
+                    }
+                }
+            }
 
             float moveStep = movement.currentSpeed * Time.deltaTime;
             _characterController.Move(_direction * moveStep);
         }
 
         MoveAimingCircle();
+
         _animator.SetFloat("MoveZ", _velocityZ, 0.2f, Time.deltaTime);
         _animator.SetFloat("MoveX", _velocityX, 0.2f, Time.deltaTime);
 
-        // ----- New moveAmount logic -----
-        float walkBase = PlayerConfigSingleton.Instance.PlayerConfig.speed; // Your configured base speed
+        float walkBase = PlayerConfigSingleton.Instance.PlayerConfig.speed;
         float runMultiplier = (PlayerConfigSingleton.Instance.PlayerConfig.RunningSpeed_pct / 100f) + 1f;
         float runMax = walkBase * runMultiplier;
 
-        // movement.currentSpeed is already easing toward target; use it for animation smoothness
         float denom = movement.isSprinting ? runMax : walkBase;
         float speedRatio = denom > 0f ? Mathf.Clamp01(movement.currentSpeed / denom) : 0f;
 
         float moveAmount = movement.isSprinting
-            ? 0.5f + 0.5f * speedRatio          // 0.5 → 1 while running
-            : 0.5f * speedRatio;                // 0 → 0.5 while walking
+            ? 0.5f + 0.5f * speedRatio
+            : 0.5f * speedRatio;
 
-        // Optional: if analog stick is very slight, force a tiny walk to avoid popping idle <-> walk
         if (!movement.isSprinting && _rawInputMagnitude > 0f && moveAmount < 0.05f)
             moveAmount = 0.05f;
 
         _animator.SetFloat("moveAmount", moveAmount, 0.15f, Time.deltaTime);
-        // --------------------------------
 
         bool isWalking = _rawInputMagnitude > 0 && !movement.isSprinting;
         bool isRunning = movement.isSprinting;
@@ -1397,6 +1452,9 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
         //_hit = true;
         _animator.Play("HeadHit");
         SoundFXManager.Instance.PlaySoundFXClip(PlayerConfigSingleton.Instance.PlayerConfig.hitReceived, transform, 1f);
+        Vector3 damagePosition = transform.position + Vector3.up * 1.5f;
+        _damageNumberPrefab.Spawn(damagePosition, damage);
+
     }
 
     public HealthSystem GetHealthSystem()
@@ -1761,11 +1819,10 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
         }
     }
 
-
     // Acceleration handling: movement.acceleration (0..100)
     private void UpdateCurrentSpeed(float targetSpeed)
     {
-        float accelPct = Mathf.Clamp(movement.acceleration, 0f, 100f);
+        float accelPct = Mathf.Clamp(movement.acceleration, 0f, 100f); // 0..100
 
         if (accelPct >= 100f)
         {
@@ -1775,12 +1832,13 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
 
         if (accelPct <= 0f)
         {
-            // Never accelerates toward target; stays where it is
-            if (targetSpeed == 0f) movement.currentSpeed = 0f; // allow stopping
+            // Frozen speed unless target is zero
+            if (targetSpeed == 0f) movement.currentSpeed = 0f;
             return;
         }
 
-        float factor = accelPct / 100f;          // 0..1
+        // Smooth approach based on acceleration percent
+        float factor = accelPct / 100f; // 0..1
         movement.currentSpeed += (targetSpeed - movement.currentSpeed) * factor;
 
         if (Mathf.Abs(targetSpeed - movement.currentSpeed) < 0.01f)
@@ -2092,7 +2150,7 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
 
     void AnimateLaser(LineRenderer lr, Material mat)
     {
-        // Scroll UV (strujanje)
+        // Scroll UV (strujanja)
         float t = Time.time;
         Vector2 o = mat.mainTextureOffset;
         o.x = -t * scrollSpeed;
