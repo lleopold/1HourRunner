@@ -357,6 +357,8 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
         EnsureLineRenderersOnTop();
         InitLaserSmoke();
 
+        // === Default movement acceleration if not set in Inspector ===
+        if (movement.acceleration <= 0f) movement.acceleration = 80f; // 0..100 (0 = never accelerates, 100 = instant)
     }
 
     private void Awake()
@@ -759,16 +761,15 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
         {
             int sprinting = movement.isSprinting ? 1 : 0;
             var targetSpeed = GetMoveSpeed(_rawInputMagnitude, sprinting);
-            movement.currentSpeed = Mathf.MoveTowards(
-                movement.currentSpeed,
-                targetSpeed,
-                PlayerConfigSingleton.Instance.PlayerConfig.speed * Time.deltaTime);
+
+            // Use acceleration mapping (0 = no change, 100 = instant)
+            UpdateCurrentSpeed(targetSpeed);
+
             float moveStep = movement.currentSpeed * Time.deltaTime;
             _characterController.Move(_direction * moveStep);
         }
 
         MoveAimingCircle();
-
         _animator.SetFloat("MoveZ", _velocityZ, 0.2f, Time.deltaTime);
         _animator.SetFloat("MoveX", _velocityX, 0.2f, Time.deltaTime);
 
@@ -880,6 +881,7 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
             localRunningSpeedBack = ((PlayerConfigSingleton.Instance.PlayerConfig.BackMovementPenalty_pct * PlayerConfigSingleton.Instance.PlayerConfig.speed / 100) + 1) * runningLocal;
             returnSpeed *= (localWalkingSpeedBack + localRunningSpeedBack);
         }
+        movement.acceleration = PlayerConfigSingleton.Instance.PlayerConfig.acceleration;
 
         return returnSpeed;
     }
@@ -1760,7 +1762,32 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
     }
 
 
-    void UpdateMovementPenalty(bool isWalking, bool isRunning, bool isStrafing)
+    // Acceleration handling: movement.acceleration (0..100)
+    private void UpdateCurrentSpeed(float targetSpeed)
+    {
+        float accelPct = Mathf.Clamp(movement.acceleration, 0f, 100f);
+
+        if (accelPct >= 100f)
+        {
+            movement.currentSpeed = targetSpeed; // instant
+            return;
+        }
+
+        if (accelPct <= 0f)
+        {
+            // Never accelerates toward target; stays where it is
+            if (targetSpeed == 0f) movement.currentSpeed = 0f; // allow stopping
+            return;
+        }
+
+        float factor = accelPct / 100f;          // 0..1
+        movement.currentSpeed += (targetSpeed - movement.currentSpeed) * factor;
+
+        if (Mathf.Abs(targetSpeed - movement.currentSpeed) < 0.01f)
+            movement.currentSpeed = targetSpeed;
+    }
+
+    private void UpdateMovementPenalty(bool isWalking, bool isRunning, bool isStrafing)
     {
         float pctPerSecond = 0f;
 
@@ -2255,7 +2282,6 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
         _laserSmokeRight.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 }
-
 [Serializable]
 public struct Movement
 {

@@ -577,8 +577,8 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
             SpawnImpactEffect(_player.transform.position);
         }
 
-        var hitEffectPrefab = Resources.Load<GameObject>("Weapons/Hit_02");
-        if (hitEffectPrefab) Instantiate(hitEffectPrefab, _player.transform.position, Quaternion.identity);
+        //var hitEffectPrefab = Resources.Load<GameObject>("Weapons/Hit_02");
+        //if (hitEffectPrefab) Instantiate(hitEffectPrefab, _player.transform.position, Quaternion.identity);
 
         if (strIn == "end")
         {
@@ -736,6 +736,9 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
     private bool PlayerIsInMeleeRange()
     {
+
+        float distance = Vector3.Distance(transform.position, _player.transform.position);
+        Debug.Log("Melee range: " + _enemyConfig.meleeRadius + "Current range: " + distance);
         return Vector3.Distance(transform.position, _player.transform.position) <= _enemyConfig.meleeRadius;
     }
 
@@ -743,7 +746,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     {
         Vector3 directionToPlayer = (_player.transform.position - transform.position).normalized;
         float angle = Vector3.Angle(transform.forward, directionToPlayer);
-        // You can adjust the angle threshold as needed (e.g., 45 degrees)
+        Debug.Log("Angle to Player (has to be less 45%: " + angle);
         return angle < 45f;
     }
 
