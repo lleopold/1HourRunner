@@ -57,8 +57,16 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
     [SerializeField] float minWorldWidth = 0.02f;  // safety clamps
     [SerializeField] float maxWorldWidth = 0.25f;
 
+    // Add near other private fields
+    [SerializeField] private float movementSpreadPerSecondWalk = 25f;   // degrees per second toward max
+    [SerializeField] private float movementSpreadPerSecondRun = 45f;    // degrees per second toward max
+    [SerializeField] private float movementEnterBurstPct = 20f;         // % of (max-min) instantly when starting to move while aiming
+    private bool _wasMoving;
+
     // Prefab path (inside Resources folder) and ParticleSystem references
     [SerializeField] string laserSmokePrefabPath = "VFX/LaserSmoke";
+    private float MovementPenaltyBase
+        => PlayerConfigSingleton.Instance.PlayerConfig.movementAimingPenalty;
     ParticleSystem _laserSmokeLeft;
     ParticleSystem _laserSmokeRight;
 
@@ -1845,31 +1853,35 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
             movement.currentSpeed = targetSpeed;
     }
 
-    private void UpdateMovementPenalty(bool isWalking, bool isRunning, bool isStrafing)
+    // Replace the current UpdateMovementPenalty method with this version
+    void UpdateMovementPenalty(bool isWalking, bool isRunning, bool isStrafing)
     {
-        float pctPerSecond = 0f;
+        bool isMoving = (isWalking || isRunning || isStrafing);
 
-        if (isRunning)
-            pctPerSecond = 30f;       // running increases spread faster
-        else if (isWalking || isStrafing)
-            pctPerSecond = 10f;       // walking/strafe increases spread slower
-
-        if (pctPerSecond > 0f && _aim)
+        if (_aim)
         {
-            // Increase current spread by a percentage per second of the current (at least min) value.
-            float baseForGrowth = Mathf.Max(_currentAngleLineRenderers, gameStats._precisionMin);
-            float delta = baseForGrowth * (pctPerSecond / 100f) * Time.deltaTime;
-            _currentAngleLineRenderers = Mathf.Min(_currentAngleLineRenderers + delta, gameStats._precisionMax);
-        }
-        else if (_aim)
-        {
-            // Optional: small decay while stationary but still aiming (handled in UpdateAimingVisuals already).
-            // Keep empty to avoid fighting with that logic
+            float range = gameStats._precisionMax - gameStats._precisionMin;
+
+            // One–time burst when movement begins
+            if (isMoving && !_wasMoving)
+            {
+                float burst = range * (MovementPenaltyBase / 100f); // treat as percentage of range
+                _currentAngleLineRenderers = Mathf.Min(_currentAngleLineRenderers + burst, gameStats._precisionMax);
+            }
+
+            // Continuous growth while moving
+            if (isMoving)
+            {
+                // walking = base; running = 2x base
+                float perSecond = MovementPenaltyBase * (isRunning ? 2f : 1f);
+                _currentAngleLineRenderers = Mathf.Min(
+                    _currentAngleLineRenderers + perSecond * Time.deltaTime,
+                    gameStats._precisionMax);
+            }
         }
 
-        // Note: _movementPenaltyCoroutine is no longer used.
+        _wasMoving = isMoving;
     }
-
     private IEnumerator DashCoroutine()
     {
         isDashing = true;
@@ -2201,15 +2213,23 @@ public class PlayerControllerInput : MonoBehaviour, IGetHealthSystem
         {
             SetAimLinesActive(true);
 
+            //bool isMoving = _input.magnitude > 0f;
+            //// Only relax toward min when not moving. If moving, let movement penalty increase spread.
+            //if (!isMoving)
+            //{
+            //    _currentAngleLineRenderers = Mathf.MoveTowards(
+            //        _currentAngleLineRenderers,
+            //        gameStats._precisionMin,
+            //        gameStats._aimingSpeed * Time.deltaTime
+            //    );
+            //}
             bool isMoving = _input.magnitude > 0f;
-            // Only relax toward min when not moving. If moving, let movement penalty increase spread.
             if (!isMoving)
             {
-                _currentAngleLineRenderers = Mathf.MoveTowards(
-                    _currentAngleLineRenderers,
+                float recoverPerSecond = gameStats._aimingSpeed;
+                _currentAngleLineRenderers = Mathf.Max(
                     gameStats._precisionMin,
-                    gameStats._aimingSpeed * Time.deltaTime
-                );
+                    _currentAngleLineRenderers - recoverPerSecond * Time.deltaTime);
             }
 
             // Apply recoil as a raise, not as a hard set
