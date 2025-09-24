@@ -5,7 +5,7 @@ public class Coin : MonoBehaviour
     public int CoinAmount { get; set; }
     public float magnetRange; // Magnet range for the coin
     private bool isMagnetized = false;
-    private float movementSpeed = 15f; // Speed at which the coin moves towards the player
+    private float movementSpeed = 7f; // Speed at which the coin moves towards the player
     private GameObject _player;
     AudioClip _coinSound;
     private bool _pickedUp = false;
