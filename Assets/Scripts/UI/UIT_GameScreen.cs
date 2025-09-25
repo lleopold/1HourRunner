@@ -1,8 +1,8 @@
 using Assets.Scripts.HealthSystem;
-using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using ZombieGame;
 
 public class UIT_GameScreen : MonoBehaviour
 {

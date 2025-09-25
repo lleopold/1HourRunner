@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using ZombieGame;
 using Random = UnityEngine.Random;
 
 

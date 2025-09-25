@@ -1,4 +1,5 @@
 using UnityEngine;
+using ZombieGame;
 
 public class Coin : MonoBehaviour
 {
