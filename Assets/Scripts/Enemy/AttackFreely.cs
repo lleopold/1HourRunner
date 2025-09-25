@@ -52,12 +52,8 @@ public class AttackFreely : IState
     {
         _attacking = false;
 
-        // Resume movement control
-        if (_navMeshAgent != null)
-        {
-            _navMeshAgent.isStopped = false;
-            _navMeshAgent.updateRotation = true;
-        }
+        // Do not resume NavMeshAgent here; the next locomotion state will configure it.
+        // This avoids a frame of sliding before the walk animation blends in.
 
         // Clear attack params
         _animator.ResetTrigger("ZombieAttack");
@@ -72,17 +68,17 @@ public class AttackFreely : IState
 
     public void Tick()
     {
-        // Face the player while attacking
-        if (_victim != null)
-        {
-            Vector3 direction = _victim.transform.position - _enemy.transform.position;
-            direction.y = 0f;
-            if (direction.sqrMagnitude > 0.0001f)
-            {
-                Quaternion lookRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
-                _enemy.transform.rotation = Quaternion.Slerp(_enemy.transform.rotation, lookRotation, 10f * Time.deltaTime);
-            }
-        }
+        //// Face the player while attacking sto bi to radio, i fora je da moze da se skloni
+        //if (_victim != null)
+        //{
+        //    Vector3 direction = _victim.transform.position - _enemy.transform.position;
+        //    direction.y = 0f;
+        //    if (direction.sqrMagnitude > 0.0001f)
+        //    {
+        //        Quaternion lookRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+        //        _enemy.transform.rotation = Quaternion.Slerp(_enemy.transform.rotation, lookRotation, 10f * Time.deltaTime);
+        //    }
+        //}
     }
 
     private System.Collections.IEnumerator AttackEndFailSafe(float seconds)
@@ -92,6 +88,7 @@ public class AttackFreely : IState
         {
             // If animation didn’t signal end, force it
             _enemy.AttackFinished = true;
+            Debug.Log("AttackEndFailSafe triggered");
         }
     }
 }

@@ -107,7 +107,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         //At(searchForVictim, walkToSelected, FarToPlayer);
         //At(searchForGatheringSpot, walkToGathering, FarToGathering);
         //At(walkToGathering, stop, CloseToGather);    //TODO
-        At(stop, searchForVictim, HasTarget);
+        At(stop, searchForVictim, () => HasTarget() && stop.CanExit);
         At(searchForVictim, walkToSelected, FarToPlayer);
         //At(searchForVictim, walkToSelected, HasTarget);
 
@@ -120,7 +120,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
 
         At(walkToSelected, attackFreely, CloseToPlayer);
-        At(attackFreely, walkToSelected, FinishedAttack);
+        At(attackFreely, stop, FinishedAttack);
 
         //At(searchForGatheringSpot, walkToGathering, FarToGathering);
         //At(attackFreely, walkToGathering, CloseToGather);
@@ -565,6 +565,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     //referenced from the animation
     public void AnimationZombieAttack(string strIn)
     {
+        // Keep movement halted during all attack events (including "end").
         zombieNavMeshAgent.isStopped = true;
 
         if (strIn != "end")
@@ -578,13 +579,11 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
             SpawnImpactEffect(_player.transform.position);
         }
 
-        //var hitEffectPrefab = Resources.Load<GameObject>("Weapons/Hit_02");
-        //if (hitEffectPrefab) Instantiate(hitEffectPrefab, _player.transform.position, Quaternion.identity);
-
         if (strIn == "end")
         {
+            // Signal the state machine to transition; do NOT resume NavMesh here.
             AttackFinished = true;
-            zombieNavMeshAgent.isStopped = false; // let chase resume immediately
+            // Movement will resume in WalkToSelected.OnEnter to keep animation/motion in sync.
         }
     }
 
