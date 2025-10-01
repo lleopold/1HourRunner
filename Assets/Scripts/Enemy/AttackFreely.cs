@@ -11,6 +11,10 @@ public class AttackFreely : IState
     private MonoBehaviour _monoBehaviour;
     private NavMeshAgent _navMeshAgent;
     private Coroutine _attackTimeoutCo;
+    private Coroutine _sequenceCo;
+
+    // Telegraph timing tweakable
+    private const float TelegraphDuration = 0.5f;
 
     public AttackFreely(Enemy enemy, GameObject victim, Animator animator, EnemyConfig enemyConfig, MonoBehaviour monoBehaviour)
     {
@@ -24,16 +28,75 @@ public class AttackFreely : IState
 
     public void OnEnter()
     {
-        // Stop moving while we swing
+        if (_attacking) return;
+        _attacking = true;
+
         if (_navMeshAgent != null)
         {
             _navMeshAgent.isStopped = true;
-            _navMeshAgent.updateRotation = false; // we rotate manually while attacking
+            _navMeshAgent.updateRotation = false;
         }
 
-        if (_attacking) return;
+        // Start full attack sequence (telegraph -> animation)
+        _sequenceCo = _monoBehaviour.StartCoroutine(AttackSequence());
+    }
 
-        if (Random.Range(1, 3) == 1)
+    public void OnExit()
+    {
+        _attacking = false;
+
+        if (_attackTimeoutCo != null)
+        {
+            _monoBehaviour.StopCoroutine(_attackTimeoutCo);
+            _attackTimeoutCo = null;
+        }
+
+        if (_sequenceCo != null)
+        {
+            _monoBehaviour.StopCoroutine(_sequenceCo);
+            _sequenceCo = null;
+        }
+
+        // Hide indicator if still showing
+        _enemy.AlertIndicator?.Cancel();
+
+        // Reset animator params
+        _animator.ResetTrigger("ZombieAttack");
+        _animator.SetInteger("Kick", 0);
+    }
+
+    public void Tick()
+    {
+        // Rotation while attacking intentionally skipped (commented logic retained in original)
+    }
+
+    private System.Collections.IEnumerator AttackSequence()
+    {
+        bool useKick = (Random.Range(1, 3) == 1);
+
+        bool canAttack = true;
+        // Optional: you could add conditions here (e.g. still in melee range)
+        if (!canAttack)
+        {
+            _enemy.AttackFinished = true;
+            yield break;
+        }
+
+        // Telegraph phase
+        if (_enemy.AlertIndicator != null)
+        {
+            bool telegraphDone = false;
+            _enemy.AlertIndicator.Telegraph(_monoBehaviour, TelegraphDuration, () => telegraphDone = true);
+            while (!telegraphDone)
+                yield return null;
+        }
+        else
+        {
+            yield return new WaitForSeconds(TelegraphDuration);
+        }
+
+        // Play actual attack animation
+        if (useKick)
         {
             _animator.SetInteger("Kick", 1);
         }
@@ -42,43 +105,8 @@ public class AttackFreely : IState
             _animator.SetTrigger("ZombieAttack");
         }
 
-        // Fail-safe: ensure we exit attack even if animation event “end” doesn’t fire
+        // Fail-safe exit
         _attackTimeoutCo = _monoBehaviour.StartCoroutine(AttackEndFailSafe(2.0f));
-
-        _attacking = true;
-    }
-
-    public void OnExit()
-    {
-        _attacking = false;
-
-        // Do not resume NavMeshAgent here; the next locomotion state will configure it.
-        // This avoids a frame of sliding before the walk animation blends in.
-
-        // Clear attack params
-        _animator.ResetTrigger("ZombieAttack");
-        _animator.SetInteger("Kick", 0);
-
-        if (_attackTimeoutCo != null)
-        {
-            _monoBehaviour.StopCoroutine(_attackTimeoutCo);
-            _attackTimeoutCo = null;
-        }
-    }
-
-    public void Tick()
-    {
-        //// Face the player while attacking sto bi to radio, i fora je da moze da se skloni
-        //if (_victim != null)
-        //{
-        //    Vector3 direction = _victim.transform.position - _enemy.transform.position;
-        //    direction.y = 0f;
-        //    if (direction.sqrMagnitude > 0.0001f)
-        //    {
-        //        Quaternion lookRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
-        //        _enemy.transform.rotation = Quaternion.Slerp(_enemy.transform.rotation, lookRotation, 10f * Time.deltaTime);
-        //    }
-        //}
     }
 
     private System.Collections.IEnumerator AttackEndFailSafe(float seconds)
@@ -86,7 +114,6 @@ public class AttackFreely : IState
         yield return new WaitForSeconds(seconds);
         if (!_enemy.AttackFinished)
         {
-            // If animation didn’t signal end, force it
             _enemy.AttackFinished = true;
             Debug.Log("AttackEndFailSafe triggered");
         }

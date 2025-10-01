@@ -46,6 +46,8 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     private Collider[] _ragdollColliders;
     //[SerializeField] private Animator _animator;
     private static DamageNumber _damageNumberPrefab;
+    public EnemyAlertIndicator AlertIndicator { get; private set; }
+
 
 
     private void Awake()
@@ -150,6 +152,12 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
             bloodDecalManagerGO.AddComponent<BloodDecalManager>();
         }
         CreateDamageNumber();
+
+        AlertIndicator = gameObject.AddComponent<EnemyAlertIndicator>();
+        AlertIndicator.worldOffset = new Vector3(0f, 2.1f, 0f); // tune per model height
+        AlertIndicator.prefabPath = "Indicators/Exclamation";
+        AlertIndicator.EnsureReady();
+
     }
 
     public void SetOutline(bool newSetting)
