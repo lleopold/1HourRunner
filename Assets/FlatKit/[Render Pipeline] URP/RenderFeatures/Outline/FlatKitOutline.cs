@@ -11,7 +11,7 @@ public class FlatKitOutline : ScriptableRendererFeature {
     public OutlineSettings settings;
 
     private Material _effectMaterial;
-    private DustyroomRenderPass _fullScreenPass;
+    private ScreenRenderPass _fullScreenPass;
     private bool _requiresColor;
     private bool _injectedBeforeTransparents;
     private ScriptableRenderPassInput _requirements = ScriptableRenderPassInput.Color;
@@ -49,7 +49,7 @@ public class FlatKitOutline : ScriptableRendererFeature {
         }
 
         {
-            _fullScreenPass = new DustyroomRenderPass {
+            _fullScreenPass = new ScreenRenderPass {
                 renderPassEvent = settings.renderEvent,
             };
 

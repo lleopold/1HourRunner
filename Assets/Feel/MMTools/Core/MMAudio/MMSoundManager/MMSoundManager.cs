@@ -72,6 +72,7 @@ namespace MoreMountains.Tools
 		protected Dictionary<AudioSource, Coroutine> _fadeInSoundCoroutines;
 		protected Dictionary<AudioSource, Coroutine> _fadeOutSoundCoroutines;
 		protected Dictionary<MMSoundManagerTracks, Coroutine> _fadeTrackCoroutines;
+		protected Dictionary<MMSoundManagerTracks, bool> _pausedTracks = new Dictionary<MMSoundManagerTracks, bool>();
 
 		#region Initialization
 
@@ -407,6 +408,21 @@ namespace MoreMountains.Tools
 		#endregion
         
 		#region TrackControls
+
+		/// <summary>
+		/// Returns true if the specified track is currently paused, false otherwise
+		/// </summary>
+		/// <param name="track"></param>
+		/// <returns></returns>
+		public virtual bool IsPaused(MMSoundManagerTracks track)
+		{
+			if (_pausedTracks.TryGetValue(track, out bool muted))
+			{
+				return muted;
+			}
+
+			return false;
+		}
         
 		/// <summary>
 		/// Mutes an entire track
@@ -492,6 +508,7 @@ namespace MoreMountains.Tools
 		/// <param name="track"></param>
 		public virtual void PauseTrack(MMSoundManagerTracks track)
 		{
+			_pausedTracks[track] = true;
 			foreach (MMSoundManagerSound sound in _sounds)
 			{
 				if (sound.Track == track)
@@ -507,6 +524,7 @@ namespace MoreMountains.Tools
 		/// <param name="track"></param>
 		public virtual void PlayTrack(MMSoundManagerTracks track)
 		{
+			_pausedTracks[track] = false;
 			foreach (MMSoundManagerSound sound in _sounds)
 			{
 				if (sound.Track == track)
@@ -1271,16 +1289,19 @@ namespace MoreMountains.Tools
 		/// </summary>
 		protected virtual void OnEnable()
 		{
-			MMSfxEvent.Register(OnMMSfxEvent);
-			MMSoundManagerSoundPlayEvent.Register(OnMMSoundManagerSoundPlayEvent);
-			this.MMEventStartListening<MMSoundManagerEvent>();
-			this.MMEventStartListening<MMSoundManagerTrackEvent>();
-			this.MMEventStartListening<MMSoundManagerSoundControlEvent>();
-			this.MMEventStartListening<MMSoundManagerTrackFadeEvent>();
-			this.MMEventStartListening<MMSoundManagerSoundFadeEvent>();
-			this.MMEventStartListening<MMSoundManagerAllSoundsControlEvent>();
-            
-			SceneManager.sceneLoaded += OnSceneLoaded;
+			if (_enabled)
+			{
+				MMSfxEvent.Register(OnMMSfxEvent);
+				MMSoundManagerSoundPlayEvent.Register(OnMMSoundManagerSoundPlayEvent);
+				this.MMEventStartListening<MMSoundManagerEvent>();
+				this.MMEventStartListening<MMSoundManagerTrackEvent>();
+				this.MMEventStartListening<MMSoundManagerSoundControlEvent>();
+				this.MMEventStartListening<MMSoundManagerTrackFadeEvent>();
+				this.MMEventStartListening<MMSoundManagerSoundFadeEvent>();
+				this.MMEventStartListening<MMSoundManagerAllSoundsControlEvent>();
+	            
+				SceneManager.sceneLoaded += OnSceneLoaded;
+			}
 		}
 
 		/// <summary>

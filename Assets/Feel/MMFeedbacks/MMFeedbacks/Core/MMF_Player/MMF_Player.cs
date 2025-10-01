@@ -332,6 +332,24 @@ namespace MoreMountains.Feedbacks
 			}
 		}
 
+		/// <summary>
+		/// Plays all feedbacks in the sequence from top to bottom
+		/// </summary>
+		public virtual void PlayFeedbacksTopToBottom()
+		{
+			SetDirectionTopToBottom();
+			PlayFeedbacks();
+		}
+		
+		/// <summary>
+		/// Plays all feedbacks in the sequence from bottom to top
+		/// </summary>
+		public virtual void PlayFeedbacksBottomToTop()
+		{
+			SetDirectionBottomToTop();
+			PlayFeedbacks();
+		}
+
 		#endregion
 
 		#region SEQUENCE

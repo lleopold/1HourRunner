@@ -11,7 +11,7 @@ public class FlatKitFog : ScriptableRendererFeature {
     public FogSettings settings;
 
     private Material _effectMaterial;
-    private DustyroomRenderPass _fullScreenPass;
+    private ScreenRenderPass _fullScreenPass;
     private bool _requiresColor;
     private bool _injectedBeforeTransparents;
     private ScriptableRenderPassInput _requirements = ScriptableRenderPassInput.Color;
@@ -54,7 +54,7 @@ public class FlatKitFog : ScriptableRendererFeature {
         }
 
         {
-            _fullScreenPass = new DustyroomRenderPass {
+            _fullScreenPass = new ScreenRenderPass {
                 renderPassEvent = settings.renderEvent,
             };
 

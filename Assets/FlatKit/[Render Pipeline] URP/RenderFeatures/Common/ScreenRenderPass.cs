@@ -8,18 +8,13 @@ using UnityEngine.Rendering.RenderGraphModule.Util;
 using RenderGraphUtils = UnityEngine.Rendering.RenderGraphModule.Util.RenderGraphUtils;
 #endif
 
-public class DustyroomRenderPass : ScriptableRenderPass {
+public class ScreenRenderPass : ScriptableRenderPass {
     private Material _passMaterial;
     private bool _requiresColor;
     private bool _isBeforeTransparents;
     private PassData _passData;
     private ProfilingSampler _profilingSampler;
     private RTHandle _copiedColor;
-
-#if UNITY_6000_0_OR_NEWER
-    private RenderTextureDescriptor _texDescriptor = new(Screen.width, Screen.height,
-        RenderTextureFormat.Default, 0);
-#endif
 
     private const string TexName = "_BlitTexture";
     private static readonly int BlitTextureShaderID = Shader.PropertyToID(TexName);
@@ -33,7 +28,11 @@ public class DustyroomRenderPass : ScriptableRenderPass {
 
         var colorCopyDescriptor = renderingData.cameraData.cameraTargetDescriptor;
         colorCopyDescriptor.depthBufferBits = (int)DepthBits.None;
-#if UNITY_2022_3_OR_NEWER
+
+#if UNITY_6000_0_OR_NEWER
+        RenderingUtils.ReAllocateHandleIfNeeded(ref _copiedColor, colorCopyDescriptor, FilterMode.Point,
+            TextureWrapMode.Clamp, name: "_FullscreenPassColorCopy");
+#elif UNITY_2022_3_OR_NEWER
         RenderingUtils.ReAllocateIfNeeded(ref _copiedColor, colorCopyDescriptor, name: "_FullscreenPassColorCopy");
 #endif
 
@@ -54,21 +53,18 @@ public class DustyroomRenderPass : ScriptableRenderPass {
             return;
         }
 
-        {
-            _texDescriptor.width = cameraData.cameraTargetDescriptor.width;
-            _texDescriptor.height = cameraData.cameraTargetDescriptor.height;
-            _texDescriptor.depthBufferBits = 0;
-        }
+        RenderTextureDescriptor texDescriptor = cameraData.cameraTargetDescriptor;
+        texDescriptor.depthBufferBits = 0;
 
         TextureHandle srcCamColor = resourceData.activeColorTexture;
-        TextureHandle dst = UniversalRenderer.CreateRenderGraphTexture(renderGraph, _texDescriptor, TexName, false);
+        TextureHandle dst = UniversalRenderer.CreateRenderGraphTexture(renderGraph, texDescriptor, TexName, false);
 
         // This check is to avoid an error from the material preview in the scene.
         if (!srcCamColor.IsValid() || !dst.IsValid()) {
             return;
         }
 
-        RenderGraphUtils.BlitMaterialParameters blit1 = new(srcCamColor, dst, _passMaterial, 0);
+        RenderGraphUtils.BlitMaterialParameters blit1 = new(srcCamColor, dst, _passMaterial, shaderPass: 0);
         renderGraph.AddBlitPass(blit1, $"{_profilingSampler.name} (Effect Pass)");
         renderGraph.AddCopyPass(dst, srcCamColor);
     }
@@ -85,6 +81,9 @@ public class DustyroomRenderPass : ScriptableRenderPass {
         ExecutePass(_passData, ref renderingData, ref context);
     }
 
+#if UNITY_6000_0_OR_NEWER
+    [Obsolete("This rendering path is for compatibility mode only (when Render Graph is disabled).", false)]
+#endif
     private static void ExecutePass(PassData passData, ref RenderingData renderingData,
         ref ScriptableRenderContext context) {
         var passMaterial = passData.effectMaterial;

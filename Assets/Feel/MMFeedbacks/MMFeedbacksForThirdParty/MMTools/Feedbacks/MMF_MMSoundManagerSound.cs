@@ -297,6 +297,7 @@ namespace MoreMountains.Feedbacks
 		protected Vector3 _gizmoCenter;
 		protected MMShufflebag<int> _randomUniqueShuffleBag;
 		protected AudioClip _lastPlayedClip;
+		protected Coroutine _isPlayingCoroutine;
 		
 		protected override void CustomInitialization(MMF_Player owner)
 		{
@@ -383,6 +384,12 @@ namespace MoreMountains.Feedbacks
 				{
 					MMSoundManager.Instance.FreeSound(_playedAudioSource);	
 				}
+				if (_isPlayingCoroutine != null)
+				{
+					Owner.StopCoroutine(_isPlayingCoroutine);
+					_isPlayingCoroutine = null;
+				}
+				_playedAudioSource = null;
 			}
 		}
 
@@ -528,7 +535,7 @@ namespace MoreMountains.Feedbacks
 			
 			_playedAudioSource = MMSoundManagerSoundPlayEvent.Trigger(sfx, _options);
 
-			Owner.StartCoroutine(IsPlayingCoroutine());
+			_isPlayingCoroutine = Owner.StartCoroutine(IsPlayingCoroutine());
 
 			_lastPlayTimestamp = FeedbackTime;
 			_lastPlayedClip = sfx;
@@ -630,7 +637,7 @@ namespace MoreMountains.Feedbacks
 		/// <summary>
 		/// A test method that creates an audiosource, plays it, and destroys itself after play
 		/// </summary>
-		protected virtual async void TestPlaySound()
+		public virtual async void TestPlaySound()
 		{
 			AudioClip tmpAudioClip = null;
 			

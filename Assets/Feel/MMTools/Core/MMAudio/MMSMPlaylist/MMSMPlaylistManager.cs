@@ -328,6 +328,14 @@ namespace MoreMountains.Tools
 			/// </summary>
 			protected virtual void Update()
 			{
+				if (AudioListener.pause)
+				{
+					return;
+				}
+				if (MMSoundManager.Instance.IsPaused(Playlist.Track))
+				{
+					return;
+				}
 				if (PlaylistManagerState.CurrentState == PlaylistManagerStates.Idle)
 				{
 					this.enabled = false;

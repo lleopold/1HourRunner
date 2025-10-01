@@ -34,7 +34,7 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
     private static readonly int LightmapDirectionYaw = Shader.PropertyToID("_LightmapDirectionYaw");
     private const string OutlineSmoothNormalsKeyword = "DR_OUTLINE_SMOOTH_NORMALS";
     private const string RenderingOptionsName = "Rendering Options";
-    private const string UnityVersion = "NLC6GM";
+    private const string UnityVersion = "NLC6GO";
 
     private void DrawStandard(MaterialProperty property) {
         // Remove everything in square brackets.
