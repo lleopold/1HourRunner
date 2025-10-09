@@ -13,6 +13,16 @@ public class WalkToSelected : IState
     private float _velocity;
     private float _lastLogTime = 0f;
 
+    // New: pathing + diagnostics helpers
+    private Vector3 _lastRequestedDestination = Vector3.positiveInfinity;
+    private float _nextRepathTime = 0f;
+    private const float RepathInterval = 0.2f;                // seconds between repaths
+    private const float DestinationMoveThreshold = 0.5f;       // meters before re-issue SetDestination
+    private const float StuckMoveEpsSqr = 0.0004f;             // ~2cm squared movement between frames
+    private const float StuckRecoverSeconds = 2f;              // time of no progress before recovery
+    private const bool DebugLogs = true;                      // flip to true to see periodic logs
+    private static readonly int VelocityHash = Animator.StringToHash("velocity");
+
     public WalkToSelected(Enemy enemy, NavMeshAgent navMeshAgent, Animator animator, EnemyConfig enemyConfig, Transform target)
     {
         _enemy = enemy;
@@ -36,9 +46,21 @@ public class WalkToSelected : IState
         _navMeshAgent.ResetPath();
 
         var playerT = _enemy._player != null ? _enemy._player.transform : _target;
-        if (playerT != null) _navMeshAgent.SetDestination(playerT.position);
+        if (playerT != null)
+        {
+            _navMeshAgent.SetDestination(playerT.position);
+            _lastRequestedDestination = playerT.position;
+        }
+        else
+        {
+            _lastRequestedDestination = Vector3.positiveInfinity;
+        }
 
+        _nextRepathTime = Time.time + RepathInterval;
+        _lastPosition = _enemy.transform.position;
         _velocity = 0f;
+        _animator.SetFloat(VelocityHash, 0f);
+
         Debug.Log("WalkToSelected OnEnter:" + (playerT != null ? playerT.name : "null"));
     }
 
@@ -49,43 +71,115 @@ public class WalkToSelected : IState
 
     public void Tick()
     {
-        // Use the latest player transform if available
+        // Resolve current target
         Transform playerT = _enemy._player != null ? _enemy._player.transform : _target;
         if (playerT == null) return;
 
-        if (!_navMeshAgent.enabled) _navMeshAgent.enabled = true;
+        // Ensure agent is usable
+        if (!_navMeshAgent.enabled)
+            _navMeshAgent.enabled = true;
 
-        // If we somehow ended up off the NavMesh, try to recover
         if (!_navMeshAgent.isOnNavMesh)
         {
             if (NavMesh.SamplePosition(_enemy.transform.position, out NavMeshHit hit, 2f, NavMesh.AllAreas))
             {
                 _navMeshAgent.Warp(hit.position);
             }
+            else
+            {
+                // Can't recover onto NavMesh now; bail out this tick
+                return;
+            }
         }
 
         if (_navMeshAgent.isStopped) _navMeshAgent.isStopped = false;
 
-        // Ensure speed is sane
+        // Ensure speed is sane (prefer config)
         if (_navMeshAgent.speed <= 0.01f)
         {
             _navMeshAgent.speed = (_enemyConfig.speed > 0.01f) ? _enemyConfig.speed : 3.5f;
+            Debug.LogWarning($"[WalkToSelected] NavMeshAgent speed was zero, reset to {_navMeshAgent.speed}");
         }
 
-        _navMeshAgent.SetDestination(playerT.position);
+        // Repath throttled: only when the target moved enough or periodically, or path is invalid/partial
+        Vector3 targetPos = playerT.position;
+        bool needRepath =
+            !_navMeshAgent.hasPath ||
+            _navMeshAgent.pathStatus == NavMeshPathStatus.PathInvalid ||
+            _navMeshAgent.pathStatus == NavMeshPathStatus.PathPartial;
 
-        // Guard divide-by-zero
-        _velocity = (_navMeshAgent.speed > 0.001f)
-            ? _navMeshAgent.velocity.magnitude / _navMeshAgent.speed
-            : 0f;
-        _animator.SetFloat("velocity", _velocity);
-
-        // Log every 5s
-        if (Time.time - _lastLogTime >= 5f)
+        if (Time.time >= _nextRepathTime)
         {
-            Debug.Log($"[WalkToSelected] onNavMesh={_navMeshAgent.isOnNavMesh}, enabled={_navMeshAgent.enabled}, stopped={_navMeshAgent.isStopped}, speed={_navMeshAgent.speed:F2}, hasPath={_navMeshAgent.hasPath}, status={_navMeshAgent.pathStatus}, remaining={_navMeshAgent.remainingDistance:F2}, desiredVel={_navMeshAgent.desiredVelocity.magnitude:F2}, pos={_enemy.transform.position}, target={playerT.position}");
+            if (_lastRequestedDestination == Vector3.positiveInfinity ||
+                (targetPos - _lastRequestedDestination).sqrMagnitude >= (DestinationMoveThreshold * DestinationMoveThreshold))
+            {
+                needRepath = true;
+            }
+        }
+
+        if (needRepath)
+        {
+            _navMeshAgent.SetDestination(targetPos);
+            _lastRequestedDestination = targetPos;
+            _nextRepathTime = Time.time + RepathInterval;
+        }
+
+        // Animator: normalized speed using actual world displacement (robust vs agent.velocity==0)
+        float speed = _navMeshAgent.speed;
+        float dt = Time.deltaTime;
+        float actualSpeed = (dt > 0f) ? (_enemy.transform.position - _lastPosition).magnitude / dt : 0f;
+
+        float norm = (speed > 0.001f) ? actualSpeed / speed : 0f;
+
+        // Fallback: if we're not moving yet but agent wants to, use desiredVelocity to avoid idle "sliding"
+        if (norm < 0.01f && _navMeshAgent.hasPath && _navMeshAgent.desiredVelocity.sqrMagnitude > 0.01f)
+        {
+            norm = Mathf.Clamp01(_navMeshAgent.desiredVelocity.magnitude / Mathf.Max(speed, 0.001f));
+        }
+
+        _velocity = norm;
+        _animator.SetFloat(VelocityHash, _velocity, 0.1f, Time.deltaTime);
+
+        // Stuck detection & recovery
+        Vector3 pos = _enemy.transform.position;
+        if (_navMeshAgent.hasPath && _navMeshAgent.remainingDistance > 0.2f)
+        {
+            float movedSqr = (pos - _lastPosition).sqrMagnitude;
+            if (movedSqr < StuckMoveEpsSqr && _navMeshAgent.desiredVelocity.sqrMagnitude > 0.01f)
+            {
+                TimeStuck += Time.deltaTime;
+
+                if (TimeStuck >= StuckRecoverSeconds)
+                {
+                    if (NavMesh.SamplePosition(pos, out NavMeshHit hit2, 1.5f, NavMesh.AllAreas))
+                    {
+                        _navMeshAgent.Warp(hit2.position);
+                        _navMeshAgent.ResetPath();
+                        _lastRequestedDestination = Vector3.positiveInfinity; // force repath next tick window
+                    }
+                    TimeStuck = 0f;
+                }
+            }
+            else
+            {
+                TimeStuck = 0f;
+            }
+
+            _lastPosition = pos;
+        }
+
+        // Optional periodic debug
+        if (DebugLogs && Time.time - _lastLogTime >= 1f)
+        {
+            Debug.Log($"[WalkToSelected] onNavMesh={_navMeshAgent.isOnNavMesh}, " +
+                $"velocity={_velocity}," +
+                $"speed={_navMeshAgent.speed:F2}, hasPath={_navMeshAgent.hasPath}, " +
+                $"enabled={_navMeshAgent.enabled}, stopped={_navMeshAgent.isStopped}, " +
+                $"status={_navMeshAgent.pathStatus}, remaining={_navMeshAgent.remainingDistance:F2}, " +
+                $"desiredVel={_navMeshAgent.desiredVelocity.magnitude:F2}, " +
+                $"pos={_enemy.transform.position}, " +
+                $"target={playerT.position}");
             _lastLogTime = Time.time;
         }
-        Debug.Log("Speed of navmesh is: " + _navMeshAgent.speed.ToString());
     }
 }

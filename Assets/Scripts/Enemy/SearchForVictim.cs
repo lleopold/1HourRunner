@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class SearchForVictim : IState
 {
@@ -22,7 +19,7 @@ public class SearchForVictim : IState
 
     public void OnExit()
     {
-        Debug.Log("SearchForVictim OnExit");
+        //Debug.Log("SearchForVictim OnExit");
     }
 
     public void Tick()

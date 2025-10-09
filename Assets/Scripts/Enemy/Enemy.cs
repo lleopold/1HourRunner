@@ -121,7 +121,10 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
 
 
-        At(walkToSelected, attackFreely, CloseToPlayer);
+        //At(walkToSelected, attackFreely, CloseToPlayer);
+        At(walkToSelected, stop, CloseToPlayer);
+        At(stop, attackFreely, () => CloseToPlayer() && stop.CanExit);
+        At(stop, searchForVictim, () => !CloseToPlayer() && stop.CanExit);
         At(attackFreely, stop, FinishedAttack);
 
         //At(searchForGatheringSpot, walkToGathering, FarToGathering);
@@ -195,7 +198,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         var retval = Vector3.Distance(transform.position, _player.transform.position) > _enemyConfig.meleeRadius;
         if (retval)
         {
-            Debug.Log("FarToPlayer:" + retval);
+            //Debug.Log("FarToPlayer:" + retval);
         }
         return retval;
     }
@@ -746,7 +749,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     {
 
         float distance = Vector3.Distance(transform.position, _player.transform.position);
-        Debug.Log("Melee range: " + _enemyConfig.meleeRadius + "Current range: " + distance);
+        //Debug.Log("Melee range: " + _enemyConfig.meleeRadius + "Current range: " + distance);
         return Vector3.Distance(transform.position, _player.transform.position) <= _enemyConfig.meleeRadius;
     }
 

@@ -4,57 +4,56 @@ using UnityEngine.AI;
 public class Stop : IState
 {
     private readonly Enemy _enemy;
-    private readonly NavMeshAgent _navMeshAgent;
-    private Animator _animator;
+    private readonly NavMeshAgent _agent;
+    private Animator _anim;
 
-    private float _waitTimer;
-    private const float WaitDuration = 0.3f;
+    private float _t;
+    private const float WaitDuration = 0.60f; // also used as damping time
+    private static readonly int VelocityHash = Animator.StringToHash("velocity");
 
-    // Expose to the state machine so it can decide when to leave Stop.
-    public bool CanExit => _waitTimer >= WaitDuration;
+    public bool CanExit => _t >= WaitDuration;
 
-    public Stop(Enemy enemy, NavMeshAgent navMeshAgent)
+    public Stop(Enemy enemy, NavMeshAgent agent)
     {
         _enemy = enemy;
-        _navMeshAgent = navMeshAgent;
+        _agent = agent;
     }
 
     public void OnEnter()
     {
-        Debug.Log("Stop OnEnter");
+        if (!_agent.enabled) _agent.enabled = true;
 
-        if (!_navMeshAgent.enabled) _navMeshAgent.enabled = true;
-        _navMeshAgent.isStopped = true;
-        _navMeshAgent.updatePosition = true;
-        _navMeshAgent.updateRotation = true;
-        _navMeshAgent.ResetPath();
+        // Immediate stop
+        _agent.updatePosition = true;
+        _agent.updateRotation = true;
+        _agent.isStopped = true;
+        _agent.ResetPath();
+        _agent.velocity = Vector3.zero;
 
-        _waitTimer = 0f;
+        if (_anim == null) _anim = _enemy.GetComponent<Animator>();
 
-        if (_animator == null)
-            _animator = _enemy.GetComponent<Animator>();
+        _t = 0f;
+        // Do not snap the blend tree; Tick will damp it to 0 over WaitDuration.
+    }
 
-        if (_animator != null)
+    public void Tick()
+    {
+        _t += Time.deltaTime;
+
+        if (_anim)
         {
-            // Drive the locomotion blend tree to idle.
-            _animator.SetFloat("velocity", 0f);
-            // If you have an idle trigger, you can also use it:
-            // _animator.SetTrigger("GoToIdle");
+            // Valid overload: SetFloat(id, value, dampTime, deltaTime)
+            _anim.SetFloat(VelocityHash, 0f, WaitDuration, Time.deltaTime);
+
+            // Optional clamp to avoid tail drift
+            if (_anim.GetFloat(VelocityHash) < 0.01f)
+                _anim.SetFloat(VelocityHash, 0f);
         }
     }
 
     public void OnExit()
     {
-        _enemy.Target = GameObject.Find("Player");
-    }
-
-    public void Tick()
-    {
-        _waitTimer += Time.deltaTime;
-
-        if (_enemy.Target == null)
-        {
-            _enemy.Target = GameObject.Find("Player");
-        }
+        if (_anim) _anim.SetFloat(VelocityHash, 0f);
+        // Leave agent stopped; the next state should decide when to resume.
     }
 }
