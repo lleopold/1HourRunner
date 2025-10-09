@@ -152,6 +152,7 @@ namespace MoreMountains.Tools
 		protected Transform _knobTransform;
 		protected bool _rotatingIndicatorIsNotNull = false;
 		protected float _maxRangeTransformDistance;
+		protected Canvas _parentCanvas;
 		
 		/// <summary>
 		/// On Start we initialize our stick
@@ -173,6 +174,7 @@ namespace MoreMountains.Tools
 			}
 			
 			_canvasGroup = GetComponent<CanvasGroup>();
+			_parentCanvas = GetComponentInParent<Canvas>();
 			_rotatingIndicatorIsNotNull = (RotatingIndicator != null);
 			RefreshMaxRangeDistance();
 
@@ -316,6 +318,8 @@ namespace MoreMountains.Tools
 		{
 			if (ParentCanvasRenderMode == RenderMode.ScreenSpaceCamera)
 			{
+				float distance = _parentCanvas != null ? _parentCanvas.planeDistance : 0f;
+				position.z = distance;
 				return TargetCamera.ScreenToWorldPoint(position);
 			}
 			else

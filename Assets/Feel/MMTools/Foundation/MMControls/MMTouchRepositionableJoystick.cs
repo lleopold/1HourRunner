@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿﻿using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -63,17 +63,7 @@ namespace MoreMountains.Tools
 		{
 			base.OnPointerDown(data);
 			
-			// if we're in "screen space - camera" render mode
-			if (ParentCanvasRenderMode == RenderMode.ScreenSpaceCamera)
-			{
-				_newPosition = TargetCamera.ScreenToWorldPoint(data.position);
-			}
-			// otherwise
-			else
-			{
-				_newPosition = data.position;
-			}
-			_newPosition.z = this.transform.position.z;
+			_newPosition = ConvertToWorld(data.position);
 			
 			if (!WithinBounds())
 			{

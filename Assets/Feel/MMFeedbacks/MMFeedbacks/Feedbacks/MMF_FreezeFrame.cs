@@ -27,7 +27,7 @@ namespace MoreMountains.Feedbacks
 		[MMFInspectorGroup("Freeze Frame", true, 63)]
 		/// the duration of the freeze frame
 		[Tooltip("the duration of the freeze frame")]
-		public float FreezeFrameDuration = 0.02f;
+		public float FreezeFrameDuration = 0.1f;
 		/// the minimum value the timescale should be at for this freeze frame to happen. This can be useful to avoid triggering freeze frames when the timescale is already frozen. 
 		[Tooltip("the minimum value the timescale should be at for this freeze frame to happen. This can be useful to avoid triggering freeze frames when the timescale is already frozen.")]
 		public float MinimumTimescaleThreshold = 0.1f;

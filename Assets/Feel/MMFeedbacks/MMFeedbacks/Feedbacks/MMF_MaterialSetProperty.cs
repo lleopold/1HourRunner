@@ -112,7 +112,7 @@ namespace MoreMountains.Feedbacks
 		protected Coroutine _coroutine;
 		protected Color _newColor;
 		protected Vector2 _newVector2;
-		protected Vector2 _newVector4;
+		protected Vector4 _newVector4;
 		
 		/// <summary>
 		/// On init we turn the sprite renderer off if needed

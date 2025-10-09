@@ -104,7 +104,7 @@ namespace MoreMountains.Feedbacks
 			{
 				IsPlaying = true;
 				BoundAnimator.speed = DetermineNewSpeed();
-				yield return MMCoroutine.WaitFor(Duration);
+				yield return WaitFor(Duration);
 				BoundAnimator.speed = _initialSpeed;	
 				IsPlaying = false;
 			}

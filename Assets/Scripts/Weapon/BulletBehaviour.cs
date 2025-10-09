@@ -5,6 +5,8 @@ public class BulletBehaviour : MonoBehaviour
     public float speed = 20f; // Speed of the bullet
     public float maxDistance = 50f; // Maximum travel distance for bullet
     public GameObject hitEffectPrefab; // Prefab for the hit effect
+    public GameObject hitEffectPrefabBloodCloud; // Prefab for the hit effect
+
 
     private Vector3 _startPosition; // To track distance traveled
     private Vector3 _direction; // Bullet's direction
@@ -39,6 +41,7 @@ public class BulletBehaviour : MonoBehaviour
         if (hitEffectPrefab != null)
         {
             Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
+            Instantiate(hitEffectPrefabBloodCloud, transform.position, Quaternion.identity);
         }
 
         // Destroy the bullet
@@ -59,22 +62,30 @@ public class BulletBehaviour : MonoBehaviour
             float damage = GetWeaponDamage(WeaponConfigSingleton.Instance.WeaponConfig.DamageFluctuation);
             Debug.Log("Hit enemy: " + damage);
             enemy.DamageReceived(damage, transform.forward);
-            hitEffectPrefab = Resources.Load<GameObject>("Weapons/Hit_02");//zombie hit effect
+            hitEffectPrefab = Resources.Load<GameObject>("FX/Hit_02");//zombie hit effect
+            hitEffectPrefabBloodCloud = Resources.Load<GameObject>("FX/Impact_blood");//zombie hit effect blood cloud
+
 
         }
         else
         {
             //how knows what was hit
             // Spawn hit effect at the bullet's position
-            hitEffectPrefab = Resources.Load<GameObject>("Weapons/Hit_01");
+            hitEffectPrefab = Resources.Load<GameObject>("FX/Hit_01");
         }
 
-        if (hitEffectPrefab != null)
+        if (hitEffectPrefab != null && hitEffectPrefabBloodCloud != null)
         {
+            Debug.Log("Spawn hit effect");
             var impact = Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
+            var impact2 = Instantiate(hitEffectPrefabBloodCloud, transform.position, Quaternion.identity);
             ParticleSystem hitPart = impact.GetComponent<ParticleSystem>();
+            ParticleSystem hitPart2 = impact2.GetComponent<ParticleSystem>();
             hitPart.Play();
+            hitPart2.Play();
             Destroy(impact, 2f);
+            Destroy(impact2, 2f);
+            Debug.Log("Spawned hit effect end");
         }
 
         // Destroy the bullet after the hit

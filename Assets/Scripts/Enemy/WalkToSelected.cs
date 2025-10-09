@@ -86,5 +86,6 @@ public class WalkToSelected : IState
             Debug.Log($"[WalkToSelected] onNavMesh={_navMeshAgent.isOnNavMesh}, enabled={_navMeshAgent.enabled}, stopped={_navMeshAgent.isStopped}, speed={_navMeshAgent.speed:F2}, hasPath={_navMeshAgent.hasPath}, status={_navMeshAgent.pathStatus}, remaining={_navMeshAgent.remainingDistance:F2}, desiredVel={_navMeshAgent.desiredVelocity.magnitude:F2}, pos={_enemy.transform.position}, target={playerT.position}");
             _lastLogTime = Time.time;
         }
+        Debug.Log("Speed of navmesh is: " + _navMeshAgent.speed.ToString());
     }
 }

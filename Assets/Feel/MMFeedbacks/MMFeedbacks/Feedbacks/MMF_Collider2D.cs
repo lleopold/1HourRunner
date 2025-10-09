@@ -6,6 +6,7 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace MoreMountains.Feedbacks
 {
+	#if MM_PHYSICS2D
 	/// <summary>
 	/// This feedback will let you enable/disable/toggle a target collider 2D, or change its trigger status
 	/// </summary>
@@ -123,4 +124,5 @@ namespace MoreMountains.Feedbacks
 			}
 		}
 	}
+	#endif
 }
