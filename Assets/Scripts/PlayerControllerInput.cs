@@ -1258,12 +1258,41 @@ namespace ZombieGame
         {
             try
             {
-                ParticleSystem muzzleFlash = GetComponentInChildren<ParticleSystem>();
-                muzzleFlash.Play();
+                // Find the weapon GameObject (either "Weapon" or "Pistol(Clone)")
+                Transform weaponTransform = FindRecursive(transform, "Weapon");
+                if (weaponTransform == null)
+                {
+                    weaponTransform = FindRecursive(transform, "Pistol(Clone)");
+                }
+
+                if (weaponTransform == null)
+                {
+                    Debug.LogWarning("No weapon found on player!");
+                    return;
+                }
+
+                // Find MuzzleFlash01 child GameObject
+                Transform muzzleFlashTransform = weaponTransform.Find("MuzzleFlash01");
+                if (muzzleFlashTransform == null)
+                {
+                    Debug.LogWarning($"MuzzleFlash01 not found on weapon: {weaponTransform.name}");
+                    return;
+                }
+
+                // Get and play the ParticleSystem
+                ParticleSystem muzzleFlash = muzzleFlashTransform.GetComponent<ParticleSystem>();
+                if (muzzleFlash != null)
+                {
+                    muzzleFlash.Play();
+                }
+                else
+                {
+                    Debug.LogWarning($"ParticleSystem not found on MuzzleFlash01!");
+                }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Debug.Log("No muzzle flash");
+                Debug.LogError($"Muzzle flash error: {e.Message}");
             }
         }
 
