@@ -195,6 +195,8 @@ namespace ZombieGame
         private const float RUN_STOP_TIME = 0.4f;
         private float _rawInputMagnitude;
         private static DamageNumber _damageNumberPrefab;
+        // Add with other private fields (around line 100)
+        private RigRecoilController _rigRecoilController;
 
         public float Health
         {
@@ -394,15 +396,16 @@ namespace ZombieGame
             Stamina = PlayerConfigSingleton.Instance.PlayerConfig.stamina;
             _uiT_GameScreen.SetStamina(100);
 
-
             _uiT_EndGamePopUp = FindObjectOfType<UIT_EndGamePopUp>();
             _uiT_EndGamePopUp._root.visible = false;
             _uiT_EndGamePopUp.enabled = false;
 
             CreateDamageNumber();
 
-
+            // Initialize rig recoil controller (automatically finds rig references)
+            _rigRecoilController = new RigRecoilController(this);
         }
+
         public static void CreateDamageNumber()
         {
             // Load once and reuse
@@ -1214,15 +1217,7 @@ namespace ZombieGame
                         // Calculate the next allowed shooting time
                         _nextFireTime = Time.time + 1f / WeaponConfigSingleton.Instance.WeaponConfig.FireRate; //TODO MODIFIER OF PLAYER CONFIG for faster shooting
                                                                                                                //GameObject hitParticleGameObject = Resources.Load<GameObject>("Weapons/Hit_01");
-                        try
-                        {
-                            ParticleSystem muzzleFlash = GetComponentInChildren<ParticleSystem>();
-                            muzzleFlash.Play();
-                        }
-                        catch (Exception)
-                        {
-                            Debug.Log("No muzzle flash");
-                        }
+                        MuzzleFlash();
                         float randomAngle = UnityEngine.Random.Range(-_currentAngleLineRenderers, _currentAngleLineRenderers);
                         Vector3 forceDirection = Quaternion.Euler(0f, randomAngle, 0f) * transform.forward;
 
@@ -1259,6 +1254,19 @@ namespace ZombieGame
             }
         }
 
+        private void MuzzleFlash()
+        {
+            try
+            {
+                ParticleSystem muzzleFlash = GetComponentInChildren<ParticleSystem>();
+                muzzleFlash.Play();
+            }
+            catch (Exception)
+            {
+                Debug.Log("No muzzle flash");
+            }
+        }
+
         private void SpawnBulletAndShoot(Transform gunBarrel, Vector3 forceDirection, float currentAngle)
         {
             // Ensure the direction is normalized
@@ -1283,24 +1291,27 @@ namespace ZombieGame
 
         /// <summary>
         /// Applies recoil to the weapon, increasing the aiming angle (reducing precision).
+        /// Also applies physical recoil to the weapon rig.
         /// Weapon recoil is countered by the player's recoil reduction.
         /// </summary>
         /// <param name="currentAngle">The current aiming angle before applying recoil.</param>
         public void Recoil(float currentAngle)
         {
             float weaponRecoil = WeaponConfigSingleton.Instance.WeaponConfig.Recoil;
-            float playerRecoil = PlayerConfigSingleton.Instance.PlayerConfig.recoilReduction;
-            float totalRecoil = Mathf.Max(weaponRecoil - playerRecoil, 0);
+            float playerRecoilReduction = PlayerConfigSingleton.Instance.PlayerConfig.recoilReduction;
+            float totalRecoil = Mathf.Max(weaponRecoil - playerRecoilReduction, 0);
 
-
-            //goes from min to max, can be bigger than starting
+            // Apply visual spread recoil (existing behavior)
             minAngle = gameStats._precisionMin;
             maxAngle = gameStats._precisionMax;
-
-            float totalAngleRange = maxAngle - minAngle; // Total possible deviation
+            float totalAngleRange = maxAngle - minAngle;
             float newAngle = Mathf.Min(_currentAngleLineRenderers + (totalAngleRange * (totalRecoil / 100)), maxAngle);
             _recoil = newAngle;
-            Debug.Log($"Recoil Applied: Weapon={weaponRecoil}, Player={playerRecoil}, Total={totalRecoil}, NewAngle={newAngle}");
+
+            // Apply physical weapon rig recoil
+            _rigRecoilController?.ApplyRecoil(weaponRecoil, playerRecoilReduction);
+
+            Debug.Log($"Recoil Applied: Weapon={weaponRecoil}, Reduction={playerRecoilReduction}, Total={totalRecoil}, NewAngle={newAngle}");
         }
 
 
