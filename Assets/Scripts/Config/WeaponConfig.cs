@@ -30,4 +30,5 @@ public class WeaponConfig : ScriptableObject
     public float Weight;
     public AudioClip shootingClip;
     public ParticleSystem muzzleFlash;
+
 }

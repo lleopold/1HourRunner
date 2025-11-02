@@ -704,7 +704,7 @@ namespace ZombieGame
         private void RotateTowardsSomething()
         {
 
-            if (_aim)
+            if (_aim || 1 == 1)
             {
                 //var ray = _mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
 
@@ -2071,13 +2071,13 @@ namespace ZombieGame
                 if (playerHead != null)
                 {
                     Gizmos.color = Color.red;
-                    Gizmos.DrawSphere(playerHead.position, 0.2f); // Player head
+                    //Gizmos.DrawSphere(playerHead.position, 0.2f); // Player head
                 }
 
                 if (zombieHead != null)
                 {
                     Gizmos.color = Color.blue;
-                    Gizmos.DrawSphere(zombieHead.position, 0.2f); // Zombie head
+                    //Gizmos.DrawSphere(zombieHead.position, 0.2f); // Zombie head
                 }
             }
         }

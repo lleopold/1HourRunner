@@ -105,12 +105,23 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         var walkToGathering = new WalkToGathering(this, zombieNavMeshAgent, _animator, _enemyConfig, _gathering.transform);
         var roam = new Roam(this, _player.transform, zombieNavMeshAgent, _animator, _enemyConfig, _monoBehaviour);
 
+
+
+        //At(stop, searchForVictim, () => HasTarget() && stop.CanExit);
+        //At(searchForVictim, walkToSelected, FarToPlayer);
+
+        //At(walkToSelected, stop, CloseToPlayer);
+        //At(stop, attackFreely, () => CloseToPlayer() && stop.CanExit);
+        //At(stop, searchForVictim, () => !CloseToPlayer() && stop.CanExit);
+        //At(attackFreely, stop, FinishedAttack);
+
+
+
+
         //_stateMachine.AddTransition(searchForVictim, walkToSelected, HasTarget);
         //At(searchForVictim, walkToSelected, FarToPlayer);
         //At(searchForGatheringSpot, walkToGathering, FarToGathering);
         //At(walkToGathering, stop, CloseToGather);    //TODO
-        At(stop, searchForVictim, () => HasTarget() && stop.CanExit);
-        At(searchForVictim, walkToSelected, FarToPlayer);
         //At(searchForVictim, walkToSelected, HasTarget);
 
         //At(walkToSelected, fullStop, CloseToPlayer);
@@ -122,10 +133,6 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
 
         //At(walkToSelected, attackFreely, CloseToPlayer);
-        At(walkToSelected, stop, CloseToPlayer);
-        At(stop, attackFreely, () => CloseToPlayer() && stop.CanExit);
-        At(stop, searchForVictim, () => !CloseToPlayer() && stop.CanExit);
-        At(attackFreely, stop, FinishedAttack);
 
         //At(searchForGatheringSpot, walkToGathering, FarToGathering);
         //At(attackFreely, walkToGathering, CloseToGather);
