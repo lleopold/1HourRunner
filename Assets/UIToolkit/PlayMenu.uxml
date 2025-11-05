@@ -1,28 +1,20 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-  <Style src="project://database/Assets/UIToolkit/PlayHUD.uss?...amp;guid=438f7fc86e9b197409e4017d0e26730c&amp;type=3#PlayHUD" />
-  <ui:VisualElement name="root" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;">
-
-    <!-- Debug panel (unchanged layout) -->
-    <ui:VisualElement name="debug_panel"
-                      style="position: absolute; left: 56px; top: 96px; width: 140px; padding: 6px; background-color: rgba(20,20,20,.6); border-radius: 6px;">
-      <ui:Label name="lab_bullets" text="Bullets: 0" />
-      <ui:Button name="bt_exit" text="Exit" />
-      <ui:Button name="bt_main_screen" text="Main screen" />
-      <ui:Button name="bt_zombie" text="Zombie stumble" />
-      <ui:Button name="bt_end_game" text="End Game" />
-      <ui:Button name="bt_level_up" text="Level up" />
+    <Style src="project://database/Assets/UIToolkit/PlayHUD.uss?fileID=7433441132597879392&amp;guid=438f7fc86e9b197409e4017d0e26730c&amp;type=3#PlayHUD" />
+    <ui:VisualElement name="root" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;">
+        <ui:ProgressBar name="pb_xp" class="xp" style="position: absolute; left: 0; right: 0; bottom: 0;" />
+        <ui:VisualElement name="bars_stack" style="position: absolute; left: 56px; bottom: 24px; width: 30%; display: flex; flex-direction: column;">
+            <ui:ProgressBar name="pb_health" class="bar health" />
+            <ui:ProgressBar name="pb_stamina" class="bar stamina" />
+            <ui:ProgressBar name="pb_reload" class="bar reload" />
+        </ui:VisualElement>
+        <ui:VisualElement name="debug_panel" style="position: absolute; left: 3px; top: 80px; width: 72px; padding: 6px; background-color: rgba(20, 20, 20, 0.6); border-radius: 6px; height: 303px; padding-top: 1px; padding-right: 1px; padding-bottom: 1px; padding-left: 1px;">
+            <ui:Label name="lab_bullets" text="Bullets: 0" />
+            <ui:Button name="bt_exit" text="Exit" />
+            <ui:Button name="bt_main_screen" text="Main screen" />
+            <ui:Button name="bt_zombie" text="Zombie stumble" />
+            <ui:Button name="bt_end_game" text="End Game" />
+            <ui:Button name="bt_level_up" text="Level up" />
+            <ui:Button text="Take damage" />
+        </ui:VisualElement>
     </ui:VisualElement>
-
-    <!-- Full-width XP bar on the very bottom -->
-    <ui:ProgressBar name="pb_xp" class="xp" style="position: absolute; left: 0; right: 0; bottom: 0;" />
-
-    <!-- Stats stack bottom-left. Width ~30% of screen. Sits above XP bar by 24px. -->
-    <ui:VisualElement name="bars_stack"
-                      style="position: absolute; left: 56px; bottom: 24px; width: 30%; display: flex; flex-direction: column;">
-      <ui:ProgressBar name="pb_health"  class="bar health" />
-      <ui:ProgressBar name="pb_stamina" class="bar stamina" />
-      <ui:ProgressBar name="pb_reload"  class="bar reload" />
-    </ui:VisualElement>
-
-  </ui:VisualElement>
 </ui:UXML>

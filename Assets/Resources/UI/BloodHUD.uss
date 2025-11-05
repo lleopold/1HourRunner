@@ -1,0 +1,16 @@
+.blood-hud {
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  pointer-events: none;              /* don’t block input */
+}
+
+.splat {
+  position: absolute;
+  background-repeat: no-repeat;
+  background-size: contain;          /* fit image */
+  opacity: 0;                        /* start invisible */
+  /* one transition for both in/out; timings controlled in code */
+  transition-property: opacity, transform;
+  transition-duration: 0.06s;
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
