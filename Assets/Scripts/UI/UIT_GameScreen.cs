@@ -1,8 +1,6 @@
-using Assets.Scripts.HealthSystem;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
-using ZombieGame;
 
 public class UIT_GameScreen : MonoBehaviour
 {
@@ -15,10 +13,10 @@ public class UIT_GameScreen : MonoBehaviour
     public Label _bullets;
     private Button _btn_exit;
     private Button _btn_mainScreen;
-    //private Button _bt_progress_dmg;
     private Button _btn_spawn_zombie;
     private Button _btn_end_game;
     private Button _btn_level_up;
+    private Button _btn_take_damage;
     private float _totalXP;
     private int _level;
     private float[] _levelBoundaries;
@@ -49,18 +47,17 @@ public class UIT_GameScreen : MonoBehaviour
         _bullets = _root.Q<Label>("lab_bullets");
         _btn_exit = _root.Q<Button>("bt_exit");
         _btn_mainScreen = _root.Q<Button>("bt_main_screen");
-        //_bt_progress_dmg = _root.Q<Button>("bt_progress_dmg");
-        //_btn_mainScreen = _root.Q<Button>("bt_main_screen");
         _btn_spawn_zombie = _root.Q<Button>("bt_zombie");
         _btn_end_game = _root.Q<Button>("bt_end_game");
         _btn_level_up = _root.Q<Button>("bt_level_up");
+        _btn_take_damage = _root.Q<Button>("bt_take_damage");
 
         _btn_exit.RegisterCallback<ClickEvent>(GoToExitApplication);
         _btn_mainScreen.RegisterCallback<ClickEvent>(GoToMainScreen);
-        //_bt_progress_dmg.RegisterCallback<ClickEvent>(TakeDamage);
         _btn_spawn_zombie.RegisterCallback<ClickEvent>(GoToSpawnZombie);
         _btn_end_game.RegisterCallback<ClickEvent>(GoToEndGame);
         _btn_level_up.RegisterCallback<ClickEvent>(GoToPowerUp);
+        _btn_take_damage.RegisterCallback<ClickEvent>(TestBloodHUD);
         _totalXP = 0;
 
         var actualBar = _root.Q(className: "unity-progress-bar__progress");
@@ -68,21 +65,40 @@ public class UIT_GameScreen : MonoBehaviour
         _xpBar.value = 0;
     }
 
-    private void TakeDamage(ClickEvent evt)
+    private void TestBloodHUD(ClickEvent evt)
     {
-        GameObject healthBarCanvas = GameObject.Find("HealthBarCanvas_2");
-        Transform healthBarUI = healthBarCanvas.transform.Find("HealthBarUI"); // Find the child
-        HealthBarScroll healthBarScroll = healthBarUI.GetComponent<HealthBarScroll>();
-        //healthBarScroll.healthSystemArmour.Initialize(100, 50);
-        healthBarScroll.healthSystemArmour.Damage(10);
+        // Test BloodHUD with random intensity
+        if (BloodHUD.Instance != null)
+        {
+            float intensity = Random.Range(0.3f, 2.0f);
+            BloodHUD.Instance.Hit(intensity);
+            Debug.Log($"BloodHUD triggered with intensity: {intensity}");
+        }
+        else
+        {
+            Debug.LogError("Pih2 OPAAAA IDEMOOOOO!!!" + "Make sure BloodHUD component is in the scene.!");
+        }
+    }
+    void OnScriptHotReload()
+    {
+        //do whatever you want to do with access to instance via 'this'
+        Debug.LogError("NECE !!!! BloodHUD.Instance is null!!!?!?!?!?! ");
+    }
 
+    static void OnScriptHotReloadNoInstance()
+    {
+        //do whatever you want to do without instance
+        //useful if you've added brand new type
+        //or want to simply execute some code without |any instance created.
+        //Like reload scene, call test function etc
+        Debug.LogError("Hotreload smece");
     }
 
     private void GoToPowerUp(ClickEvent evt)
     {
-        GameObject player = GameObject.Find("Player");
-        player.GetComponent<PlayerControllerInput>().AddCoins(100);
-        Debug.LogError("Added 100");
+        //GameObject player = GameObject.Find("Player");
+        //player.GetComponent<PlayerControllerInput>().AddCoins(100);
+        Debug.LogError("NOT Added 100");
     }
 
     private void GoToEndGame(ClickEvent evt)

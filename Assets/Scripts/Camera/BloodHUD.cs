@@ -121,7 +121,11 @@ public class BloodHUD : MonoBehaviour
 
     public void Hit(float intensity01 = 1f)
     {
-        if (_root == null || Splats == null || Splats.Length == 0) return;
+        if (_root == null || Splats == null || Splats.Length == 0)
+        {
+            Debug.LogWarning("BloodHUD: Cannot Hit() because no root or splats assigned.");
+            return;
+        }
 
         var ve = Get();
 
