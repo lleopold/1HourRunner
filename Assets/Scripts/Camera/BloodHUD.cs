@@ -19,15 +19,21 @@ public class BloodHUD : MonoBehaviour
     [Header("Timings (seconds)")]
     public float FadeIn = 0.06f;
     public float Hold = 0.05f;
-    public float FadeOut = 0.35f;
+    public float FadeOut = 0.8f;
 
     [Header("Randomization")]
     public Vector2 ScaleRange = new(0.8f, 1.6f);
     public float EdgePadding = 64f;
     public float AlphaMin = 0.25f, AlphaMax = 0.6f;
+    [Range(0f, 0.5f)]
+    public float FadeRandomization = 0.2f; // ±20% by default
 
     [Header("Pool")]
     public int PoolSize = 12;
+
+    [Header("Multi-Splat Settings")]
+    public int MinSplatsPerHit = 20;
+    public int MaxSplatsPerHit = 21;
 
     public static BloodHUD Instance { get; private set; }
 
@@ -106,13 +112,13 @@ public class BloodHUD : MonoBehaviour
 
         // Animate ONLY opacity
         ve.style.transitionProperty = new List<StylePropertyName>
-    {
-        new StylePropertyName("opacity")
-    };
+        {
+            new StylePropertyName("opacity")
+        };
         ve.style.transitionDuration = new List<TimeValue>
-    {
-        new TimeValue(FadeIn, TimeUnit.Second)
-    };
+        {
+            new TimeValue(FadeIn, TimeUnit.Second)
+        };
 
         _root.Add(ve);
         return ve;
@@ -150,14 +156,54 @@ public class BloodHUD : MonoBehaviour
         ve.style.opacity = 0f;
         ve.style.transitionDuration = new List<TimeValue>
         {
-            new TimeValue(FadeIn, TimeUnit.Second),
             new TimeValue(FadeIn, TimeUnit.Second)
         };
 
         _pool.Enqueue(ve);
     }
 
+    /// <summary>
+    /// Returns a randomized duration based on the base value ±FadeRandomization percentage
+    /// </summary>
+    float RandomizeDuration(float baseDuration)
+    {
+        float variation = baseDuration * FadeRandomization;
+        return Random.Range(baseDuration - variation, baseDuration + variation);
+    }
+
+    /// <summary>
+    /// Spawns multiple blood splats around all edges/corners for intense damage effect
+    /// </summary>
+    /// <param name="intensity01">Damage intensity (0-1)</param>
+    public void HitMultiple(float intensity01 = 1f)
+    {
+        int count = Random.Range(MinSplatsPerHit, MaxSplatsPerHit + 1);
+        for (int i = 0; i < count; i++)
+        {
+            // Stagger each splat with a small random delay (0-100ms)
+            float delay = Random.Range(0f, 0.1f);
+            int capturedIndex = i; // Capture for closure
+
+            _root.schedule.Execute(() =>
+            {
+                HitSingle(intensity01);
+            }).StartingIn((long)(delay * 1000f));
+        }
+    }
+
+    /// <summary>
+    /// Spawns a single blood splat (use HitMultiple for better effect)
+    /// </summary>
+    /// <param name="intensity01">Damage intensity (0-1)</param>
     public void Hit(float intensity01 = 1f)
+    {
+        HitMultiple(intensity01);
+    }
+
+    /// <summary>
+    /// Internal method to spawn a single splat
+    /// </summary>
+    private void HitSingle(float intensity01 = 1f)
     {
         if (_root == null || Splats == null || Splats.Length == 0) return;
 
@@ -172,15 +218,50 @@ public class BloodHUD : MonoBehaviour
         // Temporarily disable transition to avoid animated movement while placing/resizing
         ve.style.transitionDuration = new List<TimeValue> { new TimeValue(0f, TimeUnit.Second) };
 
-        // Position on an edge
-        float x, y; int edge = Random.Range(0, 4);
+        // Calculate safe zone (40% from each edge to ensure corner/edge coverage)
+        float safeZoneW = w * 0.4f;
+        float safeZoneH = h * 0.4f;
+
+        // Position on an edge or corner - improved distribution
+        float x, y;
+        int edge = Random.Range(0, 8); // 8 zones: 4 corners + 4 edges
+
         switch (edge)
         {
-            case 0: x = Random.Range(-EdgePadding, EdgePadding * 2); y = Random.Range(0, h); break;
-            case 1: x = Random.Range(w - EdgePadding * 2, w + EdgePadding); y = Random.Range(0, h); break;
-            case 2: x = Random.Range(0, w); y = Random.Range(-EdgePadding, EdgePadding * 2); break;
-            default: x = Random.Range(0, w); y = Random.Range(h - EdgePadding * 2, h + EdgePadding); break;
+            case 0: // Top-left corner
+                x = Random.Range(0, safeZoneW);
+                y = Random.Range(0, safeZoneH);
+                break;
+            case 1: // Top-right corner
+                x = Random.Range(w - safeZoneW, w);
+                y = Random.Range(0, safeZoneH);
+                break;
+            case 2: // Bottom-left corner
+                x = Random.Range(0, safeZoneW);
+                y = Random.Range(h - safeZoneH, h);
+                break;
+            case 3: // Bottom-right corner
+                x = Random.Range(w - safeZoneW, w);
+                y = Random.Range(h - safeZoneH, h);
+                break;
+            case 4: // Left edge (middle section)
+                x = Random.Range(0, safeZoneW);
+                y = Random.Range(safeZoneH, h - safeZoneH);
+                break;
+            case 5: // Right edge (middle section)
+                x = Random.Range(w - safeZoneW, w);
+                y = Random.Range(safeZoneH, h - safeZoneH);
+                break;
+            case 6: // Top edge (middle section)
+                x = Random.Range(safeZoneW, w - safeZoneW);
+                y = Random.Range(0, safeZoneH);
+                break;
+            default: // Bottom edge (middle section)
+                x = Random.Range(safeZoneW, w - safeZoneW);
+                y = Random.Range(h - safeZoneH, h);
+                break;
         }
+
         ve.style.left = x;
         ve.style.top = y;
 
@@ -190,9 +271,12 @@ public class BloodHUD : MonoBehaviour
         ve.style.width = size;
         ve.style.height = size;
 
-        // Re-enable opacity transition and animate only opacity
+        // Randomize fade-in duration (±20% of FadeIn)
+        float randomFadeIn = RandomizeDuration(FadeIn);
+
+        // Re-enable opacity transition with randomized fade-in duration
         ve.style.transitionProperty = new List<StylePropertyName> { new StylePropertyName("opacity") };
-        ve.style.transitionDuration = new List<TimeValue> { new TimeValue(FadeIn, TimeUnit.Second) };
+        ve.style.transitionDuration = new List<TimeValue> { new TimeValue(randomFadeIn, TimeUnit.Second) };
 
         float targetA = Mathf.Clamp01(Random.Range(AlphaMin, AlphaMax) * Mathf.Max(0.15f, intensity01));
         ve.style.opacity = 0f;
@@ -203,15 +287,17 @@ public class BloodHUD : MonoBehaviour
 
             var s2 = ve.schedule.Execute(() =>
             {
-                ve.style.transitionDuration = new List<TimeValue> { new TimeValue(FadeOut, TimeUnit.Second) };
+                // Randomize fade-out duration (±20% of FadeOut)
+                float randomFadeOut = RandomizeDuration(FadeOut);
+
+                ve.style.transitionDuration = new List<TimeValue> { new TimeValue(randomFadeOut, TimeUnit.Second) };
                 ve.style.opacity = 0f;
 
-                var s3 = ve.schedule.Execute(() => Release(ve)).StartingIn(Ms(FadeOut));
+                var s3 = ve.schedule.Execute(() => Release(ve)).StartingIn(Ms(randomFadeOut));
                 _activeSchedules[ve].Add(s3);
             }).StartingIn(Ms(Hold));
             _activeSchedules[ve].Add(s2);
         }).StartingIn(0);
         _activeSchedules[ve].Add(s1);
     }
-
 }

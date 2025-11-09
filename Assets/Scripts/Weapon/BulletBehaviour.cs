@@ -16,6 +16,10 @@ public class BulletBehaviour : MonoBehaviour
         _direction = direction.normalized;
         _direction.y = 0; // Prevent bullet from going up or down
         _startPosition = transform.position;
+
+        hitEffectPrefab = Resources.Load<GameObject>("FX/Hit_02");//zombie hit effect
+        hitEffectPrefabBloodCloud = Resources.Load<GameObject>("FX/Impact_blood");//zombie hit effect blood cloud
+
     }
 
     void Update()
@@ -62,8 +66,8 @@ public class BulletBehaviour : MonoBehaviour
             float damage = GetWeaponDamage(WeaponConfigSingleton.Instance.WeaponConfig.DamageFluctuation);
             Debug.Log("Hit enemy: " + damage);
             enemy.DamageReceived(damage, transform.forward);
-            hitEffectPrefab = Resources.Load<GameObject>("FX/Hit_02");//zombie hit effect
-            hitEffectPrefabBloodCloud = Resources.Load<GameObject>("FX/Impact_blood");//zombie hit effect blood cloud
+            //hitEffectPrefab = Resources.Load<GameObject>("FX/Hit_02");//zombie hit effect
+            //hitEffectPrefabBloodCloud = Resources.Load<GameObject>("FX/Impact_blood");//zombie hit effect blood cloud
 
 
         }
@@ -86,6 +90,10 @@ public class BulletBehaviour : MonoBehaviour
             Destroy(impact, 2f);
             Destroy(impact2, 2f);
             Debug.Log("Spawned hit effect end");
+        }
+        else
+        {
+            Debug.Log("No hit effect to spawn");
         }
 
         // Destroy the bullet after the hit
