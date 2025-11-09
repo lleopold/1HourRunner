@@ -34,6 +34,7 @@ public class BloodHUD : MonoBehaviour
     UIDocument _uiDoc;
     VisualElement _root;
     readonly Queue<VisualElement> _pool = new();
+    readonly Dictionary<VisualElement, List<IVisualElementScheduledItem>> _activeSchedules = new();
 
     static long Ms(float seconds) => (long)Mathf.Round(seconds * 1000f);
 
@@ -82,102 +83,135 @@ public class BloodHUD : MonoBehaviour
     void PrewarmPool()
     {
         _pool.Clear();
+        _activeSchedules.Clear();
         for (int i = 0; i < PoolSize; i++)
-            _pool.Enqueue(CreateSplatElement());
+        {
+            var ve = CreateSplatElement();
+            _activeSchedules[ve] = new List<IVisualElementScheduledItem>();
+            _pool.Enqueue(ve);
+        }
     }
 
     VisualElement CreateSplatElement()
     {
-        var ve = new VisualElement();
-        ve.pickingMode = PickingMode.Ignore;
+        var ve = new VisualElement
+        {
+            pickingMode = PickingMode.Ignore
+        };
         ve.style.position = Position.Absolute;
         ve.style.backgroundRepeat = new BackgroundRepeat(Repeat.NoRepeat, Repeat.NoRepeat);
         ve.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
         ve.style.opacity = 0f;
         ve.style.visibility = Visibility.Hidden;
+
+        // Animate ONLY opacity
+        ve.style.transitionProperty = new List<StylePropertyName>
+    {
+        new StylePropertyName("opacity")
+    };
+        ve.style.transitionDuration = new List<TimeValue>
+    {
+        new TimeValue(FadeIn, TimeUnit.Second)
+    };
+
+        _root.Add(ve);
+        return ve;
+    }
+
+
+    VisualElement Get()
+    {
+        if (_pool.Count == 0)
+        {
+            var ve = CreateSplatElement();
+            _activeSchedules[ve] = new List<IVisualElementScheduledItem>();
+            return ve;
+        }
+
+        var element = _pool.Dequeue();
+        element.style.visibility = Visibility.Visible;
+        return element;
+    }
+
+    void Release(VisualElement ve)
+    {
+        // Cancel ALL scheduled items for this element
+        if (_activeSchedules.ContainsKey(ve))
+        {
+            foreach (var schedule in _activeSchedules[ve])
+            {
+                schedule?.Pause();
+            }
+            _activeSchedules[ve].Clear();
+        }
+
+        // Reset all styles to default state
+        ve.style.visibility = Visibility.Hidden;
+        ve.style.opacity = 0f;
         ve.style.transitionDuration = new List<TimeValue>
         {
             new TimeValue(FadeIn, TimeUnit.Second),
             new TimeValue(FadeIn, TimeUnit.Second)
         };
-        _root.Add(ve);
-        return ve;
-    }
 
-    VisualElement Get()
-    {
-        if (_pool.Count == 0) _pool.Enqueue(CreateSplatElement());
-        var ve = _pool.Dequeue();
-        ve.style.visibility = Visibility.Visible;
-        return ve;
-    }
-
-    void Release(VisualElement ve)
-    {
-        ve.style.visibility = Visibility.Hidden;
-        ve.style.opacity = 0f;
         _pool.Enqueue(ve);
     }
 
     public void Hit(float intensity01 = 1f)
     {
-        if (_root == null || Splats == null || Splats.Length == 0)
-        {
-            Debug.LogWarning("BloodHUD: Cannot Hit() because no root or splats assigned.");
-            return;
-        }
+        if (_root == null || Splats == null || Splats.Length == 0) return;
 
         var ve = Get();
+        if (!_activeSchedules.ContainsKey(ve)) _activeSchedules[ve] = new();
 
-        var tex = Splats[Random.Range(0, Splats.Length)];
-        ve.style.backgroundImage = new StyleBackground(tex);
+        ve.style.backgroundImage = new StyleBackground(Splats[Random.Range(0, Splats.Length)]);
 
-        float w = _root.resolvedStyle.width;
-        if (w <= 0) w = Screen.width;
-        float h = _root.resolvedStyle.height;
-        if (h <= 0) h = Screen.height;
+        float w = _root.resolvedStyle.width > 0 ? _root.resolvedStyle.width : Screen.width;
+        float h = _root.resolvedStyle.height > 0 ? _root.resolvedStyle.height : Screen.height;
 
-        float x = Random.Range(EdgePadding, Mathf.Max(EdgePadding, w - EdgePadding));
-        float y = Random.Range(EdgePadding, Mathf.Max(EdgePadding, h - EdgePadding));
+        // Temporarily disable transition to avoid animated movement while placing/resizing
+        ve.style.transitionDuration = new List<TimeValue> { new TimeValue(0f, TimeUnit.Second) };
+
+        // Position on an edge
+        float x, y; int edge = Random.Range(0, 4);
+        switch (edge)
+        {
+            case 0: x = Random.Range(-EdgePadding, EdgePadding * 2); y = Random.Range(0, h); break;
+            case 1: x = Random.Range(w - EdgePadding * 2, w + EdgePadding); y = Random.Range(0, h); break;
+            case 2: x = Random.Range(0, w); y = Random.Range(-EdgePadding, EdgePadding * 2); break;
+            default: x = Random.Range(0, w); y = Random.Range(h - EdgePadding * 2, h + EdgePadding); break;
+        }
         ve.style.left = x;
         ve.style.top = y;
 
         float baseSize = Mathf.Min(w, h) * 0.35f;
-        float scale = Random.Range(ScaleRange.x, ScaleRange.y) *
-                      Mathf.Lerp(0.8f, 1.4f, Mathf.Clamp01(intensity01));
+        float scale = Random.Range(ScaleRange.x, ScaleRange.y) * Mathf.Lerp(0.8f, 1.4f, Mathf.Clamp01(intensity01));
         float size = Mathf.Clamp(baseSize * scale, 96f, 800f);
         ve.style.width = size;
         ve.style.height = size;
 
-        // fixed rotation line for all Unity versions
-        float deg = Random.Range(0f, 360f);
-        ve.style.rotate = new UnityEngine.UIElements.Rotate(new Angle(deg, AngleUnit.Degree));
+        // Re-enable opacity transition and animate only opacity
+        ve.style.transitionProperty = new List<StylePropertyName> { new StylePropertyName("opacity") };
+        ve.style.transitionDuration = new List<TimeValue> { new TimeValue(FadeIn, TimeUnit.Second) };
 
-        float targetA = Mathf.Clamp01(Random.Range(AlphaMin, AlphaMax) *
-                                      Mathf.Max(0.15f, intensity01));
-
-        ve.style.transitionDuration = new List<TimeValue>
-        {
-            new TimeValue(FadeIn, TimeUnit.Second),
-            new TimeValue(FadeIn, TimeUnit.Second)
-        };
+        float targetA = Mathf.Clamp01(Random.Range(AlphaMin, AlphaMax) * Mathf.Max(0.15f, intensity01));
         ve.style.opacity = 0f;
 
-        ve.schedule.Execute(() =>
+        var s1 = ve.schedule.Execute(() =>
         {
             ve.style.opacity = targetA;
 
-            ve.schedule.Execute(() =>
+            var s2 = ve.schedule.Execute(() =>
             {
-                ve.style.transitionDuration = new List<TimeValue>
-                {
-                    new TimeValue(FadeOut, TimeUnit.Second),
-                    new TimeValue(FadeOut, TimeUnit.Second)
-                };
+                ve.style.transitionDuration = new List<TimeValue> { new TimeValue(FadeOut, TimeUnit.Second) };
                 ve.style.opacity = 0f;
-                ve.schedule.Execute(() => Release(ve)).StartingIn(Ms(FadeOut));
-            }).StartingIn(Ms(Hold));
 
-        }).StartingIn(0L);
+                var s3 = ve.schedule.Execute(() => Release(ve)).StartingIn(Ms(FadeOut));
+                _activeSchedules[ve].Add(s3);
+            }).StartingIn(Ms(Hold));
+            _activeSchedules[ve].Add(s2);
+        }).StartingIn(0);
+        _activeSchedules[ve].Add(s1);
     }
+
 }

@@ -71,7 +71,7 @@ public class UIT_GameScreen : MonoBehaviour
         if (BloodHUD.Instance != null)
         {
             float intensity = Random.Range(0.3f, 2.0f);
-            BloodHUD.Instance.Hit(intensity);
+            BloodHUD.Instance.Hit(3);
             Debug.Log($"BloodHUD triggered with intensity: {intensity}");
         }
         else
