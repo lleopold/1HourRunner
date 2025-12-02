@@ -1210,37 +1210,44 @@ namespace ZombieGame
             {
                 if (_shoot && _bulletsInClip > 0)
                 {
-                    if (Time.time >= _nextFireTime /*&& Input.GetButton("Fire1")*/)
+                    if (Time.time >= _nextFireTime)
                     {
                         _bulletsInClip--;
                         Transform gunBarrel = GetWeaponPostitionFromPlayer();
-                        // Calculate the next allowed shooting time
-                        _nextFireTime = Time.time + 1f / WeaponConfigSingleton.Instance.WeaponConfig.FireRate; //TODO MODIFIER OF PLAYER CONFIG for faster shooting
-                                                                                                               //GameObject hitParticleGameObject = Resources.Load<GameObject>("Weapons/Hit_01");
+                        _nextFireTime = Time.time + 1f / WeaponConfigSingleton.Instance.WeaponConfig.FireRate;
+
                         MuzzleFlash();
                         float randomAngle = UnityEngine.Random.Range(-_currentAngleLineRenderers, _currentAngleLineRenderers);
                         Vector3 forceDirection = Quaternion.Euler(0f, randomAngle, 0f) * transform.forward;
 
-                        //RayCastHit(gunBarrel, hitParticleGameObject, forceDirection);
                         SpawnBulletAndShoot(gunBarrel, forceDirection, _currentAngleLineRenderers);
                         Recoil(_currentAngleLineRenderers);
                         SoundFXManager.Instance.PlaySoundFXClip(WeaponConfigSingleton.Instance.WeaponConfig.shootingClip, transform, 1f);
+
+                        // ✨ NEW: Trigger camera shake based on weapon recoil and player strength
+                        if (CameraShakeManager.Instance != null)
+                        {
+                            float weaponRecoil = WeaponConfigSingleton.Instance.WeaponConfig.Recoil;
+                            float playerStrength = PlayerConfigSingleton.Instance.PlayerConfig.strength;
+                            CameraShakeManager.Instance.ShakeOnFire(weaponRecoil, playerStrength);
+                        }
                     }
                 }
+
+                // Rest of the method remains unchanged...
                 if (!_shoot)
                 {
                 }
-                //Nema veze sa pucanjem, non stop se okida:
-                if (_bulletsInClip == 0 && !_reloadingInProgress) //Start reloading
+                if (_bulletsInClip == 0 && !_reloadingInProgress)
                 {
                     _reloadTimeLeft = GetTotalReloadTime();
                     _nextFireTime = Time.time + _reloadTimeLeft;
                     _reloadingInProgress = true;
                     _uiT_GameScreen.SetAmmoBar(0);
                 }
-                if ((_bulletsInClip > 0) && (!_reloadingInProgress)) //Not reloading progres, show number of bullets
+                if ((_bulletsInClip > 0) && (!_reloadingInProgress))
                 {
-                    _uiT_GameScreen.SetAmmoBar(GetPercentageOfClipLeft()); //
+                    _uiT_GameScreen.SetAmmoBar(GetPercentageOfClipLeft());
                     _uiT_GameScreen._bullets.text = _bulletsInClip.ToString();
                 }
                 if (_reloadingInProgress)
@@ -1253,7 +1260,6 @@ namespace ZombieGame
                 Debug.LogError("Error in shooting: " + e.Message);
             }
         }
-
         private void MuzzleFlash()
         {
             try
