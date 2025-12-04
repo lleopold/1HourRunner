@@ -80,7 +80,7 @@ public class BulletBehaviour : MonoBehaviour
 
         if (hitEffectPrefab != null && hitEffectPrefabBloodCloud != null)
         {
-            Debug.Log("Spawn hit effect");
+            //Debug.Log("Spawn hit effect");
             var impact = Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
             var impact2 = Instantiate(hitEffectPrefabBloodCloud, transform.position, Quaternion.identity);
             ParticleSystem hitPart = impact.GetComponent<ParticleSystem>();
@@ -89,7 +89,7 @@ public class BulletBehaviour : MonoBehaviour
             hitPart2.Play();
             Destroy(impact, 2f);
             Destroy(impact2, 2f);
-            Debug.Log("Spawned hit effect end");
+            //Debug.Log("Spawned hit effect end");
         }
         else
         {

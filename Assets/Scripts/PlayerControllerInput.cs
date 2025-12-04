@@ -50,6 +50,18 @@ namespace ZombieGame
         [SerializeField] float emissionBase = 1.4f;    // osnovna jačina žara
         [SerializeField] float emissionPulse = 1.0f;   // dodatni puls emisije
 
+        // Add these fields near other aiming-related serialized fields (around line 25-50)
+        [Header("Precision Shot System")]
+        [SerializeField] private float _precisionVAngle = 0.1f; // Narrower V angle for precision zone
+        [SerializeField] private Color _precisionVColor = new Color(0f, 1f, 0.5f, 1f); // Cyan-green for precision lines
+        [SerializeField] private float _precisionVAlpha = 2.0f;
+        [SerializeField] private float _precisionZoneToleranceDegrees = 3f; // How close the wave needs to be to center
+
+        // Add near other private LineRenderer fields (around line 100)
+        private LineRenderer lineRendererPrecisionLeft;
+        private LineRenderer lineRendererPrecisionRight;
+        private bool _isPrecisionShot = false;
+
         Material laserMat;
         Texture2D laserTex;
 
@@ -62,6 +74,9 @@ namespace ZombieGame
         [SerializeField] private float movementSpreadPerSecondWalk = 25f;   // degrees per second toward max
         [SerializeField] private float movementSpreadPerSecondRun = 45f;    // degrees per second toward max
         [SerializeField] private float movementEnterBurstPct = 20f;         // % of (max-min) instantly when starting to move while aiming
+
+        // Update the precision visual settings at the top of your class (around line 60)
+        [Header("Precision Shot System")]
         private bool _wasMoving;
 
         // Prefab path (inside Resources folder) and ParticleSystem references
@@ -377,6 +392,29 @@ namespace ZombieGame
 
             // === Default movement acceleration if not set in Inspector ===
             if (movement.acceleration <= 0f) movement.acceleration = 80f; // 0..100 (0 = never accelerates, 100 = instant)
+
+            // Setup precision line renderers
+            GameObject precisionLeftLine = new GameObject("PrecisionLeftLine");
+            GameObject precisionRightLine = new GameObject("PrecisionRightLine");
+
+            precisionLeftLine.transform.parent = transform;
+            precisionRightLine.transform.parent = transform;
+
+            lineRendererPrecisionLeft = precisionLeftLine.AddComponent<LineRenderer>();
+            lineRendererPrecisionRight = precisionRightLine.AddComponent<LineRenderer>();
+
+            ConfigureLineRenderer(lineRendererPrecisionLeft);
+            ConfigureLineRenderer(lineRendererPrecisionRight);
+
+            SetupLaser(lineRendererPrecisionLeft);
+            SetupLaser(lineRendererPrecisionRight);
+
+            // ✨ IMPORTANT: Ensure they render on top like the main lines
+            lineRendererPrecisionLeft.sortingOrder = 5001;  // Higher than main lines
+            lineRendererPrecisionRight.sortingOrder = 5001;
+
+            lineRendererPrecisionLeft.enabled = false;
+            lineRendererPrecisionRight.enabled = false;
         }
 
         private void Awake()
@@ -1217,24 +1255,59 @@ namespace ZombieGame
                         _nextFireTime = Time.time + 1f / WeaponConfigSingleton.Instance.WeaponConfig.FireRate;
 
                         MuzzleFlash();
-                        float randomAngle = UnityEngine.Random.Range(-_currentAngleLineRenderers, _currentAngleLineRenderers);
-                        Vector3 forceDirection = Quaternion.Euler(0f, randomAngle, 0f) * transform.forward;
+
+                        // ✨ NEW: Check for precision shot
+                        _isPrecisionShot = IsRadarInPrecisionZone();
+
+                        float randomAngle;
+                        Vector3 forceDirection;
+
+                        if (_isPrecisionShot)
+                        {
+                            // Perfect center shot - no deviation
+                            randomAngle = 0f;
+                            forceDirection = transform.forward; // Straight ahead
+                            Debug.Log("🎯 PRECISION SHOT!");
+
+                            // Visual feedback for precision shot (optional)
+                            SoundFXManager.Instance?.PlaySoundFXClip(WeaponConfigSingleton.Instance.WeaponConfig.shootingClip, transform, 1.2f); // Slightly louder
+                        }
+                        else
+                        {
+                            // Normal shot with spread
+                            randomAngle = UnityEngine.Random.Range(-_currentAngleLineRenderers, _currentAngleLineRenderers);
+                            forceDirection = Quaternion.Euler(0f, randomAngle, 0f) * transform.forward;
+                        }
 
                         SpawnBulletAndShoot(gunBarrel, forceDirection, _currentAngleLineRenderers);
-                        Recoil(_currentAngleLineRenderers);
+
+                        // ✨ NEW: Only apply recoil if NOT a precision shot
+                        if (!_isPrecisionShot)
+                        {
+                            Recoil(_currentAngleLineRenderers);
+                        }
+                        else
+                        {
+                            // Precision shot: V stays tight, no recoil applied
+                            Debug.Log($"Precision shot - no recoil applied. Current angle: {_currentAngleLineRenderers}°");
+                        }
+
                         SoundFXManager.Instance.PlaySoundFXClip(WeaponConfigSingleton.Instance.WeaponConfig.shootingClip, transform, 1f);
 
-                        // ✨ NEW: Trigger camera shake based on weapon recoil and player strength
+                        // Camera shake
                         if (CameraShakeManager.Instance != null)
                         {
                             float weaponRecoil = WeaponConfigSingleton.Instance.WeaponConfig.Recoil;
                             float playerStrength = PlayerConfigSingleton.Instance.PlayerConfig.strength;
-                            CameraShakeManager.Instance.ShakeOnFire(weaponRecoil, playerStrength);
+
+                            // ✨ Reduced shake on precision shots
+                            float shakeMultiplier = _isPrecisionShot ? 0.3f : 1f;
+                            CameraShakeManager.Instance.ShakeOnFire(weaponRecoil * shakeMultiplier, playerStrength);
                         }
                     }
                 }
 
-                // Rest of the method remains unchanged...
+                // Rest of reload logic remains unchanged
                 if (!_shoot)
                 {
                 }
@@ -1536,14 +1609,16 @@ namespace ZombieGame
                 _currentAngleLineRenderers = gameStats._precisionStartingAim;
             }
         }
+        // Replace the UpdateLinePoints method (around line 1850)
         void UpdateLinePoints(float angle)
         {
             float baseRadius = 2f;
             float lengthMultiplier = 5f;
             float currentRadius = baseRadius * lengthMultiplier;
             float halfAngle = angle / 2f;
+            float halfPrecisionAngle = _precisionVAngle / 2f;
 
-            float yOffset = 0.03f; // <<< NOVO: da “pluta” iznad tla
+            float yOffset = 0.03f;
 
             Vector3 playerPosition = transform.position;
             Quaternion playerRotation = transform.rotation;
@@ -1552,6 +1627,7 @@ namespace ZombieGame
                                        _gameObjectAimingCircle.transform.position.y + yOffset,
                                        playerPosition.z);
 
+            // Main V lines
             Vector3 leftPoint = triangleBase + playerRotation * Quaternion.Euler(0, -halfAngle, 0) * Vector3.forward * currentRadius;
             Vector3 rightPoint = triangleBase + playerRotation * Quaternion.Euler(0, halfAngle, 0) * Vector3.forward * currentRadius;
 
@@ -1560,8 +1636,23 @@ namespace ZombieGame
 
             lineRendererRight.positionCount = 2;
             lineRendererRight.SetPositions(new[] { triangleBase, rightPoint });
-        }
 
+            // Precision V lines (narrower, inner V)
+            Vector3 precisionLeftPoint = triangleBase + playerRotation * Quaternion.Euler(0, -halfPrecisionAngle, 0) * Vector3.forward * currentRadius;
+            Vector3 precisionRightPoint = triangleBase + playerRotation * Quaternion.Euler(0, halfPrecisionAngle, 0) * Vector3.forward * currentRadius;
+
+            if (lineRendererPrecisionLeft != null && lineRendererPrecisionRight != null)
+            {
+                lineRendererPrecisionLeft.positionCount = 2;
+                lineRendererPrecisionLeft.SetPositions(new[] { triangleBase, precisionLeftPoint });
+
+                lineRendererPrecisionRight.positionCount = 2;
+                lineRendererPrecisionRight.SetPositions(new[] { triangleBase, precisionRightPoint });
+
+                // ✨ DEBUG: Log to verify positions are being set
+                //Debug.Log($"Precision lines updated - Angle: {_precisionVAngle}°, Enabled: L={lineRendererPrecisionLeft.enabled}, R={lineRendererPrecisionRight.enabled}");
+            }
+        }
         void SetLineAlpha(LineRenderer lineRenderer, float alpha)
         {
             //Debug.Log("Setting alpha to: " + alpha);
@@ -2218,16 +2309,6 @@ namespace ZombieGame
             {
                 SetAimLinesActive(true);
 
-                //bool isMoving = _input.magnitude > 0f;
-                //// Only relax toward min when not moving. If moving, let movement penalty increase spread.
-                //if (!isMoving)
-                //{
-                //    _currentAngleLineRenderers = Mathf.MoveTowards(
-                //        _currentAngleLineRenderers,
-                //        gameStats._precisionMin,
-                //        gameStats._aimingSpeed * Time.deltaTime
-                //    );
-                //}
                 bool isMoving = _input.magnitude > 0f;
                 if (!isMoving)
                 {
@@ -2237,14 +2318,12 @@ namespace ZombieGame
                         _currentAngleLineRenderers - recoverPerSecond * Time.deltaTime);
                 }
 
-                // Apply recoil as a raise, not as a hard set
                 if (_recoil > 0f)
                 {
                     _currentAngleLineRenderers = Mathf.Max(_currentAngleLineRenderers, _recoil);
                     _recoil = 0f;
                 }
 
-                // Clamp final spread
                 _currentAngleLineRenderers = Mathf.Clamp(
                     _currentAngleLineRenderers,
                     gameStats._precisionMin,
@@ -2255,18 +2334,33 @@ namespace ZombieGame
                 ApplyVisuals(lineRendererLeft, _meshRendererAimingCircle, _currentAngleLineRenderers);
                 ApplyVisuals(lineRendererRight, _meshRendererAimingCircle, _currentAngleLineRenderers);
 
+                // ✨ Apply precision line visuals with distinct color
+                ApplyPrecisionVisuals(lineRendererPrecisionLeft);
+                ApplyPrecisionVisuals(lineRendererPrecisionRight);
+
+                // ✨ CRITICAL: Animate the precision lasers too!
                 AnimateLaser(lineRendererLeft, laserMat);
                 AnimateLaser(lineRendererRight, laserMat);
+                AnimateLaser(lineRendererPrecisionLeft, laserMat);  // ← Add this
+                AnimateLaser(lineRendererPrecisionRight, laserMat); // ← Add this
+
+                // Enable precision lines
+                if (!lineRendererPrecisionLeft.enabled) lineRendererPrecisionLeft.enabled = true;
+                if (!lineRendererPrecisionRight.enabled) lineRendererPrecisionRight.enabled = true;
             }
             else
             {
                 SetAimLinesActive(false);
                 _currentAngleLineRenderers = gameStats._precisionStartingAim;
+
+                // Disable precision lines
+                if (lineRendererPrecisionLeft != null && lineRendererPrecisionLeft.enabled) lineRendererPrecisionLeft.enabled = false;
+                if (lineRendererPrecisionRight != null && lineRendererPrecisionRight.enabled) lineRendererPrecisionRight.enabled = false;
+
                 if (_laserSmokeLeft.isPlaying) _laserSmokeLeft.Stop(true, ParticleSystemStopBehavior.StopEmitting);
                 if (_laserSmokeRight.isPlaying) _laserSmokeRight.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             }
         }
-
         void EnsureLineRenderersOnTop()
         {
             // Ako želiš bezbedno rešenje bez menjanja materijala:
@@ -2287,7 +2381,6 @@ namespace ZombieGame
         {
             if (!lineRendererLeft || !lineRendererRight || _mainCamera == null) return;
 
-            // pick a point near the player/base of the V to measure distance
             Vector3 basePoint = lineRendererLeft.positionCount > 0
                 ? lineRendererLeft.GetPosition(0)
                 : transform.position;
@@ -2299,6 +2392,11 @@ namespace ZombieGame
 
             lineRendererLeft.startWidth = lineRendererLeft.endWidth = worldWidth;
             lineRendererRight.startWidth = lineRendererRight.endWidth = worldWidth;
+
+            // ✨ Precision lines slightly thinner for visual distinction
+            float precisionWidth = worldWidth * 0.7f;
+            if (lineRendererPrecisionLeft) lineRendererPrecisionLeft.startWidth = lineRendererPrecisionLeft.endWidth = precisionWidth;
+            if (lineRendererPrecisionRight) lineRendererPrecisionRight.startWidth = lineRendererPrecisionRight.endWidth = precisionWidth;
         }
 
         // Convert desired pixel width to world-space width at a given distance
@@ -2364,7 +2462,72 @@ namespace ZombieGame
             _laserSmokeLeft.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             _laserSmokeRight.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
+        // Add this once per frame for debugging
+        void QuickLineDebugInit()
+        {
+            /*
+            lineRendererLeft.startColor = Color.red;
+            lineRendererLeft.endColor = Color.red;
+
+            lineRendererRight.startColor = Color.blue;
+            lineRendererRight.endColor = Color.blue;
+            */
+        }
+        // Add this for debugging each frame
+        void QuickLineDebugTick()
+        {
+            /*
+            lineRendererLeft.SetPosition(0, transform.position);
+            lineRendererLeft.SetPosition(1, transform.position + transform.forward * 5f);
+
+            lineRendererRight.SetPosition(0, transform.position);
+            lineRendererRight.SetPosition(1, transform.position - transform.forward * 5f);
+            */
+        }
+        // Add this new method to check if radar wave is in precision zone
+        private bool IsRadarInPrecisionZone()
+        {
+            float currentTime = Time.time;
+            float sweepT = Mathf.PingPong(currentTime / (_sweepDuration / 2f), 1f);
+
+            // Check if paused at edge (precision shot not possible)
+            bool hitRightEdge = sweepT >= 1f;
+            bool hitLeftEdge = sweepT <= 0f;
+
+            if (_isPausedAtEdge) return false;
+
+            // Calculate how close the sweep is to center (0.5 = center)
+            float distanceFromCenter = Mathf.Abs(sweepT - 0.5f);
+
+            // Calculate normalized tolerance based on total angle range
+            float halfAngle = _currentAngleLineRenderers / 2f;
+            float tolerance = _precisionZoneToleranceDegrees / halfAngle; // normalized 0..1
+
+            return distanceFromCenter <= tolerance;
+        }
+        // Add new method for precision line visuals
+        void ApplyPrecisionVisuals(LineRenderer lineRenderer)
+        {
+            // Distinct gradient for precision lines
+            Gradient gradient = new();
+            gradient.SetKeys(
+                new[] {
+            new GradientColorKey(Color.white, 0f),
+            new GradientColorKey(_precisionVColor, 0.35f),
+            new GradientColorKey(_precisionVColor, 0.65f),
+            new GradientColorKey(Color.white, 1f),
+                },
+                new[] {
+            new GradientAlphaKey(0.0f, 0f),
+            new GradientAlphaKey(_precisionVAlpha, 0.08f),
+            new GradientAlphaKey(_precisionVAlpha, 0.92f),
+            new GradientAlphaKey(0.0f, 1f),
+                }
+            );
+            lineRenderer.colorGradient = gradient;
+        }
     }
+
 }
 [Serializable]
 public struct Movement
