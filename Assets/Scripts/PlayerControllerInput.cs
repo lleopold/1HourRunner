@@ -2318,8 +2318,8 @@ namespace ZombieGame
                 // ✨ CRITICAL: Animate the precision lasers too with their own material!
                 AnimateLaser(lineRendererLeft, laserMat);
                 AnimateLaser(lineRendererRight, laserMat);
-                AnimatePrecisionLaser(lineRendererPrecisionLeft, precisionLaserMat);  // ✨ Use new method
-                AnimatePrecisionLaser(lineRendererPrecisionRight, precisionLaserMat); // ✨ Use new method
+                AnimatePrecisionZone(lineRendererPrecisionLeft, precisionLaserMat);  // ✨ Use new method
+                AnimatePrecisionZone(lineRendererPrecisionRight, precisionLaserMat); // ✨ Use new method
 
                 // Enable precision lines
                 if (!lineRendererPrecisionLeft.enabled) lineRendererPrecisionLeft.enabled = true;
@@ -2564,7 +2564,7 @@ namespace ZombieGame
             lr.sortingOrder = 5001; // Render on top of main lines
         }
         // ✨ NEW: Separate animation for precision lines with yellow emission
-        void AnimatePrecisionLaser(LineRenderer lr, Material mat)
+        void AnimatePrecisionZone(LineRenderer lr, Material mat)
         {
             // Scroll UV (same as main laser)
             float t = Time.time;
