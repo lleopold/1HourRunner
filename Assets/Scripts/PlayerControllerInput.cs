@@ -50,13 +50,12 @@ namespace ZombieGame
         [SerializeField] float emissionBase = 1.4f;    // osnovna jačina žara
         [SerializeField] float emissionPulse = 1.0f;   // dodatni puls emisije
 
-        // Add these fields near other aiming-related serialized fields (around line 25-50)
+        // Remove the duplicate declaration around line 70 and keep only this one with yellow color:
         [Header("Precision Shot System")]
         [SerializeField] private float _precisionVAngle = 0.1f; // Narrower V angle for precision zone
-        [SerializeField] private Color _precisionVColor = new Color(0f, 1f, 0.5f, 1f); // Cyan-green for precision lines
-        [SerializeField] private float _precisionVAlpha = 2.0f;
+        [SerializeField] private Color _precisionVColor = Color.yellow; // ✨ Changed to yellow
+        [SerializeField] private float _precisionVAlpha = 3.0f; // Increased for better visibility
         [SerializeField] private float _precisionZoneToleranceDegrees = 3f; // How close the wave needs to be to center
-
         // Add near other private LineRenderer fields (around line 100)
         private LineRenderer lineRendererPrecisionLeft;
         private LineRenderer lineRendererPrecisionRight;
@@ -64,6 +63,7 @@ namespace ZombieGame
 
         Material laserMat;
         Texture2D laserTex;
+        Material precisionLaserMat;
 
         // --- tweakables --- laser
         [SerializeField] int aimLinePixels = 0;        // target screen thickness in px
@@ -76,7 +76,6 @@ namespace ZombieGame
         [SerializeField] private float movementEnterBurstPct = 20f;         // % of (max-min) instantly when starting to move while aiming
 
         // Update the precision visual settings at the top of your class (around line 60)
-        [Header("Precision Shot System")]
         private bool _wasMoving;
 
         // Prefab path (inside Resources folder) and ParticleSystem references
@@ -89,6 +88,8 @@ namespace ZombieGame
         private float _lastSweepEndTime = -999f;
         private bool _isPausedAtEdge = false;
         private bool _pauseOnRightEdge = false;
+
+
 
         private CharacterController _characterController;
         private Vector3 _direction;
@@ -378,12 +379,20 @@ namespace ZombieGame
             if (sh == null) sh = Shader.Find("Particles/Additive");
             laserMat = new Material(sh);
             laserMat.mainTexture = laserTex;
-            laserMat.SetColor("_BaseColor", laserColor);           // URP varijanta
-            laserMat.SetColor("_Color", laserColor);               // Legacy fallback
+            laserMat.SetColor("_BaseColor", laserColor);
+            laserMat.SetColor("_Color", laserColor);
             laserMat.EnableKeyword("_EMISSION");
             laserMat.SetColor("_EmissionColor", laserColor * emissionBase);
 
-            // 3) Podesi oba line renderera kao “laser”
+            // ✨ NEW: Create separate material for precision lines with yellow color
+            precisionLaserMat = new Material(sh);
+            precisionLaserMat.mainTexture = laserTex;
+            precisionLaserMat.SetColor("_BaseColor", _precisionVColor);
+            precisionLaserMat.SetColor("_Color", _precisionVColor);
+            precisionLaserMat.EnableKeyword("_EMISSION");
+            precisionLaserMat.SetColor("_EmissionColor", _precisionVColor * emissionBase);
+
+            // 3) Podesi oba line renderera kao "laser"
             SetupLaser(lineRendererLeft);
             SetupLaser(lineRendererRight);
             //QuickLineDebugInit();
@@ -406,8 +415,8 @@ namespace ZombieGame
             ConfigureLineRenderer(lineRendererPrecisionLeft);
             ConfigureLineRenderer(lineRendererPrecisionRight);
 
-            SetupLaser(lineRendererPrecisionLeft);
-            SetupLaser(lineRendererPrecisionRight);
+            SetupPrecisionLaser(lineRendererPrecisionLeft);  // ✨ Use new method
+            SetupPrecisionLaser(lineRendererPrecisionRight); // ✨ Use new method
 
             // ✨ IMPORTANT: Ensure they render on top like the main lines
             lineRendererPrecisionLeft.sortingOrder = 5001;  // Higher than main lines
@@ -1744,8 +1753,6 @@ namespace ZombieGame
         }
 
 
-
-
         void ConfigureLineRenderer(LineRenderer lineRenderer)
         {
             // Postavite LineRenderer
@@ -2226,36 +2233,6 @@ namespace ZombieGame
                 _lastLogTime = Time.time;
             }
         }
-        void SetupLaser(LineRenderer lr)
-        {
-            lr.positionCount = 2;
-            lr.widthMultiplier = baseWidth;
-            lr.textureMode = LineTextureMode.Tile;
-            lr.numCapVertices = 4;      // za zaobljene krajeve
-            lr.numCornerVertices = 2;
-            lr.alignment = LineAlignment.View;
-
-            // Gradijent (duž linije): toplo belo ka crvenom
-            var g = new Gradient();
-            g.SetKeys(
-                new[] {
-            new GradientColorKey(Color.white, 0f),
-            new GradientColorKey(laserColor, 0.35f),
-            new GradientColorKey(laserColor, 0.65f),
-            new GradientColorKey(Color.white, 1f),
-                },
-                new[] {
-            new GradientAlphaKey(0.0f, 0f),
-            new GradientAlphaKey(1.0f, 0.08f),
-            new GradientAlphaKey(1.0f, 0.92f),
-            new GradientAlphaKey(0.0f, 1f),
-                }
-            );
-            lr.colorGradient = g;
-
-            lr.material = laserMat;
-        }
-
         void AnimateLaser(LineRenderer lr, Material mat)
         {
             // Scroll UV (strujanja)
@@ -2338,11 +2315,11 @@ namespace ZombieGame
                 ApplyPrecisionVisuals(lineRendererPrecisionLeft);
                 ApplyPrecisionVisuals(lineRendererPrecisionRight);
 
-                // ✨ CRITICAL: Animate the precision lasers too!
+                // ✨ CRITICAL: Animate the precision lasers too with their own material!
                 AnimateLaser(lineRendererLeft, laserMat);
                 AnimateLaser(lineRendererRight, laserMat);
-                AnimateLaser(lineRendererPrecisionLeft, laserMat);  // ← Add this
-                AnimateLaser(lineRendererPrecisionRight, laserMat); // ← Add this
+                AnimatePrecisionLaser(lineRendererPrecisionLeft, precisionLaserMat);  // ✨ Use new method
+                AnimatePrecisionLaser(lineRendererPrecisionRight, precisionLaserMat); // ✨ Use new method
 
                 // Enable precision lines
                 if (!lineRendererPrecisionLeft.enabled) lineRendererPrecisionLeft.enabled = true;
@@ -2525,6 +2502,83 @@ namespace ZombieGame
                 }
             );
             lineRenderer.colorGradient = gradient;
+        }
+        void SetupLaser(LineRenderer lr)
+        {
+            lr.positionCount = 2;
+            lr.widthMultiplier = baseWidth;
+            lr.textureMode = LineTextureMode.Tile;
+            lr.numCapVertices = 4;
+            lr.numCornerVertices = 2;
+            lr.alignment = LineAlignment.View;
+
+            var g = new Gradient();
+            g.SetKeys(
+                new[] {
+            new GradientColorKey(Color.white, 0f),
+            new GradientColorKey(laserColor, 0.35f),
+            new GradientColorKey(laserColor, 0.65f),
+            new GradientColorKey(Color.white, 1f),
+                },
+                new[] {
+            new GradientAlphaKey(0.0f, 0f),
+            new GradientAlphaKey(1.0f, 0.08f),
+            new GradientAlphaKey(1.0f, 0.92f),
+            new GradientAlphaKey(0.0f, 1f),
+                }
+            );
+            lr.colorGradient = g;
+
+            lr.material = laserMat;
+        }
+
+        // ✨ NEW: Setup method specifically for precision lines with yellow color
+        void SetupPrecisionLaser(LineRenderer lr)
+        {
+            lr.positionCount = 2;
+            lr.widthMultiplier = baseWidth;
+            lr.textureMode = LineTextureMode.Tile;
+            lr.numCapVertices = 4;
+            lr.numCornerVertices = 2;
+            lr.alignment = LineAlignment.View;
+
+            // Yellow gradient for precision lines
+            var g = new Gradient();
+            g.SetKeys(
+                new[] {
+            new GradientColorKey(Color.white, 0f),
+            new GradientColorKey(_precisionVColor, 0.35f),
+            new GradientColorKey(_precisionVColor, 0.65f),
+            new GradientColorKey(Color.white, 1f),
+                },
+                new[] {
+            new GradientAlphaKey(0.0f, 0f),
+            new GradientAlphaKey(_precisionVAlpha, 0.08f),
+            new GradientAlphaKey(_precisionVAlpha, 0.92f),
+            new GradientAlphaKey(0.0f, 1f),
+                }
+            );
+            lr.colorGradient = g;
+
+            lr.material = precisionLaserMat; // ✨ Use yellow material
+            lr.sortingOrder = 5001; // Render on top of main lines
+        }
+        // ✨ NEW: Separate animation for precision lines with yellow emission
+        void AnimatePrecisionLaser(LineRenderer lr, Material mat)
+        {
+            // Scroll UV (same as main laser)
+            float t = Time.time;
+            Vector2 o = mat.mainTextureOffset;
+            o.x = -t * scrollSpeed;
+            mat.mainTextureOffset = o;
+
+            // Puls širine (slightly different for visual distinction)
+            float pulse = Mathf.Lerp(pulseMin, pulseMax, 0.5f + 0.5f * Mathf.Sin(t * pulseSpeed * 1.2f));
+            lr.widthMultiplier = baseWidth * pulse * 0.7f; // Thinner than main lines
+
+            // Yellow emission pulse
+            float e = emissionBase + Mathf.Sin(t * (pulseSpeed * 1.3f)) * emissionPulse;
+            mat.SetColor("_EmissionColor", _precisionVColor * e); // ✨ Use yellow color
         }
     }
 
