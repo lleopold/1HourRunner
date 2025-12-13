@@ -291,11 +291,6 @@ namespace ZombieGame
                 _precisionStartingAim = PlayerConfigSingleton.Instance.PlayerConfig.PrecisionAimingAngleStarting,
                 _aimingSpeed = PlayerConfigSingleton.Instance.PlayerConfig.AimingSpeed
             };
-            gameStats._precisionMin = PlayerConfigSingleton.Instance.PlayerConfig.PrecisionAngleMin;
-            gameStats._precisionMax = PlayerConfigSingleton.Instance.PlayerConfig.PrecisionAngleMax;
-            gameStats._precisionStartingAim = PlayerConfigSingleton.Instance.PlayerConfig.PrecisionAimingAngleStarting;
-            gameStats._aimingSpeed = PlayerConfigSingleton.Instance.PlayerConfig.AimingSpeed;
-
             _currentAngleLineRenderers = gameStats._precisionMax;
 
 
@@ -336,7 +331,7 @@ namespace ZombieGame
             SkinnedMeshRenderer skinnedMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
             if (skinnedMeshRenderer == null || skinnedMeshRenderer.sharedMesh == null)
             {
-                Debug.LogError("❌ No SkinnedMeshRenderer found on Player!");
+                Debug.LogError("No SkinnedMeshRenderer found on Player!");
                 return;
             }
 
@@ -536,7 +531,11 @@ namespace ZombieGame
             // Start from current rotation so we never snap to identity
             Quaternion rotationL = transform.rotation;
 
-            if (!_aim) return rotationL;
+            if (!_aim)
+            {
+                Debug.Log("Not Aiming");
+                return rotationL;
+            }
 
             if (_aimingType == AimingType.Mouse)
             {
@@ -611,14 +610,17 @@ namespace ZombieGame
 
         private Quaternion MouseRotation()
         {
+            Debug.Log("MouseRotation called");
             if (_mainCamera == null) return transform.rotation;
 
             var ray = _mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
 
             // Try Ground layer first (if you use it)
             int groundMask = LayerMask.GetMask("Ground");
-            if (groundMask != 0 && Physics.Raycast(ray, out _raycastHit, Mathf.Infinity, groundMask, QueryTriggerInteraction.Ignore))
+            //if (groundMask != 0 && Physics.Raycast(ray, out _raycastHit, Mathf.Infinity, groundMask, QueryTriggerInteraction.Ignore))
+            if (groundMask != 0 && Physics.Raycast(ray, out _raycastHit, 1000f, groundMask, QueryTriggerInteraction.Ignore))
             {
+                Debug.Log("Mouse rotation ground hit!");
                 Vector3 target = _raycastHit.point;
                 target.y = transform.position.y;
 
@@ -627,10 +629,12 @@ namespace ZombieGame
                 if (dir.sqrMagnitude < 0.0001f) return transform.rotation;
 
                 Quaternion targetRot = Quaternion.LookRotation(dir.normalized, Vector3.up);
+                Debug.Log("Rotation returned:" + transform.rotation);
                 return Quaternion.RotateTowards(transform.rotation, targetRot, _rotationSpeed * Time.deltaTime);
             }
 
             // Fallback: intersect with a horizontal plane at player height
+            Debug.Log("Mouse rotation fallback!");
             var plane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
             if (plane.Raycast(ray, out float enter))
             {
@@ -640,9 +644,10 @@ namespace ZombieGame
                 if (dir.sqrMagnitude < 0.0001f) return transform.rotation;
 
                 Quaternion targetRot = Quaternion.LookRotation(dir.normalized, Vector3.up);
+                Debug.Log("Rotation2:" + transform.rotation);
                 return Quaternion.RotateTowards(transform.rotation, targetRot, _rotationSpeed * Time.deltaTime);
             }
-
+            Debug.Log("Mouse rotation fallback 2!");
             return transform.rotation;
         }
 
@@ -754,7 +759,8 @@ namespace ZombieGame
         private void RotateTowardsSomething()
         {
 
-            if (_aim || 1 == 1)
+            //if (_aim || 1 == 1)
+            if (_aim)
             {
                 //var ray = _mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
 
