@@ -55,7 +55,7 @@ namespace ZombieGame
         [SerializeField] private float _precisionVAngle = 0.1f; // Narrower V angle for precision zone
         [SerializeField] private Color _precisionVColor = Color.yellow; // ✨ Changed to yellow
         [SerializeField] private float _precisionVAlpha = 3.0f; // Increased for better visibility
-        [SerializeField] private float _precisionZoneToleranceDegrees = 3f; // How close the wave needs to be to center
+        [SerializeField] private float _precisionZoneToleranceDegrees = 1f; // How close the wave needs to be to center
         // Add near other private LineRenderer fields (around line 100)
         private LineRenderer lineRendererPrecisionLeft;
         private LineRenderer lineRendererPrecisionRight;
@@ -472,6 +472,10 @@ namespace ZombieGame
         }
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.F11))
+            {
+                Screen.fullScreen = !Screen.fullScreen;
+            }
             //QuickLineDebugTick();
 
             if (_animator != null)
@@ -610,7 +614,6 @@ namespace ZombieGame
 
         private Quaternion MouseRotation()
         {
-            Debug.Log("MouseRotation called");
             if (_mainCamera == null) return transform.rotation;
 
             var ray = _mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
@@ -634,7 +637,6 @@ namespace ZombieGame
             }
 
             // Fallback: intersect with a horizontal plane at player height
-            Debug.Log("Mouse rotation fallback!");
             var plane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
             if (plane.Raycast(ray, out float enter))
             {
@@ -644,10 +646,8 @@ namespace ZombieGame
                 if (dir.sqrMagnitude < 0.0001f) return transform.rotation;
 
                 Quaternion targetRot = Quaternion.LookRotation(dir.normalized, Vector3.up);
-                Debug.Log("Rotation2:" + transform.rotation);
                 return Quaternion.RotateTowards(transform.rotation, targetRot, _rotationSpeed * Time.deltaTime);
             }
-            Debug.Log("Mouse rotation fallback 2!");
             return transform.rotation;
         }
 
@@ -1309,14 +1309,12 @@ namespace ZombieGame
 
                         SoundFXManager.Instance.PlaySoundFXClip(WeaponConfigSingleton.Instance.WeaponConfig.shootingClip, transform, 1f);
 
-                        // Camera shake
                         if (CameraShakeManager.Instance != null)
                         {
-                            float weaponRecoil = WeaponConfigSingleton.Instance.WeaponConfig.Recoil;
+                            float weaponRecoil = WeaponConfigSingleton.weaponConfig.Recoil;
                             float playerStrength = PlayerConfigSingleton.Instance.PlayerConfig.strength;
-
-                            // ✨ Reduced shake on precision shots
                             float shakeMultiplier = _isPrecisionShot ? 0.3f : 1f;
+
                             CameraShakeManager.Instance.ShakeOnFire(weaponRecoil * shakeMultiplier, playerStrength);
                         }
                     }

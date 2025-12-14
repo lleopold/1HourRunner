@@ -9,25 +9,32 @@ public class CameraShakeSetup : MonoBehaviour
 {
     private void Awake()
     {
-        // Check if MMCameraShaker already exists
-        if (GetComponent<MMCameraShaker>() == null)
+        // Ensure MMCameraShaker exists on THIS camera
+        var shaker = GetComponent<MMCameraShaker>();
+        if (shaker == null)
         {
-            // Add the shaker component
-            MMCameraShaker shaker = gameObject.AddComponent<MMCameraShaker>();
-
-            // Configure the wiggle component
-            MMWiggle wiggle = GetComponent<MMWiggle>();
-            if (wiggle != null)
-            {
-                wiggle.PositionActive = true;
-                wiggle.PositionWiggleProperties = new WiggleProperties
-                {
-                    WigglePermitted = false,
-                    WiggleType = WiggleTypes.Noise
-                };
-            }
-
-            Debug.Log("MMCameraShaker component added to camera");
+            shaker = gameObject.AddComponent<MMCameraShaker>();
         }
+
+        // Ensure MMWiggle exists on THIS camera
+        var wiggle = GetComponent<MMWiggle>();
+        if (wiggle == null)
+        {
+            wiggle = gameObject.AddComponent<MMWiggle>();
+        }
+
+        // Configure position wiggle for camera shaking, but DON'T permanently disable it
+        wiggle.PositionActive = true;
+        if (wiggle.PositionWiggleProperties == null)
+        {
+            wiggle.PositionWiggleProperties = new WiggleProperties();
+        }
+
+        // Reasonable defaults – MMShaker will override amplitude/frequency on each shake
+        wiggle.PositionWiggleProperties.WigglePermitted = true;
+        wiggle.PositionWiggleProperties.WiggleType = WiggleTypes.Noise;
+        wiggle.PositionWiggleProperties.RelativeAmplitude = true;
+
+        Debug.Log("Camera shake setup complete: MMCameraShaker + MMWiggle attached to camera.");
     }
 }
