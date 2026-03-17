@@ -10,7 +10,7 @@ public class PlayerCameraFar : MonoBehaviour
     [SerializeField] private float offsetZ = 0f; // Forward offset from center
     [SerializeField] private float currentZoom = 0f;
     [SerializeField] private float minZoom = 0.44f;
-    [SerializeField] private float maxZoom = 2f;
+    [SerializeField] private float maxZoom = 2f; 
     [SerializeField] private float zoomSensitivity = 1f;
     public GameObject player;
 
@@ -20,7 +20,6 @@ public class PlayerCameraFar : MonoBehaviour
     }
     private void LateUpdate()
     {
-        Debug.Log("CameraFar LateUpdate called");
         if (targetCharacter == null)
         {
             GameObject player = GameObject.Find("Player");

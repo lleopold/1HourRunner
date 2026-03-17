@@ -16,11 +16,10 @@ namespace ZombieGame
             Action<InputAction.CallbackContext> aiming,
             Action<InputAction.CallbackContext> aimingControllerRightStick,
             Action<InputAction.CallbackContext> aimingControllerTrigger,
-            Action<InputAction.CallbackContext> shooting,
-            Action<InputAction.CallbackContext> weaponSwitch)
+            Action<InputAction.CallbackContext> shooting)
         {
             var playerInput = new global::ZombieGame.PlayerInputIS();
-            RegisterInputEvents(playerInput, move, jump, sprint, aiming, aimingControllerRightStick, aimingControllerTrigger, shooting, weaponSwitch);
+            RegisterInputEvents(playerInput, move, jump, sprint, aiming, aimingControllerRightStick, aimingControllerTrigger, shooting);
             return playerInput;
         }
 
@@ -34,8 +33,7 @@ namespace ZombieGame
             Action<InputAction.CallbackContext> aiming,
             Action<InputAction.CallbackContext> aimingControllerRightStick,
             Action<InputAction.CallbackContext> aimingControllerTrigger,
-            Action<InputAction.CallbackContext> shooting,
-            Action<InputAction.CallbackContext> weaponSwitch)
+            Action<InputAction.CallbackContext> shooting)
         {
             if (playerInput == null) return;
 
@@ -59,10 +57,6 @@ namespace ZombieGame
             playerInput.Gameplay.Fire.started += shooting;
             playerInput.Gameplay.Fire.canceled += shooting;
 
-            // ✨ NEW: Register weapon switch
-            // You'll need to add "WeaponSwitch" action to your Input Actions asset
-            // For now, using keyboard keys directly in Update as fallback
-
             playerInput.Gameplay.Enable();
             playerInput.UI.Enable();
         }
@@ -77,8 +71,7 @@ namespace ZombieGame
             Action<InputAction.CallbackContext> aiming,
             Action<InputAction.CallbackContext> aimingControllerRightStick,
             Action<InputAction.CallbackContext> aimingControllerTrigger,
-            Action<InputAction.CallbackContext> shooting,
-            Action<InputAction.CallbackContext> weaponSwitch) // ✨ NEW parameter
+            Action<InputAction.CallbackContext> shooting)
         {
             if (playerInput == null) return;
 

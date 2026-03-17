@@ -10,7 +10,6 @@ using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using static StickDirectionAnalyzer;
-using UnityEngine.UIElements;
 
 
 namespace ZombieGame
@@ -50,16 +49,6 @@ namespace ZombieGame
         [SerializeField] Color laserColor = new Color(1f, 0.2f, 0.05f); // žarko crvena
         [SerializeField] float emissionBase = 1.4f;    // osnovna jačina žara
         [SerializeField] float emissionPulse = 1.0f;   // dodatni puls emisije
-
-        [Header("Weapon Switching")]
-        [SerializeField] private WeaponEnum _primaryWeapon = WeaponEnum.WPN_Revolver;
-        [SerializeField] private WeaponEnum _secondaryWeapon = WeaponEnum.WPN_590A1;
-        private WeaponEnum _currentWeaponSlot; // Tracks which slot is active
-        private GameObject _currentWeaponInstance; // Current weapon model instance
-
-        // Add near _uiT_GameScreen field (around line 170)
-        private Label _ui_weaponName; // UI label for weapon name
-        private Label _ui_weaponSlot; // UI label for slot (PRIMARY/SECONDARY)
 
         // Remove the duplicate declaration around line 70 and keep only this one with yellow color:
         [Header("Precision Shot System")]
@@ -430,14 +419,12 @@ namespace ZombieGame
 
             lineRendererPrecisionLeft.enabled = false;
             lineRendererPrecisionRight.enabled = false;
-
-            InstantiateAndAttachWeapon();
-            UpdateWeaponUI();
         }
 
         private void Awake()
         {
-            _playerInput = PliTuls.InitializeInput(Move, Jump, Sprint, Aiming, AimingControllerRightStick, AimingControllerTrigger, Shooting, SwitchWeapon);
+            _playerInput = PliTuls.InitializeInput(
+                Move, Jump, Sprint, Aiming, AimingControllerRightStick, AimingControllerTrigger, Shooting);
 
             _characterController = GetComponent<CharacterController>();
             _mainCamera = Camera.main;
@@ -445,9 +432,6 @@ namespace ZombieGame
             _currentHelth = PlayerConfigSingleton.Instance.PlayerConfig.health;
             _healthSystem = new HealthSystem(PlayerConfigSingleton.Instance.PlayerConfig.health);
             _uiT_GameScreen = FindFirstObjectByType<UIT_GameScreen>();
-            // ✨ NEW: Initialize weapon UI references
-            InitializeWeaponUI();
-
             _bulletsInClip = WeaponConfigSingleton.Instance.WeaponConfig.ClipSize;
             _uiT_GameScreen._bullets.text = _bulletsInClip.ToString();
             _uiT_GameScreen.SetHealth(100);
@@ -462,22 +446,6 @@ namespace ZombieGame
 
             // Initialize rig recoil controller (automatically finds rig references)
             _rigRecoilController = new RigRecoilController(this);
-            // ✨ NEW: Initialize weapon system
-            _currentWeaponSlot = _primaryWeapon; // Start with primary
-            DataHolder.chosenWeapon = _currentWeaponSlot;
-        }
-        private void InitializeWeaponUI()
-        {
-            var root = _uiT_GameScreen.GetComponent<UIDocument>().rootVisualElement;
-
-            // Query existing UI elements or create new ones
-            _ui_weaponName = root.Q<Label>("lab_weapon_name");
-            _ui_weaponSlot = root.Q<Label>("lab_weapon_slot");
-
-            if (_ui_weaponName == null || _ui_weaponSlot == null)
-            {
-                Debug.LogWarning("Weapon UI labels not found - weapon switching UI will not display");
-            }
         }
 
         public static void CreateDamageNumber()
@@ -500,7 +468,7 @@ namespace ZombieGame
         private void OnDestroy()
         {
             PliTuls.UnregisterInputEvents(_playerInput,
-                Move, Jump, Sprint, Aiming, AimingControllerRightStick, AimingControllerTrigger, Shooting, SwitchWeapon);
+                Move, Jump, Sprint, Aiming, AimingControllerRightStick, AimingControllerTrigger, Shooting);
         }
         private void Update()
         {
@@ -508,39 +476,13 @@ namespace ZombieGame
             {
                 Screen.fullScreen = !Screen.fullScreen;
             }
-            // ✨ NEW: Weapon switching fallback (until Input Actions updated)
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                SwitchToWeapon(_primaryWeapon);
-            }
-            else if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                SwitchToWeapon(_secondaryWeapon);
-            }
-            // Controller X button (JoystickButton2 on most controllers)
-            else if (Input.GetKeyDown(KeyCode.JoystickButton2))
-            {
-                SwitchWeapon(new InputAction.CallbackContext()); // Toggle
-            }
-
             //QuickLineDebugTick();
 
             if (_animator != null)
             {
                 _animator = GetComponent<Animator>();
             }
-
-            // Fixed: Try to find zombies, but handle the error if the tag doesn't exist
-            try
-            {
-                onScreenZombies = GameObject.FindGameObjectsWithTag("Zombie");
-            }
-            catch (UnityException)
-            {
-                // Prevent crash if tag is missing
-                // To fix permanently: Go to Unity Editor -> Edit -> Project Settings -> Tags and Layers -> Add "Zombie"
-                onScreenZombies = new GameObject[0];
-            }
+            onScreenZombies = GameObject.FindGameObjectsWithTag("Zombie"); // Find all zombies
 
             RotateTowardsSomething();
             ApplyGravity();
@@ -1442,7 +1384,7 @@ namespace ZombieGame
             }
             catch (Exception e)
             {
-                Debug.LogError($"Muzzle flash error: " + e.Message);
+                Debug.LogError($"Muzzle flash error: {e.Message}");
             }
         }
 
@@ -1724,7 +1666,6 @@ namespace ZombieGame
                 //Debug.Log($"Precision lines updated - Angle: {_precisionVAngle}°, Enabled: L={lineRendererPrecisionLeft.enabled}, R={lineRendererPrecisionRight.enabled}");
             }
         }
-
         void SetLineAlpha(LineRenderer lineRenderer, float alpha)
         {
             //Debug.Log("Setting alpha to: " + alpha);
@@ -2642,118 +2583,6 @@ namespace ZombieGame
             // Yellow emission pulse
             float e = emissionBase + Mathf.Sin(t * (pulseSpeed * 1.3f)) * emissionPulse;
             mat.SetColor("_EmissionColor", _precisionVColor * e); // ✨ Use yellow color
-        }
-
-        // Add this method near other input handlers (after Shooting method, around line 1800)
-        public void SwitchWeapon(InputAction.CallbackContext context)
-        {
-            if (!context.started) return;
-
-            // Toggle between primary and secondary
-            if (_currentWeaponSlot == _primaryWeapon)
-                SwitchToWeapon(_secondaryWeapon);
-            else
-                SwitchToWeapon(_primaryWeapon);
-        }
-
-        private void SwitchToWeapon(WeaponEnum targetWeapon)
-        {
-            // ✨ NEW: Prevent switching to the same weapon
-            if (_currentWeaponSlot == targetWeapon)
-            {
-                Debug.Log($"Already holding {targetWeapon} - ignoring switch request");
-                return;
-            }
-
-            if (_reloadingInProgress)
-            {
-                Debug.Log("Cannot switch during reload");
-                return;
-            }
-
-            _currentWeaponSlot = targetWeapon;
-            DataHolder.chosenWeapon = targetWeapon;
-
-            // Update weapon type for animation
-            if (targetWeapon == WeaponEnum.WPN_M4 || targetWeapon == WeaponEnum.WPN_M16)
-                DataHolder.weaponType = WeaponType.H2;
-            else
-                DataHolder.weaponType = WeaponType.H1;
-
-            // Destroy current weapon visual
-            if (_currentWeaponInstance != null)
-                Destroy(_currentWeaponInstance);
-
-            // Instantiate new weapon model and attach to player
-            InstantiateAndAttachWeapon();
-
-            // Update ammo UI
-            _bulletsInClip = WeaponConfigSingleton.Instance.WeaponConfig.ClipSize;
-            _uiT_GameScreen._bullets.text = _bulletsInClip.ToString();
-            _uiT_GameScreen.SetAmmoBar(100);
-
-            // Update weapon display UI
-            UpdateWeaponUI();
-
-            Debug.Log($"Switched to {targetWeapon}");
-        }
-
-        private void InstantiateAndAttachWeapon()
-        {
-            // Load weapon model
-            string weaponPath = $"Models/Weapons/{_currentWeaponSlot}";
-            GameObject weaponPrefab = Resources.Load<GameObject>(weaponPath);
-
-            if (weaponPrefab == null)
-            {
-                Debug.LogError($"Weapon prefab not found: {weaponPath}");
-                return;
-            }
-
-            // Find right hand bone
-            string bonename = "mixamorig:RightHand";
-            Transform rightHandTransform = FindRecursive(transform, "mixamorig[0-9]:RightHand");
-            if (rightHandTransform == null)
-                rightHandTransform = FindRecursive(transform, bonename);
-
-            if (rightHandTransform == null)
-            {
-                Debug.LogError("Right hand bone not found!");
-                return;
-            }
-
-            // Instantiate weapon
-            _currentWeaponInstance = Instantiate(weaponPrefab, rightHandTransform);
-            _currentWeaponInstance.name = "Weapon";
-            _currentWeaponInstance.transform.SetParent(rightHandTransform, false);
-
-            // Position based on weapon type
-            if (DataHolder.weaponType == WeaponType.H1) // Pistol
-            {
-                _currentWeaponInstance.transform.localPosition = new Vector3(-0.0464068204f, 0.186311349f, 0.041510012f);
-                _currentWeaponInstance.transform.localRotation = Quaternion.Euler(279.578644f, 325.888763f, 119.821121f);
-            }
-            else // Two-handed
-            {
-                _currentWeaponInstance.transform.localPosition = new Vector3(-0.111000001f, 0.444000006f, 0.0560000017f);
-                _currentWeaponInstance.transform.localRotation = Quaternion.Euler(274.885498f, 351.066345f, 85.1047287f);
-            }
-        }
-
-        private void UpdateWeaponUI()
-        {
-            if (_ui_weaponName == null || _ui_weaponSlot == null) return;
-
-            // Get weapon config for display name
-            var config = WeaponConfigSingleton.Instance.WeaponConfig;
-
-            // Update UI labels
-            _ui_weaponName.text = config.Name ?? _currentWeaponSlot.ToString().Replace("WPN_", "");
-            _ui_weaponSlot.text = (_currentWeaponSlot == _primaryWeapon) ? "PRIMARY" : "SECONDARY";
-
-            // Optional: Add visual feedback (flash/color change)
-            _ui_weaponName.AddToClassList("weapon-switched");
-            _ui_weaponName.schedule.Execute(() => _ui_weaponName.RemoveFromClassList("weapon-switched")).StartingIn(300);
         }
     }
 

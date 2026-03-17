@@ -8,12 +8,12 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private MouseSensitivity _mouseSensitivity;
     [SerializeField] private CameraAngle _cameraAngle;  //Probably for deleting
     [SerializeField] private CameraAngleX _cameraAngleX;
-    private float currentZoom;
+    [SerializeField] private float currentZoom;
     [SerializeField] public float currentZoomAngle;
 
     private void Awake()
     {
-        currentZoom = 44;// 15.0f;
+        currentZoom = 4;// 15.0f;
     }
     private void Start()
     {

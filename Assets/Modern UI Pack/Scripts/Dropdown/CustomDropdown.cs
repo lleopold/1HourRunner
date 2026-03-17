@@ -270,7 +270,7 @@ namespace Michsky.MUIP
             };
             items.Add(item);
 
-            if (selectedItemIndex > items.Count) { selectedItemIndex = 0; }
+            if (selectedItemIndex >= items.Count) { selectedItemIndex = 0; }
             if (notify) { SetupDropdown(); }
         }
 
@@ -282,7 +282,7 @@ namespace Michsky.MUIP
             };
             items.Add(item);
 
-            if (selectedItemIndex > items.Count) { selectedItemIndex = 0; }
+            if (selectedItemIndex >= items.Count) { selectedItemIndex = 0; }
             if (notify) { SetupDropdown(); }
         }
 
@@ -291,7 +291,7 @@ namespace Michsky.MUIP
             var item = items.Find(x => x.itemName == itemTitle);
             items.Remove(item);
 
-            if (selectedItemIndex > items.Count) { selectedItemIndex = 0; }
+            if (selectedItemIndex >= items.Count) { selectedItemIndex = 0; }
             if (notify) { SetupDropdown(); }
         }
 

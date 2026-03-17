@@ -94,7 +94,7 @@ namespace Michsky.MUIP
                         MUIPEditorHandler.DrawUIManagerConnectedHeader();
 
                         if (GUILayout.Button("Open UI Manager", customSkin.button))
-                            EditorApplication.ExecuteMenuItem(MUIPEditorHandler.UIM_SHORTCUT);
+                            EditorApplication.ExecuteMenuItem("Tools/Modern UI Pack/Show UI Manager");
 
                         if (GUILayout.Button("Disable UI Manager Connection", customSkin.button))
                         {
