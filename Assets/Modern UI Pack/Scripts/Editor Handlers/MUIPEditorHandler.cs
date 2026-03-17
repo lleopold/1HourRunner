@@ -6,6 +6,8 @@ namespace Michsky.MUIP
 {
     public class MUIPEditorHandler : Editor
     {
+        public const string UIM_SHORTCUT = "Tools/Modern UI Pack/Open UI Manager %#M";
+
         public static GUISkin GetDarkEditor(GUISkin tempSkin)
         {
             tempSkin = (GUISkin)Resources.Load("MUIP-EditorDark");

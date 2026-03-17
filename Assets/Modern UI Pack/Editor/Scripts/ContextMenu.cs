@@ -158,7 +158,7 @@ namespace Michsky.MUIP
             catch { ShowErrorDialog(); }
         }
 
-        [MenuItem("Tools/Modern UI Pack/Open UI Manager %#M")]
+        [MenuItem(MUIPEditorHandler.UIM_SHORTCUT)]
         static void ShowManager()
         {
             Selection.activeObject = Resources.Load("MUIP Manager");

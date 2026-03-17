@@ -19,7 +19,7 @@ public class FlatKitReadme : ScriptableObject {
     public bool FlatKitInstalled;
 
     [NonSerialized]
-    public readonly string FlatKitVersion = "4.9.7";
+    public readonly string FlatKitVersion = "4.9.9";
 
     [NonSerialized]
     public bool? UrpInstalled;

@@ -215,7 +215,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _fl_weight.value = playerConfig.weight;
         _fl_strength.value = playerConfig.strength;
         _fl_stamina.value = playerConfig.stamina;
-        _fl_stamina_regen.value = playerConfig.stamina;
+        _fl_stamina_regen.value = playerConfig.staminaRegenDelay;
         _fl_stamina_speed.value = playerConfig.staminaRegenSpeed;
         _fl_speed.value = playerConfig.speed;
         _fl_acceleration.value = playerConfig.acceleration;
