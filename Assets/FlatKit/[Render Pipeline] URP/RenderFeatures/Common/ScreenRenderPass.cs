@@ -8,7 +8,8 @@ using UnityEngine.Rendering.RenderGraphModule.Util;
 using RenderGraphUtils = UnityEngine.Rendering.RenderGraphModule.Util.RenderGraphUtils;
 #endif
 
-public class ScreenRenderPass : ScriptableRenderPass {
+public class ScreenRenderPass : ScriptableRenderPass
+{
     private Material _passMaterial;
     private bool _requiresColor;
     private bool _isBeforeTransparents;
@@ -20,7 +21,8 @@ public class ScreenRenderPass : ScriptableRenderPass {
     private static readonly int BlitTextureShaderID = Shader.PropertyToID(TexName);
 
     public void Setup(Material mat, bool requiresColor, bool isBeforeTransparents, string featureName,
-        in RenderingData renderingData) {
+        in RenderingData renderingData)
+    {
         _passMaterial = mat;
         _requiresColor = requiresColor;
         _isBeforeTransparents = isBeforeTransparents;
@@ -39,17 +41,20 @@ public class ScreenRenderPass : ScriptableRenderPass {
         _passData ??= new PassData();
     }
 
-    public void Dispose() {
+    public void Dispose()
+    {
         _copiedColor?.Release();
     }
 
 #if UNITY_6000_0_OR_NEWER
-    public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData) {
+    public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
+    {
         UniversalResourceData resourceData = frameData.Get<UniversalResourceData>();
         UniversalCameraData cameraData = frameData.Get<UniversalCameraData>();
 
         // The following line ensures that the render pass doesn't blit from the back buffer.
-        if (resourceData.isActiveTargetBackBuffer) {
+        if (resourceData.isActiveTargetBackBuffer)
+        {
             return;
         }
 
@@ -60,7 +65,8 @@ public class ScreenRenderPass : ScriptableRenderPass {
         TextureHandle dst = UniversalRenderer.CreateRenderGraphTexture(renderGraph, texDescriptor, TexName, false);
 
         // This check is to avoid an error from the material preview in the scene.
-        if (!srcCamColor.IsValid() || !dst.IsValid()) {
+        if (!srcCamColor.IsValid() || !dst.IsValid())
+        {
             return;
         }
 
@@ -71,7 +77,8 @@ public class ScreenRenderPass : ScriptableRenderPass {
 
     [Obsolete("This rendering path is for compatibility mode only (when Render Graph is disabled).", false)]
 #endif
-    public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData) {
+    public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
+    {
         _passData.effectMaterial = _passMaterial;
         _passData.requiresColor = _requiresColor;
         _passData.isBeforeTransparents = _isBeforeTransparents;
@@ -85,32 +92,37 @@ public class ScreenRenderPass : ScriptableRenderPass {
     [Obsolete("This rendering path is for compatibility mode only (when Render Graph is disabled).", false)]
 #endif
     private static void ExecutePass(PassData passData, ref RenderingData renderingData,
-        ref ScriptableRenderContext context) {
+        ref ScriptableRenderContext context)
+    {
         var passMaterial = passData.effectMaterial;
         var requiresColor = passData.requiresColor;
         var copiedColor = passData.copiedColor;
         var profilingSampler = passData.profilingSampler;
 
-        if (passMaterial == null) {
+        if (passMaterial == null)
+        {
             return;
         }
 
-        if (renderingData.cameraData.isPreviewCamera) {
+        if (renderingData.cameraData.isPreviewCamera)
+        {
             return;
         }
 
 #if UNITY_2022_3_OR_NEWER
-        CommandBuffer cmd = renderingData.commandBuffer;
+        CommandBuffer cmd = CommandBufferPool.Get();
 #else
         CommandBuffer cmd = CommandBufferPool.Get();
 #endif
         var cameraData = renderingData.cameraData;
 
-        using (new ProfilingScope(cmd, profilingSampler)) {
-            if (requiresColor) {
+        using (new ProfilingScope(cmd, profilingSampler))
+        {
+            if (requiresColor)
+            {
 #if UNITY_2022_3_OR_NEWER
                 var source = passData.isBeforeTransparents
-                    ? cameraData.renderer.GetCameraColorBackBuffer(cmd)
+                    ? cameraData.renderer.cameraColorTargetHandle
                     : cameraData.renderer.cameraColorTargetHandle;
                 Blitter.BlitCameraTexture(cmd, source, copiedColor);
 #else
@@ -122,7 +134,7 @@ public class ScreenRenderPass : ScriptableRenderPass {
             }
 
 #if UNITY_2022_3_OR_NEWER
-            CoreUtils.SetRenderTarget(cmd, cameraData.renderer.GetCameraColorBackBuffer(cmd));
+            CoreUtils.SetRenderTarget(cmd, cameraData.renderer.cameraColorTargetHandle);
 #else
             CoreUtils.SetRenderTarget(cmd, cameraData.renderer.cameraColorTarget);
 #endif
@@ -130,9 +142,12 @@ public class ScreenRenderPass : ScriptableRenderPass {
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
         }
+
+        CommandBufferPool.Release(cmd);
     }
 
-    private class PassData {
+    private class PassData
+    {
         internal Material effectMaterial;
         internal bool requiresColor;
         internal bool isBeforeTransparents;

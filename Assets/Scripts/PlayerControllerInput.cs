@@ -556,11 +556,6 @@ namespace ZombieGame
         {
             try
             {
-                //#if UNITY_EDITOR
-                //            var logEntries = System.Type.GetType("UnityEditor.LogEntries,UnityEditor.dll");
-                //            var clearMethod = logEntries.GetMethod("Clear", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
-                //            clearMethod.Invoke(null, null);
-                //#endif
                 Quaternion return_val = transform.rotation;
                 Vector3 directionController = new(_aimControllerInput.x, 0, _aimControllerInput.y);
                 if (directionController.sqrMagnitude < 0.01f)
@@ -568,31 +563,28 @@ namespace ZombieGame
                     return transform.rotation;
                 }
                 directionController.Normalize();
-                if (_currentTarget == null && _nextTarget == null) //nemas nista naciljano, trazi najblizeg
+
+                if (_currentTarget == null && _nextTarget == null)
                 {
                     _nextTarget = GetClosestZombie();
-                    return_val = RotateTowardsGameObject(_nextTarget);
+                    if (_nextTarget != null) // ✅ Add null check
+                        return_val = RotateTowardsGameObject(_nextTarget);
+                    else
+                        return RotateTowardsDirection(directionController); // ✅ Fallback to manual aim
                 }
-                if (_currentTarget != null && _nextTarget == null) //imas naciljano, ali ne mislis nikoga da ciljas
+                else if (_currentTarget != null && _nextTarget == null)
                 {
                     return_val = RotateTowardsGameObject(_currentTarget);
                 }
-                if (_currentTarget == null && _nextTarget != null) //nema naciljano, ali mislis nekoga da ciljas
+                else if (_currentTarget == null && _nextTarget != null)
                 {
                     return_val = RotateTowardsGameObject(_nextTarget);
                 }
-                if (_currentTarget != null && _nextTarget != null && _currentTarget.name != _nextTarget.name) //switching mode
+                else if (_currentTarget != null && _nextTarget != null)
                 {
                     return_val = RotateTowardsGameObject(_nextTarget);
                 }
-                if (_currentTarget != null && _nextTarget != null && _currentTarget.name == _nextTarget.name) //switching mode
-                {
-                    return_val = RotateTowardsGameObject(_nextTarget);
-                }
-                if (_currentTarget == null && _nextTarget == null) //niti imas naciljano, niti mislis nekoga da ciljas
-                {
-                    return RotateTowardsDirection(directionController);
-                }
+
                 return return_val;
             }
             catch (Exception ex)
@@ -654,6 +646,9 @@ namespace ZombieGame
 
         Quaternion RotateTowardsGameObject(GameObject zombie)
         {
+            if (zombie == null)
+                return transform.rotation;
+
             Vector3 directionToZombie = zombie.transform.position - transform.position;
             directionToZombie.y = 0f;
 
