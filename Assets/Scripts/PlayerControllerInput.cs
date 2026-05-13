@@ -214,10 +214,6 @@ namespace ZombieGame
         // Add with other private fields (around line 100)
         private RigRecoilController _rigRecoilController;
 
-        // Add this field near other private fields (around line 230)
-        private Quaternion _lastAimRotation;
-        private float _aimRotationSpeed; // degrees per second
-
         public float Health
         {
             get { return _currentHelth; }
@@ -484,10 +480,6 @@ namespace ZombieGame
             }
             onScreenZombies = GameObject.FindGameObjectsWithTag("Zombie"); // Find all zombies
 
-            float rotationDelta = Quaternion.Angle(_lastAimRotation, transform.rotation);
-            _aimRotationSpeed = rotationDelta / Time.deltaTime;
-            _lastAimRotation = transform.rotation;
-
             RotateTowardsSomething();
             ApplyGravity();
             ApplyMovement();
@@ -610,7 +602,7 @@ namespace ZombieGame
 
         private Quaternion MouseRotation()
         {
-            //Debug.Log("MouseRotation called");
+            Debug.Log("MouseRotation called");
             if (_mainCamera == null) return transform.rotation;
 
             var ray = _mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
@@ -634,7 +626,7 @@ namespace ZombieGame
             }
 
             // Fallback: intersect with a horizontal plane at player height
-            //Debug.Log("Mouse rotation fallback!");
+            Debug.Log("Mouse rotation fallback!");
             var plane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
             if (plane.Raycast(ray, out float enter))
             {
@@ -1313,15 +1305,15 @@ namespace ZombieGame
                         SoundFXManager.Instance.PlaySoundFXClip(WeaponConfigSingleton.Instance.WeaponConfig.shootingClip, transform, 1f);
 
                         // Camera shake
-                        //if (CameraShakeManager.Instance != null)
-                        //{
-                        //    float weaponRecoil = WeaponConfigSingleton.Instance.WeaponConfig.Recoil;
-                        //    float playerStrength = PlayerConfigSingleton.Instance.PlayerConfig.strength;
+                        if (CameraShakeManager.Instance != null)
+                        {
+                            float weaponRecoil = WeaponConfigSingleton.Instance.WeaponConfig.Recoil;
+                            float playerStrength = PlayerConfigSingleton.Instance.PlayerConfig.strength;
 
-                        //    // ✨ Reduced shake on precision shots
-                        //    float shakeMultiplier = _isPrecisionShot ? 0.3f : 1f;
-                        //    CameraShakeManager.Instance.ShakeOnFire(weaponRecoil * shakeMultiplier, playerStrength);
-                        //}
+                            // ✨ Reduced shake on precision shots
+                            float shakeMultiplier = _isPrecisionShot ? 0.3f : 1f;
+                            CameraShakeManager.Instance.ShakeOnFire(weaponRecoil * shakeMultiplier, playerStrength);
+                        }
                     }
                 }
 
@@ -2289,33 +2281,19 @@ namespace ZombieGame
             }
         }
 
-        // Replace UpdateAimingVisuals() with this fixed version:
         void UpdateAimingVisuals()
         {
             if (_aim)
             {
                 SetAimLinesActive(true);
 
-                // ✨ FIX: Check both character movement AND aim rotation
                 bool isMoving = _input.magnitude > 0f;
-                bool isRotatingAim = _aimRotationSpeed > 1f; // Threshold in degrees/sec
-
-                // Only recover precision if BOTH not moving AND not rotating aim
-                if (!isMoving && !isRotatingAim)
+                if (!isMoving)
                 {
                     float recoverPerSecond = gameStats._aimingSpeed;
                     _currentAngleLineRenderers = Mathf.Max(
                         gameStats._precisionMin,
                         _currentAngleLineRenderers - recoverPerSecond * Time.deltaTime);
-                }
-
-                // ✨ NEW: Apply penalty while rotating aim (even if standing still)
-                if (isRotatingAim)
-                {
-                    float rotationPenalty = _aimRotationSpeed * 0.2f; // Adjust multiplier to taste
-                    _currentAngleLineRenderers = Mathf.Min(
-                        _currentAngleLineRenderers + rotationPenalty * Time.deltaTime,
-                        gameStats._precisionMax);
                 }
 
                 if (_recoil > 0f)
@@ -2334,14 +2312,17 @@ namespace ZombieGame
                 ApplyVisuals(lineRendererLeft, _meshRendererAimingCircle, _currentAngleLineRenderers);
                 ApplyVisuals(lineRendererRight, _meshRendererAimingCircle, _currentAngleLineRenderers);
 
+                // ✨ Apply precision line visuals with distinct color
                 ApplyPrecisionVisuals(lineRendererPrecisionLeft);
                 ApplyPrecisionVisuals(lineRendererPrecisionRight);
 
+                // ✨ CRITICAL: Animate the precision lasers too with their own material!
                 AnimateLaser(lineRendererLeft, laserMat);
                 AnimateLaser(lineRendererRight, laserMat);
-                AnimatePrecisionZone(lineRendererPrecisionLeft, precisionLaserMat);
-                AnimatePrecisionZone(lineRendererPrecisionRight, precisionLaserMat);
+                AnimatePrecisionZone(lineRendererPrecisionLeft, precisionLaserMat);  // ✨ Use new method
+                AnimatePrecisionZone(lineRendererPrecisionRight, precisionLaserMat); // ✨ Use new method
 
+                // Enable precision lines
                 if (!lineRendererPrecisionLeft.enabled) lineRendererPrecisionLeft.enabled = true;
                 if (!lineRendererPrecisionRight.enabled) lineRendererPrecisionRight.enabled = true;
             }
@@ -2350,6 +2331,7 @@ namespace ZombieGame
                 SetAimLinesActive(false);
                 _currentAngleLineRenderers = gameStats._precisionStartingAim;
 
+                // Disable precision lines
                 if (lineRendererPrecisionLeft != null && lineRendererPrecisionLeft.enabled) lineRendererPrecisionLeft.enabled = false;
                 if (lineRendererPrecisionRight != null && lineRendererPrecisionRight.enabled) lineRendererPrecisionRight.enabled = false;
 
