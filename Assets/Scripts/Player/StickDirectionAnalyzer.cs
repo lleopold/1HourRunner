@@ -125,4 +125,22 @@ public class StickDirectionAnalyzer
         // If no valid turn detected, return NONE
         return RotationCW.NONE;
     }
+
+    public struct StickInputSample
+    {
+        public Vector2 input;
+        public float time;
+
+        public StickInputSample(Vector2 input, float time)
+        {
+            this.input = input;
+            this.time = time;
+        }
+    }
+
+    public enum AimingType
+    {
+        Mouse,
+        ControllerRightStick
+    }
 }

@@ -75,76 +75,59 @@ public class ScreenRenderPass : ScriptableRenderPass
         renderGraph.AddCopyPass(dst, srcCamColor);
     }
 
-    [Obsolete("This rendering path is for compatibility mode only (when Render Graph is disabled).", false)]
-#endif
-    public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
-    {
-        _passData.effectMaterial = _passMaterial;
-        _passData.requiresColor = _requiresColor;
-        _passData.isBeforeTransparents = _isBeforeTransparents;
-        _passData.profilingSampler = _profilingSampler;
-        _passData.copiedColor = _copiedColor;
+    #endif
 
-        ExecutePass(_passData, ref renderingData, ref context);
-    }
-
-#if UNITY_6000_0_OR_NEWER
-    [Obsolete("This rendering path is for compatibility mode only (when Render Graph is disabled).", false)]
-#endif
-    private static void ExecutePass(PassData passData, ref RenderingData renderingData,
-        ref ScriptableRenderContext context)
-    {
-        var passMaterial = passData.effectMaterial;
-        var requiresColor = passData.requiresColor;
-        var copiedColor = passData.copiedColor;
-        var profilingSampler = passData.profilingSampler;
-
-        if (passMaterial == null)
+    #if !UNITY_6000_0_OR_NEWER
+        public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            return;
+            _passData.effectMaterial = _passMaterial;
+            _passData.requiresColor = _requiresColor;
+            _passData.isBeforeTransparents = _isBeforeTransparents;
+            _passData.profilingSampler = _profilingSampler;
+            _passData.copiedColor = _copiedColor;
+
+            ExecutePass(_passData, ref renderingData, ref context);
         }
 
-        if (renderingData.cameraData.isPreviewCamera)
+        private static void ExecutePass(PassData passData, ref RenderingData renderingData,
+            ref ScriptableRenderContext context)
         {
-            return;
-        }
+            var passMaterial = passData.effectMaterial;
+            var requiresColor = passData.requiresColor;
+            var copiedColor = passData.copiedColor;
+            var profilingSampler = passData.profilingSampler;
 
-#if UNITY_2022_3_OR_NEWER
-        CommandBuffer cmd = CommandBufferPool.Get();
-#else
-        CommandBuffer cmd = CommandBufferPool.Get();
-#endif
-        var cameraData = renderingData.cameraData;
-
-        using (new ProfilingScope(cmd, profilingSampler))
-        {
-            if (requiresColor)
+            if (passMaterial == null)
             {
-#if UNITY_2022_3_OR_NEWER
-                var source = passData.isBeforeTransparents
-                    ? cameraData.renderer.cameraColorTargetHandle
-                    : cameraData.renderer.cameraColorTargetHandle;
-                Blitter.BlitCameraTexture(cmd, source, copiedColor);
-#else
-                var source = cameraData.renderer.cameraColorTarget;
-                cmd.Blit(source, copiedColor);
-#endif
-
-                passMaterial.SetTexture(BlitTextureShaderID, copiedColor);
+                return;
             }
 
-#if UNITY_2022_3_OR_NEWER
-            CoreUtils.SetRenderTarget(cmd, cameraData.renderer.cameraColorTargetHandle);
-#else
-            CoreUtils.SetRenderTarget(cmd, cameraData.renderer.cameraColorTarget);
-#endif
-            CoreUtils.DrawFullScreen(cmd, passMaterial);
-            context.ExecuteCommandBuffer(cmd);
-            cmd.Clear();
-        }
+            if (renderingData.cameraData.isPreviewCamera)
+            {
+                return;
+            }
 
-        CommandBufferPool.Release(cmd);
-    }
+            CommandBuffer cmd = CommandBufferPool.Get();
+            var cameraData = renderingData.cameraData;
+
+            using (new ProfilingScope(cmd, profilingSampler))
+            {
+                if (requiresColor)
+                {
+                    var source = cameraData.renderer.cameraColorTargetHandle;
+                    Blitter.BlitCameraTexture(cmd, source, copiedColor);
+                    passMaterial.SetTexture(BlitTextureShaderID, copiedColor);
+                }
+
+                CoreUtils.SetRenderTarget(cmd, cameraData.renderer.cameraColorTargetHandle);
+                CoreUtils.DrawFullScreen(cmd, passMaterial);
+                context.ExecuteCommandBuffer(cmd);
+                cmd.Clear();
+            }
+
+            CommandBufferPool.Release(cmd);
+        }
+    #endif
 
     private class PassData
     {

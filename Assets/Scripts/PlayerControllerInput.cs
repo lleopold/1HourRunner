@@ -1017,8 +1017,8 @@ namespace ZombieGame
             if (_stickInputBuffer.Count < 2)
                 return RotationCW.NONE;
 
-            StickInputSample neutralSample = null;
-            StickInputSample strongSample = null;
+            StickInputSample? neutralSample = null;
+            StickInputSample? strongSample = null;
 
             for (int i = 0; i < _stickInputBuffer.Count; i++)
             {
@@ -1034,10 +1034,10 @@ namespace ZombieGame
                 }
             }
 
-            if (neutralSample != null && strongSample != null && strongSample.time > neutralSample.time)
+            if (neutralSample != null && strongSample != null && strongSample.Value.time > neutralSample.Value.time)
             {
                 Debug.Log("Flick detected, analyzing direction");
-                Vector2 inputDir = strongSample.input.normalized;
+                Vector2 inputDir = strongSample.Value.input.normalized;
                 Vector3 flickDir = new Vector3(inputDir.x, 0, inputDir.y); // Convert to world-space
 
                 float angle = GetAngleBetween(playerForward, flickDir);
@@ -2593,9 +2593,4 @@ public struct Movement
     public float acceleration;
     [HideInInspector] public float currentSpeed;
 }
-public enum AimingType
-{
-    Mouse,
-    ControllerRightStick,
-    ControllerTrigger
-}
+
