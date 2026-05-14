@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -12,7 +12,7 @@ public class PreLoad : MonoBehaviour
     [SerializeField] private Vector2 smokeScreenOffset = new Vector2(0f, -0.1f); // x,y in viewport (-0.1 puts it a bit lower)
 
 
-    [SerializeField] private float minShowTime = 2.0f;     // already there; increase to 2–3s
+    [SerializeField] private float minShowTime = 20.0f;     // minimum time the preload screen is shown
     [SerializeField] private HoldMode holdWhenReady = HoldMode.FixedSeconds;
     [SerializeField] private float readyHoldSeconds = 1.5f; // extra time AFTER loading is ready
     [SerializeField] private bool showPressAnyKey = false;  // if true, overrides FixedSeconds
@@ -48,15 +48,27 @@ public class PreLoad : MonoBehaviour
     private Label _loadingLabel;
     private static bool _instanceAlive;
 
+    // Reset static state when Play mode starts so the singleton check works correctly every run
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics() => _instanceAlive = false;
+
     void Awake()
     {
         if (_instanceAlive) { Destroy(gameObject); return; }
         _instanceAlive = true;
-        DontDestroyOnLoad(gameObject); // keep this alive until we activate next scene
+        DontDestroyOnLoad(gameObject);
+
+        // Keep Camera and UIDocument alive so the screen doesn't go black
+        // while LoadSceneAsync is pending with allowSceneActivation = false
+        var cam = Camera.main;
+        if (cam != null) DontDestroyOnLoad(cam.gameObject);
 
         if (!uiDocument) uiDocument = FindFirstObjectByType<UIDocument>();
         if (uiDocument != null)
+        {
+            DontDestroyOnLoad(uiDocument.gameObject);
             _loadingLabel = uiDocument.rootVisualElement?.Q<Label>(loadingLabelName);
+        }
 
         TrySpawnSmoke();
     }
@@ -69,56 +81,31 @@ public class PreLoad : MonoBehaviour
 
     private IEnumerator LoadFlow()
     {
-        float t0 = Time.unscaledTime;
+        Debug.Log("[Preload] LoadFlow STARTED. minShowTime=" + minShowTime);
 
-        // Start loading the Start scene
         var op = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneToLoad);
         op.allowSceneActivation = false;
+        KickAllPreloads();
 
-        // Kick off ALL requests at once (don’t wait per-item)
-        var (reqs, keys) = KickAllPreloads();
-
-        // While scene is loading to 0.9, spend up to preloadBudgetSeconds warming assets
-        float budget = preloadBudgetSeconds;
-        // Wait until async load reaches "ready" (0.9)
+        // Wait for scene to reach 0.9 (ready but not activated)
         while (op.progress < 0.9f)
         {
-            float pct = Mathf.Clamp01(op.progress / 0.9f); // normalize 0..1
+            float pct = Mathf.Clamp01(op.progress / 0.9f);
             int dots = (int)((Time.unscaledTime * 3f) % 4f);
-            SetText($"Loading… {(int)(pct * 100f)}%{new string('.', dots)}");
+            SetText("Loading " + ((int)(pct * 100f)).ToString() + "%" + new string('.', dots));
             yield return null;
         }
+        Debug.Log("[Preload] Scene ready. Waiting " + minShowTime + "s (real time)...");
+        SetText("Loading 100%");
 
-        float tStart = Time.unscaledTime;
-        while (Time.unscaledTime - tStart < minShowTime)
-        {
-            SetText("Loading… 100%");
-            yield return null;
-        }
+        // Wait using real wall-clock time — cannot be skipped by scene load or timeScale
+        yield return new WaitForSecondsRealtime(minShowTime);
 
-        // Optional hold(s)
-        if (showPressAnyKey || holdWhenReady == HoldMode.PressAnyKey)
-        {
-            SetText("Press any key to continue");
-            while (!Input.anyKeyDown) yield return null;
-        }
-        else if (holdWhenReady == HoldMode.FixedSeconds && readyHoldSeconds > 0f)
-        {
-            float t = 0f;
-            while (t < readyHoldSeconds) { t += Time.unscaledDeltaTime; yield return null; }
-        }
-
-        SetText("Loading… 100%");
-        yield return null;         // let UI paint once
-
-        // (Optional) quick fade out so transition feels smooth
+        Debug.Log("[Preload] Wait done. Activating scene.");
         yield return StartCoroutine(FadeOutUITK(0.25f));
-
-        SetText("Loading… 100%");
-        yield return null;           // let UI paint once
-                                     // optional fade...
         op.allowSceneActivation = true;
     }
+
     private IEnumerator FadeOutUITK(float duration)
     {
         var root = uiDocument ? uiDocument.rootVisualElement : null;
@@ -238,14 +225,17 @@ public class PreLoad : MonoBehaviour
 
         if (smokeFollowsCamera)
         {
-            // Parent (no world-space baking) so it moves with the camera
+            // Parent to camera — camera is DontDestroyOnLoad so smoke survives scene change
             inst.transform.SetParent(cam.transform, worldPositionStays: false);
             inst.transform.localPosition = new Vector3(0f + smokeScreenOffset.x * smokeDistance,
                                                        0f + smokeScreenOffset.y * smokeDistance,
                                                        smokeDistance);
-            inst.transform.localRotation = Quaternion.identity; // face same direction as camera
-                                                                // Optional: scale normalization if the prefab is huge/tiny
-                                                                // inst.transform.localScale = Vector3.one;
+            inst.transform.localRotation = Quaternion.identity;
+        }
+        else
+        {
+            // Not parented to camera — must protect it manually
+            DontDestroyOnLoad(inst);
         }
     }
     private (List<ResourceRequest> reqs, List<string> keys) KickAllPreloads()
