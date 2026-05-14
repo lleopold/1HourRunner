@@ -507,29 +507,59 @@ public class WeaponsCarouselController : MonoBehaviour
             r.enabled = true;
         SetLayerRecursively(_spawned, 31);
 
-        // Reset zoom and fit camera
-        _zoomFactor = 0.6f;
+        // Reset zoom and fit camera — also schedule a second fit next LateUpdate
+        // because Renderer.bounds may not be accurate in the same frame as Instantiate
+        _zoomFactor = 1f;
+        _fitNextLateUpdate = true;
         PositionCameraForCurrentModel();
+    }
+
+    private bool _fitNextLateUpdate = false;
+
+    void LateUpdate()
+    {
+        if (_fitNextLateUpdate)
+        {
+            _fitNextLateUpdate = false;
+            PositionCameraForCurrentModel();
+        }
     }
 
     private void PositionCameraForCurrentModel()
     {
         if (_spawned == null || _cam == null) return;
 
-        // Bounds of the model
-        var renderers = _spawned.GetComponentsInChildren<Renderer>();
-        if (renderers.Length == 0) return;
+        // Only use MeshRenderer / SkinnedMeshRenderer — ignore ParticleSystemRenderer,
+        // LineRenderer, etc. that can inflate bounds far beyond the visible gun geometry
+        var meshRenderers = _spawned.GetComponentsInChildren<MeshRenderer>();
+        var skinnedRenderers = _spawned.GetComponentsInChildren<SkinnedMeshRenderer>();
 
-        Bounds b = renderers[0].bounds;
-        for (int i = 1; i < renderers.Length; i++) b.Encapsulate(renderers[i].bounds);
+        bool hasBounds = false;
+        Bounds b = default;
 
-        // Move model to origin for stable rotation feel
-        Vector3 offset = b.center;
-        _spawned.transform.position -= offset;
-        b.center -= offset;
+        foreach (var r in meshRenderers)
+        {
+            if (!hasBounds) { b = r.bounds; hasBounds = true; }
+            else b.Encapsulate(r.bounds);
+        }
+        foreach (var r in skinnedRenderers)
+        {
+            if (!hasBounds) { b = r.bounds; hasBounds = true; }
+            else b.Encapsulate(r.bounds);
+        }
 
-        float radius = b.extents.magnitude;
-        radius = Mathf.Max(0.001f, radius);
+        if (!hasBounds) return;
+
+        // Centre the model pivot on world origin only if it isn't already there
+        // (avoid double-offset on repeated calls e.g. after RT resize)
+        float distToOrigin = b.center.magnitude;
+        if (distToOrigin > 0.001f)
+        {
+            _spawned.transform.position -= b.center;
+            b.center = Vector3.zero;
+        }
+
+        float radius = Mathf.Max(0.001f, b.extents.magnitude);
 
         // Distance based on FOV so the whole object fits
         float fovRad = _cam.fieldOfView * Mathf.Deg2Rad;
