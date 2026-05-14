@@ -1,4 +1,6 @@
-﻿using System;
+﻿// TODO: precision shooting disabled — re-enable when returning to the feature
+/*
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -59,3 +61,4 @@ namespace Assets.Scripts.Weapon
         }
     }
 }
+*/

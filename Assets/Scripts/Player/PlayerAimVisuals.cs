@@ -125,24 +125,25 @@ namespace ZombieGame
                 UpdateLinePoints(CurrentAngle);
                 ApplyVisuals(LineRendererLeft, _meshRendererAimingCircle, CurrentAngle);
                 ApplyVisuals(LineRendererRight, _meshRendererAimingCircle, CurrentAngle);
-                ApplyPrecisionVisuals(_lineRendererPrecisionLeft);
-                ApplyPrecisionVisuals(_lineRendererPrecisionRight);
+                // TODO: precision shooting disabled — re-enable when returning to the feature
+                // ApplyPrecisionVisuals(_lineRendererPrecisionLeft);
+                // ApplyPrecisionVisuals(_lineRendererPrecisionRight);
 
                 AnimateLaser(LineRendererLeft, _laserMat);
                 AnimateLaser(LineRendererRight, _laserMat);
-                AnimatePrecisionZone(_lineRendererPrecisionLeft, _precisionLaserMat);
-                AnimatePrecisionZone(_lineRendererPrecisionRight, _precisionLaserMat);
+                // AnimatePrecisionZone(_lineRendererPrecisionLeft, _precisionLaserMat);
+                // AnimatePrecisionZone(_lineRendererPrecisionRight, _precisionLaserMat);
 
-                if (!_lineRendererPrecisionLeft.enabled) _lineRendererPrecisionLeft.enabled = true;
-                if (!_lineRendererPrecisionRight.enabled) _lineRendererPrecisionRight.enabled = true;
+                // if (!_lineRendererPrecisionLeft.enabled) _lineRendererPrecisionLeft.enabled = true;
+                // if (!_lineRendererPrecisionRight.enabled) _lineRendererPrecisionRight.enabled = true;
             }
             else
             {
                 SetAimLinesActive(false);
                 CurrentAngle = _gameStats._precisionStartingAim;
 
-                if (_lineRendererPrecisionLeft != null && _lineRendererPrecisionLeft.enabled) _lineRendererPrecisionLeft.enabled = false;
-                if (_lineRendererPrecisionRight != null && _lineRendererPrecisionRight.enabled) _lineRendererPrecisionRight.enabled = false;
+                // if (_lineRendererPrecisionLeft != null && _lineRendererPrecisionLeft.enabled) _lineRendererPrecisionLeft.enabled = false;
+                // if (_lineRendererPrecisionRight != null && _lineRendererPrecisionRight.enabled) _lineRendererPrecisionRight.enabled = false;
 
                 if (_laserSmokeLeft.isPlaying) _laserSmokeLeft.Stop(true, ParticleSystemStopBehavior.StopEmitting);
                 if (_laserSmokeRight.isPlaying) _laserSmokeRight.Stop(true, ParticleSystemStopBehavior.StopEmitting);
@@ -205,14 +206,16 @@ namespace ZombieGame
             }
         }
 
+        // TODO: precision shooting disabled — re-enable when returning to the feature
         public bool IsRadarInPrecisionZone()
         {
-            float sweepT = Mathf.PingPong(Time.time / (_sweepDuration / 2f), 1f);
-            if (_isPausedAtEdge) return false;
-            float distanceFromCenter = Mathf.Abs(sweepT - 0.5f);
-            float halfAngle = CurrentAngle / 2f;
-            float tolerance = _precisionZoneToleranceDegrees / halfAngle;
-            return distanceFromCenter <= tolerance;
+            // float sweepT = Mathf.PingPong(Time.time / (_sweepDuration / 2f), 1f);
+            // if (_isPausedAtEdge) return false;
+            // float distanceFromCenter = Mathf.Abs(sweepT - 0.5f);
+            // float halfAngle = CurrentAngle / 2f;
+            // float tolerance = _precisionZoneToleranceDegrees / halfAngle;
+            // return distanceFromCenter <= tolerance;
+            return false;
         }
 
         // ── Setup helpers ──────────────────────────────────────────────────────
@@ -231,12 +234,13 @@ namespace ZombieGame
             _laserMat.EnableKeyword("_EMISSION");
             _laserMat.SetColor("_EmissionColor", laserColor * emissionBase);
 
-            _precisionLaserMat = new Material(sh);
-            _precisionLaserMat.mainTexture = _laserTex;
-            _precisionLaserMat.SetColor("_BaseColor", _precisionVColor);
-            _precisionLaserMat.SetColor("_Color", _precisionVColor);
-            _precisionLaserMat.EnableKeyword("_EMISSION");
-            _precisionLaserMat.SetColor("_EmissionColor", _precisionVColor * emissionBase);
+            // TODO: precision shooting disabled — re-enable when returning to the feature
+            // _precisionLaserMat = new Material(sh);
+            // _precisionLaserMat.mainTexture = _laserTex;
+            // _precisionLaserMat.SetColor("_BaseColor", _precisionVColor);
+            // _precisionLaserMat.SetColor("_Color", _precisionVColor);
+            // _precisionLaserMat.EnableKeyword("_EMISSION");
+            // _precisionLaserMat.SetColor("_EmissionColor", _precisionVColor * emissionBase);
 
             LineRendererLeft = CreateLineRendererChild("LeftLine");
             LineRendererRight = CreateLineRendererChild("RightLine");
@@ -246,12 +250,12 @@ namespace ZombieGame
             SetLineAlpha(LineRendererLeft, 0);
             SetLineAlpha(LineRendererRight, 0);
 
-            _lineRendererPrecisionLeft = CreateLineRendererChild("PrecisionLeftLine");
-            _lineRendererPrecisionRight = CreateLineRendererChild("PrecisionRightLine");
-            SetupPrecisionLaser(_lineRendererPrecisionLeft);
-            SetupPrecisionLaser(_lineRendererPrecisionRight);
-            _lineRendererPrecisionLeft.enabled = false;
-            _lineRendererPrecisionRight.enabled = false;
+            // _lineRendererPrecisionLeft = CreateLineRendererChild("PrecisionLeftLine");
+            // _lineRendererPrecisionRight = CreateLineRendererChild("PrecisionRightLine");
+            // SetupPrecisionLaser(_lineRendererPrecisionLeft);
+            // SetupPrecisionLaser(_lineRendererPrecisionRight);
+            // _lineRendererPrecisionLeft.enabled = false;
+            // _lineRendererPrecisionRight.enabled = false;
         }
 
         private LineRenderer CreateLineRendererChild(string name)
@@ -347,7 +351,7 @@ namespace ZombieGame
             float lengthMultiplier = 5f;
             float currentRadius = baseRadiusLocal * lengthMultiplier;
             float halfAngle = angle / 2f;
-            float halfPrecisionAngle = _precisionVAngle / 2f;
+            // float halfPrecisionAngle = _precisionVAngle / 2f;  // TODO: precision shooting disabled
             float yOffset = 0.03f;
 
             Vector3 playerPosition = transform.position;
@@ -363,26 +367,27 @@ namespace ZombieGame
             LineRendererRight.positionCount = 2;
             LineRendererRight.SetPositions(new[] { triangleBase, rightPoint });
 
-            Vector3 precisionLeft = triangleBase + playerRotation * Quaternion.Euler(0, -halfPrecisionAngle, 0) * Vector3.forward * currentRadius;
-            Vector3 precisionRight = triangleBase + playerRotation * Quaternion.Euler(0, halfPrecisionAngle, 0) * Vector3.forward * currentRadius;
-
-            if (_lineRendererPrecisionLeft != null && _lineRendererPrecisionRight != null)
-            {
-                _lineRendererPrecisionLeft.positionCount = 2;
-                _lineRendererPrecisionLeft.SetPositions(new[] { triangleBase, precisionLeft });
-                _lineRendererPrecisionRight.positionCount = 2;
-                _lineRendererPrecisionRight.SetPositions(new[] { triangleBase, precisionRight });
-            }
+            // TODO: precision shooting disabled — re-enable when returning to the feature
+            // Vector3 precisionLeft = triangleBase + playerRotation * Quaternion.Euler(0, -halfPrecisionAngle, 0) * Vector3.forward * currentRadius;
+            // Vector3 precisionRight = triangleBase + playerRotation * Quaternion.Euler(0, halfPrecisionAngle, 0) * Vector3.forward * currentRadius;
+            // if (_lineRendererPrecisionLeft != null && _lineRendererPrecisionRight != null)
+            // {
+            //     _lineRendererPrecisionLeft.positionCount = 2;
+            //     _lineRendererPrecisionLeft.SetPositions(new[] { triangleBase, precisionLeft });
+            //     _lineRendererPrecisionRight.positionCount = 2;
+            //     _lineRendererPrecisionRight.SetPositions(new[] { triangleBase, precisionRight });
+            // }
         }
 
         private void ApplyVisuals(LineRenderer lineRenderer, MeshRenderer meshRenderer, float angle)
         {
+            Color vColor = AimPrecisionColors.GetAnimatedColor(angle);
             Gradient gradient = new Gradient();
             gradient.SetKeys(
                 new[] {
                     new GradientColorKey(Color.white, 0f),
-                    new GradientColorKey(laserColor, 0.35f),
-                    new GradientColorKey(laserColor, 0.65f),
+                    new GradientColorKey(vColor, 0.35f),
+                    new GradientColorKey(vColor, 0.65f),
                     new GradientColorKey(Color.white, 1f),
                 },
                 new[] {
@@ -441,8 +446,11 @@ namespace ZombieGame
             float pulse = Mathf.Lerp(pulseMin, pulseMax, 0.5f + 0.5f * Mathf.Sin(t * pulseSpeed));
             lr.widthMultiplier = baseWidth * pulse;
 
+            Color vColor = AimPrecisionColors.GetAnimatedColor(CurrentAngle);
             float e = emissionBase + Mathf.Sin(t * (pulseSpeed * 1.3f)) * emissionPulse;
-            mat.SetColor("_EmissionColor", laserColor * e);
+            mat.SetColor("_BaseColor", vColor);
+            mat.SetColor("_Color", vColor);
+            mat.SetColor("_EmissionColor", vColor * e);
         }
 
         private void AnimatePrecisionZone(LineRenderer lr, Material mat)
