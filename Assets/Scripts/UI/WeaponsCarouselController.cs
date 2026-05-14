@@ -39,7 +39,7 @@ public class WeaponsCarouselController : MonoBehaviour
     [SerializeField] private float minZoom = 0.6f;
     [SerializeField] private float maxZoom = 1.8f;
 
-    private float _zoomFactor = 1f;
+    private float _zoomFactor = 0.6f;
     private bool _dragging;
     private Vector3 _lastPointer;
 
@@ -127,15 +127,13 @@ public class WeaponsCarouselController : MonoBehaviour
         QueryStatFields(root);
         EnsurePreviewImage();
 
-        // Tabs carousel events
+        // Tabs carousel events — registered once in HookCarouselCategoryEvents (called from OnRootReady)
         var named = root.Q<VisualElement>(containerName);
         if (named == null)
         {
             Debug.LogError($"WeaponsCarouselController: container '{containerName}' not found in UXML.");
             enabled = false; return;
         }
-        carousel.PrevCategoryRequested += () => ChangeCategory(-1);
-        carousel.NextCategoryRequested += () => ChangeCategory(+1);
 
         // Build preview rig now
         BuildPreviewRig();
@@ -151,6 +149,11 @@ public class WeaponsCarouselController : MonoBehaviour
     {
         var root = uiDoc?.rootVisualElement;
         if (root != null) root.UnregisterCallback<GeometryChangedEvent>(OnRootReady);
+        if (carousel != null)
+        {
+            carousel.PrevCategoryRequested -= OnPrevCategory;
+            carousel.NextCategoryRequested -= OnNextCategory;
+        }
     }
 
     private void OnDestroy()
@@ -271,9 +274,15 @@ public class WeaponsCarouselController : MonoBehaviour
 
     private void HookCarouselCategoryEvents()
     {
-        carousel.PrevCategoryRequested += () => ChangeCategory(-1);
-        carousel.NextCategoryRequested += () => ChangeCategory(+1);
+        // Always unsubscribe first to prevent duplicate registrations on re-enable
+        carousel.PrevCategoryRequested -= OnPrevCategory;
+        carousel.NextCategoryRequested -= OnNextCategory;
+        carousel.PrevCategoryRequested += OnPrevCategory;
+        carousel.NextCategoryRequested += OnNextCategory;
     }
+
+    private void OnPrevCategory() => ChangeCategory(-1);
+    private void OnNextCategory() => ChangeCategory(+1);
 
     private WeaponButton BuildWeaponButton(WeaponDef w, string slotText)
     {
@@ -403,6 +412,7 @@ public class WeaponsCarouselController : MonoBehaviour
         {
             float dir = Mathf.Sign(e.delta.y); // up is positive on most mice
             _zoomFactor = Mathf.Clamp(_zoomFactor + dir * zoomSpeed, minZoom, maxZoom);
+            //Debug.Log($"Zoom factor: {_zoomFactor}");
             PositionCameraForCurrentModel();
         });
     }
@@ -498,7 +508,7 @@ public class WeaponsCarouselController : MonoBehaviour
         SetLayerRecursively(_spawned, 31);
 
         // Reset zoom and fit camera
-        _zoomFactor = 1f;
+        _zoomFactor = 0.6f;
         PositionCameraForCurrentModel();
     }
 
@@ -570,11 +580,4 @@ public class WeaponsCarouselController : MonoBehaviour
     }
 
     // ---------- Keyboard category switch fallback ----------
-    void Update()
-    {
-        bool prev = Input.GetKeyDown(prevKey) || (useControllerLB_RB && Input.GetKeyDown(KeyCode.JoystickButton4));
-        bool next = Input.GetKeyDown(nextKey) || (useControllerLB_RB && Input.GetKeyDown(KeyCode.JoystickButton5));
-        if (prev) ChangeCategory(-1);
-        if (next) ChangeCategory(+1);
-    }
 }
