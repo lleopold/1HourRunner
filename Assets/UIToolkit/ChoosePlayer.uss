@@ -1,93 +1,244 @@
-﻿/* =========================
-   ChoosePlayer — full file
-   ========================= */
+﻿/* ============================================================
+   ChoosePlayer — styled in the spirit of the Start scene
+   ============================================================ */
 
-/* Basic layout (unchanged) */
-.choose-root, .weapon-screen, #root { background-color: transparent; }
-.topbar { height:56px; flex-direction:row; justify-content:space-between; align-items:center; padding:0 8px; }
-.title { font-size:22px; unity-font-style:bold; color:#E8EEF7; }
-
-.btn { height:36px; padding:0 14px; border-radius:12px; background:#20262e; color:#E6EDF6; font-size:14px; border-width:1px; border-color:#2f3742; transition-property:background-color,scale,translate; transition-duration:.12s; }
-.btn:hover { background:#2b323c; translate:0 -1px; }
-.btn:active { scale:.985; }
-.btn--primary { background:#5EE1A5; color:#0f1318; border-width:0; }
-
-.row { flex-direction:row; align-items:stretch; gap:16px; flex-grow:1; }
-#visual_rep { flex-grow:1; flex-basis:0; min-width:35%; align-self:stretch; background-color:transparent; border-width:0; picking-mode:ignore; }
-
-#choose_char { width:18%; min-width:180px; max-width:320px; padding:10px; background:rgba(255,255,255,.03); border-radius:12px; border-width:1px; border-color:rgba(255,255,255,.09); }
-.thumb { height:88px; margin-bottom:10px; border-radius:10px; background:rgba(255,255,255,.06); background-size:cover; background-position:center; background-repeat:no-repeat; }
-
-.stats { width:28%; min-width:260px; max-width:520px; padding:12px 16px; background:rgba(255,255,255,.03); border-radius:12px; border-width:1px; border-color:rgba(255,255,255,.09); gap:8px; }
-.stat-row { flex-direction:row; justify-content:space-between; align-items:center; padding:6px 4px; border-bottom-width:1px; border-bottom-color:rgba(255,255,255,.06); }
-.stat-row:last-child { border-bottom-width:0; }
-.stat-name { color:#AEB9C8; font-size:13px; }
-.stat-val  { color:#E5ECF7; font-size:13px; unity-font-style:bold; }
-
-.bottom { height:48px; align-items:flex-start; justify-content:center; }
-
-/* Scrollbars on left */
-#choose_char .unity-scroll-view__horizontal-scroller { display:none; height:0; }
-#choose_char .unity-scroller__low-button, #choose_char .unity-scroller__high-button { display:none; }
-#choose_char .unity-scroll-view__vertical-scroller { width:6px; margin-right:3px; background:transparent; }
-#choose_char .unity-scroller__slider .unity-slider__tracker { background:rgba(255,255,255,.08); border-radius:3px; }
-#choose_char .unity-scroller__slider .unity-slider__dragger { background:rgba(255,255,255,.35); border-radius:3px; min-height:28px; }
-
-/* =========================================================
-   INPUTS: force LIGHT box + DARK text (overrides theme)
-   ========================================================= */
-
-/* Comfortable control height */
-.weapon-screen .stats :is(.unity-float-field, .unity-integer-field) { min-height:32px; }
-
-/* Light input background (container behind text) */
-.weapon-screen .stats :is(.unity-float-field, .unity-integer-field) > .unity-base-field__input {
-    background-color:#F5F7FA !important;   /* light */
-    border-radius:6px;
-    border-width:1px;
-    border-color:#2a2f38;
-    opacity:1 !important;
-    align-items:center;                     /* vertical center */
+/* Full-screen dark root — transparent so the 3D scene shows through */
+.choose-root {
+    flex-grow: 1;
+    flex-direction: column;
+    position: absolute;
+    left: 0; top: 0; right: 0; bottom: 0;
+    background-color: transparent;
+    padding: 0 24px 16px 24px;
 }
 
-/* On focus keep it light */
-.weapon-screen .stats :is(.unity-float-field, .unity-integer-field):focus-within > .unity-base-field__input {
-    background-color:#FFFFFF !important;
-    border-color:#3b82f6;                   /* subtle highlight */
+/* ── Top bar ─────────────────────────────────────────────── */
+.topbar {
+    height: 56px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255,255,255,0.07);
+    margin-bottom: 16px;
+    padding: 0 4px;
 }
 
-/* Actual editable text element — force dark text always */
-.weapon-screen .stats :is(.unity-float-field, .unity-integer-field)
-  :is(#unity-text-input, .unity-base-text-field__input, .unity-text-input) {
-    color:#111111 !important;
-    caret-color:#111111 !important;
-    background-color:transparent !important;
-    opacity:1 !important;
-    height:100%;
-    min-height:28px;
-    padding:6px 8px;
-    overflow:visible;
-    white-space:nowrap;
+.title {
+    font-size: 22px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    letter-spacing: 4px;
 }
 
-/* Placeholder, just in case */
-.weapon-screen .stats :is(.unity-float-field, .unity-integer-field)
-  .unity-text-element__placeholder {
-    color:#6b7280 !important;
+/* Accent on first letter of title (visual only — green accent bar below) */
+.accent-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background-color: #5EE1A5;
 }
 
-/* Stepper buttons + numeric width */
-.stat-edit { flex-direction:row; align-items:center; gap:6px; }
-.step { width:22px; height:22px; padding:0; border-radius:6px; background:#20262e; color:#e6edf6; border-width:1px; border-color:#2f3742; unity-text-align:center; }
-.num { width:100px; min-width:100px; }
+/* ── Navigation button (top-right) ───────────────────────── */
+.btn {
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 0;
+    border-width: 0;
+    border-left-width: 0;
+    border-left-color: rgba(0,0,0,0);
+    background-color: rgba(0,0,0,0);
+    color: #B0BCCC;
+    font-size: 14px;
+    letter-spacing: 1px;
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    transition-property: background-color, color, border-left-width, border-left-color;
+    transition-duration: 0.1s, 0.1s, 0.1s, 0.1s;
+}
 
-/* Darker rows so inputs pop */
-.weapon-screen .stats .stat-row { background:rgba(30,33,39,.55); border-radius:8px; }
+.btn:hover {
+    background-color: rgba(255,255,255,0.06);
+    color: #FFFFFF;
+    border-left-width: 3px;
+    border-left-color: #5EE1A5;
+}
 
-/* If overlay labels existed */
-.weapon-screen .stat-val { pointer-events:none; }
+.btn:active {
+    background-color: rgba(94,225,165,0.1);
+    color: #FFFFFF;
+    border-left-width: 3px;
+    border-left-color: #5EE1A5;
+}
 
+/* ── Main row ────────────────────────────────────────────── */
+.row {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 16px;
+    flex-grow: 1;
+}
 
-.stat-row .num .unity-base-field__input {
-    color: grey;
+/* ── Character list panel ────────────────────────────────── */
+#choose_char {
+    width: 18%;
+    min-width: 160px;
+    max-width: 280px;
+    padding: 10px;
+    background-color: rgba(255,255,255,0.03);
+    border-width: 1px;
+    border-color: rgba(255,255,255,0.08);
+}
+
+.thumb {
+    height: 80px;
+    margin-bottom: 8px;
+    border-radius: 0;
+    border-width: 0;
+    border-left-width: 0;
+    border-left-color: rgba(0,0,0,0);
+    background-color: rgba(255,255,255,0.05);
+    color: #B0BCCC;
+    font-size: 13px;
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    transition-property: background-color, color, border-left-width, border-left-color;
+    transition-duration: 0.1s;
+}
+
+.thumb:hover {
+    background-color: rgba(255,255,255,0.08);
+    color: #FFFFFF;
+    border-left-width: 3px;
+    border-left-color: #5EE1A5;
+}
+
+.thumb:active {
+    background-color: rgba(94,225,165,0.1);
+    color: #FFFFFF;
+    border-left-width: 3px;
+    border-left-color: #5EE1A5;
+}
+
+/* ── Preview panel (centre) ──────────────────────────────── */
+#visual_rep {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 35%;
+    align-self: stretch;
+    background-color: transparent;
+    border-width: 0;
+    picking-mode: ignore;
+}
+
+/* ── Stats panel ─────────────────────────────────────────── */
+.stats {
+    width: 28%;
+    min-width: 260px;
+    max-width: 480px;
+    padding: 12px 16px;
+    background-color: rgba(255,255,255,0.03);
+    border-width: 1px;
+    border-color: rgba(255,255,255,0.08);
+    gap: 4px;
+}
+
+.stat-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255,255,255,0.06);
+}
+
+.stat-row:last-child { border-bottom-width: 0; }
+
+.stat-name {
+    color: #5A6473;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+.stat-val {
+    color: #E5ECF7;
+    font-size: 13px;
+    -unity-font-style: bold;
+    pointer-events: none;
+}
+
+/* ── Stepper controls ────────────────────────────────────── */
+.stat-edit { flex-direction: row; align-items: center; gap: 6px; }
+
+.step {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border-radius: 0;
+    border-width: 1px;
+    border-color: rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.05);
+    color: #B0BCCC;
+    -unity-text-align: middle-center;
+    font-size: 14px;
+    transition-property: background-color, color;
+    transition-duration: 0.1s;
+}
+
+.step:hover {
+    background-color: rgba(94,225,165,0.15);
+    color: #5EE1A5;
+    border-color: #5EE1A5;
+}
+
+.step:active {
+    background-color: rgba(94,225,165,0.25);
+    color: #5EE1A5;
+}
+
+.num { width: 90px; min-width: 90px; }
+
+/* Numeric field input box */
+.num > .unity-base-field__input {
+    background-color: rgba(255,255,255,0.06);
+    border-radius: 0;
+    border-width: 1px;
+    border-color: rgba(255,255,255,0.1);
+    color: #E5ECF7;
+    padding: 4px 6px;
+}
+
+.num:focus-within > .unity-base-field__input {
+    border-color: #5EE1A5;
+    background-color: rgba(94,225,165,0.06);
+}
+
+/* ── Scrollbar styling ───────────────────────────────────── */
+#choose_char .unity-scroll-view__horizontal-scroller { display: none; height: 0; }
+#choose_char .unity-scroller__low-button,
+#choose_char .unity-scroller__high-button { display: none; }
+#choose_char .unity-scroll-view__vertical-scroller { width: 4px; margin-right: 2px; background-color: transparent; }
+#choose_char .unity-scroller__slider .unity-slider__tracker { background-color: rgba(255,255,255,0.06); }
+#choose_char .unity-scroller__slider .unity-slider__dragger { background-color: rgba(255,255,255,0.25); min-height: 28px; }
+
+/* ── Bottom bar ──────────────────────────────────────────── */
+.bottom {
+    height: 48px;
+    align-items: flex-start;
+    justify-content: center;
+    border-top-width: 1px;
+    border-top-color: rgba(255,255,255,0.07);
+    margin-top: 8px;
+    padding-top: 8px;
+}
+
+.weapon-field > .unity-base-field__input {
+    background-color: rgba(255,255,255,0.06);
+    border-width: 1px;
+    border-color: rgba(255,255,255,0.1);
+    color: #E5ECF7;
+}
+
+.weapon-field:focus-within > .unity-base-field__input {
+    border-color: #5EE1A5;
 }

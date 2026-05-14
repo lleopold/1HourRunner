@@ -36,7 +36,6 @@ public class UIT_ChoosePlayer : MonoBehaviour
     private Button _btn_steel;
     private Button _btn_business_girl;
     private Button _btn_dr;
-    private Button _btn_solider;
     private Button _btn_green_hat_basic;
     private Button _btn_choose_level;
 
@@ -93,14 +92,12 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _btn_jennifer = _root.Q<Button>("btn_jennifer");
         _btn_swat = _root.Q<Button>("btn_swat");
         _btn_steel = _root.Q<Button>("btn_steel");
-        _btn_solider = _root.Q<Button>("btn_solider");
         _btn_green_hat_basic = _root.Q<Button>("btn_green_hat");
         _btn_business_girl.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.BusinessGirl));
         _btn_dr.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Dr));
         _btn_jennifer.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Jennifer));
         _btn_swat.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Swat));
         _btn_steel.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Jackson_Steel_Reynolds));
-        _btn_solider.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Solider));
         _btn_green_hat_basic.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.GreenHat_basic));
 
 
