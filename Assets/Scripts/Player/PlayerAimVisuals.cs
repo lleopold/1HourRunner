@@ -320,6 +320,12 @@ namespace ZombieGame
             rightGO.name = "LaserSmoke_Right";
             _laserSmokeLeft = leftGO.GetComponent<ParticleSystem>();
             _laserSmokeRight = rightGO.GetComponent<ParticleSystem>();
+
+            var mainLeft = _laserSmokeLeft.main;
+            mainLeft.startColor = laserColor;
+            var mainRight = _laserSmokeRight.main;
+            mainRight.startColor = laserColor;
+
             _laserSmokeLeft.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             _laserSmokeRight.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
