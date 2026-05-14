@@ -181,6 +181,10 @@ public class WeaponsCarouselController : MonoBehaviour
         ShowCategory(_current);
 
         HookPreviewPointerEvents();
+
+        // Resize RT once layout is known, then again if the panel resizes
+        _preview.RegisterCallback<GeometryChangedEvent>(OnPreviewResized);
+        ResizeRTToPreview(); // in case geometry is already resolved
     }
 
     private void QueryStatFields(VisualElement root)
@@ -379,7 +383,7 @@ public class WeaponsCarouselController : MonoBehaviour
 
             // yaw around up axis
             _spawned.transform.Rotate(Vector3.up, -delta.x * rotateSpeed, Space.World);
-            // pitch: clamp a bit to avoid flipping
+            // pitch
             _spawned.transform.Rotate(Vector3.right, delta.y * rotateSpeed, Space.Self);
         });
 
@@ -430,8 +434,13 @@ public class WeaponsCarouselController : MonoBehaviour
         _cam.nearClipPlane = 0.05f;
         _cam.farClipPlane = 100f;
         _cam.targetTexture = _rt;
+        _cam.cullingMask = 1 << 31; // Only render preview layer
         _cam.transform.position = new Vector3(0, 0, 5);
         _cam.transform.rotation = Quaternion.identity;
+
+        // Exclude preview layer from main camera so rig is invisible to it
+        if (Camera.main != null)
+            Camera.main.cullingMask &= ~(1 << 31);
 
 
 
@@ -456,6 +465,8 @@ public class WeaponsCarouselController : MonoBehaviour
         _preview.style.unityBackgroundImageTintColor = Color.white;
         _preview.style.backgroundColor = StyleKeyword.Null; //igors
         _previewImage.style.opacity = 1f;
+
+
     }
 
     private void UpdatePreview_3D(WeaponDef w)
@@ -481,9 +492,10 @@ public class WeaponsCarouselController : MonoBehaviour
         _spawned.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
         _spawned.transform.localScale = Vector3.one;
 
-        // Ensure renderers are enabled (in case prefab is disabled)
+        // Ensure renderers are enabled and move to preview layer
         foreach (var r in _spawned.GetComponentsInChildren<Renderer>(true))
             r.enabled = true;
+        SetLayerRecursively(_spawned, 31);
 
         // Reset zoom and fit camera
         _zoomFactor = 1f;
@@ -513,8 +525,48 @@ public class WeaponsCarouselController : MonoBehaviour
         float fovRad = _cam.fieldOfView * Mathf.Deg2Rad;
         float dist = (radius * fitPadding * _zoomFactor) / Mathf.Tan(fovRad * 0.5f);
 
+        // Adjust near clip so model never clips when zooming in close
+        _cam.nearClipPlane = Mathf.Max(0.001f, dist * 0.01f);
         _cam.transform.position = new Vector3(0f, 0f, dist);
         _cam.transform.LookAt(Vector3.zero, Vector3.up);
+    }
+
+    private void OnPreviewResized(GeometryChangedEvent _) => ResizeRTToPreview();
+
+    private void ResizeRTToPreview()
+    {
+        if (_preview == null || _cam == null) return;
+
+        int w = Mathf.Max(1, Mathf.RoundToInt(_preview.resolvedStyle.width));
+        int h = Mathf.Max(1, Mathf.RoundToInt(_preview.resolvedStyle.height));
+
+        // Skip if layout not resolved yet
+        if (w <= 1 || h <= 1) return;
+
+        // Rebuild RT only if size actually changed
+        if (_rt != null && _rt.width == w && _rt.height == h) return;
+
+        if (_rt != null) { _rt.Release(); Destroy(_rt); }
+        _rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32)
+        {
+            name = "WeaponPreviewRT",
+            useMipMap = false,
+            autoGenerateMips = false
+        };
+        _rt.Create();
+        _cam.targetTexture = _rt;
+        _cam.aspect = (float)w / h;
+        if (_previewImage != null) _previewImage.image = _rt;
+
+        // Refit camera for current model
+        PositionCameraForCurrentModel();
+    }
+
+    private static void SetLayerRecursively(GameObject go, int layer)
+    {
+        go.layer = layer;
+        foreach (Transform child in go.transform)
+            SetLayerRecursively(child.gameObject, layer);
     }
 
     // ---------- Keyboard category switch fallback ----------
