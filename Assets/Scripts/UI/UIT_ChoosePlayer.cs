@@ -40,6 +40,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
     private Button _btn_choose_level;
 
     private readonly Dictionary<string, Label> _statLabels = new();
+    private Animator _presentedAnimator;
 
 
     private void Awake()
@@ -153,6 +154,14 @@ public class UIT_ChoosePlayer : MonoBehaviour
         minus.RegisterCallback<ClickEvent>(_ => ClampAndSet(ff.value - step));
         plus.RegisterCallback<ClickEvent>(_ => ClampAndSet(ff.value + step));
     }
+    private void Update()
+    {
+        if (_presentedAnimator == null)
+            return;
+        float blend = Mathf.PingPong(Time.time / 20f, 1f);
+        Debug.Log($"Updating blend to {blend}");
+        _presentedAnimator.SetFloat("Blend", blend);
+    }
 
     private void ClickChooseWeapon()
     {
@@ -163,7 +172,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
         UnityEngine.SceneManagement.SceneManager.LoadScene("ChooseWeapon");
     }
 
-    private static GameObject LoadModel()
+    private GameObject LoadModel()
     {
         if (GameObject.Find("PresentedModel") != null)
         {
@@ -175,7 +184,9 @@ public class UIT_ChoosePlayer : MonoBehaviour
         character.transform.Rotate(0f, -180f, 0f);
         Animator animator = character.GetComponent<Animator>();
         animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animators/IdleController");
+        animator.SetFloat("Blend", 0f);
         character.name = "PresentedModel";
+        _presentedAnimator = animator;
 
         return character;
     }
