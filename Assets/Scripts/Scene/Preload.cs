@@ -96,10 +96,17 @@ public class PreLoad : MonoBehaviour
             yield return null;
         }
         Debug.Log("[Preload] Scene ready. Waiting " + minShowTime + "s (real time)...");
-        SetText("Loading 100%");
 
-        // Wait using real wall-clock time — cannot be skipped by scene load or timeScale
-        yield return new WaitForSecondsRealtime(minShowTime);
+        // Animate fake progress 0→100% over minShowTime seconds, or track real asset loading speed
+        float elapsed = 0f;
+        while (elapsed < minShowTime)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float fakePct = Mathf.Clamp01(elapsed / minShowTime);
+            int dots = (int)((Time.unscaledTime * 3f) % 4f);
+            SetText("Loading " + ((int)(fakePct * 100f)).ToString() + "%" + new string('.', dots));
+            yield return null;
+        }
 
         Debug.Log("[Preload] Wait done. Activating scene.");
         yield return StartCoroutine(FadeOutUITK(0.25f));
