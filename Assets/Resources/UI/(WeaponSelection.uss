@@ -124,6 +124,40 @@
 .action-buttons { margin-top: 16px; gap: 16px; }
 .action-buttons .unity-button { border-radius: 8px; padding: 8px 24px; }
 
+/* ── Back button ─────────────────────────────────────────── */
+#btn_back {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 0;
+    border-width: 0;
+    border-left-width: 0;
+    border-left-color: rgba(0,0,0,0);
+    background-color: rgba(0,0,0,0);
+    background-image: none;
+    color: #5A6473;
+    font-size: 12px;
+    letter-spacing: 2px;
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    transition-property: color, border-left-width, border-left-color, background-color;
+    transition-duration: 0.15s, 0.15s, 0.15s, 0.15s;
+}
+
+#btn_back:hover {
+    background-color: rgba(94,225,165,0.06);
+    color: #5EE1A5;
+    border-left-width: 3px;
+    border-left-color: #5EE1A5;
+}
+
+#btn_back:active {
+    background-color: rgba(94,225,165,0.12);
+    color: #FFFFFF;
+}
+
 /* Targetuje input dio FloatField-a */
 .unity-float-field__input {
     color: white; /* boja teksta */

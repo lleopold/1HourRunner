@@ -181,6 +181,10 @@ public class WeaponsCarouselController : MonoBehaviour
             Debug.LogWarning("WeaponsCarouselController: Button 'btn_choose_level' not found in UXML.");
         }
 
+        var btnBack = root.Q<Button>("btn_back");
+        if (btnBack != null)
+            btnBack.clicked += () => UnityEngine.SceneManagement.SceneManager.LoadScene("ChoosePlayer");
+
         BindTabs(root);
         HookCarouselCategoryEvents();
         ShowCategory(_current);

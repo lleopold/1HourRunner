@@ -71,6 +71,28 @@
     border-left-color: #5EE1A5;
 }
 
+/* ── Back button ─────────────────────────────────────────── */
+.btn-back {
+    letter-spacing: 2px;
+    font-size: 12px;
+    color: #5A6473;
+    padding: 0 16px;
+    transition-property: color, border-left-width, border-left-color, background-color;
+    transition-duration: 0.15s, 0.15s, 0.15s, 0.15s;
+}
+
+.btn-back:hover {
+    color: #5EE1A5;
+    background-color: rgba(94,225,165,0.06);
+    border-left-width: 3px;
+    border-left-color: #5EE1A5;
+}
+
+.btn-back:active {
+    color: #FFFFFF;
+    background-color: rgba(94,225,165,0.12);
+}
+
 /* ── Main row ────────────────────────────────────────────── */
 .row {
     flex-direction: row;

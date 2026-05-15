@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 
@@ -125,6 +126,9 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _btn_swat.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Swat));
         _btn_steel.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Jackson_Steel_Reynolds));
         _btn_green_hat_basic.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.GreenHat_basic));
+
+        var btnBack = _root.Q<Button>("btn_back");
+        btnBack?.RegisterCallback<ClickEvent>(_ => SceneManager.LoadScene("Start"));
 
         // Inject WeaponButton-style overlays into all thumb buttons
         var thumbData = new (Button btn, PlayerEnum p)[]
