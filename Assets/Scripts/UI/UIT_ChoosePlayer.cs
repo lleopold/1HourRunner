@@ -159,7 +159,6 @@ public class UIT_ChoosePlayer : MonoBehaviour
         if (_presentedAnimator == null)
             return;
         float blend = Mathf.PingPong(Time.time / 20f, 1f);
-        Debug.Log($"Updating blend to {blend}");
         _presentedAnimator.SetFloat("Blend", blend);
     }
 
