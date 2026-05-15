@@ -301,6 +301,26 @@
     opacity: 0.85;
 }
 
+/* Progress bar track — sits just below the perk name */
+.thumb__bar-track {
+    position: absolute;
+    left: 8px;
+    right: 14px;
+    top: 24px;
+    height: 3px;
+    background-color: rgba(255,255,255,0.08);
+    border-radius: 2px;
+}
+
+/* Progress bar fill */
+.thumb__bar-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background-color: #5EE1A5;
+    border-radius: 2px;
+    opacity: 0.7;
+}
+
 /* Bottom bar — dark strip with LVL label */
 .thumb__bottombar {
     position: absolute;

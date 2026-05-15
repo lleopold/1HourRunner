@@ -153,6 +153,16 @@ public class UIT_ChoosePlayer : MonoBehaviour
             perkLabel.AddToClassList("thumb__perk");
             btn.Add(perkLabel);
 
+            // Perk progress bar (random 30–70% placeholder)
+            float perkProgress = UnityEngine.Random.Range(0.30f, 0.70f);
+            var barTrack = new VisualElement();
+            barTrack.AddToClassList("thumb__bar-track");
+            var barFill = new VisualElement();
+            barFill.AddToClassList("thumb__bar-fill");
+            barFill.style.width = Length.Percent(perkProgress * 100f);
+            barTrack.Add(barFill);
+            btn.Add(barTrack);
+
             // Bottom bar strip
             var bottombar = new VisualElement();
             bottombar.AddToClassList("thumb__bottombar");
