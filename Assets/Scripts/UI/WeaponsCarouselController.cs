@@ -100,7 +100,9 @@ public class WeaponsCarouselController : MonoBehaviour
     private WeaponDef _selectedWeapon;
     private Cat _current = Cat.Pistols;
 
-    private Button _btnChooseLevel; // add
+    private Button _btnChooseLevel;
+    private Button _activeTab;
+    private float _tabPulseTime;
 
     void Awake()
     {
@@ -221,6 +223,19 @@ public class WeaponsCarouselController : MonoBehaviour
         int tabIndex = System.Array.IndexOf(Order, cat);
         if (tabIndex >= 0) carousel?.SnapTo(tabIndex);
 
+        // Update active tab visual
+        foreach (var kv in _tabButtons)
+        {
+            kv.Value.RemoveFromClassList("is-active");
+            kv.Value.style.borderBottomColor = StyleKeyword.Null;
+        }
+        if (_tabButtons.TryGetValue(cat, out var activeTab))
+        {
+            activeTab.AddToClassList("is-active");
+            _activeTab = activeTab;
+            _tabPulseTime = 0f;
+        }
+
         if (!WeaponsByCat.TryGetValue(cat, out var pack))
         {
             Debug.LogWarning($"No data for {cat}");
@@ -248,6 +263,8 @@ public class WeaponsCarouselController : MonoBehaviour
             SelectWeapon(list[0], _itemButtons[0]);
     }
 
+    private Dictionary<Cat, Button> _tabButtons = new();
+
     private void BindTabs(VisualElement root)
     {
         var tabsRow = root.Q<VisualElement>("ws_tabs");
@@ -267,8 +284,9 @@ public class WeaponsCarouselController : MonoBehaviour
             var tab = tabsRow.Q<Button>(kv.Key);
             if (tab == null) { Debug.LogWarning($"Tab '{kv.Key}' not found in UXML."); continue; }
             var cat = kv.Value;
-            tab.focusable = false; // not clickable as per your design
+            tab.focusable = false;
             tab.clicked += () => ShowCategory(cat);
+            _tabButtons[cat] = tab;
         }
     }
 
@@ -564,6 +582,14 @@ public class WeaponsCarouselController : MonoBehaviour
     void LateUpdate()
     {
         _selectedBtn?.Tick(Time.deltaTime);
+
+        // Pulse active tab underline
+        if (_activeTab != null)
+        {
+            _tabPulseTime += Time.deltaTime;
+            float alpha = 0.4f + 0.6f * (0.5f + 0.5f * Mathf.Sin(_tabPulseTime * 2.8f));
+            _activeTab.style.borderBottomColor = new StyleColor(new Color(0.369f, 0.882f, 0.647f, alpha));
+        }
 
         if (_fitNextLateUpdate)
         {
