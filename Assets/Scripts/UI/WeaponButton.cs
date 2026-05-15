@@ -51,8 +51,11 @@ public class WeaponButton : VisualElement
 
     VisualElement _img;
     Label _tl, _name, _tr, _br;
+    VisualElement _accentLine;
 
     bool _built;
+    bool _isActive;
+    float _pulseTime;
 
     public event Action<WeaponButton> Clicked;
 
@@ -74,6 +77,7 @@ public class WeaponButton : VisualElement
         _name = this.Q<Label>(NameName);
         _tr = this.Q<Label>(TRName);
         _br = this.Q<Label>(BRName);
+        _accentLine = this.Q<VisualElement>("accent-line");
 
         AddToClassList(RootClass);
 
@@ -102,5 +106,40 @@ public class WeaponButton : VisualElement
     {
         if (tex) SetImage(tex);
         SetTexts(slotType, weaponName, topRight, bottomRight);
+    }
+
+    public void SetActive(bool active)
+    {
+        if (_isActive == active) return;
+        _isActive = active;
+
+        if (active)
+        {
+            AddToClassList("is-active");
+            RemoveFromClassList("selected");
+            _pulseTime = 0f;
+        }
+        else
+        {
+            RemoveFromClassList("is-active");
+            StopPulse();
+        }
+    }
+
+    // Call every frame from MonoBehaviour.Update() for real-time pulse
+    public void Tick(float deltaTime)
+    {
+        if (!_isActive || _accentLine == null) return;
+        _pulseTime += deltaTime;
+        float alpha = 0.3f + 0.7f * (0.5f + 0.5f * Mathf.Sin(_pulseTime * 3.5f));
+        _accentLine.style.backgroundColor = new UnityEngine.UIElements.StyleColor(
+            new UnityEngine.Color(0.369f, 0.882f, 0.647f, alpha));
+    }
+
+    void StopPulse()
+    {
+        if (_accentLine != null)
+            _accentLine.style.backgroundColor = new UnityEngine.UIElements.StyleColor(
+                new UnityEngine.Color(0.369f, 0.882f, 0.647f, 0f));
     }
 }

@@ -141,6 +141,9 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
 
     void Update()
     {
+        // Tick active weapon button for pulse animation
+        _root?.Query<WeaponButton>().ForEach(b => b.Tick(Time.deltaTime));
+
         if (_isSliding) return;
         GameObject weapon = GameObject.Find("PresentedWeapon");
         if (weapon != null)
@@ -228,6 +231,25 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
 
         LoadSettingsToUI();
         LoadWeaponWithSlide(weaponEnum);
+        ActivateButtonForWeapon(weaponEnum);
+    }
+
+    void ActivateButtonForWeapon(WeaponEnum weaponEnum)
+    {
+        var all = new (WeaponEnum e, WeaponButton b)[] {
+            (WeaponEnum.WPN_AP85, _btn_WPN_AP85), (WeaponEnum.WPN_MK18, _btn_WPN_MK18),
+            (WeaponEnum.WPN_P350, _btn_WPN_P350), (WeaponEnum.WPN_Revolver, _btn_WPN_Revolver),
+            (WeaponEnum.WPN_Hunter85, _btn_WPN_Hunter85), (WeaponEnum.WPN_M4, _btn_WPN_M4),
+            (WeaponEnum.WPN_M9, _btn_WPN_M9), (WeaponEnum.WPN_SMG5, _btn_WPN_SMG5),
+            (WeaponEnum.WPN_PT8, _btn_WPN_PT8), (WeaponEnum.WPN_R90, _btn_WPN_R90),
+            (WeaponEnum.WPN_FBS, _btn_WPN_FBS), (WeaponEnum.WPN_Eder22, _btn_WPN_Eder22),
+            (WeaponEnum.WPN_DT22, _btn_WPN_DT22), (WeaponEnum.WPN_CV47, _btn_WPN_CV47),
+            (WeaponEnum.WPN_C1911, _btn_WPN_C1911), (WeaponEnum.WPN_M16, _btn_WPN_M16),
+            (WeaponEnum.WPN_KM4, _btn_WPN_KM4), (WeaponEnum.WPN_590A1, _btn_WPN_590A1),
+            (WeaponEnum.WPN_CX8, _btn_WPN_CX8)
+        };
+        foreach (var pair in all)
+            pair.b?.SetActive(pair.e == weaponEnum);
     }
 
     void LoadWeaponWithSlide(WeaponEnum weaponEnum)
@@ -336,8 +358,8 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
             if (b == null) continue;
             b.RegisterCallback<ClickEvent>(_ =>
             {
-                foreach (var x in weaponButtons) x?.RemoveFromClassList("selected");
-                b.AddToClassList("selected");
+                foreach (var x in weaponButtons) x?.SetActive(false);
+                b.SetActive(true);
                 b.Focus();
             });
         }

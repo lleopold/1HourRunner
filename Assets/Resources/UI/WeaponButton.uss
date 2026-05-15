@@ -98,9 +98,43 @@
     background-color: rgba(255,255,255,0.08);
 }
 
-/* Selected — brighter + stronger borders */
+/* Selected — brighter background only, no border (borders cause Unity to render all 4 sides) */
 .weapon-btn.is-active {
     background-color: rgba(255,255,255,0.12);
-    border-top-color: rgba(255,255,255,0.18);
-    border-bottom-color: rgba(255,255,255,0.18);
+}
+
+/* ── Selected accent line (right side, shorter, pulsing via C#) ── */
+.weapon-btn__accent-line {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    translate: 0 -50%;
+    width: 3px;
+    height: 40%;
+    background-color: rgba(94,225,165,0);  /* hidden by default */
+    border-radius: 2px;
+}
+
+/* accent-line color is driven entirely by C# inline style when active */
+
+/* ── Hover line (left side, no pulse) ── */
+.weapon-btn__hover-line {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    translate: 0 -50%;
+    width: 3px;
+    height: 40%;
+    background-color: rgba(94,225,165,0);  /* hidden by default */
+    border-radius: 2px;
+    transition-property: background-color;
+    transition-duration: 0.15s;
+}
+
+.weapon-btn:hover .weapon-btn__hover-line {
+    background-color: rgba(94,225,165,0.85);
+}
+
+.weapon-btn.is-active .weapon-btn__hover-line {
+    background-color: rgba(94,225,165,0);  /* hide on selected, accent-line is enough */
 }
