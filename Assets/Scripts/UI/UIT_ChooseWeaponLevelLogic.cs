@@ -8,6 +8,8 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
     [SerializeField] public WeaponEnum _weapon;
     [SerializeField] private UIDocument _uiDocument;
     private WeaponConfig _weaponConfig;
+    private Coroutine _slideCoroutine;
+    private bool _isSliding;
     private Button _btn_play;
     private Button _btn_back;
     private FloatField _damage;
@@ -139,6 +141,7 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
 
     void Update()
     {
+        if (_isSliding) return;
         GameObject weapon = GameObject.Find("PresentedWeapon");
         if (weapon != null)
         {
@@ -224,7 +227,85 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
             DataHolder.weaponType = WeaponType.H1;
 
         LoadSettingsToUI();
-        LoadWeapon();
+        LoadWeaponWithSlide(weaponEnum);
+    }
+
+    void LoadWeaponWithSlide(WeaponEnum weaponEnum)
+    {
+        if (_slideCoroutine != null)
+            StopCoroutine(_slideCoroutine);
+
+        GameObject positionSpot = GameObject.Find("WeaponPositionSpot");
+        Vector3 center = positionSpot.transform.position;
+
+        GameObject outWeapon = GameObject.Find("PresentedWeapon");
+
+        GameObject model = Resources.Load<GameObject>("Models/Weapons/" + weaponEnum.ToString());
+        GameObject inWeapon = Instantiate(model, center, Quaternion.identity);
+        inWeapon.transform.Rotate(-70f, 90f, 0f);
+        if (weaponEnum == WeaponEnum.WPN_MK18
+            || weaponEnum == WeaponEnum.WPN_Hunter85
+            || weaponEnum == WeaponEnum.WPN_M4
+            || weaponEnum == WeaponEnum.WPN_SMG5
+            || weaponEnum == WeaponEnum.WPN_R90
+            || weaponEnum == WeaponEnum.WPN_FBS
+            || weaponEnum == WeaponEnum.WPN_CV47
+            || weaponEnum == WeaponEnum.WPN_M16
+            || weaponEnum == WeaponEnum.WPN_KM4
+            || weaponEnum == WeaponEnum.WPN_590A1
+            || weaponEnum == WeaponEnum.WPN_CX8
+            || weaponEnum == WeaponEnum.WPN_DT22)
+        {
+            inWeapon.transform.localScale *= 0.3f;
+        }
+        inWeapon.name = "PresentedWeapon";
+
+        Debug.Log("[Slide] Calling StartCoroutine. outWeapon=" + (outWeapon != null ? outWeapon.name : "NULL"));
+        _slideCoroutine = StartCoroutine(SlideWeaponTransition(outWeapon, inWeapon, center));
+    }
+
+    private System.Collections.IEnumerator SlideWeaponTransition(GameObject outWeapon, GameObject inWeapon, Vector3 center)
+    {
+        _isSliding = true;
+        Debug.Log("[Slide] COROUTINE STARTED. outWeapon=" + (outWeapon != null ? outWeapon.name : "NULL") + " inWeapon=" + (inWeapon != null ? inWeapon.name : "NULL"));
+
+        float duration = 0.4f;
+        float elapsed = 0f;
+
+        // Slide along camera's right so it's always visible on screen
+        Vector3 camRight = Camera.main != null ? Camera.main.transform.right : Vector3.right;
+        Vector3 slideOffset = camRight * 5f;
+
+        Vector3 outEnd = center - slideOffset;
+        Vector3 inStart = center + slideOffset;
+        inWeapon.transform.position = inStart;
+
+        // Freeze camera on center so it doesn't follow and cancel the slide
+        Quaternion frozenCamRot = Camera.main != null ? Camera.main.transform.rotation : Quaternion.identity;
+        if (Camera.main != null)
+            Camera.main.transform.LookAt(center);
+
+        int frame = 0;
+        while (elapsed < duration)
+        {
+            float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
+            if (outWeapon != null)
+                outWeapon.transform.position = Vector3.Lerp(center, outEnd, t);
+            inWeapon.transform.position = Vector3.Lerp(inStart, center, t);
+            if (frame == 0)
+                Debug.Log("[Slide] FIRST YIELD frame. t=" + t + " inPos=" + inWeapon.transform.position + " inStart=" + inStart + " center=" + center);
+            elapsed += Time.deltaTime;
+            frame++;
+            yield return null;
+        }
+
+        Debug.Log("[Slide] LOOP DONE after " + frame + " frames.");
+        inWeapon.transform.position = center;
+        if (outWeapon != null)
+            Destroy(outWeapon);
+
+        _isSliding = false;
+        _slideCoroutine = null;
     }
 
     void LoadSettingsToUI()

@@ -301,15 +301,30 @@ public class WeaponsCarouselController : MonoBehaviour
 
     private void SelectWeapon(WeaponDef w, WeaponButton wb)
     {
-        if (_selectedBtn != null) _selectedBtn.RemoveFromClassList("is-active");
+        bool sameWeapon = _selectedWeapon.id == w.id && _spawned != null;
+
+        // Deactivate old button
+        if (_selectedBtn != null)
+        {
+            _selectedBtn.RemoveFromClassList("is-active");
+            _selectedBtn.style.borderRightColor = new StyleColor(new Color(0, 0, 0, 0));
+            _selectedBtn.style.borderRightWidth = 1f;
+            _selectedBtn.style.borderLeftColor = StyleKeyword.Null;
+        }
+
         _selectedBtn = wb;
         _selectedWeapon = w;
         _selectedBtn.AddToClassList("is-active");
+        // Force right border green via inline style (USS border-right on custom VisualElement is unreliable)
+        _selectedBtn.style.borderRightWidth = 4f;
+        _selectedBtn.style.borderRightColor = new StyleColor(new Color(0.369f, 0.882f, 0.647f, 1f)); // #5EE1A5
+        // Clear left bar in case hover CSS left it — is-active resets it via USS but belt-and-suspenders
+        _selectedBtn.style.borderLeftColor = new StyleColor(new Color(0, 0, 0, 0));
 
-        // OLD: just visual preview
+        if (sameWeapon) return;
+
         UpdatePreview_3D(w);
 
-        // NEW: full selection logic
         if (TryMapToEnum(w.id, out var weaponEnum))
             ApplyWeaponSelection(weaponEnum);
         else
@@ -481,10 +496,12 @@ public class WeaponsCarouselController : MonoBehaviour
 
     private void UpdatePreview_3D(WeaponDef w)
     {
-        // Destroy last
-        if (_spawned) { Destroy(_spawned); _spawned = null; }
+        if (_slideCoroutine != null)
+        {
+            StopCoroutine(_slideCoroutine);
+            if (_outgoingSpawned) { Destroy(_outgoingSpawned); _outgoingSpawned = null; }
+        }
 
-        // Try id first (your prefabs are named like WPN_AP85), then display as fallback
         GameObject prefab =
             Resources.Load<GameObject>($"{ModelsRoot}/{w.id}") ??
             Resources.Load<GameObject>($"{ModelsRoot}/{w.display}");
@@ -492,29 +509,67 @@ public class WeaponsCarouselController : MonoBehaviour
         if (!prefab)
         {
             Debug.LogWarning($"Prefab not found in Resources/{ModelsRoot}: '{w.id}' or '{w.display}'.");
-            // still clear the preview RT (camera will just render background)
+            if (_spawned) { Destroy(_spawned); _spawned = null; }
             return;
         }
 
-        _spawned = Instantiate(prefab, _rig.transform);
-        _spawned.name = $"PREVIEW_{w.id}";
-        _spawned.transform.localPosition = Vector3.zero;
-        _spawned.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
-        _spawned.transform.localScale = Vector3.one;
+        // Keep old weapon alive as outgoing
+        _outgoingSpawned = _spawned;
+        _spawned = null;
 
-        // Ensure renderers are enabled and move to preview layer
-        foreach (var r in _spawned.GetComponentsInChildren<Renderer>(true))
+        // Spawn new weapon
+        var newWeapon = Instantiate(prefab, _rig.transform);
+        newWeapon.name = $"PREVIEW_{w.id}";
+        newWeapon.transform.localPosition = Vector3.zero;
+        newWeapon.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
+        newWeapon.transform.localScale = Vector3.one;
+
+        foreach (var r in newWeapon.GetComponentsInChildren<Renderer>(true))
             r.enabled = true;
-        SetLayerRecursively(_spawned, 31);
+        SetLayerRecursively(newWeapon, 31);
 
-        // Reset zoom and fit camera — also schedule a second fit next LateUpdate
-        // because Renderer.bounds may not be accurate in the same frame as Instantiate
+        _spawned = newWeapon;
         _zoomFactor = 1f;
         _fitNextLateUpdate = true;
         PositionCameraForCurrentModel();
+
+        _slideCoroutine = StartCoroutine(SlidePreviewTransition(_outgoingSpawned, _spawned));
+    }
+
+    private System.Collections.IEnumerator SlidePreviewTransition(GameObject outWeapon, GameObject inWeapon)
+    {
+        const float duration = 0.35f;
+        const float slideX = 1.5f; // local rig units
+        float elapsed = 0f;
+
+        // Capture inWeapon's fitted center position (set by PositionCameraForCurrentModel)
+        Vector3 inCenter = inWeapon != null ? inWeapon.transform.localPosition : Vector3.zero;
+        Vector3 outCenter = outWeapon != null ? outWeapon.transform.localPosition : Vector3.zero;
+
+        Vector3 inStart  = inCenter  + new Vector3( slideX, 0f, 0f);
+        Vector3 outEnd   = outCenter + new Vector3(-slideX, 0f, 0f);
+
+        if (inWeapon != null) inWeapon.transform.localPosition = inStart;
+
+        while (elapsed < duration)
+        {
+            float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
+            if (outWeapon != null) outWeapon.transform.localPosition = Vector3.Lerp(outCenter, outEnd, t);
+            if (inWeapon != null)  inWeapon.transform.localPosition  = Vector3.Lerp(inStart,  inCenter, t);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if (inWeapon != null)  inWeapon.transform.localPosition = inCenter;
+        if (outWeapon != null) Destroy(outWeapon);
+
+        _outgoingSpawned = null;
+        _slideCoroutine = null;
     }
 
     private bool _fitNextLateUpdate = false;
+    private Coroutine _slideCoroutine;
+    private GameObject _outgoingSpawned;
 
     void LateUpdate()
     {
