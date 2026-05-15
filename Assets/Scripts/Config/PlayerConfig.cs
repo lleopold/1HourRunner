@@ -38,4 +38,6 @@ public class PlayerConfig : ScriptableObject
     /// - Initial burst when starting to move while aiming : (movementAimingPenalty)% of (max-min) range
     /// </summary>
     public float movementAimingPenalty = 25f;
+    public string PerkDescription;
+
 }

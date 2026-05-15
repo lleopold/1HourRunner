@@ -42,6 +42,12 @@ public class UIT_ChoosePlayer : MonoBehaviour
     private readonly Dictionary<string, Label> _statLabels = new();
     private Animator _presentedAnimator;
 
+    // Selection pulse
+    private Button _activePlayerBtn;
+    private VisualElement _activeAccentLine;
+    private float _pulseTime;
+    private Dictionary<Button, VisualElement> _accentLines = new();
+
 
     private void Awake()
     {
@@ -101,6 +107,21 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _btn_steel.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Jackson_Steel_Reynolds));
         _btn_green_hat_basic.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.GreenHat_basic));
 
+        // Inject accent lines into all thumb buttons
+        foreach (var btn in new[] { _btn_jennifer, _btn_swat, _btn_steel, _btn_business_girl, _btn_dr, _btn_green_hat_basic })
+        {
+            if (btn == null) continue;
+            btn.style.position = Position.Relative;
+            btn.style.overflow = Overflow.Hidden;
+            var line = new VisualElement();
+            line.AddToClassList("thumb__accent-line");
+            btn.Add(line);
+            _accentLines[btn] = line;
+        }
+
+        // Set initial selection based on saved player
+        SetActivePlayerButton(GetButtonForPlayer(player));
+
 
 
         _fl_health.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.health = ev.newValue);
@@ -156,11 +177,49 @@ public class UIT_ChoosePlayer : MonoBehaviour
     }
     private void Update()
     {
-        if (_presentedAnimator == null)
-            return;
-        float blend = Mathf.PingPong(Time.time / 20f, 1f);
-        _presentedAnimator.SetFloat("Blend", blend);
+        if (_presentedAnimator != null)
+        {
+            float blend = Mathf.PingPong(Time.time / 20f, 1f);
+            _presentedAnimator.SetFloat("Blend", blend);
+        }
+
+        // Pulse accent line on active player button
+        if (_activeAccentLine != null)
+        {
+            _pulseTime += Time.deltaTime;
+            float opacity = 0.3f + 0.7f * (0.5f + 0.5f * Mathf.Sin(_pulseTime * 3.5f));
+            _activeAccentLine.style.opacity = opacity;
+        }
     }
+
+    private void SetActivePlayerButton(Button btn)
+    {
+        // Deactivate old
+        if (_activePlayerBtn != null)
+        {
+            _activePlayerBtn.RemoveFromClassList("is-active");
+            if (_accentLines.TryGetValue(_activePlayerBtn, out var oldLine))
+                oldLine.style.opacity = 0f;
+        }
+
+        _activePlayerBtn = btn;
+        _activeAccentLine = btn != null && _accentLines.TryGetValue(btn, out var line) ? line : null;
+        _pulseTime = 0f;
+
+        if (_activePlayerBtn != null)
+            _activePlayerBtn.AddToClassList("is-active");
+    }
+
+    private Button GetButtonForPlayer(PlayerEnum p) => p switch
+    {
+        PlayerEnum.Jennifer                 => _btn_jennifer,
+        PlayerEnum.Swat                     => _btn_swat,
+        PlayerEnum.Jackson_Steel_Reynolds   => _btn_steel,
+        PlayerEnum.BusinessGirl             => _btn_business_girl,
+        PlayerEnum.Dr                       => _btn_dr,
+        PlayerEnum.GreenHat_basic           => _btn_green_hat_basic,
+        _                                   => _btn_jennifer,
+    };
 
     private void ClickChooseWeapon()
     {
@@ -213,8 +272,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
         playerConfig = PlayerConfigSingleton.Instance.PlayerConfig;
         LoadSettingsToUI();
         LoadModel();
-
-
+        SetActivePlayerButton(GetButtonForPlayer(player));
     }
     void LoadSettingsToUI()
     {
