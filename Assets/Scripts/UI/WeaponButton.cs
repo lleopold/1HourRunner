@@ -55,7 +55,8 @@ public class WeaponButton : VisualElement
 
     bool _built;
     bool _isActive;
-    float _pulseTime;
+    float _pulseStartTime;
+    IVisualElementScheduledItem _pulseJob;
 
     public event Action<WeaponButton> Clicked;
 
@@ -86,6 +87,13 @@ public class WeaponButton : VisualElement
         this.RegisterCallback<PointerLeaveEvent>(_ => RemoveFromClassList("hover"));
         this.RegisterCallback<ClickEvent>(_ => Clicked?.Invoke(this));
 
+        // When attached to panel, restart pulse if already marked active (handles early SetActive calls)
+        this.RegisterCallback<AttachToPanelEvent>(_ =>
+        {
+            _accentLine = this.Q<VisualElement>("accent-line");
+            if (_isActive) StartPulse();
+        });
+
         _built = true;
     }
 
@@ -113,11 +121,14 @@ public class WeaponButton : VisualElement
         if (_isActive == active) return;
         _isActive = active;
 
+        if (_accentLine == null)
+            _accentLine = this.Q<VisualElement>("accent-line");
+
         if (active)
         {
             AddToClassList("is-active");
             RemoveFromClassList("selected");
-            _pulseTime = 0f;
+            StartPulse();
         }
         else
         {
@@ -126,20 +137,28 @@ public class WeaponButton : VisualElement
         }
     }
 
-    // Call every frame from MonoBehaviour.Update() for real-time pulse
-    public void Tick(float deltaTime)
+    // External tick no longer needed — pulse is self-driven via schedule
+    public void Tick(float deltaTime) { }
+
+    void StartPulse()
     {
-        if (!_isActive || _accentLine == null) return;
-        _pulseTime += deltaTime;
-        float alpha = 0.3f + 0.7f * (0.5f + 0.5f * Mathf.Sin(_pulseTime * 3.5f));
-        _accentLine.style.backgroundColor = new UnityEngine.UIElements.StyleColor(
-            new UnityEngine.Color(0.369f, 0.882f, 0.647f, alpha));
+        StopPulse();
+        _pulseStartTime = Time.realtimeSinceStartup;
+        // schedule fires every 16ms independently of MonoBehaviour
+        _pulseJob = schedule.Execute(() =>
+        {
+            if (_accentLine == null) return;
+            float t = Time.realtimeSinceStartup - _pulseStartTime;
+            float opacity = 0.3f + 0.7f * (0.5f + 0.5f * Mathf.Sin(t * 3.5f));
+            _accentLine.style.opacity = opacity;
+        }).Every(16).StartingIn(0);
     }
 
     void StopPulse()
     {
+        _pulseJob?.Pause();
+        _pulseJob = null;
         if (_accentLine != null)
-            _accentLine.style.backgroundColor = new UnityEngine.UIElements.StyleColor(
-                new UnityEngine.Color(0.369f, 0.882f, 0.647f, 0f));
+            _accentLine.style.opacity = 0f;
     }
 }

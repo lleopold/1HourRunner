@@ -305,21 +305,11 @@ public class WeaponsCarouselController : MonoBehaviour
 
         // Deactivate old button
         if (_selectedBtn != null)
-        {
-            _selectedBtn.RemoveFromClassList("is-active");
-            _selectedBtn.style.borderRightColor = new StyleColor(new Color(0, 0, 0, 0));
-            _selectedBtn.style.borderRightWidth = 1f;
-            _selectedBtn.style.borderLeftColor = StyleKeyword.Null;
-        }
+            _selectedBtn.SetActive(false);
 
         _selectedBtn = wb;
         _selectedWeapon = w;
-        _selectedBtn.AddToClassList("is-active");
-        // Force right border green via inline style (USS border-right on custom VisualElement is unreliable)
-        _selectedBtn.style.borderRightWidth = 4f;
-        _selectedBtn.style.borderRightColor = new StyleColor(new Color(0.369f, 0.882f, 0.647f, 1f)); // #5EE1A5
-        // Clear left bar in case hover CSS left it — is-active resets it via USS but belt-and-suspenders
-        _selectedBtn.style.borderLeftColor = new StyleColor(new Color(0, 0, 0, 0));
+        _selectedBtn.SetActive(true);
 
         if (sameWeapon) return;
 
@@ -573,6 +563,8 @@ public class WeaponsCarouselController : MonoBehaviour
 
     void LateUpdate()
     {
+        _selectedBtn?.Tick(Time.deltaTime);
+
         if (_fitNextLateUpdate)
         {
             _fitNextLateUpdate = false;

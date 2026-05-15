@@ -10,6 +10,7 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
     private WeaponConfig _weaponConfig;
     private Coroutine _slideCoroutine;
     private bool _isSliding;
+    private WeaponButton _activeWeaponButton;
     private Button _btn_play;
     private Button _btn_back;
     private FloatField _damage;
@@ -142,7 +143,7 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
     void Update()
     {
         // Tick active weapon button for pulse animation
-        _root?.Query<WeaponButton>().ForEach(b => b.Tick(Time.deltaTime));
+        _activeWeaponButton?.Tick(Time.deltaTime);
 
         if (_isSliding) return;
         GameObject weapon = GameObject.Find("PresentedWeapon");
@@ -248,8 +249,13 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
             (WeaponEnum.WPN_KM4, _btn_WPN_KM4), (WeaponEnum.WPN_590A1, _btn_WPN_590A1),
             (WeaponEnum.WPN_CX8, _btn_WPN_CX8)
         };
+        _activeWeaponButton = null;
         foreach (var pair in all)
-            pair.b?.SetActive(pair.e == weaponEnum);
+        {
+            bool active = pair.e == weaponEnum;
+            pair.b?.SetActive(active);
+            if (active) _activeWeaponButton = pair.b;
+        }
     }
 
     void LoadWeaponWithSlide(WeaponEnum weaponEnum)
