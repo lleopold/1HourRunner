@@ -81,18 +81,30 @@
 
 /* ── Character list panel ────────────────────────────────── */
 #choose_char {
-    width: 18%;
-    min-width: 160px;
-    max-width: 280px;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
     padding: 10px;
     background-color: rgba(255,255,255,0.03);
     border-width: 1px;
     border-color: rgba(255,255,255,0.08);
 }
 
-.thumb {
-    height: 80px;
-    margin-bottom: 8px;
+#choose_char > #unity-low-button,
+#choose_char > #unity-high-button,
+#choose_char #unity-vertical-scroller,
+#choose_char #unity-horizontal-scroller,
+#choose_char #unity-slider,
+#choose_char .unity-scroller,
+#choose_char .unity-scroll-view__vertical-scroller,
+#choose_char .unity-scroll-view__horizontal-scroller {
+    display: none;
+}
+
+    .thumb {
+        height: 80px;
+        width: 100%;
+        margin-bottom: 8px;
     border-radius: 0;
     border-width: 0;
     border-left-width: 0;
@@ -167,8 +179,8 @@
 /* ── Preview panel (centre) ──────────────────────────────── */
 #visual_rep {
     flex-grow: 1;
+    flex-shrink: 1;
     flex-basis: 0;
-    min-width: 35%;
     align-self: stretch;
     background-color: transparent;
     border-width: 0;
@@ -177,9 +189,9 @@
 
 /* ── Stats panel ─────────────────────────────────────────── */
 .stats {
-    width: 28%;
-    min-width: 260px;
-    max-width: 480px;
+    flex-shrink: 0;
+    flex-grow: 0;
+    flex-basis: 520px;
     padding: 12px 16px;
     background-color: rgba(255,255,255,0.03);
     border-width: 1px;
@@ -188,15 +200,37 @@
 }
 
 .stat-row {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 4px;
+    flex-direction: column;
+    padding: 5px 4px 6px 4px;
     border-bottom-width: 1px;
     border-bottom-color: rgba(255,255,255,0.06);
+    gap: 4px;
 }
 
 .stat-row:last-child { border-bottom-width: 0; }
+
+/* Top part of stat row — label left, edit right */
+.stat-top {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Stat progress bar track */
+.stat-bar-track {
+    height: 2px;
+    background-color: rgba(255,255,255,0.07);
+    border-radius: 1px;
+    margin: 0 2px;
+}
+
+/* Stat progress bar fill */
+.stat-bar-fill {
+    height: 2px;
+    background-color: #5EE1A5;
+    border-radius: 1px;
+    opacity: 0.55;
+}
 
 .stat-name {
     color: #5A6473;
@@ -380,16 +414,44 @@
 
 /* ── Level Up button ─────────────────────────────────────── */
 .btn-level-up {
-    margin-top: 14px;
+    margin-top: auto;
     height: 40px;
     border-radius: 0;
     border-width: 1px;
     border-color: rgba(94,225,165,0.3);
     background-color: rgba(94,225,165,0.06);
+    background-image: none;
     color: #5EE1A5;
     font-size: 13px;
     letter-spacing: 3px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     opacity: 0.4;
+}
+
+.btn-choose-weapon {
+    margin-top: auto;
+    opacity: 1;
+    background-color: rgba(94,225,165,0.06);
+    border-color: rgba(94,225,165,0.3);
+    border-width: 1px;
+    border-radius: 0;
+    -unity-background-image-tint-color: rgba(0,0,0,0);
+}
+
+.btn-choose-weapon:hover {
+    background-color: rgba(94,225,165,0.14);
+    border-color: rgba(94,225,165,0.6);
+}
+
+.thumbs-col {
+    flex-direction: column;
+    flex-shrink: 0;
+    flex-grow: 0;
+    flex-basis: 347px;
+}
+
+.thumbs {
+    flex-grow: 1;
+    flex-shrink: 1;
 }

@@ -215,6 +215,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _btn_choose_level?.RegisterCallback<ClickEvent>(ev => ClickChooseWeapon());
 
         LoadSettingsToUI();
+        RandomizeStatBars();
 
         // Wire steppers: fieldName, minusBtn, plusBtn, step, min, max
         WireStepper("fl_health", "btn_fl_health_minus", "btn_fl_health_plus", 5f, 0f, 500f);
@@ -406,6 +407,19 @@ public class UIT_ChoosePlayer : MonoBehaviour
         {
             DataHolder.ChosenPlayer = PlayerEnum.GreenHat_basic;
             player = PlayerEnum.GreenHat_basic;
+        }
+    }
+
+    private void RandomizeStatBars()
+    {
+        var statsPanel = _root.Q<VisualElement>("stats");
+        if (statsPanel == null) return;
+        foreach (var row in statsPanel.Query<VisualElement>(className: "stat-row").ToList())
+        {
+            var fill = row.Q<VisualElement>(className: "stat-bar-fill");
+            if (fill == null) continue;
+            float pct = UnityEngine.Random.Range(30f, 70f);
+            fill.style.width = Length.Percent(pct);
         }
     }
 
