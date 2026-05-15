@@ -262,3 +262,71 @@
 .weapon-field:focus-within > .unity-base-field__input {
     border-color: #5EE1A5;
 }
+
+/* ── Thumb perk label (injected via C#) ─────────────────── */
+.thumb__perk {
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    right: 0;
+    font-size: 9px;
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+    color: #5EE1A5;
+    -unity-text-align: middle-center;
+    opacity: 0.75;
+}
+
+/* ── Perk section (inside stats panel) ──────────────────── */
+.perk-section {
+    margin-top: 10px;
+    padding: 10px 4px 6px 4px;
+    border-top-width: 1px;
+    border-top-color: rgba(94,225,165,0.2);
+    gap: 6px;
+}
+
+.perk-header {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.perk-header-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: #5EE1A5;
+    -unity-font-style: bold;
+    opacity: 0.6;
+}
+
+.perk-name {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: #5EE1A5;
+    letter-spacing: 2px;
+}
+
+.perk-desc {
+    font-size: 11px;
+    color: #5A6473;
+    -unity-text-align: upper-left;
+    padding: 0 2px;
+    white-space: normal;
+}
+
+/* ── Level Up button ─────────────────────────────────────── */
+.btn-level-up {
+    margin-top: 14px;
+    height: 40px;
+    border-radius: 0;
+    border-width: 1px;
+    border-color: rgba(94,225,165,0.3);
+    background-color: rgba(94,225,165,0.06);
+    color: #5EE1A5;
+    font-size: 13px;
+    letter-spacing: 3px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    opacity: 0.4;
+}

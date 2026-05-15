@@ -48,6 +48,22 @@ public class UIT_ChoosePlayer : MonoBehaviour
     private float _pulseTime;
     private Dictionary<Button, VisualElement> _accentLines = new();
 
+    // Perk labels in stats panel
+    private Label _lbl_perk_name;
+    private Label _lbl_perk_desc;
+
+    // Default perk names per character (can be overridden by PlayerConfig.PerkName)
+    private static readonly Dictionary<PlayerEnum, string> DefaultPerkNames = new()
+    {
+        { PlayerEnum.Jennifer,                "RUNNER"        },
+        { PlayerEnum.Swat,                    "TACTICIAN"     },
+        { PlayerEnum.Jackson_Steel_Reynolds,  "TRIGGER HAPPY" },
+        { PlayerEnum.BusinessGirl,            "SNIPER"        },
+        { PlayerEnum.Dr,                      "MARTIAL ARTS"  },
+        { PlayerEnum.GreenHat_basic,          "RUNNER"        },
+        { PlayerEnum.Solider,                 "TACTICIAN"     },
+    };
+
 
     private void Awake()
     {
@@ -107,17 +123,34 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _btn_steel.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Jackson_Steel_Reynolds));
         _btn_green_hat_basic.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.GreenHat_basic));
 
-        // Inject accent lines into all thumb buttons
-        foreach (var btn in new[] { _btn_jennifer, _btn_swat, _btn_steel, _btn_business_girl, _btn_dr, _btn_green_hat_basic })
+        // Inject accent lines and perk labels into all thumb buttons
+        var thumbData = new (Button btn, PlayerEnum p)[]
+        {
+            (_btn_jennifer,       PlayerEnum.Jennifer),
+            (_btn_swat,           PlayerEnum.Swat),
+            (_btn_steel,          PlayerEnum.Jackson_Steel_Reynolds),
+            (_btn_business_girl,  PlayerEnum.BusinessGirl),
+            (_btn_dr,             PlayerEnum.Dr),
+            (_btn_green_hat_basic,PlayerEnum.GreenHat_basic),
+        };
+        foreach (var (btn, p) in thumbData)
         {
             if (btn == null) continue;
             btn.style.position = Position.Relative;
             btn.style.overflow = Overflow.Hidden;
+
             var line = new VisualElement();
             line.AddToClassList("thumb__accent-line");
             btn.Add(line);
             _accentLines[btn] = line;
+
+            var perkLabel = new Label(DefaultPerkNames.TryGetValue(p, out var n) ? n : "");
+            perkLabel.AddToClassList("thumb__perk");
+            btn.Add(perkLabel);
         }
+
+        _lbl_perk_name = _root.Q<Label>("lbl_perk_name");
+        _lbl_perk_desc = _root.Q<Label>("lbl_perk_desc");
 
         // Set initial selection based on saved player
         SetActivePlayerButton(GetButtonForPlayer(player));
@@ -291,6 +324,13 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _fl_reload_speed.value = playerConfig.reloadSpeed;
         _fl_vision.value = playerConfig.vision;
         _fl_injured_penalty.value = playerConfig.InjuredPenalty;
+
+        // Perk section
+        string perkName = !string.IsNullOrEmpty(playerConfig.PerkName)
+            ? playerConfig.PerkName
+            : (DefaultPerkNames.TryGetValue(DataHolder.ChosenPlayer, out var def) ? def : "—");
+        if (_lbl_perk_name != null) _lbl_perk_name.text = perkName;
+        if (_lbl_perk_desc  != null) _lbl_perk_desc.text  = playerConfig.PerkDescription ?? "";
     }
     public void ChoosePlayer(int index)
     {

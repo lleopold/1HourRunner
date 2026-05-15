@@ -139,6 +139,14 @@
                         <ui:Button name="btn_fl_injured_plus" text="+" class="step step--plus"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
+                <ui:VisualElement class="perk-section">
+                    <ui:VisualElement class="perk-header">
+                        <ui:Label text="PERK" class="perk-header-label"/>
+                        <ui:Label name="lbl_perk_name" text="—" class="perk-name"/>
+                    </ui:VisualElement>
+                    <ui:Label name="lbl_perk_desc" text="" class="perk-desc"/>
+                </ui:VisualElement>
+                <ui:Button name="btn_level_up" text="LEVEL UP" class="btn-level-up" enabled="false"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement class="bottom">
