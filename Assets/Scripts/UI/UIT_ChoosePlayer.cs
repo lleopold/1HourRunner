@@ -47,6 +47,9 @@ public class UIT_ChoosePlayer : MonoBehaviour
     private VisualElement _activeAccentLine;
     private float _pulseTime;
     private Dictionary<Button, VisualElement> _accentLines = new();
+    private Dictionary<Button, Label> _levelLabels = new();
+    // All buttons list for bulk pulse update
+    private List<(Button btn, VisualElement accent)> _allThumbAccents = new();
 
     // Perk labels in stats panel
     private Label _lbl_perk_name;
@@ -123,15 +126,15 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _btn_steel.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.Jackson_Steel_Reynolds));
         _btn_green_hat_basic.RegisterCallback<ClickEvent>(ev => ClickAssignData(PlayerEnum.GreenHat_basic));
 
-        // Inject accent lines and perk labels into all thumb buttons
+        // Inject WeaponButton-style overlays into all thumb buttons
         var thumbData = new (Button btn, PlayerEnum p)[]
         {
-            (_btn_jennifer,       PlayerEnum.Jennifer),
-            (_btn_swat,           PlayerEnum.Swat),
-            (_btn_steel,          PlayerEnum.Jackson_Steel_Reynolds),
-            (_btn_business_girl,  PlayerEnum.BusinessGirl),
-            (_btn_dr,             PlayerEnum.Dr),
-            (_btn_green_hat_basic,PlayerEnum.GreenHat_basic),
+            (_btn_jennifer,        PlayerEnum.Jennifer),
+            (_btn_swat,            PlayerEnum.Swat),
+            (_btn_steel,           PlayerEnum.Jackson_Steel_Reynolds),
+            (_btn_business_girl,   PlayerEnum.BusinessGirl),
+            (_btn_dr,              PlayerEnum.Dr),
+            (_btn_green_hat_basic, PlayerEnum.GreenHat_basic),
         };
         foreach (var (btn, p) in thumbData)
         {
@@ -139,14 +142,39 @@ public class UIT_ChoosePlayer : MonoBehaviour
             btn.style.position = Position.Relative;
             btn.style.overflow = Overflow.Hidden;
 
-            var line = new VisualElement();
-            line.AddToClassList("thumb__accent-line");
-            btn.Add(line);
-            _accentLines[btn] = line;
+            // Dark topbar strip
+            var topbar = new VisualElement();
+            topbar.AddToClassList("thumb__topbar");
+            btn.Add(topbar);
 
-            var perkLabel = new Label(DefaultPerkNames.TryGetValue(p, out var n) ? n : "");
+            // Perk name — top-left on strip
+            string perkName = DefaultPerkNames.TryGetValue(p, out var n) ? n : "";
+            var perkLabel = new Label(perkName);
             perkLabel.AddToClassList("thumb__perk");
             btn.Add(perkLabel);
+
+            // Bottom bar strip
+            var bottombar = new VisualElement();
+            bottombar.AddToClassList("thumb__bottombar");
+            btn.Add(bottombar);
+
+            // Level — centered on bottom bar
+            var levelLabel = new Label("LVL 1");
+            levelLabel.AddToClassList("thumb__level");
+            btn.Add(levelLabel);
+            _levelLabels[btn] = levelLabel;
+
+            // Hover line — left side
+            var hoverLine = new VisualElement();
+            hoverLine.AddToClassList("thumb__hover-line");
+            btn.Add(hoverLine);
+
+            // Accent line — right side, always pulsing when not active
+            var accentLine = new VisualElement();
+            accentLine.AddToClassList("thumb__accent-line");
+            btn.Add(accentLine);
+            _accentLines[btn] = accentLine;
+            _allThumbAccents.Add((btn, accentLine));
         }
 
         _lbl_perk_name = _root.Q<Label>("lbl_perk_name");
@@ -216,31 +244,31 @@ public class UIT_ChoosePlayer : MonoBehaviour
             _presentedAnimator.SetFloat("Blend", blend);
         }
 
-        // Pulse accent line on active player button
-        if (_activeAccentLine != null)
+        // Pulse accent line only on active thumb
+        if (_activePlayerBtn != null && _accentLines.TryGetValue(_activePlayerBtn, out var activeAccent))
         {
             _pulseTime += Time.deltaTime;
             float opacity = 0.3f + 0.7f * (0.5f + 0.5f * Mathf.Sin(_pulseTime * 3.5f));
-            _activeAccentLine.style.opacity = opacity;
+            activeAccent.style.opacity = opacity;
         }
     }
 
     private void SetActivePlayerButton(Button btn)
     {
-        // Deactivate old
+        // Deactivate old — hide accent line
         if (_activePlayerBtn != null)
         {
             _activePlayerBtn.RemoveFromClassList("is-active");
-            if (_accentLines.TryGetValue(_activePlayerBtn, out var oldLine))
-                oldLine.style.opacity = 0f;
+            if (_accentLines.TryGetValue(_activePlayerBtn, out var oldAccent))
+                oldAccent.style.opacity = 0f;
         }
 
         _activePlayerBtn = btn;
-        _activeAccentLine = btn != null && _accentLines.TryGetValue(btn, out var line) ? line : null;
         _pulseTime = 0f;
 
         if (_activePlayerBtn != null)
             _activePlayerBtn.AddToClassList("is-active");
+        // accent-line opacity for the new active is driven by Update() pulse
     }
 
     private Button GetButtonForPlayer(PlayerEnum p) => p switch
@@ -331,6 +359,10 @@ public class UIT_ChoosePlayer : MonoBehaviour
             : (DefaultPerkNames.TryGetValue(DataHolder.ChosenPlayer, out var def) ? def : "—");
         if (_lbl_perk_name != null) _lbl_perk_name.text = perkName;
         if (_lbl_perk_desc  != null) _lbl_perk_desc.text  = playerConfig.PerkDescription ?? "";
+
+        // Level label on the active thumb button
+        if (_activePlayerBtn != null && _levelLabels.TryGetValue(_activePlayerBtn, out var lvlLabel))
+            lvlLabel.text = $"LVL {playerConfig.Level}";
     }
     public void ChoosePlayer(int index)
     {
