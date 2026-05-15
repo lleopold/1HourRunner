@@ -3,12 +3,12 @@
     <ui:VisualElement class="choose-root">
         <ui:VisualElement class="accent-bar"/>
         <ui:VisualElement class="topbar">
-            <ui:Label text="Survivors Revenge" class="title"/>
+            <ui:Label text="1 Hour Runner" class="title"/>
             <ui:VisualElement style="flex-direction: row; gap: 8px;"/>
         </ui:VisualElement>
         <ui:VisualElement class="row">
             <ui:VisualElement class="thumbs-col">
-                <ui:ScrollView name="choose_char" class="thumbs" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden">
+                <ui:ScrollView name="choose_char" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" class="thumbs">
                     <ui:Button name="btn_jennifer" text="Jennifer" class="thumb"/>
                     <ui:Button name="btn_swat" text="Swat" class="thumb"/>
                     <ui:Button name="btn_steel" text="Steel" class="thumb"/>
@@ -29,7 +29,9 @@
                             <ui:Button name="btn_fl_health_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -40,7 +42,9 @@
                             <ui:Button name="btn_fl_weight_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -51,7 +55,9 @@
                             <ui:Button name="btn_fl_strength_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -62,7 +68,9 @@
                             <ui:Button name="btn_fl_stamina_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -73,7 +81,9 @@
                             <ui:Button name="btn_fl_stamina_regen_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -84,7 +94,9 @@
                             <ui:Button name="btn_fl_stamina_speed_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -95,7 +107,9 @@
                             <ui:Button name="btn_fl_speed_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -106,7 +120,9 @@
                             <ui:Button name="btn_fl_acceleration_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -117,7 +133,9 @@
                             <ui:Button name="btn_fl_running_pct_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -128,7 +146,9 @@
                             <ui:Button name="btn_fl_back_move_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -139,7 +159,9 @@
                             <ui:Button name="btn_fl_aim_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -150,7 +172,9 @@
                             <ui:Button name="btn_fl_recoil_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -161,7 +185,9 @@
                             <ui:Button name="btn_fl_reload_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -172,7 +198,9 @@
                             <ui:Button name="btn_fl_vision_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-row">
                     <ui:VisualElement class="stat-top">
@@ -183,7 +211,9 @@
                             <ui:Button name="btn_fl_injured_plus" text="+" class="step step--plus"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track"><ui:VisualElement class="stat-bar-fill"/></ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement class="stat-bar-fill"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="perk-section">
                     <ui:VisualElement class="perk-header">
@@ -192,7 +222,7 @@
                     </ui:VisualElement>
                     <ui:Label name="lbl_perk_desc" text="" class="perk-desc"/>
                 </ui:VisualElement>
-                <ui:Button name="btn_level_up" text="LEVEL UP" class="btn-level-up" enabled="false"/>
+                <ui:Button name="btn_level_up" text="LEVEL UP" enabled="false" class="btn-level-up"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement class="bottom">

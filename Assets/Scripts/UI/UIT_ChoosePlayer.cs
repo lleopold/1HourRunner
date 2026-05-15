@@ -140,7 +140,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
         {
             if (btn == null) continue;
             btn.style.position = Position.Relative;
-            btn.style.overflow = Overflow.Hidden;
+            btn.style.overflow = Overflow.Visible;
 
             // Dark topbar strip
             var topbar = new VisualElement();

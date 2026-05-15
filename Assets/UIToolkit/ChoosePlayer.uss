@@ -84,10 +84,11 @@
     width: 100%;
     min-width: 0;
     max-width: none;
-    padding: 10px;
+    padding: 10px 14px 10px 10px;
     background-color: rgba(255,255,255,0.03);
     border-width: 1px;
     border-color: rgba(255,255,255,0.08);
+    overflow: visible;
 }
 
 #choose_char > #unity-low-button,
@@ -101,10 +102,10 @@
     display: none;
 }
 
-    .thumb {
-        height: 80px;
-        width: 100%;
-        margin-bottom: 8px;
+.thumb {
+    height: 80px;
+    width: 100%;
+    margin-bottom: 8px;
     border-radius: 0;
     border-width: 0;
     border-left-width: 0;
@@ -114,6 +115,7 @@
     font-size: 13px;
     letter-spacing: 1px;
     -unity-text-align: middle-center;
+    overflow: visible;
     transition-property: background-color, color, border-left-width, border-left-color;
     transition-duration: 0.1s;
 }
@@ -137,11 +139,11 @@
 /* Right accent line — visible only when selected, pulsed via C# */
 .thumb__accent-line {
     position: absolute;
-    right: 0;
-    top: 22px;
-    width: 3px;
-    height: 40px;
-    background-color: rgba(94,225,165,1);
+    right: 4px;
+    top: 24px;
+    width: 4px;
+    height: 36px;
+    background-color: #5EE1A5;
     border-radius: 2px;
     opacity: 0;
 }
