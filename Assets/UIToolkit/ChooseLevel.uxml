@@ -22,21 +22,38 @@
             <ui:VisualElement class="info-panel">
                 <ui:Label text="LEVEL" class="info-section-label" />
                 <ui:Label name="preview-title" text="—" class="info-title" />
-                <ui:VisualElement class="info-divider" />
-                <ui:Label text="DESCRIPTION" class="info-section-label" />
                 <ui:Label name="preview-desc" text="—" class="info-desc" />
                 <ui:VisualElement class="info-divider" />
-                <ui:Label text="DIFFICULTY" class="info-section-label" />
-                <ui:VisualElement class="stat-bar-track">
-                    <ui:VisualElement name="difficulty-bar" class="stat-bar-fill" />
+                <ui:VisualElement class="info-stat-row">
+                    <ui:VisualElement class="info-stat-header">
+                        <ui:Label text="DIFFICULTY" class="info-stat-name" />
+                        <ui:Label name="difficulty-val" text="" class="info-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="difficulty-bar" class="stat-bar-fill" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Label text="ENEMY DENSITY" class="info-section-label" style="margin-top: 10px;" />
-                <ui:VisualElement class="stat-bar-track">
-                    <ui:VisualElement name="density-bar" class="stat-bar-fill" />
+                <ui:VisualElement class="info-stat-row">
+                    <ui:VisualElement class="info-stat-header">
+                        <ui:Label text="ENEMY DENSITY" class="info-stat-name" />
+                        <ui:Label name="density-val" text="" class="info-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="density-bar" class="stat-bar-fill" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Label text="AREA SIZE" class="info-section-label" style="margin-top: 10px;" />
-                <ui:VisualElement class="stat-bar-track">
-                    <ui:VisualElement name="area-bar" class="stat-bar-fill" />
+                <ui:VisualElement class="info-stat-row">
+                    <ui:VisualElement class="info-stat-header">
+                        <ui:Label text="AREA SIZE" class="info-stat-name" />
+                        <ui:Label name="area-val" text="" class="info-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="area-bar" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="info-best-time">
+                    <ui:Label text="BEST TIME" class="info-best-time-label" />
+                    <ui:Label name="best-time-val" text="—:——" class="info-best-time-value" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

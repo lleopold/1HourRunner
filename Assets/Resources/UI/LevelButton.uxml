@@ -1,0 +1,12 @@
+﻿<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="LevelButton.uss" />
+    <engine:VisualElement name="LevelButtonRoot" class="level-btn">
+        <engine:VisualElement name="topbar" class="level-btn__topbar" />
+        <engine:Label name="tl" text="MAP" class="level-btn__tl" />
+        <engine:Label name="tr" text="01" class="level-btn__tr" />
+        <engine:Label name="name" text="LEVEL NAME" class="level-btn__name" />
+        <engine:Label name="br" text="OUTDOOR" class="level-btn__br" />
+        <engine:VisualElement name="accent-line" class="level-btn__accent-line" />
+        <engine:VisualElement name="hover-line" class="level-btn__hover-line" />
+    </engine:VisualElement>
+</engine:UXML>

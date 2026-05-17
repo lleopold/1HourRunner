@@ -1,5 +1,5 @@
-/* ============================================================
-   ChooseLevel — RE/COD dark style, matches ChoosePlayer
+﻿/* ============================================================
+   ChooseLevel -- RE/COD dark style, matches ChoosePlayer
    ============================================================ */
 
 .choose-root {
@@ -11,7 +11,6 @@
     padding: 0 24px 16px 24px;
 }
 
-/* ── Accent bar ──────────────────────────────────────────── */
 .accent-bar {
     position: absolute;
     top: 0; left: 0; right: 0;
@@ -19,7 +18,6 @@
     background-color: #5EE1A5;
 }
 
-/* ── Top bar ─────────────────────────────────────────────── */
 .topbar {
     height: 56px;
     flex-direction: row;
@@ -38,7 +36,6 @@
     letter-spacing: 4px;
 }
 
-/* ── Shared button base ──────────────────────────────────── */
 .btn {
     height: 40px;
     padding: 0 20px;
@@ -92,7 +89,6 @@
     background-color: rgba(94,225,165,0.12);
 }
 
-/* ── Main row ────────────────────────────────────────────── */
 .row {
     flex-direction: row;
     align-items: stretch;
@@ -100,7 +96,6 @@
     flex-grow: 1;
 }
 
-/* ── Left column ─────────────────────────────────────────── */
 .thumbs-col {
     flex-basis: 300px;
     flex-shrink: 0;
@@ -117,7 +112,6 @@
     overflow: visible;
 }
 
-/* Hide scrollbar chrome */
 .thumbs > #unity-low-button,
 .thumbs > #unity-high-button,
 .thumbs #unity-vertical-scroller,
@@ -129,108 +123,6 @@
     display: none;
 }
 
-/* ── Level thumb button ──────────────────────────────────── */
-.level-btn {
-    height: 72px;
-    width: 100%;
-    margin-bottom: 8px;
-    border-radius: 0;
-    border-width: 0;
-    border-left-width: 0;
-    border-left-color: rgba(0,0,0,0);
-    background-color: rgba(255,255,255,0.05);
-    background-image: none;
-    color: #B0BCCC;
-    font-size: 13px;
-    letter-spacing: 1px;
-    -unity-text-align: middle-center;
-    overflow: visible;
-    transition-property: background-color, color, border-left-width, border-left-color;
-    transition-duration: 0.1s;
-}
-
-.level-btn:hover {
-    background-color: rgba(255,255,255,0.08);
-    color: #FFFFFF;
-}
-
-.level-btn:active {
-    background-color: rgba(94,225,165,0.1);
-    color: #FFFFFF;
-}
-
-.level-btn.is-active {
-    background-color: rgba(255,255,255,0.1);
-    color: #FFFFFF;
-}
-
-/* Overlays injected via C# */
-.level-btn__topbar {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 20px;
-    background-color: rgba(8,8,8,0.92);
-}
-
-.level-btn__label {
-    position: absolute;
-    top: 2px;
-    left: 8px;
-    font-size: 9px;
-    letter-spacing: 2px;
-    color: #5EE1A5;
-    -unity-font-style: bold;
-}
-
-.level-btn__bottombar {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 16px;
-    background-color: rgba(8,8,8,0.85);
-}
-
-.level-btn__number {
-    position: absolute;
-    bottom: 2px;
-    right: 8px;
-    font-size: 9px;
-    letter-spacing: 1px;
-    color: #5A6473;
-}
-
-.level-btn__hover-line {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    translate: 0 -50%;
-    width: 3px;
-    height: 40%;
-    background-color: rgba(94,225,165,0);
-    border-radius: 2px;
-    transition-property: background-color;
-    transition-duration: 0.15s;
-}
-
-.level-btn:hover .level-btn__hover-line {
-    background-color: rgba(94,225,165,0.85);
-}
-
-.level-btn.is-active .level-btn__hover-line {
-    background-color: rgba(94,225,165,0);
-}
-
-.level-btn__accent-line {
-    position: absolute;
-    right: 4px;
-    top: 22px;
-    width: 3px;
-    height: 30px;
-    background-color: #5EE1A5;
-    border-radius: 2px;
-    opacity: 0;
-}
-
-/* ── PLAY LEVEL button ───────────────────────────────────── */
 .btn-play-level {
     height: 44px;
     margin-top: 12px;
@@ -261,7 +153,6 @@
     color: #FFFFFF;
 }
 
-/* ── Centre preview ──────────────────────────────────────── */
 .preview-area {
     flex-grow: 1;
     flex-shrink: 1;
@@ -285,7 +176,6 @@
     display: none;
 }
 
-/* ── Right info panel ────────────────────────────────────── */
 .info-panel {
     flex-basis: 300px;
     flex-shrink: 0;
@@ -294,46 +184,73 @@
     border-width: 1px;
     border-color: rgba(255,255,255,0.08);
     flex-direction: column;
-    gap: 6px;
+    gap: 0px;
 }
 
 .info-section-label {
     color: #5A6473;
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 3px;
     -unity-font-style: bold;
-    margin-top: 6px;
+    margin-top: 12px;
+    margin-bottom: 2px;
 }
 
 .info-title {
     color: #FFFFFF;
-    font-size: 20px;
+    font-size: 22px;
     -unity-font-style: bold;
     letter-spacing: 2px;
     margin-top: 2px;
+    margin-bottom: 0px;
 }
 
 .info-desc {
     color: #B0BCCC;
-    font-size: 13px;
+    font-size: 12px;
     white-space: normal;
     margin-top: 4px;
+    margin-bottom: 0px;
+    opacity: 0.85;
 }
 
 .info-divider {
     height: 1px;
     background-color: rgba(255,255,255,0.07);
-    margin-top: 10px;
-    margin-bottom: 4px;
+    margin-top: 14px;
+    margin-bottom: 2px;
 }
 
-/* Stat bars (difficulty, density, area) */
+.info-stat-row {
+    flex-direction: column;
+    margin-top: 10px;
+    gap: 4px;
+}
+
+.info-stat-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.info-stat-name {
+    color: #5A6473;
+    font-size: 9px;
+    letter-spacing: 3px;
+    -unity-font-style: bold;
+}
+
+.info-stat-value {
+    color: #5EE1A5;
+    font-size: 9px;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+}
+
 .stat-bar-track {
     height: 2px;
     background-color: rgba(255,255,255,0.07);
     border-radius: 1px;
-    margin-top: 4px;
-    margin-bottom: 2px;
 }
 
 .stat-bar-fill {
@@ -343,3 +260,26 @@
     opacity: 0.65;
 }
 
+.info-best-time {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top-width: 1px;
+    border-top-color: rgba(255,255,255,0.07);
+}
+
+.info-best-time-label {
+    color: #5A6473;
+    font-size: 9px;
+    letter-spacing: 3px;
+    -unity-font-style: bold;
+}
+
+.info-best-time-value {
+    color: #FFFFFF;
+    font-size: 18px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+}
