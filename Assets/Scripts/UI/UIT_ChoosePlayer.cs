@@ -10,6 +10,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
     [SerializeField] public PlayerEnum player;
     [SerializeField] public WeaponEnum weapon;
     [SerializeField] private UIDocument _uiDocument;
+    [SerializeField] private PreviewAnimationConfig _previewAnimConfig;
     private VisualElement _root;
 
     [Obsolete("Used for drop down")]
@@ -253,9 +254,11 @@ public class UIT_ChoosePlayer : MonoBehaviour
     }
     private void Update()
     {
-        if (_presentedAnimator != null)
+        if (_presentedAnimator != null && _presentedAnimator.isActiveAndEnabled
+            && _presentedAnimator.runtimeAnimatorController != null)
         {
-            float blend = Mathf.PingPong(Time.time / 20f, 1f);
+            // Slowly oscillate between pistol idle (0) and pistol run (1)
+            float blend = Mathf.PingPong(Time.time / 5f, 1f);
             _presentedAnimator.SetFloat("Blend", blend);
         }
 
@@ -288,13 +291,13 @@ public class UIT_ChoosePlayer : MonoBehaviour
 
     private Button GetButtonForPlayer(PlayerEnum p) => p switch
     {
-        PlayerEnum.Jennifer                 => _btn_jennifer,
-        PlayerEnum.Swat                     => _btn_swat,
-        PlayerEnum.Jackson_Steel_Reynolds   => _btn_steel,
-        PlayerEnum.BusinessGirl             => _btn_business_girl,
-        PlayerEnum.Dr                       => _btn_dr,
-        PlayerEnum.GreenHat_basic           => _btn_green_hat_basic,
-        _                                   => _btn_jennifer,
+        PlayerEnum.Jennifer => _btn_jennifer,
+        PlayerEnum.Swat => _btn_swat,
+        PlayerEnum.Jackson_Steel_Reynolds => _btn_steel,
+        PlayerEnum.BusinessGirl => _btn_business_girl,
+        PlayerEnum.Dr => _btn_dr,
+        PlayerEnum.GreenHat_basic => _btn_green_hat_basic,
+        _ => _btn_jennifer,
     };
 
     private void ClickChooseWeapon()
@@ -308,21 +311,85 @@ public class UIT_ChoosePlayer : MonoBehaviour
 
     private GameObject LoadModel()
     {
-        if (GameObject.Find("PresentedModel") != null)
+        _presentedAnimator = null;
+        var existing = GameObject.Find("PresentedModel");
+        if (existing != null)
         {
-            Destroy(GameObject.Find("PresentedModel"));
+            Destroy(existing);
         }
         GameObject model = Resources.Load<GameObject>("Models/Player/" + DataHolder.ChosenPlayer.ToString() + "_model");
         GameObject pos = GameObject.Find("CharPositionSpot");
         GameObject character = Instantiate(model, pos.transform.position, Quaternion.identity);
         character.transform.Rotate(0f, -180f, 0f);
         Animator animator = character.GetComponent<Animator>();
-        animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animators/IdleController");
+        var baseController = Resources.Load<RuntimeAnimatorController>("Animators/IdleController");
+        if (_previewAnimConfig != null && _previewAnimConfig.pistolIdle != null)
+        {
+            var overrideController = new AnimatorOverrideController(baseController);
+            var overrides = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+            overrideController.GetOverrides(overrides);
+            for (int i = 0; i < overrides.Count; i++)
+            {
+                var orig = overrides[i].Key;
+                if (orig == null) continue;
+                AnimationClip replacement = orig.name switch
+                {
+                    "idle 0h"              => _previewAnimConfig.pistolIdle,
+                    "walking 0h"          => _previewAnimConfig.pistolWalk   ?? _previewAnimConfig.pistolIdle,
+                    "running 0h"          => _previewAnimConfig.pistolRun    ?? _previewAnimConfig.pistolIdle,
+                    "Running Backward 0h" => _previewAnimConfig.pistolRunBackward ?? _previewAnimConfig.pistolRun,
+                    _                     => null
+                };
+                if (replacement != null)
+                    overrides[i] = new KeyValuePair<AnimationClip, AnimationClip>(orig, replacement);
+            }
+            overrideController.ApplyOverrides(overrides);
+            animator.runtimeAnimatorController = overrideController;
+        }
+        else
+        {
+            animator.runtimeAnimatorController = baseController;
+        }
         animator.SetFloat("Blend", 0f);
         character.name = "PresentedModel";
         _presentedAnimator = animator;
 
+        // Attach weapon to right hand
+        AttachPreviewWeapon(character);
+
         return character;
+    }
+
+    private void AttachPreviewWeapon(GameObject character)
+    {
+        // Clean up any existing preview weapon
+        var existingWeapon = character.transform.Find("PreviewWeapon");
+        if (existingWeapon != null) Destroy(existingWeapon.gameObject);
+
+        // Load WPN_AP85 (pistol)
+        GameObject weaponPrefab = Resources.Load<GameObject>("Models/Weapons/WPN_AP85");
+        if (weaponPrefab == null) return;
+
+        // Find right hand bone (handles mixamorig1, mixamorig2, etc.)
+        Transform rightHand = FindBoneRecursive(character.transform, "RightHand");
+        if (rightHand == null) return;
+
+        GameObject weapon = Instantiate(weaponPrefab, rightHand);
+        weapon.name = "PreviewWeapon";
+        weapon.transform.localPosition = new Vector3(-0.0464068204f, 0.186311349f, 0.041510012f);
+        weapon.transform.localRotation = Quaternion.Euler(279.578644f, 325.888763f, 119.821121f);
+        weapon.transform.localScale = Vector3.one;
+    }
+
+    private Transform FindBoneRecursive(Transform parent, string boneNameContains)
+    {
+        if (parent.name.Contains(boneNameContains)) return parent;
+        foreach (Transform child in parent)
+        {
+            var result = FindBoneRecursive(child, boneNameContains);
+            if (result != null) return result;
+        }
+        return null;
     }
     void AttachWeaponSelectionStyles()
     {
@@ -373,7 +440,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
             ? playerConfig.PerkName
             : (DefaultPerkNames.TryGetValue(DataHolder.ChosenPlayer, out var def) ? def : "—");
         if (_lbl_perk_name != null) _lbl_perk_name.text = perkName;
-        if (_lbl_perk_desc  != null) _lbl_perk_desc.text  = playerConfig.PerkDescription ?? "";
+        if (_lbl_perk_desc != null) _lbl_perk_desc.text = playerConfig.PerkDescription ?? "";
 
         // Level label on the active thumb button
         if (_activePlayerBtn != null && _levelLabels.TryGetValue(_activePlayerBtn, out var lvlLabel))
