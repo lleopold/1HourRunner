@@ -53,6 +53,14 @@ public class UIT_ChoosePlayer : MonoBehaviour
     // All buttons list for bulk pulse update
     private List<(Button btn, VisualElement accent)> _allThumbAccents = new();
 
+    // Camera orbit
+    private Camera _previewCamera;
+    private Vector3 _orbitCenter;
+    private float _orbitAngle;
+    private const float OrbitRadius = 3.8f;
+    private const float OrbitHeight = 2.4f;
+    private const float OrbitSpeed = 18f; // degrees per second
+
     // Perk labels in stats panel
     private Label _lbl_perk_name;
     private Label _lbl_perk_desc;
@@ -94,6 +102,16 @@ public class UIT_ChoosePlayer : MonoBehaviour
         playerConfig = PlayerConfigSingleton.Instance.PlayerConfig;
 
         GameObject character = LoadModel();
+
+        // Init camera orbit
+        var spot = GameObject.Find("CharPositionSpot");
+        if (spot != null) _orbitCenter = spot.transform.position;
+        _previewCamera = Camera.main;
+        if (_previewCamera != null)
+        {
+            _orbitAngle = 180f; // start facing front
+            UpdateOrbitCamera();
+        }
 
 
         _fl_health = _root.Q<FloatField>("fl_health");
@@ -262,6 +280,13 @@ public class UIT_ChoosePlayer : MonoBehaviour
             _presentedAnimator.SetFloat("Blend", blend);
         }
 
+        // Orbit camera around the preview character
+        if (_previewCamera != null)
+        {
+            _orbitAngle += OrbitSpeed * Time.deltaTime;
+            UpdateOrbitCamera();
+        }
+
         // Pulse accent line only on active thumb
         if (_activePlayerBtn != null && _accentLines.TryGetValue(_activePlayerBtn, out var activeAccent))
         {
@@ -269,6 +294,17 @@ public class UIT_ChoosePlayer : MonoBehaviour
             float opacity = 0.3f + 0.7f * (0.5f + 0.5f * Mathf.Sin(_pulseTime * 3.5f));
             activeAccent.style.opacity = opacity;
         }
+    }
+
+    private void UpdateOrbitCamera()
+    {
+        float rad = _orbitAngle * Mathf.Deg2Rad;
+        Vector3 camPos = _orbitCenter + new Vector3(
+            Mathf.Sin(rad) * OrbitRadius,
+            OrbitHeight,
+            Mathf.Cos(rad) * OrbitRadius);
+        _previewCamera.transform.position = camPos;
+        _previewCamera.transform.LookAt(_orbitCenter + Vector3.up * 1.0f);
     }
 
     private void SetActivePlayerButton(Button btn)
