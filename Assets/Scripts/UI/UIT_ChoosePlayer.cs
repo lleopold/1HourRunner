@@ -323,25 +323,30 @@ public class UIT_ChoosePlayer : MonoBehaviour
         character.transform.Rotate(0f, -180f, 0f);
         Animator animator = character.GetComponent<Animator>();
         var baseController = Resources.Load<RuntimeAnimatorController>("Animators/IdleController");
-        if (_previewAnimConfig != null && _previewAnimConfig.pistolIdle != null)
+        if (_previewAnimConfig != null && _previewAnimConfig.animation1 != null)
         {
             var overrideController = new AnimatorOverrideController(baseController);
             var overrides = new List<KeyValuePair<AnimationClip, AnimationClip>>();
             overrideController.GetOverrides(overrides);
+
+            // Map blend tree slots (by index order) to animation1..6
+            AnimationClip[] slots = new[]
+            {
+                _previewAnimConfig.animation1,
+                _previewAnimConfig.animation2,
+                _previewAnimConfig.animation3,
+                _previewAnimConfig.animation4,
+                _previewAnimConfig.animation5,
+                _previewAnimConfig.animation6,
+            };
+
+            int slotIndex = 0;
             for (int i = 0; i < overrides.Count; i++)
             {
-                var orig = overrides[i].Key;
-                if (orig == null) continue;
-                AnimationClip replacement = orig.name switch
-                {
-                    "idle 0h"              => _previewAnimConfig.pistolIdle,
-                    "walking 0h"          => _previewAnimConfig.pistolWalk   ?? _previewAnimConfig.pistolIdle,
-                    "running 0h"          => _previewAnimConfig.pistolRun    ?? _previewAnimConfig.pistolIdle,
-                    "Running Backward 0h" => _previewAnimConfig.pistolRunBackward ?? _previewAnimConfig.pistolRun,
-                    _                     => null
-                };
-                if (replacement != null)
-                    overrides[i] = new KeyValuePair<AnimationClip, AnimationClip>(orig, replacement);
+                if (overrides[i].Key == null) continue;
+                if (slotIndex < slots.Length && slots[slotIndex] != null)
+                    overrides[i] = new KeyValuePair<AnimationClip, AnimationClip>(overrides[i].Key, slots[slotIndex]);
+                slotIndex++;
             }
             overrideController.ApplyOverrides(overrides);
             animator.runtimeAnimatorController = overrideController;
