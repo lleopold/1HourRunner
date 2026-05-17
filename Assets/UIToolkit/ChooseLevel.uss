@@ -1,89 +1,345 @@
-.layout {
-  flex-direction: row;
-  width: 100%;
-  height: 100%;
+/* ============================================================
+   ChooseLevel — RE/COD dark style, matches ChoosePlayer
+   ============================================================ */
+
+.choose-root {
+    flex-grow: 1;
+    flex-direction: column;
+    position: absolute;
+    left: 0; top: 0; right: 0; bottom: 0;
+    background-color: transparent;
+    padding: 0 24px 16px 24px;
 }
 
-/* LEFT: levels list */
-#levels-panel {
-  width: 280px;
-  min-width: 260px;
-  margin: 12px;
-  padding: 12px;
-  border-radius: 12px;
-  background-color: rgba(32, 36, 44, 0.6);
-  flex-shrink: 0;
+/* ── Accent bar ──────────────────────────────────────────── */
+.accent-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background-color: #5EE1A5;
 }
+
+/* ── Top bar ─────────────────────────────────────────────── */
+.topbar {
+    height: 56px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255,255,255,0.07);
+    margin-bottom: 16px;
+    padding: 0 4px;
+}
+
 .title {
-  font-size: 22px;
-  unity-font-style: bold;
-  color: #f4f6f9;
-  margin-bottom: 10px;
+    font-size: 22px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    letter-spacing: 4px;
 }
-#levels-list { flex-grow: 1; }
+
+/* ── Shared button base ──────────────────────────────────── */
+.btn {
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 0;
+    border-width: 0;
+    border-left-width: 0;
+    border-left-color: rgba(0,0,0,0);
+    background-color: rgba(0,0,0,0);
+    background-image: none;
+    color: #B0BCCC;
+    font-size: 14px;
+    letter-spacing: 1px;
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    transition-property: background-color, color, border-left-width, border-left-color;
+    transition-duration: 0.1s, 0.1s, 0.1s, 0.1s;
+}
+
+.btn:hover {
+    background-color: rgba(255,255,255,0.06);
+    color: #FFFFFF;
+    border-left-width: 3px;
+    border-left-color: #5EE1A5;
+}
+
+.btn:active {
+    background-color: rgba(94,225,165,0.1);
+    color: #FFFFFF;
+    border-left-width: 3px;
+    border-left-color: #5EE1A5;
+}
+
+.btn-back {
+    letter-spacing: 2px;
+    font-size: 12px;
+    color: #5A6473;
+    padding: 0 16px;
+    transition-property: color, border-left-width, border-left-color, background-color;
+    transition-duration: 0.15s, 0.15s, 0.15s, 0.15s;
+}
+
+.btn-back:hover {
+    color: #5EE1A5;
+    background-color: rgba(94,225,165,0.06);
+    border-left-width: 3px;
+    border-left-color: #5EE1A5;
+}
+
+.btn-back:active {
+    color: #FFFFFF;
+    background-color: rgba(94,225,165,0.12);
+}
+
+/* ── Main row ────────────────────────────────────────────── */
+.row {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 16px;
+    flex-grow: 1;
+}
+
+/* ── Left column ─────────────────────────────────────────── */
+.thumbs-col {
+    flex-basis: 300px;
+    flex-shrink: 0;
+    flex-direction: column;
+}
+
+.thumbs {
+    flex-grow: 1;
+    width: 100%;
+    padding: 10px 14px 10px 10px;
+    background-color: rgba(255,255,255,0.03);
+    border-width: 1px;
+    border-color: rgba(255,255,255,0.08);
+    overflow: visible;
+}
+
+/* Hide scrollbar chrome */
+.thumbs > #unity-low-button,
+.thumbs > #unity-high-button,
+.thumbs #unity-vertical-scroller,
+.thumbs #unity-horizontal-scroller,
+.thumbs #unity-slider,
+.thumbs .unity-scroller,
+.thumbs .unity-scroll-view__vertical-scroller,
+.thumbs .unity-scroll-view__horizontal-scroller {
+    display: none;
+}
+
+/* ── Level thumb button ──────────────────────────────────── */
 .level-btn {
-  height: 42px;
-  margin-bottom: 8px;
-  border-radius: 10px;
-  background-color: rgba(60, 66, 78, 0.85);
-  color: white;
-  font-size: 16px;
-  transition-property: background-color, scale;
-  transition-duration: 0.12s;
+    height: 72px;
+    width: 100%;
+    margin-bottom: 8px;
+    border-radius: 0;
+    border-width: 0;
+    border-left-width: 0;
+    border-left-color: rgba(0,0,0,0);
+    background-color: rgba(255,255,255,0.05);
+    background-image: none;
+    color: #B0BCCC;
+    font-size: 13px;
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    overflow: visible;
+    transition-property: background-color, color, border-left-width, border-left-color;
+    transition-duration: 0.1s;
 }
-.level-btn:hover { background-color: rgba(92, 100, 116, 0.95); }
-.level-btn:focus,
-.level-btn:focus-visible { outline-color: #3b82f6; outline-width: 2px; }
 
-/* RIGHT: preview */
-#preview-area {
-  flex-grow: 1;
-  margin: 12px;
-  padding: 14px;
-  border-radius: 14px;
-  background-color: rgba(20, 22, 28, 0.55);
-  align-items: stretch;
-  justify-content: flex-start;
+.level-btn:hover {
+    background-color: rgba(255,255,255,0.08);
+    color: #FFFFFF;
 }
-.subtitle {
-  color: #dfe6ee;
-  unity-font-style: bold;
-  margin-bottom: 8px;
+
+.level-btn:active {
+    background-color: rgba(94,225,165,0.1);
+    color: #FFFFFF;
 }
-#preview-image {
-  flex-grow: 1;
-  background-color: rgba(10, 10, 12, 0.4);
-  border-radius: 12px;
-  -unity-background-scale-mode: scale-to-fit;
-  margin-bottom: 10px;
+
+.level-btn.is-active {
+    background-color: rgba(255,255,255,0.1);
+    color: #FFFFFF;
 }
+
+/* Overlays injected via C# */
+.level-btn__topbar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 20px;
+    background-color: rgba(8,8,8,0.92);
+}
+
+.level-btn__label {
+    position: absolute;
+    top: 2px;
+    left: 8px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: #5EE1A5;
+    -unity-font-style: bold;
+}
+
+.level-btn__bottombar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 16px;
+    background-color: rgba(8,8,8,0.85);
+}
+
+.level-btn__number {
+    position: absolute;
+    bottom: 2px;
+    right: 8px;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: #5A6473;
+}
+
+.level-btn__hover-line {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    translate: 0 -50%;
+    width: 3px;
+    height: 40%;
+    background-color: rgba(94,225,165,0);
+    border-radius: 2px;
+    transition-property: background-color;
+    transition-duration: 0.15s;
+}
+
+.level-btn:hover .level-btn__hover-line {
+    background-color: rgba(94,225,165,0.85);
+}
+
+.level-btn.is-active .level-btn__hover-line {
+    background-color: rgba(94,225,165,0);
+}
+
+.level-btn__accent-line {
+    position: absolute;
+    right: 4px;
+    top: 22px;
+    width: 3px;
+    height: 30px;
+    background-color: #5EE1A5;
+    border-radius: 2px;
+    opacity: 0;
+}
+
+/* ── PLAY LEVEL button ───────────────────────────────────── */
+.btn-play-level {
+    height: 44px;
+    margin-top: 12px;
+    border-radius: 0;
+    border-width: 0;
+    border-left-width: 3px;
+    border-left-color: #5EE1A5;
+    background-color: rgba(94,225,165,0.08);
+    background-image: none;
+    color: #5EE1A5;
+    font-size: 13px;
+    letter-spacing: 3px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    transition-property: background-color, color, border-left-color;
+    transition-duration: 0.15s;
+    opacity: 1;
+}
+
+.btn-play-level:hover {
+    background-color: rgba(94,225,165,0.18);
+    color: #FFFFFF;
+    border-left-color: #FFFFFF;
+}
+
+.btn-play-level:active {
+    background-color: rgba(94,225,165,0.28);
+    color: #FFFFFF;
+}
+
+/* ── Centre preview ──────────────────────────────────────── */
+.preview-area {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    align-self: stretch;
+    background-color: rgba(255,255,255,0.02);
+    border-width: 1px;
+    border-color: rgba(255,255,255,0.06);
+    overflow: hidden;
+}
+
+.preview-image {
+    flex-grow: 1;
+    align-self: stretch;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
 #preview-rt-surface {
-  position: absolute;
-  left: 14px; right: 14px; top: 46px; bottom: 74px;
-  border-radius: 12px;
-  background-color: rgba(10,10,12,0.4);
-  display: none; /* toggle from code if you use RT */
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    display: none;
 }
-#preview-meta { margin-top: 6px; }
-.preview-title { font-size: 18px; unity-font-style: bold; color: #eef3fa; }
-.preview-desc  { color: #cbd5e1; font-size: 13px; opacity: 0.9; }
 
-/* Actions */
-#preview-actions {
-  flex-direction: row;
-  justify-content: flex-end;
-  margin-top: 10px;
-  gap: 8px;
+/* ── Right info panel ────────────────────────────────────── */
+.info-panel {
+    flex-basis: 300px;
+    flex-shrink: 0;
+    padding: 16px;
+    background-color: rgba(255,255,255,0.03);
+    border-width: 1px;
+    border-color: rgba(255,255,255,0.08);
+    flex-direction: column;
+    gap: 6px;
 }
-#preview-actions > Button {
-  height: 36px;
-  padding-left: 16px;
-  padding-right: 16px;
-  border-radius: 10px;
-  background-color: rgba(59, 130, 246, 0.9); /* Play */
-  color: white;
-  font-size: 14px;
+
+.info-section-label {
+    color: #5A6473;
+    font-size: 10px;
+    letter-spacing: 3px;
+    -unity-font-style: bold;
+    margin-top: 6px;
 }
-#btn_back { background-color: rgba(75, 85, 99, 0.85); }
-#btn_back:hover { background-color: rgba(107, 114, 128, 0.95); }
-#btn_play_level:hover { background-color: rgba(96, 165, 250, 0.98); }
+
+.info-title {
+    color: #FFFFFF;
+    font-size: 20px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    margin-top: 2px;
+}
+
+.info-desc {
+    color: #B0BCCC;
+    font-size: 13px;
+    white-space: normal;
+    margin-top: 4px;
+}
+
+.info-divider {
+    height: 1px;
+    background-color: rgba(255,255,255,0.07);
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+/* Stat bars (difficulty, density, area) */
+.stat-bar-track {
+    height: 2px;
+    background-color: rgba(255,255,255,0.07);
+    border-radius: 1px;
+    margin-top: 4px;
+    margin-bottom: 2px;
+}
+
+.stat-bar-fill {
+    height: 2px;
+    background-color: #5EE1A5;
+    border-radius: 1px;
+    opacity: 0.65;
+}
+
