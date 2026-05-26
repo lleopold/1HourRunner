@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace RayFire
@@ -25,6 +24,7 @@ namespace RayFire
         public FragHierarchyType hierarchy;
         public bool              separate;
         public bool              combine;
+        public bool              decompose;
         public SliceType         sliceType;
         public bool              origScale;
         public int               minTris;
@@ -74,6 +74,7 @@ namespace RayFire
 			hierarchy  = FragHierarchyType.Copy;
 			separate   = true;
 	        combine    = true;
+	        decompose  = false;
 	        sliceType  = SliceType.Hybrid;
 	        origScale  = false;
 	        minTris    = 0;
@@ -106,6 +107,7 @@ namespace RayFire
 	        hierarchy  = src.hierarchy;
 	        separate   = src.separate;
 	        combine    = src.combine;
+	        decompose  = src.decompose;
 	        sliceType  = src.sliceType;
 	        origScale  = src.origScale;
 	        minTris    = src.minTris;
@@ -138,6 +140,7 @@ namespace RayFire
 	        trg.hierarchy  = src.hierarchy;
 	        trg.separate   = src.separate;
 	        trg.combine    = src.combine;
+	        trg.decompose  = src.decompose;
 	        trg.sliceType  = src.sliceType;
 	        trg.origScale  = src.origScale;
 	        trg.minTris    = src.minTris;
@@ -383,6 +386,12 @@ namespace RayFire
         public bool CanUseCenter { get
         {
 	        return centerSet == true && centerBias != null;
+        }}
+        
+        // Get Combine state. Cant be true if decompose enabled
+        public bool Combine { get
+        {
+	        return combine == true && decompose == false;
         }}
         
         // Get use aabb

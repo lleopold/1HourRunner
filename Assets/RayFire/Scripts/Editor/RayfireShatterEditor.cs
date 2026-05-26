@@ -70,8 +70,8 @@ namespace RayFireEditor
         const float brick_split_offset_max = 0.95f;
         const float vox_size_min           = 0.01f;
         const float vox_size_max           = 10f;
-        const int   tet_dens_min           = 1;
-        const int   tet_dens_max           = 50;
+        const int   tet_dens_min           = 2;
+        const int   tet_dens_max           = 40;
         const int   tet_noise_min          = 0;
         const int   tet_noise_max          = 100;
         
@@ -202,7 +202,8 @@ namespace RayFireEditor
         SerializedProperty sp_cls_min;
         SerializedProperty sp_cls_max;
         SerializedProperty sp_cls_red;
-        SerializedProperty sp_cls_orig;
+        SerializedProperty sp_cls_out;
+        SerializedProperty sp_cls_tsf;
         
         // Advanced Serialized properties
         SerializedProperty sp_adv_seed;
@@ -223,9 +224,10 @@ namespace RayFireEditor
         SerializedProperty sp_adv_element;
         SerializedProperty sp_adv_face;
 
-        SerializedProperty sp_adv_hierarchy;
-        SerializedProperty sp_adv_separate;
-        SerializedProperty sp_adv_combine;
+        SerializedProperty sp_adv_hrc;
+        SerializedProperty sp_adv_sep;
+        SerializedProperty sp_adv_cmb;
+        SerializedProperty sp_adv_dec;
         SerializedProperty sp_adv_slc;
         SerializedProperty sp_adv_scl;
         SerializedProperty sp_adv_ptr;
@@ -321,7 +323,7 @@ namespace RayFireEditor
             sp_mat_uve = serializedObject.FindProperty(nameof(shatter.material) + "." + nameof(shatter.material.uvE));
             sp_mat_col = serializedObject.FindProperty(nameof(shatter.material) + "." + nameof(shatter.material.cC));
             sp_mat_uvc = serializedObject.FindProperty(nameof(shatter.material) + "." + nameof(shatter.material.uvC));
-            sp_mat_uvr = serializedObject.FindProperty (nameof(shatter.material) + "." + nameof(shatter.material.uvR));
+            sp_mat_uvr = serializedObject.FindProperty(nameof(shatter.material) + "." + nameof(shatter.material.uvR));
             
             // Clusters Serialized properties
             sp_cls_en     = serializedObject.FindProperty(nameof(shatter.clusters) + "." + nameof(shatter.clusters.enable));
@@ -334,7 +336,8 @@ namespace RayFireEditor
             sp_cls_min    = serializedObject.FindProperty(nameof(shatter.clusters) + "." + nameof(shatter.clusters.min));
             sp_cls_max    = serializedObject.FindProperty(nameof(shatter.clusters) + "." + nameof(shatter.clusters.max));
             sp_cls_red    = serializedObject.FindProperty(nameof(shatter.clusters) + "." + nameof(shatter.clusters.red));
-            sp_cls_orig   = serializedObject.FindProperty(nameof(shatter.clusters) + "." + nameof(shatter.clusters.orig));
+            sp_cls_out    = serializedObject.FindProperty(nameof(shatter.clusters) + "." + nameof(shatter.clusters.outer));
+            sp_cls_tsf    = serializedObject.FindProperty(nameof(shatter.clusters) + "." + nameof(shatter.clusters.tsf));
                 
             // Advanced Serialized properties
             sp_adv_seed     = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.seed));
@@ -353,19 +356,20 @@ namespace RayFireEditor
             sp_adv_abs      = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.absSze));
             sp_adv_element  = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.element));
             sp_adv_face     = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.minTris));
-            
-            sp_adv_hierarchy = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.hierarchy));
-            sp_adv_separate  = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.separate));
-            sp_adv_combine   = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.combine));
-            sp_adv_slc       = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.sliceType));
-            sp_adv_scl       = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.origScale));
-            sp_adv_ptr       = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.petrify));
-            sp_aabb_en       = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.ab_en));
-            sp_aabb_sep      = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.ab_sep));
-            sp_aabb_cld      = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.ab_cld));
-            sp_aabb_obj      = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.ab_obj));
-            sp_cn_set        = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.centerSet));
-            sp_cn_obj        = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.centerBias));
+
+            sp_adv_hrc  = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.hierarchy));
+            sp_adv_sep  = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.separate));
+            sp_adv_cmb  = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.combine));
+            sp_adv_dec  = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.decompose));
+            sp_adv_slc  = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.sliceType));
+            sp_adv_scl  = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.origScale));
+            sp_adv_ptr  = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.petrify));
+            sp_aabb_en  = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.ab_en));
+            sp_aabb_sep = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.ab_sep));
+            sp_aabb_cld = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.ab_cld));
+            sp_aabb_obj = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.ab_obj));
+            sp_cn_set   = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.centerSet));
+            sp_cn_obj   = serializedObject.FindProperty(nameof(shatter.advanced) + "." + nameof(shatter.advanced.centerBias));
             
             sp_shl_en    = serializedObject.FindProperty(nameof(shatter.shell) + "." + nameof(shatter.shell.enable));
             sp_shl_fr    = serializedObject.FindProperty(nameof(shatter.shell) + "." + nameof(shatter.shell.first));
@@ -430,8 +434,7 @@ namespace RayFireEditor
             RFUI.Space ();
             GUI_Advanced();
             RFUI.Space ();
-            // GUI_Info();
-
+            
             // Apply changes
             serializedObject.ApplyModifiedProperties();
         }
@@ -452,8 +455,6 @@ namespace RayFireEditor
                             (targ as RayfireShatter).Fragment();
                         else
                             (targ as RayfireShatter).InteractiveFragment();
-
-                        // TODO APPLY LOCAL SHATTER PREVIEW PROPS TO ALL SELECTED
                     }
                 }
                 // Scale preview if preview turn on
@@ -560,8 +561,9 @@ namespace RayFireEditor
 
                 RFUI.SetDirty (shatter.gameObject);
                 InteractiveChange();
+                //InteractiveScale ();
             }
-
+            
             // Color preview toggle. disabled for interactive mode
             if (shatter.interactive == false)
             {
@@ -588,7 +590,8 @@ namespace RayFireEditor
                 if (shatter.scalePreview == true)
                     ScalePreview (shatter);
                 RFUI.SetDirty (shatter.gameObject);
-                InteractiveChange(); // TODO only change scale, do not refrag. LIB update
+                InteractiveChange();
+                //InteractiveScale ();
                 SceneView.RepaintAll();
             }
             EditorGUILayout.EndHorizontal();
@@ -611,7 +614,7 @@ namespace RayFireEditor
             else if (shatter.type == FragType.Hexagon)   GUI_Type_HexGrid();
             else if (shatter.type == FragType.Custom)    GUI_Type_Custom();
             else if (shatter.type == FragType.Slices)    GUI_Type_Slices();
-            // else if (shatter.type == FragType.Tets)      GUI_Type_Tets();
+            else if (shatter.type == FragType.Tets)      GUI_Type_Tets();
             else if (shatter.type == FragType.Bricks)    GUI_Type_Bricks();
             else if (shatter.type == FragType.Voxels)    GUI_Type_Voxels();
             EditorGUI.indentLevel--;
@@ -717,9 +720,11 @@ namespace RayFireEditor
         void GUI_Type_Tets()
         {
             RFUI.Caption (TextSht.gui_cap_tet);
-            RFUI.PropertyField (sp_tp_tet_lat, TextSht.gui_tp_tetLt);
-            RFUI.PropertyField (sp_tp_tet_dns, TextSht.gui_tp_tetDn);
-            RFUI.PropertyField (sp_tp_tet_nse, TextSht.gui_tp_tetNs);
+            //RFUI.PropertyField (sp_tp_tet_lat, TextSht.gui_tp_tetLt);
+            RFUI.IntSlider (sp_tp_tet_dns, tet_dens_min,  tet_dens_max, TextSht.gui_tp_tetDn);
+            RFUI.IntSlider (sp_tp_tet_nse, tet_noise_min, tet_noise_max, TextSht.gui_tp_tetNs);
+            if (sp_tp_tet_dns.intValue > 8)
+                RFUI.HelpBox ("Tets in lattice: " + (sp_tp_tet_dns.intValue * sp_tp_tet_dns.intValue * sp_tp_tet_dns.intValue * 5), MessageType.Warning, false);
         }
 
         void GUI_Type_Bricks()
@@ -870,11 +875,14 @@ namespace RayFireEditor
             RFUI.PropertyField (sp_cls_en, TextSht.gui_cls_en);
             if (sp_cls_en.boolValue == true)
             {
+                RFUI.PropertyField (sp_cls_red, TextSht.gui_cls_red);
                 RFUI.IntSlider (sp_cls_cnt,    cls_count_min,  cls_count_max,  TextSht.gui_cls_cnt);
                 RFUI.IntSlider (sp_cls_seed,   cls_seed_min,   cls_seed_max,   TextSht.gui_cls_seed);
                 RFUI.IntSlider (sp_cls_layers, cls_layers_min, cls_layers_max, TextSht.gui_cls_debris);
-                RFUI.PropertyField (sp_cls_red, TextSht.gui_cls_red);
-                // if (sp_cls_red.boolValue == true) RFUI.PropertyField (sp_cls_orig, TextSht.gui_cls_orig);
+                // RFUI.PropertyField (sp_cls_tsf, TextSht.gui_cls_tsf);
+                RFUI.Slider (sp_cls_rel,    cls_relax_min,  cls_relax_max,  TextSht.gui_cls_rlx);
+                if (sp_cls_rel.floatValue > 0)
+                    RFUI.PropertyField (sp_cls_out, TextSht.gui_cls_out);
             }
             if (EditorGUI.EndChangeCheck() == true)
                 InteractiveChange();
@@ -935,27 +943,28 @@ namespace RayFireEditor
         {
             EditorGUI.BeginChangeCheck();
             RFUI.CaptionBox (TextSht.gui_cap_prp);
-            RFUI.PropertyField (sp_adv_hierarchy, TextSht.gui_adv_hierarchy);
-            RFUI.PropertyField (sp_adv_slc,       TextSht.gui_adv_slice);
-            RFUI.IntSlider (sp_adv_seed,    cls_seed_min,    cls_seed_max,    TextSht.gui_adv_seed);
+            RFUI.PropertyField (sp_adv_hrc, TextSht.gui_adv_hierarchy);
             
             if (shatter.type != FragType.Decompose)
             {
-                RFUI.PropertyField (sp_adv_separate, TextSht.gui_adv_separate);
-                if (sp_adv_separate.boolValue == true)
+                RFUI.PropertyField (sp_adv_slc,       TextSht.gui_adv_slice);
+                RFUI.IntSlider (sp_adv_seed,    cls_seed_min,    cls_seed_max,    TextSht.gui_adv_seed);
+                RFUI.PropertyField (sp_adv_sep, TextSht.gui_adv_separate);
+                if (sp_adv_sep.boolValue == true)
                 {
                     RFUI.IntSlider (sp_adv_element, adv_element_min, adv_element_max, TextSht.gui_adv_element);
-                    RFUI.PropertyField (sp_adv_combine, TextSht.gui_adv_combine);
+                    RFUI.PropertyField (sp_adv_cmb, TextSht.gui_adv_combine);
                 }
+                RFUI.PropertyField (sp_adv_dec,    TextSht.gui_adv_dec);
             }
             
             RFUI.PropertyField (sp_adv_input,  TextSht.gui_adv_input);
             RFUI.PropertyField (sp_adv_output, TextSht.gui_adv_output);
+            RFUI.PropertyField (sp_adv_scl,    TextSht.gui_adv_scl);
+            RFUI.PropertyField (sp_adv_smooth, TextSht.gui_adv_smooth);
             if (EditorGUI.EndChangeCheck() == true)
                 InteractiveChange();
             
-            RFUI.PropertyField (sp_adv_scl,    TextSht.gui_adv_scl);
-            RFUI.PropertyField (sp_adv_smooth, TextSht.gui_adv_smooth);
             RFUI.PropertyField (sp_adv_ptr,    TextSht.gui_adv_ptr);
             
             GUI_Filters();
@@ -1263,7 +1272,15 @@ namespace RayFireEditor
                 shatter.InteractiveChange();
             }
         }
-        
+
+        void InteractiveScale()
+        {
+            if (shatter != null && shatter.interactive == true)
+            {
+                shatter.InteractiveScale();
+            }
+        }
+
         void CheckPropertyChange(Transform tm, SerializedProperty prop)
         {
             if (shatter.interactive == false)

@@ -1,4 +1,26 @@
- 
+
+  [2.08]  
+    
+ - Shatter. Tetrahedron fragmentation type.
+ - Shatter. Vertex Relax for cluster inner surface.
+ - Shatter. Decompose property.
+ - Shatter. Inner surface vertex normal Smooth fix for Interactive mode.
+ - Shatter. Fix for NaN bug with normal, tangent abd UV channels for specific triangles. 
+ - Shatter. Hexagon frag type fix for Divergence with Restrict to Plane. 
+ - Shatter. UV mapping fix for high amount of clusters. 
+ - Rigid. Damage reset for secondary clusters shards.
+ - Rigid. Decompose property for Mesh Demolition.
+ - Rigid. Slice by Blade fix with enabled Clustering.
+ - Rigid. Radial frag type fix for Awake Prefragment and Awake Precache. 
+ - Rigid. Child Fragments reset support with Fragments Reuse mode.
+ - Man. Fix for several managers in scene.
+ - Man. Fix for fragments Local Parent.  
+ - Man. Material presets UI fix.  
+ - Man. Fragments Shadows Size threshold default value increased from 0.05 to 0.2 units.  
+ - Debris/Dust. Pooling Reuse fix with disabled pooling.
+ - Blade. Default Box collider by slicing plane type. 
+ - iOS build fix.
+  
   [2.07] March 14
        
  - Rigid. Slice By Blade fix for Blade with Demolition action.  

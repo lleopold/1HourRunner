@@ -374,7 +374,8 @@ namespace RayFire
         public bool reuse;
         public int  over;
         
-        // TODO public bool repooliflowfps; // TODO do not emit at set to host frames
+        // TODO public bool repooliflowfps;
+        // TODO do not emit at set to host frames
         
         [NonSerialized] public RFPoolingEmitter emitter;
         

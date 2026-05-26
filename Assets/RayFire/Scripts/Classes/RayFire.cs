@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 using RandomUnity = UnityEngine.Random;
 
 namespace RayFire
@@ -70,21 +71,23 @@ namespace RayFire
         public int   min;
         public int   max;
         public bool  red;
-        public bool  orig;
+        public bool  outer;
+        public bool  tsf;       // One Shard Transfer
 
         public RFShatterCluster()
         {
             enable = false;
             count  = 10;
             seed   = 1;
-            relax  = 0.5f;
+            relax  = 0;
             layers = 0;
             amount = 0;
             scale  = 1f;
             min    = 1;
             max    = 3;
             red    = true;
-            orig   = false;
+            outer  = false;
+            tsf    = true;
         }
         
         public RFShatterCluster (RFShatterCluster src)
@@ -99,7 +102,8 @@ namespace RayFire
             min    = src.min;
             max    = src.max;
             red    = src.red;
-            orig   = src.orig;
+            outer  = src.outer;
+            tsf    = src.tsf;
         }
         
         public static void Copy (RFShatterCluster trg, RFShatterCluster src)
@@ -114,7 +118,8 @@ namespace RayFire
             trg.min    = src.min;
             trg.max    = src.max;
             trg.red    = src.red;
-            trg.orig   = src.orig;
+            trg.outer  = src.outer;
+            trg.tsf    = src.tsf;
         }
         
         // Get seed
@@ -464,6 +469,18 @@ namespace RayFire
             lattice = src.lattice;
             density = src.density;
             noise   = src.noise;
+        }
+
+        public int Density
+        {
+            get
+            {
+                if (density > 90)
+                    return 90;
+                if (density < 2)
+                    return 2;
+                return density;
+            }
         }
     }
 }

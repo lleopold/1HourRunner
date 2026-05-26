@@ -25,7 +25,7 @@ namespace RayFire
         {
             parent        = FragmentParentType.Manager;
             maximumAmount = 1000;
-            sizeThreshold = 0.05f;
+            sizeThreshold = 0.2f;
             currentAmount = 0;
         }
         

@@ -68,19 +68,6 @@ public class CameraShakeManager : MonoBehaviour
             null, // channelData
             false // useUnscaledTime
         );
-        MMCameraShakeEvent.Trigger(
-        3,
-        3,
-        3,
-        0f, // amplitudeX
-        0f, // amplitudeY
-        0f, // amplitudeZ
-        false, // infinite
-        null, // channelData
-        false // useUnscaledTime
-        );
-
-        Debug.Log($"Camera Shake - Recoil: {weaponRecoil}, Strength: {playerStrength}, Final Amplitude: {finalAmplitude:F3}");
     }
 
     public void ShakeCustom(float duration, float amplitude, float frequency = 25f)

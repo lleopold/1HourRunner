@@ -85,7 +85,15 @@ namespace RayFire
 
             // No collider. Add own
             if (colLider == null)
+            {
                 colLider = gameObject.AddComponent<BoxCollider>();
+                if (sliceType == PlaneType.XY)
+                    (colLider as BoxCollider).size = new Vector3(2f, 2f, 0.1f);
+                else if (sliceType == PlaneType.XZ)
+                    (colLider as BoxCollider).size = new Vector3(2f, 0.1f, 2f);
+                else if (sliceType == PlaneType.YZ)
+                    (colLider as BoxCollider).size = new Vector3(0.1f, 2f, 2f);
+            }
                 
             // Set convex for mesh collider
             if (colLider is MeshCollider)

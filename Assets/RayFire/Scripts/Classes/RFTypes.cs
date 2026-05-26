@@ -54,7 +54,7 @@
         Custom    = 5,
         //Mirrored= 6,
         Slices    = 7,
-        // Tets      = 8,
+        Tets      = 8,
         Bricks    = 9,
         Voxels    = 10,
         Decompose = 15

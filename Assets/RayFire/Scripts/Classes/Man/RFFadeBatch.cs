@@ -194,7 +194,7 @@ namespace RayFire
             rigid.fading.state = 3;
 
             // Not going to be reused
-            if (rigid.reset.action == RFReset.PostDemolitionType.DestroyWithDelay)
+            if (rigid.reset.act == RFReset.PostDemolitionType.DestroyWithDelay)
             {
                 UnityEngine.Object.Destroy (rigid.physics.rb);
                 UnityEngine.Object.Destroy (rigid.physics.mc);
@@ -202,7 +202,7 @@ namespace RayFire
             }
 
             // Going to be reused 
-            else if (rigid.reset.action == RFReset.PostDemolitionType.DeactivateToReset)
+            else if (rigid.reset.act == RFReset.PostDemolitionType.DeactivateToReset)
             {
                 // Set kinematic
                 rigid.physics.rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;

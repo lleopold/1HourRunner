@@ -7,6 +7,9 @@ using Random = UnityEngine.Random;
 
 namespace RayFire
 {
+    /// <summary>
+    /// Mesh Demolition class for Rayfire Rigid component.
+    /// </summary>
     [Serializable]
     public class RFDemolitionMesh
     {
@@ -17,22 +20,21 @@ namespace RayFire
             Connectivity     = 4
         }
         
-        public int                  am;
-        public int                  var;
-        public float                dpf;
-        public float                bias;
-        public int                  cls;
-        public int                  sd;
-        public bool                 use;
-        public bool                 cld;
-        public FragSimType          sim;
-        public ConvertType          cnv;
-        public RFFragmentProperties prp;
-        public RFRuntimeCaching     ch;
-        public RayfireShatter       sht;
+        public int                  am;     // Amount
+        public int                  var;    // Variation
+        public float                dpf;    // Depth Fade
+        public float                bias;   // Contact bias
+        public int                  cls;    // Cluster amount
+        public int                  sd;     // Seed
+        public bool                 use;    // Use Shatter
+        public bool                 cld;    // Add children
+        public FragSimType          sim;    // Sim type
+        public ConvertType          cnv;    // Convert type
+        public RFFragmentProperties prp;    // Advanced properties
+        public RFRuntimeCaching     ch;     // Runtime caching
+        public RayfireShatter       sht;    // Base Shatter
         
         // Non serialized
-        [NonSerialized] public int       badMesh;
         [NonSerialized] public RFEngine  engine;
 
         /// /////////////////////////////////////////////////////////
@@ -67,7 +69,7 @@ namespace RayFire
         // Reset
         public void LocalReset()
         {
-            badMesh     = 0;
+           
         }
         
         // Pool Reset
@@ -119,7 +121,7 @@ namespace RayFire
             if (scr.HasFragments == true)
             {
                 // Set parent
-                RayfireMan.SetFragmentRootParent (scr.rtC);
+                RayfireMan.SetFragmentRootParent (scr.rtC, scr.transform.parent);
                 
                 // Set tm 
                 scr.rtC.position = scr.tsf.position;
@@ -217,16 +219,6 @@ namespace RayFire
         
         // SLice mesh
         public static bool SliceMesh(RayfireRigid scr)
-        {
-            return SliceMeshV2 (scr);
-        }
-        
-        /// /////////////////////////////////////////////////////////
-        /// V2 Slice
-        /// /////////////////////////////////////////////////////////
-
-        // SLice mesh
-        public static bool SliceMeshV2(RayfireRigid scr)
         {
             // Start countdown
             // System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
@@ -625,6 +617,12 @@ namespace RayFire
             // No children
             if (scr.tsf.childCount == 0)
                 return;
+
+            // Create list for child fragments data
+            scr.reset.childFragments = new List<RFReset.RFChildFragment>();
+
+            // Fragments hash
+            HashSet<RayfireRigid> fragmentsHash = new HashSet<RayfireRigid>(scr.fragments);
             
             // Iterate children TODO precache in awake and use now. Set init type to by method at awake.
             Transform child;
@@ -637,13 +635,13 @@ namespace RayFire
                 // Skip if has no mesh
                 if (child.GetComponent<MeshFilter>() == false)
                     continue;
-
+                
                 // Set parent to main fragments root
                 child.parent = scr.rtC;
                 
                 // Get Already applied Rigid
                 RayfireRigid childScr = child.GetComponent<RayfireRigid>();
-
+                
                 // Add new if has no. Copy properties
                 if (childScr == null)
                 {
@@ -657,6 +655,9 @@ namespace RayFire
                         childScr.mshDemol.use = true;
                 }
                 
+                // Save children data for reset
+                scr.reset.childFragments.Add (new RFReset.RFChildFragment (child.transform, scr.tsf, childScr));
+                
                 // Set custom fragment simulation type if not inherited
                 RFPhysic.SetFragmentSimulationType (childScr, scr.simTp);
 
@@ -666,9 +667,14 @@ namespace RayFire
                 // Update depth level and amount
                 childScr.lim.currentDepth = scr.lim.currentDepth + 1;
                 
-                // Collect
-                scr.fragments.Add (childScr);
+                // Collect if not already in fragments list because of previous Reset
+                if (fragmentsHash.Contains (childScr) == false)
+                    scr.fragments.Add (childScr);
             }
+
+            // Nullify if empty
+            if (scr.reset.childFragments.Count == 0)
+                scr.reset.childFragments = null;
         }
         
         /// /////////////////////////////////////////////////////////

@@ -1,23 +1,22 @@
 ﻿using System;
-using UnityEngine.Serialization;
 
 namespace RayFire
 {
 	[Serializable]
 	public class RFFragmentProperties
 	{
-		[FormerlySerializedAs ("removeCollinear")] public bool           rem; 
-		[FormerlySerializedAs ("decompose")]       public bool           dec; // Decompose
-		public                                            SliceType      slc;
-		public                                            bool           cmb; // Combine
-		public                                            bool           cap; // Input Cap
-		public                                            bool           ptr; // Petrify
-		[FormerlySerializedAs ("colliderType")] public    RFColliderType col;
-		[FormerlySerializedAs ("sizeFilter")]   public    float          szF;
-		public                                            bool           l; // Inherit layer
-		[FormerlySerializedAs ("layer")] public           int            lay;
-		public                                            bool           t; // Inherit tag
-		public                                            string         tag;
+		public bool           rem; 
+		public bool           dec; // Decompose
+		public SliceType      slc;
+		public bool           cmb; // Combine
+		public bool           cap; // Input Cap
+		public bool           ptr; // Petrify
+		public RFColliderType col;
+		public float          szF;
+		public bool           l; // Inherit layer
+		public int            lay;
+		public bool           t; // Inherit tag
+		public string         tag;
 
 		/// /////////////////////////////////////////////////////////
         /// Constructor
@@ -33,9 +32,9 @@ namespace RayFire
 		public void InitValues()
 		{
 			rem = false;
-			dec = true;
 			slc = SliceType.Hybrid;
 			cmb = true;
+			dec = false;
 			cap = true;
 			ptr = true;
 			col = RFColliderType.Mesh;
@@ -50,9 +49,9 @@ namespace RayFire
 		public void CopyFrom (RFFragmentProperties props)
 		{
 			rem = props.rem;
-			dec = props.dec;
 			slc = props.slc;
 			cmb = props.cmb;
+			dec = props.dec;
 			cap = props.cap;
 			ptr = props.ptr;
 			col = props.col;
@@ -126,5 +125,11 @@ namespace RayFire
 				}
 			}
 		}
+		
+		// Get Combine state. Cant be true if decompose enabled
+		public bool Combine { get
+		{
+			return cmb == true && dec == false;
+		}}
 	}
 }

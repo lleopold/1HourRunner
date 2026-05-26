@@ -13,8 +13,8 @@ namespace RayFire
         public PlaneType plane;
         public int       row;
         public int       col;
-        public float     div;
-        public bool      rest;
+        public float     div;   // Divergence
+        public bool      rest;  // Restrict to plane
         
         public bool          noPc;
         public List<Vector3> pc;
@@ -157,19 +157,12 @@ namespace RayFire
 
                 // Restrict to plane
                 if (hexagon.rest == true)
-                {
-                    if (hexagon.plane == PlaneType.XZ)
-                        varY = 0;
-                    else if (hexagon.plane == PlaneType.XY)
-                        varZ = 0;
-                    else if (hexagon.plane == PlaneType.YZ)
-                        varX = 0;
-                }
+                    varY = 0;
                 
                 // Random offset
                 Random.InitState (0);
                 for (int i = 0; i < hexagon.pc.Count; i++)
-                    hexagon.pc[i] += new Vector3(Random.Range (-varX, varX), Random.Range (-varY, varY), Random.Range (-varZ, varZ));
+                    hexagon.pc[i] += new Vector3 (Random.Range (-varX, varX), Random.Range (-varY, varY), Random.Range (-varZ, varZ));
             }
         }
 

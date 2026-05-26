@@ -48,6 +48,9 @@ namespace RayFire
         int[][]         interVerts;
         float           interScale;
         
+        //Vector3[][] sclVerts;
+        //int[][]     sclTris;
+        
         const float minSize  = 0.005f;
         const string str_fr = "_fr_";
         const string str_sh = "_sh_";
@@ -69,7 +72,7 @@ namespace RayFire
             renderers  = new List<Renderer>(size);
             skinFlags  = new List<bool> (size);
             transMap   = new Dictionary<Transform, Transform> (size);
-            worldMat   = new List<Matrix4x4>(size); 
+            worldMat   = new List<Matrix4x4>(size);
         }
 
         // Perform simple fragmentation to load lib methods 
@@ -109,7 +112,7 @@ namespace RayFire
             sh.engine.biasPos = sh.advanced.CanUseCenter == true
                 ? sh.engine.normalMat.MultiplyPoint (sh.engine.biasTN.GetPosition())
                 : new Vector3 (0, 0, 0);
-            
+          
             // Chose Fragmentation Type and Set Parameters
             SetShatterFragType (sh, sh.engine.sliceData, sh.engine, sh.engine.normalMat, sh.engine.biasTN, sh.engine.biasPos);
             
@@ -137,8 +140,8 @@ namespace RayFire
             // Get separate property. Should be enabled for decompose
             bool elementSeparate = sh.advanced.separate || sh.type == FragType.Decompose;
 
-            // Get precap property
-            bool precap = sh.advanced.inpCap;
+            // Get preCap property
+            bool preCap = sh.advanced.inpCap;
 
             // Set slice type
             SliceType sliceType = sh.advanced.sliceType;
@@ -160,7 +163,7 @@ namespace RayFire
                 : Matrix4x4.identity;
             
             // Setup fragmentation properties
-            SetupFragmentation (sh.engine, sh.transform, elementSeparate, precap, sliceType, axisScale, cutAABB, aabbSeparate);
+            SetupFragmentation (sh.engine, sh.transform, elementSeparate, preCap, sliceType, axisScale, cutAABB, aabbSeparate);
         }
         
         // STEP 3. Perform slicing ops. Shatter only
@@ -168,17 +171,25 @@ namespace RayFire
         {
             // Set fragmentation type
             FragType fragType   = sh.type;
-            bool     combine    = sh.advanced.combine;
+            bool     combine    = sh.advanced.Combine;
+            bool     decomp     = sh.advanced.decompose;
             int      element    = sh.advanced.element;
             int      clsCount   = sh.clusters.Count;
             int      clsLayers  = sh.clusters.layers;
             int      clsSeed    = sh.clusters.Seed;
             bool     clsRed     = sh.clusters.Reduce;
+            float    clsRlx     = sh.clusters.relax;
+            bool     clsOut     = sh.clusters.outer;
+            bool     clsTsf     = sh.clusters.tsf;
             int      faceFlt    = sh.advanced.minTris;
             bool     outCap     = sh.advanced.outCap;
             bool     smooth     = sh.advanced.smooth;
             float    fragSze    = GetSize (sh, sh.engine.bounds);
             int      planarVert = sh.advanced.planar == false ? 0 : planarVrt;
+            
+            // Disable clustering
+            if (sh.type == FragType.Decompose || sh.type == FragType.Slices)
+                clsCount = 0;
             
             // Disable filters in case of clustering
             if (clsCount > 0)
@@ -189,10 +200,10 @@ namespace RayFire
             }
             
             // Perform slicing ops
-            ProcessFragmentation (sh.engine, fragType, combine, element, fragSze, faceFlt, planarVert);
+            ProcessFragmentation (sh.engine, fragType, combine, decomp, element, fragSze, faceFlt, planarVert);
             
             // STEP 4. Post slicing ops
-            PostFragmentation (sh.engine, sh.material, outCap, smooth, clsCount, clsLayers, clsSeed, clsRed);
+            PostFragmentation (sh.engine, sh.material, outCap, smooth, clsCount, clsLayers, clsSeed, clsRed, clsRlx, clsOut, clsTsf);
         }
         
         // STEP 4. Create Unity Mesh objects
@@ -267,6 +278,13 @@ namespace RayFire
                 if (planar == true && RFShatterAdvanced.IsCoplanar (fragUnityMesh, RFShatterAdvanced.planarThreshold) == true)
                     continue;
 
+                
+                // TEMP
+                /*
+                fragUnityMesh.RecalculateTangents();
+                fragUnityMesh.RecalculateNormals();
+                */
+                
                 // Create fragment object
                 GameObject fragGo = CreateFragmentObj (groupRoot, fragUnityMesh, groupName + (j + 1), layer, tag);
                 
@@ -339,7 +357,7 @@ namespace RayFire
             // TODO disable runtime caching in case of slice or precache in method usages
             
             // Reuse existing cache
-            if (rg.reset.action == RFReset.PostDemolitionType.DeactivateToReset && 
+            if (rg.reset.act == RFReset.PostDemolitionType.DeactivateToReset && 
                 rg.reset.mesh == RFReset.MeshResetType.ReuseFragmentMeshes)
                 if (rg.mshDemol.HasEngineAndMeshes == true)
                     return;
@@ -403,33 +421,45 @@ namespace RayFire
         {
             // Set fragmentation type
             FragType fragType   = FragType.Voronoi;
-            bool     combine    = rg.mshDemol.prp.cmb;
-            int      element    = 3;                    // HARDCODED
+            bool     combine    = rg.mshDemol.prp.Combine;
+            bool     decomp     = rg.mshDemol.prp.dec;
+            int      element    = 3;                   // HARDCODED
             int      clsCount   = rg.mshDemol.cls;
-            int      clsLayers  = 0;                    // HARDCODED
+            int      clsLayers  = 0;                   // HARDCODED
             int      clsSeed    = rg.mshDemol.Seed;
-            bool     clsRed     = rg.mshDemol.cls > 1;  // Enable reduce if positive cluster count
-            int      faceFlt    = 0;                    // HARDCODED
-            bool     outCap     = false;
-            bool     smooth     = false;
-            float    fragSze    = fragSize;             // HARDCODED
+            bool     clsRed     = rg.mshDemol.cls > 1; // Enable reduce if positive cluster count
+            float    clsRlx     = 0;                   // HARDCODED
+            bool     clsOut     = false;               // HARDCODED
+            bool     clsTsf     = true;                // HARDCODED
+            int      faceFlt    = 0;                   // HARDCODED
+            bool     outCap     = false;               // HARDCODED
+            bool     smooth     = false;               // HARDCODED
+            float    fragSze    = fragSize;            
             int      planarVert = planarVrt;
 
             // Set Shatter in case of use
             if (rg.mshDemol.UseShatter == true)
             {
                 fragType   = rg.mshDemol.sht.type;
-                combine    = rg.mshDemol.sht.advanced.combine;
+                combine    = rg.mshDemol.sht.advanced.Combine;
+                decomp     = rg.mshDemol.sht.advanced.decompose;
                 element    = rg.mshDemol.sht.advanced.element;
                 clsCount   = rg.mshDemol.sht.clusters.Count;
                 clsLayers  = rg.mshDemol.sht.clusters.layers;
                 clsSeed    = rg.mshDemol.sht.clusters.Seed; 
                 clsRed     = rg.mshDemol.sht.clusters.Reduce;
+                clsRlx     = rg.mshDemol.sht.clusters.relax;
+                clsOut     = rg.mshDemol.sht.clusters.outer;
+                clsTsf     = rg.mshDemol.sht.clusters.tsf;
                 faceFlt    = rg.mshDemol.sht.advanced.minTris;
                 outCap     = rg.mshDemol.sht.advanced.outCap;
                 smooth     = rg.mshDemol.sht.advanced.smooth;
                 fragSze    = GetSize (rg.mshDemol.sht, rg.mshDemol.engine.bounds);
                 planarVert = rg.mshDemol.sht.advanced.planar == false ? 0 : planarVrt;
+                
+                // Disable clustering
+                if (rg.mshDemol.sht.type == FragType.Decompose || rg.mshDemol.sht.type == FragType.Slices)
+                    clsCount = 0;
             }
             
             // Disable filters in case of clustering
@@ -440,19 +470,23 @@ namespace RayFire
                 planarVert = 0;
             }
             
-            // Instant or multyframe caching. Always instant in case of slices.
+            // Instant or multiframe caching. Always instant in case of slices.
             if (rg.mshDemol.ch.MultiFrameState == false || rg.lim.HasSlicePlanes == true)
             {
+                // Disable clustering if slice
+                if (rg.lim.HasSlicePlanes == true)
+                    clsCount = 0;
+                
                 // Perform slicing ops
-                ProcessFragmentation (engine, fragType, combine, element, fragSze, faceFlt, planarVert);
+                ProcessFragmentation (engine, fragType, combine, decomp, element, fragSze, faceFlt, planarVert);
             
                 // STEP 4. Post slicing ops
-                PostFragmentation (engine, rg.materials, outCap, smooth, clsCount, clsLayers, clsSeed, clsRed);
+                PostFragmentation (engine, rg.materials, outCap, smooth, clsCount, clsLayers, clsSeed, clsRed, clsRlx, clsOut, clsTsf);
             }
 
             // Start multiframe coroutine
             else
-                engine.StartMultiFrameCaching (rg, combine, element, faceFlt, outCap, smooth, clsCount, clsLayers, clsSeed, clsRed);
+                engine.StartMultiFrameCaching (rg, combine, decomp, element, faceFlt, outCap, smooth, clsCount, clsLayers, clsSeed, clsRed, clsRlx, clsOut, clsTsf);
         }
         
         // STEP 4. Create Unity Mesh objects
@@ -497,7 +531,7 @@ namespace RayFire
             rg.rtC = rg.mshDemol.engine.mainRoot.transform;
             
             // Set root to manager
-            RayfireMan.SetFragmentRootParent (rg.rtC);
+            RayfireMan.SetFragmentRootParent (rg.rtC, rg.transform.parent);
             
             // Ignore neib collisions
             RFPhysic.SetIgnoreColliders (rg.physics, rg.fragments);
@@ -543,7 +577,7 @@ namespace RayFire
             }
             
             // Save pivots for reset
-            if (rg.reset.fragments == RFReset.FragmentsResetType.Reuse)
+            if (rg.reset.frg == RFReset.FragmentsResetType.Reuse)
             {
                 rg.pivots = new Vector3[rg.fragments.Count];
                 for (int i = 0; i < rg.fragments.Count; i++)
@@ -691,7 +725,7 @@ namespace RayFire
             // Collect mesh data for renderers 
             for (int i = 0; i < allRenderers.Length; ++i)
                 AddRendererMesh (engine, allRenderers[i], petrify);
-
+            
             return engine;
         }
         
@@ -757,7 +791,11 @@ namespace RayFire
 
             // Get min and max
             Utils.Mesh.Transform (engine.utilFrags, engine.normalMat, out engine.aabbMin, out engine.aabbMax);
-
+            
+            // Fix null polys
+            if (elementSeparate == false)
+                Utils.Mesh.FixPolys (engine.utilFrags);
+            
             // Separate not connected elements
             if (elementSeparate == true)
                 engine.utilFrags = Utils.Mesh.Separate (engine.utilFrags, true);
@@ -786,7 +824,7 @@ namespace RayFire
         }
 
         // STEP 3. Perform slicing ops
-        static void ProcessFragmentation(RFEngine engine, FragType fragType, bool combine, int element, float fragSze, int faceFlt, int planarVert) 
+        static void ProcessFragmentation(RFEngine engine, FragType fragType, bool combine, bool decomp, int element, float fragSze, int faceFlt, int planarVert) 
         {
             // Skip if only decompose
             if (fragType == FragType.Decompose)
@@ -800,15 +838,15 @@ namespace RayFire
             bool firstPass = true;
 
             // Fragment
-            engine.utilFrags = Utils.Mesh.Fragment (engine.sliceData, combine, engine.edgeFlags, element * 0.01f, fragSze, faceFlt, planarVert, planarThr, firstPass);
+            engine.utilFrags = Utils.Mesh.Fragment (engine.sliceData, combine, engine.edgeFlags, element * 0.01f, fragSze, faceFlt, planarVert, planarThr, firstPass, decomp);
         }
         
         // STEP 4. Post slicing ops
-        static void PostFragmentation(RFEngine engine, RFSurface material, bool outCap, bool smooth, int clsCount, int clsLayers, int clsSeed, bool clsRed) 
+        static void PostFragmentation(RFEngine engine, RFSurface material, bool outCap, bool smooth, int clsCount, int clsLayers, int clsSeed, bool clsRed, float clsRlx, bool clsOut, bool clsTsf) 
         {
             // Clusterize
             if (clsCount > 1)
-                engine.utilFrags = Utils.Mesh.Clusterize (engine.sliceData, engine.utilFrags, clsSeed, clsCount, clsLayers);
+                engine.utilFrags = Utils.Mesh.Clusterize (engine.sliceData, engine.utilFrags, clsSeed, clsCount, clsLayers, clsTsf);
             
             // OutCap holes on every fragment and set not capped open edges array
             if (outCap == true)
@@ -820,22 +858,17 @@ namespace RayFire
             // Get inner sub id TODO add support for other renderers, not only first renderer materials
             engine.innerSubId = GetInnerSubId(material.iMat, engine.GetMaterials(0));
             
-            // Start countdown
-            // System.Diagnostics.Stopwatch stopWatch3 = new System.Diagnostics.Stopwatch();
-            // stopWatch3.Start();
+            // Relax verts
+            RelaxVerts (engine, clsCount, clsRlx, clsOut);
             
             // Convert indexes and reduce tris. 
             Utils.Mesh.ReduceTris (engine.utilFrags, clsRed);
-            
-            // stopWatch3.Stop();
-            // Debug.Log("ReduceTris " + stopWatch3.Elapsed.TotalMilliseconds + " ms.");
             
             // Build SubMeshes
             Utils.Mesh.BuildSubMeshes(engine.utilFrags, engine.origMeshes, engine.innerSubId);
             
             // Build combined interactive Mesh
-            if (engine.interactive == true)
-                engine.utilFrags = Utils.Mesh.CombineMeshes(engine.utilFrags, out engine.interVerts);
+            InteractiveCombine (engine);
             
             // Undo Normalize
             Utils.Mesh.Transform(engine.utilFrags, engine.normalMat.inverse);
@@ -850,11 +883,14 @@ namespace RayFire
             engine.UnBakeWorldTransform();
             
             // Restore Maps
-            ComputeMaps (engine, material.cC, smooth);
+            bool checkOrigVerts = false; // Smooth for outer cluster verts
+            ComputeMaps (engine, material.cC, smooth, checkOrigVerts);
             
             // Scale interactive mesh
             if (engine.interactive == true)
-                Utils.Mesh.ScaleMeshes(engine.utilFrags, ref engine.interVerts, engine.interScale);
+            {
+                Utils.Mesh.ScaleMeshes (engine.utilFrags, ref engine.interVerts, engine.interScale);
+            }
             
             // Centerize
             engine.centroids = Utils.Mesh.Centerize(engine.utilFrags);
@@ -946,17 +982,13 @@ namespace RayFire
                     sd.AddPlanes(sh.slice.sliceList.ToArray(), dir, normalMat);
                     break;
                 }
-                /*
+                
                 case FragType.Tets:
                 {
-                    // TODO
-                    // sh.tets.lattice;
-                    // sh.tets.density;
-                    // sh.tets.noise;
-                    
+                    sd.GenTetrahedrons (sh.tets.Density, (sh.tets.noise * 0.01f), (int)sh.tets.lattice, false);  
                     break;
                 }
-                */
+                
                 case FragType.Bricks:
                 {
                     sd.GenBricks(
@@ -1156,6 +1188,26 @@ namespace RayFire
             }
         }
         
+        // relax inner cluster verts 
+        static void RelaxVerts(RFEngine engine, int clsCount, float clsRlx, bool clsOut)
+        {
+            if (clsCount > 1 && clsRlx > 0)
+            {
+                // Start countdown
+                // System.Diagnostics.Stopwatch stopWatch3 = new System.Diagnostics.Stopwatch();
+                // stopWatch3.Start();
+                
+                BorderType border = BorderType.orig;
+                if (clsOut == true)
+                    border = BorderType.smooth;
+                Utils.Mesh.Relax (engine.utilFrags, clsRlx * 5, 3, border); // TODO put iters in UI
+                
+                // stopWatch3.Stop();
+                // Debug.Log("clsRlx " + clsRlx);
+                // Debug.Log("SmoothVerts " + stopWatch3.Elapsed.TotalMilliseconds + " ms.");
+            } 
+        }
+        
         // Get materials
         Material[] GetMaterials(int i)
         {
@@ -1322,6 +1374,54 @@ namespace RayFire
             sh.engine.utilFrags = null;
         }
         
+        // Fragments rescale without fragment
+        public static void InteractiveScale(RayfireShatter sh)
+        {
+            if (sh.interactive == false)
+                return;
+            
+            if (sh.engine == null)
+                return;
+            
+            // Recache with new properties
+            sh.engine.interScale  = sh.PreviewScale();
+            
+            // Restore original scale
+            //for (int i = 0; i < sh.engine.utilFrags.Length; i++)
+            //    sh.engine.utilFrags[i][0].SetData (sh.engine.sclVerts[i], sh.engine.sclTris[i]);
+            
+            // Scale interactive mesh
+            Utils.Mesh.ScaleMeshes(sh.engine.utilFrags, ref sh.engine.interVerts, sh.engine.interScale);
+            
+            // Centerize
+            sh.engine.centroids = Utils.Mesh.Centerize(sh.engine.utilFrags);
+            
+            // Set matrices
+            sh.engine.centMatrices = sh.engine.FlatHierarchy(sh.transform, false);
+            sh.engine.flatMatrices = GetFlatMatrices (sh.engine.renderers, sh.engine.mainRoot.transform);
+
+            // Transform meshes
+            Utils.Mesh.Transform (sh.engine.utilFrags, sh.engine.centMatrices);
+            
+            // Set changed meshes
+            for (int i = 0; i < sh.engine.utilFrags.Length; i++)
+            {
+                if (sh.intMfs[i] == null)
+                    continue;
+                
+                // Create fragment mesh
+                Mesh fragUnityMesh = CreateMesh (sh.engine.utilFrags[i][0], sh.engine.fragMaps[i][0]);
+                fragUnityMesh.name = sh.intMfs[i].name;
+                
+                // Set mesh to meshfilter
+                sh.intMfs[i].sharedMesh = fragUnityMesh;
+                
+                // Set local fragment position
+                SetLocalPosition (sh.engine, sh.intMfs[i].transform, i, 0);
+            }
+        }
+        
+        
         // Stop interactive mode
         public static void InteractiveStop(RayfireShatter sh)
         {
@@ -1366,6 +1466,27 @@ namespace RayFire
             {
                 sh.intMfs.Add (fragments[i].GetComponent<MeshFilter>());
                 sh.intMrs.Add (fragments[i].GetComponent<Renderer>());
+            }
+        }
+        
+        // Set Fragmentation Type by Shatter
+        static void InteractiveCombine(RFEngine engine)
+        {
+            // Build combined interactive Mesh
+            if (engine.interactive == true)
+            {
+                engine.utilFrags = Utils.Mesh.CombineMeshes (engine.utilFrags, out engine.interVerts);
+                
+                /*
+                // Save scale data
+                engine.sclVerts = new Vector3[engine.utilFrags.Length][];
+                engine.sclTris  = new int[engine.utilFrags.Length][];
+                for (int i = 0; i < engine.utilFrags.Length; i++)
+                {
+                    engine.sclVerts[i] = engine.utilFrags[i][0].GetVerts();
+                    engine.sclTris[i]  = engine.utilFrags[i][0].GetTris();
+                }
+                */
             }
         }
         
@@ -1644,13 +1765,13 @@ namespace RayFire
         /// /////////////////////////////////////////////////////////
         
         // Start MultiFrame Caching coroutine
-        void StartMultiFrameCaching(RayfireRigid rg, bool combine, int elements, int faceFlt, bool outCap, bool smooth, int clsCount, int clsLayers, int clsSeed, bool clsRed)
+        void StartMultiFrameCaching(RayfireRigid rg, bool combine, bool dec, int elements, int faceFlt, bool outCap, bool smooth, int clsCount, int clsLayers, int clsSeed, bool clsRed, float clsRlx, bool clsOut, bool clsTsf)
         {
-            rg.StartCoroutine (RuntimeCachingCor(rg, combine, elements, faceFlt, outCap, smooth, clsCount, clsLayers, clsSeed, clsRed));
+            rg.StartCoroutine (RuntimeCachingCor(rg, combine, dec, elements, faceFlt, outCap, smooth, clsCount, clsLayers, clsSeed, clsRed, clsRlx, clsOut, clsTsf));
         }
         
         // Cor to fragment mesh over several frames
-        IEnumerator RuntimeCachingCor (RayfireRigid scr, bool combine, int element, int faceFlt, bool outCap, bool smooth, int clsCount, int clsLayers, int clsSeed, bool clsRed)
+        IEnumerator RuntimeCachingCor (RayfireRigid scr, bool combine, bool decomp, int element, int faceFlt, bool outCap, bool smooth, int clsCount, int clsLayers, int clsSeed, bool clsRed, float clsRlx, bool clsOut, bool clsTsf)
         {
             // Caching in progress
             scr.mshDemol.ch.inProgress = true;
@@ -1697,7 +1818,7 @@ namespace RayFire
                 bool firstPass = i == 0;
                 
                 // Fragment
-                perFrameFrags.Add(Utils.Mesh.Fragment (scr.mshDemol.engine.sliceData, combine, scr.mshDemol.engine.edgeFlags, element * 0.01f, fragSize, faceFlt, planarVrt, planarThr, firstPass));
+                perFrameFrags.Add(Utils.Mesh.Fragment (scr.mshDemol.engine.sliceData, combine, scr.mshDemol.engine.edgeFlags, element * 0.01f, fragSize, faceFlt, planarVrt, planarThr, firstPass, decomp));
 
                 yield return null;
             }
@@ -1710,7 +1831,7 @@ namespace RayFire
             // stopWatch3.Start();
             
             // STEP 4. Post slicing ops
-            PostFragmentation (scr.mshDemol.engine, scr.materials, outCap, smooth, clsCount, clsLayers, clsSeed, clsRed);
+            PostFragmentation (scr.mshDemol.engine, scr.materials, outCap, smooth, clsCount, clsLayers, clsSeed, clsRed, clsRlx, clsOut, clsTsf);
             
             // stopWatch3.Stop();
             // Debug.Log("PostFragmentation " + stopWatch3.Elapsed.TotalMilliseconds + " ms.");
@@ -1802,7 +1923,7 @@ namespace RayFire
             }
         }
         
-        static void ComputeMaps(RFEngine engine, Color innerColor, bool smoothInner) 
+        static void ComputeMaps(RFEngine engine, Color innerColor, bool smoothInner = false, bool checkOrigVerts = false) 
         {
             for (int i = 0; i < engine.utilFrags.Length; ++i)
             {
@@ -1812,13 +1933,13 @@ namespace RayFire
                     engine.fragMaps[i][t].BuildBary (engine.utilMeshes[i], engine.utilFrags[i][t]);
 
                     if (engine.skinFlags[i] == false)
-                        engine.fragMaps[i][t].ComputeNormals (engine.origMaps[i], engine.utilMeshes[i], engine.utilFrags[i][t], bakeTN, null, null, smoothInner);
+                        engine.fragMaps[i][t].ComputeNormals (engine.origMaps[i], engine.utilMeshes[i], engine.utilFrags[i][t], bakeTN, null, null, smoothInner, checkOrigVerts);
                     else
-                        engine.fragMaps[i][t].ComputeNormals (engine.origMaps[i], engine.utilMeshes[i], engine.utilFrags[i][t], bakeTN, engine.origMeshes[i].bindposes, ((SkinnedMeshRenderer)engine.renderers[i]).bones, smoothInner);
+                        engine.fragMaps[i][t].ComputeNormals (engine.origMaps[i], engine.utilMeshes[i], engine.utilFrags[i][t], bakeTN, engine.origMeshes[i].bindposes, ((SkinnedMeshRenderer)engine.renderers[i]).bones, smoothInner, checkOrigVerts);
 
                     engine.fragMaps[i][t].RestoreOrigUV (engine.origMaps[i], engine.utilMeshes[i], engine.utilFrags[i][t]);
                     engine.fragMaps[i][t].ComputeVertexColors (engine.origMaps[i], engine.utilMeshes[i], engine.utilFrags[i][t], innerColor);
-                    engine.fragMaps[i][t].ComputeTangents (engine.origMaps[i], engine.utilMeshes[i], engine.utilFrags[i][t], bakeTN);
+                    engine.fragMaps[i][t].ComputeTangents (engine.origMaps[i], engine.utilMeshes[i], engine.utilFrags[i][t], bakeTN, checkOrigVerts);
                 }
             }
         }
@@ -1966,6 +2087,7 @@ namespace RayFire
         public static void CacheRuntime(RayfireRigid rg) {}
         public static void InteractiveStart(RayfireShatter scr) {}
         public static void InteractiveChange(RayfireShatter scr) {}
+        public static void InteractiveScale(RayfireShatter scr) {}
         public static void InteractiveStop(RayfireShatter sh) {}
         public static void InteractiveFragment(RayfireShatter sh) {}
 

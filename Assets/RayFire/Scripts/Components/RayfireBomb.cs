@@ -582,7 +582,7 @@ namespace RayFire
                     for (int i = 0; i < deletionProjectiles.Count; i++)
                     {
                         if (deletionProjectiles[i].rigid != null)
-                            RayfireMan.DestroyFragment (deletionProjectiles[i].rigid, null, deletionProjectiles[i].rigid.reset.destroyDelay);
+                            RayfireMan.DestroyFragment (deletionProjectiles[i].rigid, null, deletionProjectiles[i].rigid.reset.del);
                         else
                             Destroy (deletionProjectiles[i].rb.gameObject); 
                     }

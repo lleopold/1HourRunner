@@ -351,15 +351,21 @@ namespace RayFireEditor
             {
                 EditorGUI.indentLevel++;
                 RFUI.IntSlider (sp_pol_id, pl_id_min, pl_id_max, TextDst.gui_pol_id);
+                if (sp_pol_id.intValue == 0)
+                    RFUI.HelpBox (TextDst.str_id, MessageType.Info, false);
+                
                 RFUI.PropertyField (sp_pol_en,  TextDst.gui_pol_en);
-                RFUI.PropertyField (sp_pol_war, TextDst.gui_pol_war);
-                RFUI.IntSlider (sp_pol_cap, pl_cap_min, pl_cap_max, TextDst.gui_pol_cap);
-                RFUI.IntSlider (sp_pol_rat, pl_rat_min, pl_rat_max, TextDst.gui_pol_rat);
-                RFUI.PropertyField (sp_pol_skp, TextDst.gui_pol_skp);
-                RFUI.PropertyField (sp_pol_reu, TextDst.gui_pol_reu);
-                if (dust.pool.reuse == true)
-                    RFUI.IntSlider (sp_pol_ovf, pl_ovf_min, pl_ovf_max, TextDst.gui_pol_ovf);
-
+                if (sp_pol_en.boolValue == true)
+                {
+                    RFUI.PropertyField (sp_pol_war, TextDst.gui_pol_war);
+                    RFUI.IntSlider (sp_pol_cap, pl_cap_min, pl_cap_max, TextDst.gui_pol_cap);
+                    RFUI.IntSlider (sp_pol_rat, pl_rat_min, pl_rat_max, TextDst.gui_pol_rat);
+                    RFUI.PropertyField (sp_pol_skp, TextDst.gui_pol_skp);
+                    RFUI.PropertyField (sp_pol_reu, TextDst.gui_pol_reu);
+                    if (dust.pool.reuse == true)
+                        RFUI.IntSlider (sp_pol_ovf, pl_ovf_min, pl_ovf_max, TextDst.gui_pol_ovf);
+                }
+                
                 // Caption
                 if (dust.pool.enable == true && Application.isPlaying == true)
                 {

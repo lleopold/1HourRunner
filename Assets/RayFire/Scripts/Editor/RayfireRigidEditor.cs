@@ -190,6 +190,7 @@ namespace RayFireEditor
         SerializedProperty sp_msh_rnt_sk;
         SerializedProperty sp_msh_adv_slc;
         SerializedProperty sp_msh_adv_cmb;
+        SerializedProperty sp_msh_adv_dec;
         SerializedProperty sp_msh_adv_cap;
         SerializedProperty sp_msh_adv_ptr;
         SerializedProperty sp_msh_adv_col;
@@ -337,6 +338,7 @@ namespace RayFireEditor
             sp_msh_rnt_sk  = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.ch) + "." + nameof(rigid.mshDemol.ch.skp));
             sp_msh_adv_slc = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.prp) + "." + nameof(rigid.mshDemol.prp.slc));
             sp_msh_adv_cmb = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.prp) + "." + nameof(rigid.mshDemol.prp.cmb));
+            sp_msh_adv_dec = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.prp) + "." + nameof(rigid.mshDemol.prp.dec));
             sp_msh_adv_cap = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.prp) + "." + nameof(rigid.mshDemol.prp.cap));
             sp_msh_adv_ptr = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.prp) + "." + nameof(rigid.mshDemol.prp.ptr));
             sp_msh_adv_col = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.prp) + "." + nameof(rigid.mshDemol.prp.col));
@@ -409,13 +411,13 @@ namespace RayFireEditor
             sp_fad_sh    = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.shardAmount));
             
             // Reset Serialized properties
-            sp_res_tm = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.transform));
-            sp_res_dm = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.damage));
-            sp_res_cn = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.connectivity));
-            sp_res_ac = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.action));
-            sp_res_dl = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.destroyDelay));
+            sp_res_tm = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.trs));
+            sp_res_dm = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.dmg));
+            sp_res_cn = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.con));
+            sp_res_ac = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.act));
+            sp_res_dl = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.del));
             sp_res_ms = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.mesh));
-            sp_res_fr = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.fragments));
+            sp_res_fr = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.frg));
             
             // Reorderable list
             rl_ref_list = new ReorderableList(serializedObject, sp_ref_rnd, true, true, true, true)
@@ -711,7 +713,8 @@ namespace RayFireEditor
             if (fld_prp == true)
             {
                 EditorGUI.indentLevel++;
-                RFUI.PropertyField (sp_msh_adv_slc, TextMsh.gui_msh_adv_slc);
+                if (rigid.mshDemol.use == false)
+                    RFUI.PropertyField (sp_msh_adv_slc, TextMsh.gui_msh_adv_slc);
                 RFUI.PropertyField (sp_msh_rnt, TextMsh.gui_msh_rnt);
                 if (rigid.mshDemol.ch.tp != CachingType.Disabled)
                 {
@@ -726,8 +729,15 @@ namespace RayFireEditor
                 RFUI.PropertyField (sp_msh_adv_col, TextMsh.gui_msh_adv_col);
                 if (rigid.mshDemol.prp.col != RFColliderType.None)
                     RFUI.Slider (sp_msh_adv_szf, size_adv_min, size_adv_max, TextMsh.gui_msh_adv_szf);
-                RFUI.PropertyField (sp_msh_adv_cap, TextMsh.gui_msh_adv_cap);
-                RFUI.PropertyField (sp_msh_adv_cmb, TextMsh.gui_msh_adv_cmb);
+                
+                if (rigid.mshDemol.use == false)
+                {
+                    RFUI.PropertyField (sp_msh_adv_cap, TextMsh.gui_msh_adv_cap);
+                    RFUI.PropertyField (sp_msh_adv_cmb, TextMsh.gui_msh_adv_cmb);
+                    RFUI.PropertyField (sp_msh_adv_dec, TextMsh.gui_msh_adv_dec);
+                    
+                }
+                
                 RFUI.PropertyField (sp_msh_adv_ptr, TextSht.gui_adv_ptr);
                 GUI_Layer_Tag();
                 
@@ -996,10 +1006,10 @@ namespace RayFireEditor
                 {
                     RFUI.Caption (TextRes.gui_cap_dml);
                     RFUI.PropertyField (sp_res_ac, TextRes.gui_res_ac);
-                    if (rigid.reset.action == RFReset.PostDemolitionType.DestroyWithDelay)
+                    if (rigid.reset.act == RFReset.PostDemolitionType.DestroyWithDelay)
                         RFUI.Slider (sp_res_dl, reset_del_min, reset_del_max, TextRes.gui_res_dl);
                     
-                    if (ReuseState (rigid) == true && rigid.reset.action == RFReset.PostDemolitionType.DeactivateToReset)
+                    if (ReuseState (rigid) == true && rigid.reset.act == RFReset.PostDemolitionType.DeactivateToReset)
                     {
                         RFUI.Caption (TextRes.gui_cap_reu);
                         RFUI.PropertyField (sp_res_ms, TextRes.gui_res_ms);

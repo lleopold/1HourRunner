@@ -347,14 +347,14 @@ namespace RayFire
             shard.fade = 3;
             
             // Not going to be reused
-            if (root.reset.action == RFReset.PostDemolitionType.DestroyWithDelay)
+            if (root.reset.act == RFReset.PostDemolitionType.DestroyWithDelay)
             {
                 UnityEngine.Object.Destroy (shard.rb);
                 UnityEngine.Object.Destroy (shard.col);
             }
 
             // Going to be reused 
-            else if (root.reset.action == RFReset.PostDemolitionType.DeactivateToReset)
+            else if (root.reset.act == RFReset.PostDemolitionType.DeactivateToReset)
             {
                 shard.rb.isKinematic = true;
                 shard.col.enabled    = false;

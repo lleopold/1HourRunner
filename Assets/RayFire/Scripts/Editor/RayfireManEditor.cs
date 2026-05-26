@@ -18,8 +18,8 @@ namespace RayFireEditor
 
 
         // Minimum & Maximum ranges
-        const float multiplier_min     = 0;
-        const float multiplier_max     = 1f;
+        const float grav_mlt_min       = -2;
+        const float grav_mlt_max       = 2f;
         const float collider_size_min  = 0;
         const float collider_size_max  = 1f;
         const int   coplanar_verts_min = 0;
@@ -52,7 +52,6 @@ namespace RayFireEditor
         SerializedProperty sp_phy_int;
         SerializedProperty sp_phy_mul;
         SerializedProperty sp_phy_col;
-        SerializedProperty sp_phy_cop;
         SerializedProperty sp_phy_cok;
         SerializedProperty sp_col_mesh;
         SerializedProperty sp_col_cls;
@@ -98,7 +97,6 @@ namespace RayFireEditor
             sp_phy_mul  = serializedObject.FindProperty(nameof(man.multiplier));
             sp_phy_int  = serializedObject.FindProperty(nameof(man.interpolation));
             sp_phy_col  = serializedObject.FindProperty(nameof(man.colliderSize));
-            sp_phy_cop  = serializedObject.FindProperty(nameof(man.coplanarVerts));
             sp_phy_cok  = serializedObject.FindProperty(nameof(man.cookingOptions));
             sp_col_mesh = serializedObject.FindProperty(nameof(man.meshCollision));
             sp_col_cls  = serializedObject.FindProperty(nameof(man.clusterCollision));
@@ -181,14 +179,17 @@ namespace RayFireEditor
         void GUI_Physics()
         {
             RFUI.CaptionBox (TextMan.gui_cap_phy);
+            
+            EditorGUI.BeginChangeCheck();
             RFUI.PropertyField (sp_phy_set, TextMan.gui_phy_set);
             if (man.setGravity == true)
-                RFUI.Slider (sp_phy_mul, multiplier_min, multiplier_max, TextMan.gui_phy_mul);
+                RFUI.Slider (sp_phy_mul, grav_mlt_min, grav_mlt_max, TextMan.gui_phy_mul);
             RFUI.PropertyField (sp_phy_int, TextMan.gui_phy_int);
-
+            if (EditorGUI.EndChangeCheck() == true && Application.isPlaying == true)
+                man.SetGravity();
+            
             RFUI.CaptionBox (TextMan.gui_cap_col);
             RFUI.Slider (sp_phy_col, collider_size_min,  collider_size_max,  TextMan.gui_phy_col);
-            RFUI.IntSlider (sp_phy_cop, coplanar_verts_min, coplanar_verts_max, TextMan.gui_phy_cop);
             RFUI.PropertyField (sp_phy_cok, TextMan.gui_phy_cok);
         }
 
@@ -213,13 +214,19 @@ namespace RayFireEditor
             RFUI.Slider (sp_mat_min, minimum_mass_min, minimum_mass_max, TextMan.gui_mat_min);
             RFUI.Slider (sp_mat_max, maximum_mass_min, maximum_mass_max, TextMan.gui_mat_max);
             
+            
             EditorGUI.BeginChangeCheck();
             fld_mat = EditorGUILayout.Foldout (fld_mat, TextMan.gui_mat_pres, true);
             if (fld_mat == true)
+            {
                 GUI_Preset();
+                SetUiToMat ((MaterialType)sp_mat_type.intValue);
+            }
             if (EditorGUI.EndChangeCheck() == true)
+            {
                 SetMatToUi ((MaterialType)sp_mat_type.intValue);
-            
+                EditorPrefs.SetBool (TextKeys.man_fld_mat, fld_mat);
+            }
         }
 
         void GUI_Preset()
@@ -230,6 +237,7 @@ namespace RayFireEditor
             RFUI.PropertyField (sp_mat_type, TextMan.gui_mat_type);
             if (EditorGUI.EndChangeCheck() == true)
                 SetMatToUi ((MaterialType)sp_mat_type.intValue);
+            
             EditorGUI.BeginChangeCheck();
             RFUI.Caption (TextMan.gui_cap_dm);
             RFUI.PropertyField (sp_mat_dest, TextMan.gui_mat_dest);
@@ -252,20 +260,22 @@ namespace RayFireEditor
         {
             switch (type)
             { 
-                case MaterialType.Concrete: { SetUiToMat (man.materialPresets.concrete); break; }
-                case MaterialType.Brick: { SetUiToMat (man.materialPresets.brick); break; }
-                case MaterialType.Glass: { SetUiToMat (man.materialPresets.glass); break; }
-                case MaterialType.Rubber: { SetUiToMat (man.materialPresets.rubber); break; }
-                case MaterialType.Ice: { SetUiToMat (man.materialPresets.ice); break; }
-                case MaterialType.Wood: { SetUiToMat (man.materialPresets.wood); break; }
-                case MaterialType.HeavyMetal: { SetUiToMat (man.materialPresets.heavyMetal); break; }
-                case MaterialType.LightMetal: { SetUiToMat (man.materialPresets.lightMetal); break; }
-                case MaterialType.DenseRock: { SetUiToMat (man.materialPresets.denseRock); break; }
-                case MaterialType.PorousRock: { SetUiToMat (man.materialPresets.porousRock); break; }
+                case MaterialType.Concrete: { SetUiToMat (ref man.materialPresets.concrete); break; }
+                case MaterialType.Brick: { SetUiToMat (ref man.materialPresets.brick); break; }
+                case MaterialType.Glass: { SetUiToMat (ref man.materialPresets.glass); break; }
+                case MaterialType.Rubber: { SetUiToMat (ref man.materialPresets.rubber); break; }
+                case MaterialType.Ice: { SetUiToMat (ref man.materialPresets.ice); break; }
+                case MaterialType.Wood: { SetUiToMat (ref man.materialPresets.wood); break; }
+                case MaterialType.HeavyMetal: { SetUiToMat (ref man.materialPresets.heavyMetal); break; }
+                case MaterialType.LightMetal: { SetUiToMat (ref man.materialPresets.lightMetal); break; }
+                case MaterialType.DenseRock: { SetUiToMat (ref man.materialPresets.denseRock); break; }
+                case MaterialType.PorousRock: { SetUiToMat (ref man.materialPresets.porousRock); break; }
             }
+            
+            RFUI.SetDirty (man.gameObject);
         }
 
-        void SetUiToMat (RFMaterial mat)
+        void SetUiToMat (ref RFMaterial mat)
         {
             mat.destructible    = sp_mat_dest.boolValue;
             mat.solidity        = sp_mat_sol.intValue;
@@ -293,6 +303,9 @@ namespace RayFireEditor
                 case MaterialType.DenseRock: { SetMatToUi (man.materialPresets.denseRock); break; }
                 case MaterialType.PorousRock: { SetMatToUi (man.materialPresets.porousRock); break; }
             }
+            
+            
+            RFUI.SetDirty (man.gameObject);
         }
 
         void SetMatToUi (RFMaterial mat)
@@ -396,6 +409,10 @@ namespace RayFireEditor
 
         void UI_Info()
         {
+            // Disable for deactivated
+            if (man.gameObject.activeSelf == false)
+                return;
+            
             RFUI.CaptionBox (TextMan.gui_cap_inf);
 
             if (RayfireMan.inst != null)
@@ -405,7 +422,7 @@ namespace RayFireEditor
             
             if (Application.isPlaying == true)
             {
-                if (man.fragments.enable == true && man.fragments.queue.Count > 0)
+                if (man.fragments.enable == true && man.fragments.queue != null && man.fragments.queue.Count > 0)
                     GUILayout.Label (TextMan.str_rigs + man.fragments.queue.Count);
                 
                 RFUI.Space ();

@@ -6,6 +6,7 @@ namespace RayFire
     /// <summary>
     /// Rayfire man physical material class.
     /// </summary>
+    [Serializable]
     public class RFMaterial
     {
         private string         name;

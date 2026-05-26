@@ -270,8 +270,11 @@ namespace RayFire
                 mRnd = gameObject.AddComponent<MeshRenderer>();
 
             // Init reset lists
-            if (reset.action == RFReset.PostDemolitionType.DeactivateToReset)
+            if (reset.act == RFReset.PostDemolitionType.DeactivateToReset)
                 lim.desc = new List<RayfireRigid>();
+
+            // Set contact point to object position
+            lim.contactVector3 = tsf.position;
         }
         
         // Define components
@@ -538,7 +541,6 @@ namespace RayFire
         {
             // Reset
             lim.LocalReset();
-            mshDemol.LocalReset();
             clsDemol.LocalReset();
             
             lim.birthTime = Time.time + Random.Range (0f, 0.05f);
@@ -830,7 +832,7 @@ namespace RayFire
             RFDemolitionEvent.RigidDemolitionEvent (this);
             
             // Destroy demolished object
-            RayfireMan.DestroyFragment (this, rtP, reset.destroyDelay);
+            RayfireMan.DestroyFragment (this, rtP, reset.del);
         }
         
         /// /////////////////////////////////////////////////////////
@@ -988,7 +990,7 @@ namespace RayFire
 
             // Destroy original
             if (IsMesh == true)
-                RayfireMan.DestroyFragment (this, rtP, reset.destroyDelay);
+                RayfireMan.DestroyFragment (this, rtP, reset.del);
         }
         
         /// /////////////////////////////////////////////////////////
@@ -1014,7 +1016,7 @@ namespace RayFire
                             fragments[i].physics.SaveInitTransform (fragments[i].tsf);
 
                     // Save is connectivity backup cluster
-                    if (act.cnt != null && reset.connectivity == true )
+                    if (act.cnt != null && reset.con == true )
                         if (act.cnt.backup != null)
                             RFBackupCluster.SaveTmRecursive (act.cnt.backup.cluster);
                 }

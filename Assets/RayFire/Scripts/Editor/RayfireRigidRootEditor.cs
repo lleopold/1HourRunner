@@ -248,9 +248,9 @@ namespace RayFireEditor
             sp_fad_sh    = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.shardAmount));
             
             // Reset Serialized properties
-            sp_res_tm = serializedObject.FindProperty(nameof(root.reset) + "." + nameof(root.reset.transform));
-            sp_res_dm = serializedObject.FindProperty(nameof(root.reset) + "." + nameof(root.reset.damage));
-            sp_res_cn = serializedObject.FindProperty(nameof(root.reset) + "." + nameof(root.reset.connectivity));
+            sp_res_tm = serializedObject.FindProperty(nameof(root.reset) + "." + nameof(root.reset.trs));
+            sp_res_dm = serializedObject.FindProperty(nameof(root.reset) + "." + nameof(root.reset.dmg));
+            sp_res_cn = serializedObject.FindProperty(nameof(root.reset) + "." + nameof(root.reset.con));
             
             // Foldout
             if (EditorPrefs.HasKey (TextKeys.rot_fld_phy) == true) fld_phy = EditorPrefs.GetBool (TextKeys.rot_fld_phy);

@@ -10,21 +10,21 @@ namespace RayFire
     [Serializable]
     public class RFPhysic
     {
-        public MaterialType   mt; // materialType
-        public PhysicsMaterial ma; // material
-        public MassType       mb; // massBy
-        public float          ms; // mass
-        public RFColliderType ct; // colliderType
-        public bool           pc; // planarCheck
-        public bool           ine;// ignoreNear
-        public bool           gr; // useGravity
-        public int            si; // solverIterations
-        public float          st; // Sleeping threshold
-        public float          dm; // dampening
-        public Rigidbody      rb; // rigidBody
-        public Collider       mc; // meshCollider
-        public List<Collider> cc; // clusterColliders
-        public List<int>      ign;// ignoreList
+        public MaterialType   mt;   // materialType
+        public PhysicsMaterial ma;   // material
+        public MassType       mb;   // massBy
+        public float          ms;   // mass
+        public RFColliderType ct;   // colliderType
+        public bool           pc;   // planarCheck
+        public bool           ine;  // ignoreNear
+        public bool           gr;   // useGravity
+        public int            si;   // solverIterations
+        public float          st;   // Sleeping threshold
+        public float          dm;   // dampening
+        public Rigidbody      rb;   // rigidBody
+        public Collider       mc;   // meshCollider
+        public List<Collider> cc;   // clusterColliders
+        public List<int>      ign;  // ignoreList
         
         // TODO set no serialized
         public                 bool           exclude;

@@ -367,7 +367,7 @@ namespace RayFire
                     // rigids[i].limitations.depth = 1;
                     
                     // Do not destroy after demolition
-                    rigidList[i].reset.action     = RFReset.PostDemolitionType.DeactivateToReset;
+                    rigidList[i].reset.act     = RFReset.PostDemolitionType.DeactivateToReset;
                     rigidList[i].lim.desc = new List<RayfireRigid>();
                     
                     // Subscribe to demolition

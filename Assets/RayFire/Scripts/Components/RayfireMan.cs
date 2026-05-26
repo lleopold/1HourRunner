@@ -15,7 +15,6 @@ namespace RayFire
         public float                      multiplier       = 1f;
         public RigidbodyInterpolation     interpolation    = RigidbodyInterpolation.None;
         public float                      colliderSize     = 0.05f;
-        public int                        coplanarVerts    = 30;
         public MeshColliderCookingOptions cookingOptions   = (MeshColliderCookingOptions)30;
         public CollisionDetectionMode     meshCollision    = CollisionDetectionMode.Discrete;
         public CollisionDetectionMode     clusterCollision = CollisionDetectionMode.Discrete;
@@ -50,12 +49,11 @@ namespace RayFire
         [NonSerialized]        bool      fadeLiveCorState;
         [NonSerialized]        bool      fadeOffCorState;
         [NonSerialized]        bool      actOffCorState;
-        [NonSerialized]        bool      actVelCorState;
         
         // Static
         public static RayfireMan inst;
         public const  int        buildMajor = 2;
-        public const  int        buildMinor = 07;
+        public const  int        buildMinor = 08;
         
         public static MeshColliderCookingOptions cookingOptionsStatic = (MeshColliderCookingOptions)30;
         public static int                        coplanarVertLimit    = 30;
@@ -155,7 +153,6 @@ namespace RayFire
             fadeLiveCorState       = false;
             fadeOffCorState        = false;
             actOffCorState         = false;
-            actVelCorState         = false;
             if (storage != null)
                 storage.inProgress   = false;
         }
@@ -192,11 +189,10 @@ namespace RayFire
             debugStateStatic     = debugState;
             debugBuildStatic     = debugBuild;
             debugEditorStatic    = debugEditor;
-            coplanarVertLimit    = coplanarVerts;
         }
 
         // Set gravity
-        void SetGravity()
+        public void SetGravity()
         {
             if (setGravity == true)
                 Physics.gravity = -9.81f * multiplier * Vector3.up;
@@ -766,7 +762,7 @@ namespace RayFire
         }
         
         // Set root to manager or to the same parent
-        public static void SetFragmentRootParent (Transform tm)
+        public static void SetFragmentRootParent (Transform tm, Transform parentTm)
         {
             if (inst == null)
                 return;
@@ -779,8 +775,10 @@ namespace RayFire
             else if (inst.advancedDemolitionProperties.parent == FragmentParentType.GlobalParent && inst.advancedDemolitionProperties.globalParent != null)
                 tm.parent = inst.advancedDemolitionProperties.globalParent;
             
-            // Local parent is default root location
-            
+            // Local parent
+            else if (inst.advancedDemolitionProperties.parent == FragmentParentType.LocalParent)
+                tm.parent = parentTm;
+
             // Register in storage
             inst.storage.RegisterRoot (tm);
         }
@@ -835,7 +833,7 @@ namespace RayFire
             scr.gameObject.SetActive (false);
 
             // Destroy
-            if (scr.reset.action == RFReset.PostDemolitionType.DestroyWithDelay)
+            if (scr.reset.act == RFReset.PostDemolitionType.DestroyWithDelay)
                 DestroyOp (scr, tm, time);
         }
         
@@ -846,7 +844,7 @@ namespace RayFire
             shard.tm.gameObject.SetActive (false);
             
             // Destroy
-            if (scr.reset.action == RFReset.PostDemolitionType.DestroyWithDelay)
+            if (scr.reset.act == RFReset.PostDemolitionType.DestroyWithDelay)
                 DestroyGo (shard.tm.gameObject);
         }
         
@@ -865,10 +863,10 @@ namespace RayFire
         {
             // Set delay
             if (time == 0)
-                time = scr.reset.destroyDelay;
+                time = scr.reset.del;
 
             // Object is going to be destroyed. Timer is on
-            scr.reset.toBeDestroyed = true;
+            scr.reset.tbd = true;
 
             // Destroy object
             inst.fragments.DestroyOrReset (scr, time);

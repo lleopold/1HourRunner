@@ -24,7 +24,7 @@ namespace RayFire
         public static void BackupConnectedCluster (RayfireRigid scr)
         {
             // No need to save
-            if (scr.reset.action != RFReset.PostDemolitionType.DeactivateToReset)
+            if (scr.reset.act != RFReset.PostDemolitionType.DeactivateToReset)
                 return;
             
             // Do not backup child clusters
@@ -57,7 +57,7 @@ namespace RayFire
         // Restore cluster using backup cluster
         public static void ResetRigidCluster (RayfireRigid scr)
         {
-            if (scr.reset.action == RFReset.PostDemolitionType.DeactivateToReset)
+            if (scr.reset.act == RFReset.PostDemolitionType.DeactivateToReset)
             {
                 // Do not restore child clusters
                 if (scr.clsDemol.cluster.id > 1)
@@ -251,6 +251,8 @@ namespace RayFire
                 cluster.shards[i].pos = cluster.shards[i].tm.position;
                 cluster.shards[i].rot = cluster.shards[i].tm.rotation;
                 cluster.shards[i].scl = cluster.shards[i].tm.localScale;
+                
+                // cluster.shards[i].los = cluster.shards[i].tm.localPosition;
             }
 
             // Repeat for child clusters
@@ -262,13 +264,23 @@ namespace RayFire
         // Save cluster/shards tm
         static void RestoreShardTmRecursive(RFCluster cluster)
         {
-            // Save shards tm
+            
+            //Debug.Log ("--------------");
+            // Load shards tm
             for (int i = 0; i < cluster.shards.Count; i++)
             {
+                
                 cluster.shards[i].tm.SetParent (null);
-                cluster.shards[i].tm.SetPositionAndRotation (cluster.shards[i].pos, cluster.shards[i].rot);
+                //cluster.shards[i].tm.gameObject.SetActive (false);
+                //cluster.shards[i].tm.SetPositionAndRotation (cluster.shards[i].pos, cluster.shards[i].rot);
+                cluster.shards[i].tm.position = cluster.shards[i].pos;
+                cluster.shards[i].tm.rotation = cluster.shards[i].rot;
                 cluster.shards[i].tm.SetParent (cluster.tm, true);
-                cluster.shards[i].tm.localScale = cluster.shards[i].scl;
+                cluster.shards[i].tm.localPosition = cluster.shards[i].los;
+                //cluster.shards[i].tm.localScale = cluster.shards[i].scl;
+                //cluster.shards[i].tm.gameObject.SetActive (true);
+                //Debug.Log (cluster.shards[i].tm.rotation);
+                //Debug.Log (cluster.shards[i].tm.position.y.ToString("F6"));
             }
 
             // Repeat for child clusters
@@ -380,7 +392,7 @@ namespace RayFire
                 return false;
                 
             // Backup disabled
-            if (scr.meshRootHost != null && scr.meshRootHost.reset.connectivity == false)
+            if (scr.meshRootHost != null && scr.meshRootHost.reset.con == false)
             {
                 if (warning == true)
                     RayfireMan.Log (RFLog.rig_dbgn + scr.name + RFLog.rig_conRes, scr.gameObject);
@@ -388,7 +400,7 @@ namespace RayFire
             }
             
             // Backup disabled
-            if (scr.rigidRootHost != null && scr.rigidRootHost.reset.connectivity == false)
+            if (scr.rigidRootHost != null && scr.rigidRootHost.reset.con == false)
             {
                 if (warning == true)
                     RayfireMan.Log (RFLog.rig_dbgn + scr.name + RFLog.rig_conRes, scr.gameObject);

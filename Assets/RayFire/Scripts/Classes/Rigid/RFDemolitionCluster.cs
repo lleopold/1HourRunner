@@ -354,7 +354,7 @@ namespace RayFire
             // Skip if not runtime
             if (scr.dmlTp != DemolitionType.Runtime)
                 return true;
-
+            
             // TODO inherit original cluster velocity
             
             // Cluster demolition
@@ -544,7 +544,7 @@ namespace RayFire
                 detachShards.Add (scr.clsDemol.cluster.shards[i]);
 
             // Clear list if not going to be used
-            if (scr.reset.action == RFReset.PostDemolitionType.DestroyWithDelay)
+            if (scr.reset.act == RFReset.PostDemolitionType.DestroyWithDelay)
                 scr.clsDemol.cluster.shards.Clear();
 
             // Create child clusters and shards
@@ -1014,7 +1014,7 @@ namespace RayFire
                     cluster.bound = RFCluster.GetClusterBound(cluster);
             }
 
-            // Create root for new connected cluster, set it's parent and register in storage
+            // Create root for new connected cluster, set its parent and register in storage
             if (cluster.tm == null)
             {
                 // Create root
@@ -1027,7 +1027,7 @@ namespace RayFire
             
             // Set parent for nested cluster root, register in storage if not resettable 
             else
-                RayfireMan.SetParentByManager (cluster.tm, scr.tsf, scr.reset.action != RFReset.PostDemolitionType.DeactivateToReset);
+                RayfireMan.SetParentByManager (cluster.tm, scr.tsf, scr.reset.act != RFReset.PostDemolitionType.DeactivateToReset);
 
             // Parent to main root. Nested cluster already has all shards rooted
             if (scr.objTp == ObjectType.ConnectedCluster)
@@ -1044,6 +1044,10 @@ namespace RayFire
                     // Set cluster tm as parent for Rigid to track parent tm later
                     if (cluster.shards[s].rigid != null)
                         cluster.shards[s].rigid.rtP = cluster.tm;
+
+                    // Reset damage
+                    if (cluster.shards[s].dm > scr.damage.max)
+                        cluster.shards[s].dm = 0;
                 }
             }
             
@@ -1104,8 +1108,8 @@ namespace RayFire
                 : DemolitionType.None;
             
             // Do not destroy fragment because cluster could be reused 
-            if (scr.reset.action == RFReset.PostDemolitionType.DeactivateToReset)
-                cluster.rigid.reset.action = RFReset.PostDemolitionType.DeactivateToReset;
+            if (scr.reset.act == RFReset.PostDemolitionType.DeactivateToReset)
+                cluster.rigid.reset.act = RFReset.PostDemolitionType.DeactivateToReset;
             
             // Set cluster
             cluster.initialized = true;
@@ -1461,8 +1465,8 @@ namespace RayFire
                 }
 
             // Do not destroy fragment because cluster could be reused 
-            if (scr.reset.action == RFReset.PostDemolitionType.DeactivateToReset)
-                shard.rigid.reset.action = RFReset.PostDemolitionType.DeactivateToReset;
+            if (scr.reset.act == RFReset.PostDemolitionType.DeactivateToReset)
+                shard.rigid.reset.act = RFReset.PostDemolitionType.DeactivateToReset;
             
             // Update depth level and amount
             shard.rigid.lim.currentDepth = scr.lim.currentDepth + 1;

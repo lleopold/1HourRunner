@@ -15,7 +15,7 @@ namespace RayFire
         public bool    act; // Activatable
         public Bounds  bnd;
         public SimType sm;
-        public float   dm;
+        public float   dm;  // Damage
 
         // Neib info
         public int         nAm; // Initial amount of neibs

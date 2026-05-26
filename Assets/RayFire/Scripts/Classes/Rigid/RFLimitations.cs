@@ -156,7 +156,7 @@ namespace RayFire
                     scr.physics.exclude = true;
                 }
                 
-                // Awake or Runtime Convertation to Connectivity but fragments are not Inactive/Kinematik
+                // Awake or Runtime Convert to Connectivity but fragments are not Inactive/Kinematic
                 if (scr.mshDemol.cnv == RFDemolitionMesh.ConvertType.Connectivity)
                 {
                     if (scr.mshDemol.sim != FragSimType.Inactive && scr.mshDemol.sim != FragSimType.Kinematic)
@@ -172,8 +172,7 @@ namespace RayFire
                     if (scr.mFlt != null && scr.mFlt.sharedMesh != null && scr.mFlt.sharedMesh.isReadable == false)
                     {
                         RayfireMan.Log (RFLog.rig_dbgn + scr.name + RFLog.rig_noRead, scr.mFlt.gameObject);
-                        scr.dmlTp         = DemolitionType.None;
-                        scr.mshDemol.badMesh = 10;
+                        scr.dmlTp = DemolitionType.None;
                     }
                 }
             }
@@ -278,12 +277,6 @@ namespace RayFire
             // Awake prefragmented check
             else if (scr.dmlTp == DemolitionType.AwakePrefragment)
             {
-                if (RayfireMan.debugStateStatic == true)
-                {
-                    if (scr.HasFragments == true)
-                        RayfireMan.Log (RFLog.rig_dbgn + scr.name + RFLog.rig_awk3, scr.gameObject);
-                }
-
                 // Disable runtime caching
                 if (scr.mshDemol.ch.tp != CachingType.Disabled)
                 {
@@ -326,7 +319,7 @@ namespace RayFire
         // Set descendants 
         public static void SetDescendants (RayfireRigid scr)
         {
-            if (scr.reset.action == RFReset.PostDemolitionType.DestroyWithDelay)
+            if (scr.reset.act == RFReset.PostDemolitionType.DestroyWithDelay)
                 return;
 
             if (scr.lim.anc == null)

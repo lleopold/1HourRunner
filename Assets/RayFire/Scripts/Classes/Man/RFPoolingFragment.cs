@@ -138,7 +138,6 @@ namespace RayFire
             // Add to backpooling
             else
             {
-                Debug.Log (lifeTime);
                 RigidPoolReset (rgBack);
             }
         }

@@ -157,22 +157,16 @@ namespace RayFire
         public const string rig_cnv    = " Convert property set to ";
         public const string rig_noIna  = " but Fragments Sim Type is not Inactive or Kinematik. Convertation disabled.";
         public const string rig_noRead = " Mesh is not readable. Demolition type set to None. Open Import Settings and turn On Read/Write Enabled property.";
-        public const string rig_child2 = " has no children with mesh. Object Excluded from simulation.";
+        public const string rig_child2 = " but has no children with mesh. Object Excluded from simulation.";
         public const string rig_noSkin = " but object has no SkinnedMeshRenderer. Object Excluded from simulation.";
         public const string rig_dml    = " Demolition Type is ";
         public const string rig_dml1   = " but Demolition Type is ";
         public const string rig_dml2   = " but Demolition Type is ";
         public const string rig_noShat = ". Has no Shatter component, but Use Shatter property is On. Use Shatter property was turned Off.";
-        public const string rig_noCch1 = ". Demolition Type set to None. Had precached meshes which were destroyed.";
-        public const string rig_noCch2 = ". Demolition Type set to Runtime. Had precached meshes which were destroyed.";
         public const string rig_frg1   = ". Demolition Type set to None. Had prefragmented objects which were destroyed.";
         public const string rig_frg2   = ". Demolition Type set to Runtime. Had prefragmented objects which were destroyed.";
         public const string rig_rnt    = ". Demolition Type is Runtime, Use Shatter is On. Unsupported fragments type. Runtime Caching supports only Voronoi, Splinters, Slabs and Radial fragmentation types. Runtime Caching was Disabled.";
-        public const string rig_rnt2   = ". Demolition Type is Runtime, Use Shatter is On, Clusters enabled. V1 engine doesn't support clusters and Runtime Caching. Clusters was Disabled.";
-        public const string rig_awk1   = ". Demolition Type set to Awake Precache. Had manually precached Unity meshes which were overwritten.";
         public const string rig_awk2   = ". Demolition Type set to Awake Precache. Had manually prefragmented objects which were destroyed.";
-        public const string rig_awk3   = ". Demolition Type set to Awake Prefragment. Has manually prefragmented objects";
-        public const string rig_awk4   = ". Demolition Type set to Awake Prefragment. Has manually precached Unity meshes.";
         public const string rig_cache  = ". Demolition Type set to Awake Prefragment. Runtime Caching disabled.";
         public const string rig_plane  = " had planar low poly mesh. Object can't get Mesh Collider.";
         public const string rig_init   = ". Demolition Reference object has already initialized Rigid. Set By Method Initialization type or Deactivate reference.";
@@ -206,11 +200,9 @@ namespace RayFire
         public const string sht_noFlt  = ". Object has no mesh to fragment.";
         public const string sht_noTet  = ". Tet fragmentation type is not supported by V2 engine for now.";
         public const string sht_petr   = ". Petrify property enabled. Interactive mode support skinned mesh fragmentation only with enabled Petrify property.";
-        public const string sht_time   = "Rayfire Shatter: Fragmentation time: ";
+        public const string sht_time   = ". Rayfire Shatter: ";
         public const string sht_small  = " is too small.";
         public const string sht_noPnt  = " Point Cloud is empty.";
-        public const string sht_bad1   = " Bad Shatter output mesh.";
-        public const string sht_bad2   = " Bad Slice output mesh.";
         public const string sht_null   = " Null mesh.";
         public const string sht_empt   = " Empty Mesh.";
         public const string sht_low    = " Mesh amount: ";
@@ -225,10 +217,5 @@ namespace RayFire
         public const string sht_noAct = ". Activation sound has no clips to play.";
         public const string sht_noDml = ". Demolition sound has no clips to play.";
         public const string sht_noCol = ". Collision sound has no clips to play.";
-        
-        // RayfireMan.Log ($"{RFLog.rig_dbgn}{scr.name}{RFLog.rig_child}", scr.gameObject);
-        // static float fval = 5f;
-        // Debug.Log ($"String {fval} name: {scr_bmb}, more");
-        // [Flags] https://giannisakritidis.com/blog/Enum-Flags-In-Unity/#to-remove-a-value-the-code-is-equally-simple
     }
 }

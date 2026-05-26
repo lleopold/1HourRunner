@@ -1,13 +1,48 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Object = UnityEngine.Object;
 
 namespace RayFire
 {
+    /// <summary>
+    /// Reset class for Rayfire Rigid component.
+    /// </summary>
     [Serializable]
     public class RFReset
     {
+        /// <summary>
+        /// Reset Child Fragments class for RFReset class.
+        /// </summary>
+        public class RFChildFragment
+        {
+            public Transform    tm;
+            public Vector3      pos;
+            public Quaternion   rot;
+            public Transform    parent;
+            public RayfireRigid rigid;
+            public bool         col;
+
+            // Constructor
+            public RFChildFragment(Transform TM, Transform Parent, RayfireRigid Rigid)
+            {
+                tm     = TM;
+                pos    = TM.transform.localPosition;
+                rot    = TM.transform.localRotation;
+                parent = Parent;
+                rigid  = Rigid;
+                
+                // Has collider component
+                if (TM.GetComponent (typeof(Collider)) != null)
+                {
+                    Rigid.physics.ct = RFColliderType.None;
+                    col              = true;
+                }
+            }
+        }
+        
         public enum PostDemolitionType
         {
             DestroyWithDelay  = 0,
@@ -28,17 +63,18 @@ namespace RayFire
         }
         
         // UI
-        public bool               transform;
-        public bool               damage;
-        public bool               connectivity;
-        public PostDemolitionType action;
-        public float              destroyDelay;
-        public MeshResetType      mesh;
-        public FragmentsResetType fragments;
+        [FormerlySerializedAs ("transform")]    public bool               trs;
+        [FormerlySerializedAs ("damage")]       public bool               dmg;
+        [FormerlySerializedAs ("connectivity")] public bool               con;
+        [FormerlySerializedAs ("action")]       public PostDemolitionType act;
+        [FormerlySerializedAs ("destroyDelay")] public float              del;
+        public                                         MeshResetType      mesh;
+        [FormerlySerializedAs ("fragments")] public    FragmentsResetType frg;
 
         // Non serialized
-        [NonSerialized] public bool toBeDestroyed;
-
+        [NonSerialized] public bool                  tbd; // To be destroyed
+        [NonSerialized] public List<RFChildFragment> childFragments;
+        
         /// /////////////////////////////////////////////////////////
         /// Constructor
         /// /////////////////////////////////////////////////////////
@@ -48,57 +84,57 @@ namespace RayFire
         {
             InitValues();
         }
-        
-        void InitValues()
-        {
-            transform     = true;
-            damage        = true;
-            connectivity  = false;
-            action        = PostDemolitionType.DestroyWithDelay;
-            destroyDelay  = 1;
-            mesh          = MeshResetType.ReuseFragmentMeshes;
-            fragments     = FragmentsResetType.Destroy;
-            toBeDestroyed = false;
-        }
-        
+      
         // Pool Reset
         public void GlobalReset()
         {
             InitValues();
         }
+  
+        void InitValues()
+        {
+            trs  = true;
+            dmg  = true;
+            con  = false;
+            act  = PostDemolitionType.DestroyWithDelay;
+            del  = 1;
+            mesh = MeshResetType.ReuseFragmentMeshes;
+            frg  = FragmentsResetType.Destroy;
+            tbd  = false;
+        }
 
         // Copy from
         public void CopyFrom (RFReset source, ObjectType objectType)
         {
-            transform    = source.transform;
-            damage       = source.damage;
-            action       = source.action;
-            destroyDelay = source.destroyDelay;
+            trs    = source.trs;
+            dmg       = source.dmg;
+            act       = source.act;
+            del = source.del;
             
             // Copy to initial object: mesh root copy
             if (objectType == ObjectType.MeshRoot)
             {
                 mesh      = source.mesh;
-                fragments = source.fragments;
+                frg = source.frg;
             }
 
             // Copy to cluster shards
             else if (objectType == ObjectType.ConnectedCluster)
             {
                 mesh      = source.mesh;
-                fragments = source.fragments;
+                frg = source.frg;
             }
             
             // Copy to demolished mesh fragments
             else if (objectType == ObjectType.Mesh)
             {
                 mesh      = MeshResetType.Destroy;
-                fragments = FragmentsResetType.Destroy;
+                frg = FragmentsResetType.Destroy;
 
                 // Do not keep fragments at destroy if parent not going to reuse fragments or getting destroyed
-                if (source.action == PostDemolitionType.DestroyWithDelay || 
-                    source.fragments == FragmentsResetType.Destroy)
-                    action = PostDemolitionType.DestroyWithDelay;
+                if (source.act == PostDemolitionType.DestroyWithDelay || 
+                    source.frg == FragmentsResetType.Destroy)
+                    act = PostDemolitionType.DestroyWithDelay;
             }
         }
         
@@ -122,7 +158,7 @@ namespace RayFire
             bool demolished = scr.lim.demolished;
 
             // Reset tm
-            if (scr.reset.transform == true)
+            if (scr.reset.trs == true)
                 RestoreTransform(scr);
             
             // Reset activation TODO check if it was Kinematic
@@ -146,6 +182,9 @@ namespace RayFire
             if (demolished == true)
                 ResetMeshDemolition (scr);
             
+            // Reset child fragments
+            ResetChildFragments(scr);
+            
             // Restore cluster even if it was not demolished
             ResetClusterDemolition (scr);
             
@@ -163,8 +202,8 @@ namespace RayFire
             if (scr.gameObject.activeSelf == false)
                 scr.gameObject.SetActive (true);
 
-            // Start all coroutines
-            scr.StartAllCoroutines();
+            // Start all coroutines HAPPENS On Enable
+            // scr.StartAllCoroutines();
             
             // Restart restrictions cors
             if (scr.rest != null)
@@ -226,6 +265,46 @@ namespace RayFire
                 scr.gameObject.SetActive (true);
         }
         
+        // Reset child fragments
+        public static void ResetChildFragments(RayfireRigid scr)
+        {
+            // Only with fragments reuse mode
+            if (scr.reset.frg != FragmentsResetType.Reuse)
+                return;
+            
+            // Skip if has no child fragments
+            if (scr.reset.HasChildFragments == false)
+                return;
+            
+            // TODO sWorks only with Reuse frags or need new property in Reset
+            
+            // Restore position and rotation
+            for (int i = 0; i < scr.reset.childFragments.Count; i++)
+            {
+                scr.reset.childFragments[i].tm.parent        = scr.reset.childFragments[i].parent;
+                scr.reset.childFragments[i].tm.localPosition = scr.reset.childFragments[i].pos;
+                scr.reset.childFragments[i].tm.localRotation = scr.reset.childFragments[i].rot;
+            }
+            
+            // Destroy components // TODO destroy Rigid, collider, rigidbody if had not
+            for (int i = 0; i < scr.reset.childFragments.Count; i++)
+            {
+                if (scr.reset.childFragments[i].rigid != null)
+                {
+                    if (scr.reset.childFragments[i].rigid.physics.rb != null)
+                        Object.DestroyImmediate (scr.reset.childFragments[i].rigid.physics.rb);
+                    if (scr.reset.childFragments[i].col == false)
+                        if (scr.reset.childFragments[i].rigid.physics.mc != null)
+                            Object.DestroyImmediate (scr.reset.childFragments[i].rigid.physics.mc);
+                   
+                    // Reset child frag rigid
+                    scr.reset.childFragments[i].rigid.StopAllCoroutines();
+                    scr.reset.childFragments[i].rigid.initialized = false;
+                }
+            }
+            scr.reset.childFragments = null;
+        }
+
         /// /////////////////////////////////////////////////////////
         /// Rigid Mesh Root
         /// /////////////////////////////////////////////////////////
@@ -489,7 +568,7 @@ namespace RayFire
                 }
 
                 // Fragments need to be reused
-                if (scr.reset.fragments == FragmentsResetType.Reuse)
+                if (scr.reset.frg == FragmentsResetType.Reuse)
                 {
                     // Can be reused. Destroyed if can not
                     if (FragmentReuseState (scr) == true)
@@ -499,11 +578,11 @@ namespace RayFire
                 }
                 
                 // Destroy fragments
-                else if (scr.reset.fragments == FragmentsResetType.Destroy)
+                else if (scr.reset.frg == FragmentsResetType.Destroy)
                     DestroyFragments (scr);
                 
                 // Fragments should be kept in scene. Forget about them
-                else if (scr.reset.fragments == FragmentsResetType.Preserve)
+                else if (scr.reset.frg == FragmentsResetType.Preserve)
                     PreserveFragments (scr);
             }
       
@@ -614,8 +693,6 @@ namespace RayFire
                 scr.rtC.gameObject.SetActive (false);
                 scr.rtC.position = scr.tsf.position;
                 scr.rtC.rotation = scr.tsf.rotation;
-                
-                // V2 rotation to 
             }
 
             // Reset fragments tm
@@ -624,9 +701,12 @@ namespace RayFire
                 // Destroy particles
                 DestroyRigidParticles (scr.fragments[i]);
                 
-                scr.fragments[i].tsf.localScale = scr.fragments[i].physics.initScale;
-                scr.fragments[i].tsf.position = scr.tsf.position + scr.pivots[i];
+                // Pivot not define. Child fragment
+                if (scr.pivots.Length > i) 
+                    scr.fragments[i].tsf.position = scr.tsf.position + scr.pivots[i];
+                
                 scr.fragments[i].tsf.localRotation = Quaternion.identity;
+                scr.fragments[i].tsf.localScale    = scr.fragments[i].physics.initScale;
 
                 // Reset activation TODO check if it was Kinematic
                 if (scr.fragments[i].act.activated == true)
@@ -708,7 +788,7 @@ namespace RayFire
                 return false;
             
             // One of the fragment going to be destroyed TODO make reusable
-            if (scr.fragments.Any (t => t.reset.toBeDestroyed == true))
+            if (scr.fragments.Any (t => t.reset.tbd == true))
                 return false;
             
             // One of the fragment demolished TODO make reusable
@@ -752,7 +832,7 @@ namespace RayFire
             scr.mshDemol.LocalReset();
             scr.clsDemol.LocalReset();
             scr.fading.LocalReset();
-            if (scr.reset.damage == true)
+            if (scr.reset.dmg == true)
                 scr.damage.LocalReset();
             
             // Set physical simulation type. Important. Should after collider material define
@@ -778,5 +858,15 @@ namespace RayFire
                 scr.demolition.played = false;
             }
         }
+        
+        /// /////////////////////////////////////////////////////////
+        /// Getters
+        /// /////////////////////////////////////////////////////////
+        
+        // Child fragments state
+        public bool HasChildFragments { get
+        {
+            return childFragments != null && childFragments.Count > 0;
+        }}
     }
 }

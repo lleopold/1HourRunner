@@ -18,6 +18,13 @@ namespace RayFire
                 Destroy (gameObject);
                 return;
             }
+            
+            // Pooling disabled
+            if (em.enable == false)
+            {
+                Destroy (gameObject);
+                return;
+            }
 
             // Should not be reused anymore
             if (em.reuse == false)

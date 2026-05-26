@@ -418,7 +418,7 @@ namespace RayFire
                 {
                     // Set own rigidroot
                     rigid.rigidRoot      = this;
-                    rigid.reset.action   = reset.action;
+                    rigid.reset.act   = reset.act;
                     rigid.init = RayfireRigid.InitType.ByMethod;
                     
                     // Mesh
@@ -450,7 +450,7 @@ namespace RayFire
                             {
                                 // Set own rigidroot
                                 meshRootRigid.rigidRoot      = this;
-                                meshRootRigid.reset.action   = reset.action;
+                                meshRootRigid.reset.act   = reset.act;
                                 meshRootRigid.init = RayfireRigid.InitType.ByMethod;
                                 
                                 // Mesh
