@@ -1,76 +1,74 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-internal class AimingCircleTrigger : MonoBehaviour
+public class AimingCircleTrigger : MonoBehaviour
 {
-    private HashSet<Collider> zombiesInside = new HashSet<Collider>();
+    private readonly HashSet<Collider> _zombiesInside = new HashSet<Collider>();
+    private readonly Dictionary<Collider, Enemy> _enemyCache = new Dictionary<Collider, Enemy>();
+    private readonly List<Collider> _toRemove = new List<Collider>();
+    private MeshCollider _meshCollider;
+
+    void Awake()
+    {
+        _meshCollider = GetComponent<MeshCollider>();
+    }
 
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Zombie"))
         {
-            zombiesInside.Add(other);
-            Enemy enemyScript = other.GetComponent<Enemy>();
-            if (enemyScript != null)
-            {
-                enemyScript.SetOutline(true);
-            }
+            _zombiesInside.Add(other);
+            Enemy enemy = other.GetComponent<Enemy>();
+            _enemyCache[other] = enemy;
+            enemy?.SetOutline(true);
         }
-    }
-
-    /// <summary>
-    /// works really bad, need to fix
-    /// </summary>
-    void FixedUpdate() // Run after physics updates
-    {
-        //Debug.Log("Checking zombies inside trigger: " + zombiesInside.Count);
-        if (zombiesInside.Count == 0) return;
-
-        List<Collider> zombiesToRemove = new List<Collider>();
-
-        foreach (Collider zombie in zombiesInside)
-        {
-            Vector3 closestPoint = GetComponent<MeshCollider>().ClosestPoint(zombie.transform.position);
-            if (!zombie.bounds.Contains(closestPoint))
-            {
-                //Debug.Log("Zombie is outside the aiming circle!");
-                OnTriggerExit(zombie); // Manually trigger exit
-                zombiesToRemove.Add(zombie);
-            }
-            else
-            {
-                //Debug.Log("Zombie is still inside the aiming circle.");
-            }
-        }
-
-        foreach (Collider zombie in zombiesToRemove)
-        {
-            zombiesInside.Remove(zombie);
-        }
-    }
-    public void ClearAllOutlinedZombies()
-    {
-        foreach (Collider zombie in zombiesInside)
-        {
-            Enemy enemyScript = zombie.GetComponent<Enemy>();
-            if (enemyScript != null)
-            {
-                enemyScript.SetOutline(false);
-            }
-        }
-        zombiesInside.Clear();
     }
 
     void OnTriggerExit(Collider other)
     {
-        //Debug.Log("Zombie exited: " + other.name);
         if (other != null && other.CompareTag("Zombie"))
-        {
-            Enemy enemyScript = other.GetComponent<Enemy>();
-            if (enemyScript != null)
-            {
-                enemyScript.SetOutline(false);
-            }
-        }
+            RemoveZombie(other);
     }
+
+    void FixedUpdate()
+    {
+        if (_zombiesInside.Count == 0) return;
+
+        _toRemove.Clear();
+        foreach (Collider zombie in _zombiesInside)
+        {
+            if (zombie == null)
+            {
+                _toRemove.Add(zombie);
+                continue;
+            }
+            Vector3 closestPoint = _meshCollider.ClosestPoint(zombie.transform.position);
+            if (!zombie.bounds.Contains(closestPoint))
+                _toRemove.Add(zombie);
+        }
+
+        for (int i = 0; i < _toRemove.Count; i++)
+            RemoveZombie(_toRemove[i]);
+    }
+
+    private void RemoveZombie(Collider zombie)
+    {
+        if (_enemyCache.TryGetValue(zombie, out Enemy enemy))
+        {
+            enemy?.SetOutline(false);
+            _enemyCache.Remove(zombie);
+        }
+        _zombiesInside.Remove(zombie);
+    }
+
+    public void ClearAllOutlinedZombies()
+    {
+        foreach (var kvp in _enemyCache)
+            kvp.Value?.SetOutline(false);
+        _zombiesInside.Clear();
+        _enemyCache.Clear();
+    }
+
+    /// <summary>Returns the set of zombie colliders currently inside the aiming circle.</summary>
+    public HashSet<Collider> GetZombiesInside() => _zombiesInside;
 }

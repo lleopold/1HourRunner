@@ -1,16 +1,23 @@
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Assets.Scripts.Game;
 using DamageNumbersPro;
 using UnityEngine;
+using static StickDirectionAnalyzer;
 
 namespace ZombieGame
 {
     /// <summary>
     /// Handles shooting, reload, recoil, muzzle flash, and bullet spawning.
+    /// Shooting uses a probability roll system — bullets are cosmetic only.
     /// </summary>
     public class PlayerWeaponController : MonoBehaviour
     {
+        // ── Constants ─────────────────────────────────────────────────────────
+        private const float SecondaryPenaltyMultiplier = 0.7f;
+        private const float MissConeHalfAngle = 3f; // degrees
+
         // ── State ─────────────────────────────────────────────────────────────
         public bool IsShooting { get; set; }
 
@@ -29,13 +36,23 @@ namespace ZombieGame
         private UIT_GameScreen _uiGameScreen;
         private PlayerAimVisuals _aimVisuals;
         private GameStats _gameStats;
+        private AimingCircleTrigger _aimingCircleTrigger;
+        private PlayerTargetingController _targeting;
+
+        // Reusable buffer for secondary shuffle — avoids per-shot allocation
+        private readonly List<GameObject> _secondaryBuffer = new List<GameObject>();
+
+        private float _precisionLogTimer;
 
         // ─────────────────────────────────────────────────────────────────────
-        internal void Initialize(UIT_GameScreen uiGameScreen, PlayerAimVisuals aimVisuals, GameStats gameStats)
+        internal void Initialize(UIT_GameScreen uiGameScreen, PlayerAimVisuals aimVisuals, GameStats gameStats,
+                                  AimingCircleTrigger aimingCircleTrigger, PlayerTargetingController targeting)
         {
             _uiGameScreen = uiGameScreen;
             _aimVisuals = aimVisuals;
             _gameStats = gameStats;
+            _aimingCircleTrigger = aimingCircleTrigger;
+            _targeting = targeting;
             _rigRecoilController = new RigRecoilController(this);
             _bulletPrefab = Resources.Load<GameObject>("Weapons/bullet_1");
             if (_bulletPrefab == null) Debug.LogError("Bullet prefab is null");
@@ -66,6 +83,14 @@ namespace ZombieGame
         {
             try
             {
+                _precisionLogTimer -= Time.deltaTime;
+                if (_precisionLogTimer <= 0f)
+                {
+                    _precisionLogTimer = 0.5f;
+                    float angle = _aimVisuals != null ? _aimVisuals.CurrentAngle : -1f;
+                    int zombieCount = _aimingCircleTrigger != null ? _aimingCircleTrigger.GetZombiesInside().Count : -1;
+                    Debug.Log($"[AIM] CurrentAngle={angle:F2}° | IsAiming={isAiming} | ZombiesInGizmo={zombieCount}");
+                }
                 if (IsShooting && _bulletsInClip > 0 && isAiming)
                 {
                     if (Time.time >= _nextFireTime)
@@ -104,57 +129,165 @@ namespace ZombieGame
         private void FireOnce()
         {
             _bulletsInClip--;
-            Transform gunBarrel = GetWeaponPosition();
             _nextFireTime = Time.time + 1f / WeaponConfigSingleton.Instance.WeaponConfig.FireRate;
 
             MuzzleFlash();
-
-            bool isPrecisionShot = _aimVisuals != null && _aimVisuals.IsRadarInPrecisionZone();
-            _aimVisuals?.GetType(); // keep reference alive
-
-            Vector3 forceDirection;
-            float randomAngle;
-
-            if (isPrecisionShot)
-            {
-                randomAngle = 0f;
-                forceDirection = transform.forward;
-                Debug.Log("PRECISION SHOT!");
-                SoundFXManager.Instance?.PlaySoundFXClip(WeaponConfigSingleton.Instance.WeaponConfig.shootingClip, transform, 1.2f);
-            }
-            else
-            {
-                float currentAngle = _aimVisuals != null ? _aimVisuals.CurrentAngle : 0f;
-                randomAngle = UnityEngine.Random.Range(-currentAngle, currentAngle);
-                forceDirection = Quaternion.Euler(0f, randomAngle, 0f) * transform.forward;
-            }
-
-            SpawnBulletAndShoot(gunBarrel, forceDirection);
-
-            if (!isPrecisionShot)
-            {
-                ApplyRecoil(_aimVisuals != null ? _aimVisuals.CurrentAngle : 0f);
-            }
-
             SoundFXManager.Instance.PlaySoundFXClip(WeaponConfigSingleton.Instance.WeaponConfig.shootingClip, transform, 1f);
 
             if (CameraShakeManager.Instance != null)
             {
                 float weaponRecoil = WeaponConfigSingleton.Instance.WeaponConfig.Recoil;
                 float playerStrength = PlayerConfigSingleton.Instance.PlayerConfig.strength;
-                float shakeMultiplier = isPrecisionShot ? 0.3f : 1f;
-                CameraShakeManager.Instance.ShakeOnFire(weaponRecoil * shakeMultiplier, playerStrength);
+                CameraShakeManager.Instance.ShakeOnFire(weaponRecoil, playerStrength);
+            }
+
+            ApplyRecoil(_aimVisuals != null ? _aimVisuals.CurrentAngle : 0f);
+
+            // ── Probability roll ──────────────────────────────────────────────
+            float weaponAcc  = WeaponConfigSingleton.Instance.WeaponConfig.Accuracy / 100f;
+            float playerAcc  = PlayerConfigSingleton.Instance.PlayerConfig.Accuracy  / 100f;
+            float multiplier = AimPrecisionColors.GetHitMultiplier(_aimVisuals != null ? _aimVisuals.CurrentAngle : 30f);
+            float hitChance  = weaponAcc * playerAcc * multiplier;
+
+            Debug.Log($"[SHOT] Angle={(_aimVisuals != null ? _aimVisuals.CurrentAngle : -1f):F2}° | WeaponAcc={weaponAcc:F2} PlayerAcc={playerAcc:F2} Multiplier={multiplier:F2} | HitChance={hitChance:F3} | AimMode={(_targeting != null ? _targeting.CurrentAimingType.ToString() : "null")}");
+
+            var zombies = _aimingCircleTrigger != null ? _aimingCircleTrigger.GetZombiesInside() : null;
+            if (zombies == null || zombies.Count == 0)
+            {
+                Debug.Log("[SHOT] No zombies in gizmo → MISS");
+                SpawnMissBullet();
+                return;
+            }
+
+            Debug.Log($"[SHOT] Zombies in gizmo: {zombies.Count}");
+
+            GameObject primary = GetPrimaryTarget(zombies);
+            Debug.Log($"[SHOT] Primary target: {(primary != null ? primary.name : "none")}");
+
+            GameObject hit = null;
+
+            // Primary roll
+            if (primary != null)
+            {
+                float roll = UnityEngine.Random.value;
+                bool primaryHit = roll <= hitChance;
+                Debug.Log($"[SHOT] Primary roll={roll:F3} vs hitChance={hitChance:F3} → {(primaryHit ? "HIT" : "miss")}");
+                if (primaryHit) hit = primary;
+            }
+
+            // Secondary rolls
+            if (hit == null)
+            {
+                _secondaryBuffer.Clear();
+                foreach (var c in zombies)
+                {
+                    if (c != null && c.gameObject != primary)
+                        _secondaryBuffer.Add(c.gameObject);
+                }
+                Shuffle(_secondaryBuffer);
+                float secondaryChance = hitChance * SecondaryPenaltyMultiplier;
+                Debug.Log($"[SHOT] Rolling {_secondaryBuffer.Count} secondaries, secondaryChance={secondaryChance:F3}");
+                for (int i = 0; i < _secondaryBuffer.Count; i++)
+                {
+                    float roll = UnityEngine.Random.value;
+                    bool secHit = roll <= secondaryChance;
+                    Debug.Log($"[SHOT]   Secondary[{i}] {_secondaryBuffer[i].name} roll={roll:F3} → {(secHit ? "HIT" : "miss")}");
+                    if (secHit) { hit = _secondaryBuffer[i]; break; }
+                }
+            }
+
+            if (hit != null)
+            {
+                Debug.Log($"[SHOT] RESULT: HIT {hit.name}");
+                SpawnHitBullet(hit);
+            }
+            else
+            {
+                Debug.Log("[SHOT] RESULT: MISS — spawning miss bullet");
+                SpawnMissBullet();
             }
         }
 
-        private void SpawnBulletAndShoot(Transform gunBarrel, Vector3 forceDirection)
+        // ── Roll helpers ──────────────────────────────────────────────────────
+
+        private GameObject GetPrimaryTarget(HashSet<Collider> zombies)
         {
-            forceDirection = forceDirection.normalized;
-            forceDirection.y = 0;
-            Quaternion bulletRotation = Quaternion.LookRotation(forceDirection) * Quaternion.Euler(-90, 0, 0);
-            GameObject bullet = Instantiate(_bulletPrefab, gunBarrel.position, bulletRotation);
-            BulletBehaviour bulletBehaviour = bullet.GetComponent<BulletBehaviour>();
-            bulletBehaviour?.Initialize(forceDirection);
+            // Controller mode: use locked target if it is still in the gizmo
+            if (_targeting != null && _targeting.CurrentAimingType == AimingType.ControllerRightStick)
+            {
+                GameObject locked = _targeting.CurrentTarget;
+                if (locked != null)
+                {
+                    foreach (var c in zombies)
+                        if (c != null && c.gameObject == locked) return locked;
+                }
+            }
+
+            // Mouse mode: zombie in gizmo closest to mouse ground point
+            if (_targeting != null && _targeting.CurrentAimingType == AimingType.Mouse)
+            {
+                Vector3 mousePoint = _targeting.MouseGroundPoint;
+                float bestDist = float.MaxValue;
+                GameObject best = null;
+                foreach (var c in zombies)
+                {
+                    if (c == null) continue;
+                    float d = (c.transform.position - mousePoint).sqrMagnitude;
+                    if (d < bestDist) { bestDist = d; best = c.gameObject; }
+                }
+                return best;
+            }
+
+            return null;
+        }
+
+        private void SpawnHitBullet(GameObject targetZombie)
+        {
+            Transform gunBarrel = GetWeaponPosition();
+            Vector3 dir = (targetZombie.transform.position - gunBarrel.position).normalized;
+            dir.y = 0;
+
+            // Apply damage immediately via roll system
+            float damage = WeaponConfigSingleton.Instance.WeaponConfig.Damage
+                           * (1 + UnityEngine.Random.Range(
+                               -WeaponConfigSingleton.Instance.WeaponConfig.DamageFluctuation,
+                                WeaponConfigSingleton.Instance.WeaponConfig.DamageFluctuation) / 100f);
+            // Collider may be on a child — walk up the hierarchy
+            Enemy enemy = targetZombie.GetComponent<Enemy>() ?? targetZombie.GetComponentInParent<Enemy>();
+            if (enemy == null)
+                Debug.LogWarning($"[SHOT] SpawnHitBullet: no Enemy component found on {targetZombie.name} or its parents!");
+            else
+                Debug.Log($"[SHOT] Applying damage={damage:F1} to {enemy.gameObject.name}");
+            enemy?.DamageReceived(damage, dir);
+            // Note: Enemy.DamageReceived already spawns the damage number internally
+
+            SpawnBullet(gunBarrel, dir, isHitBullet: true);
+        }
+
+        private void SpawnMissBullet()
+        {
+            Transform gunBarrel = GetWeaponPosition();
+            float randomAngle = UnityEngine.Random.Range(-MissConeHalfAngle, MissConeHalfAngle);
+            Vector3 dir = Quaternion.Euler(0f, randomAngle, 0f) * transform.forward;
+            SpawnBullet(gunBarrel, dir, isHitBullet: false);
+        }
+
+        private void SpawnBullet(Transform gunBarrel, Vector3 dir, bool isHitBullet)
+        {
+            dir = dir.normalized;
+            dir.y = 0;
+            Quaternion rot = Quaternion.LookRotation(dir) * Quaternion.Euler(-90, 0, 0);
+            GameObject bullet = Instantiate(_bulletPrefab, gunBarrel.position, rot);
+            bullet.GetComponent<BulletBehaviour>()?.Initialize(dir, isHitBullet);
+        }
+
+        private static void Shuffle(List<GameObject> list)
+        {
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = UnityEngine.Random.Range(0, i + 1);
+                (list[i], list[j]) = (list[j], list[i]);
+            }
         }
 
         // ── Recoil ────────────────────────────────────────────────────────────

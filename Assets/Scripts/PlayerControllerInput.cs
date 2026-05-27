@@ -155,7 +155,8 @@ namespace ZombieGame
             };
 
             _aimVisuals.Initialize(_gameStats);
-            _weaponController.Initialize(_uiT_GameScreen, _aimVisuals, _gameStats);
+            _weaponController.Initialize(_uiT_GameScreen, _aimVisuals, _gameStats,
+                                         _aimVisuals.AimingCircleTrigger, _targeting);
             _targeting.Initialize();
         }
 

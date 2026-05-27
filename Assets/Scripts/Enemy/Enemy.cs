@@ -107,11 +107,11 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
 
 
-        //At(stop, searchForVictim, () => HasTarget() && stop.CanExit);
-        //At(searchForVictim, walkToSelected, FarToPlayer);
+        At(stop, searchForVictim, () => HasTarget() && stop.CanExit);
+        At(searchForVictim, walkToSelected, FarToPlayer);
 
-        //At(walkToSelected, stop, CloseToPlayer);
-        //At(stop, attackFreely, () => CloseToPlayer() && stop.CanExit);
+        At(walkToSelected, stop, CloseToPlayer);
+        At(stop, attackFreely, () => CloseToPlayer() && stop.CanExit);
         //At(stop, searchForVictim, () => !CloseToPlayer() && stop.CanExit);
         //At(attackFreely, stop, FinishedAttack);
 

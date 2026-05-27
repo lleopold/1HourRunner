@@ -44,6 +44,16 @@ namespace ZombieGame
 
         // ─────────────────────────────────────────────────────────────────────
 
+        /// <summary>Returns the hit probability multiplier for <paramref name="angleDegrees"/> based on aim tier.</summary>
+        public static float GetHitMultiplier(float angleDegrees)
+        {
+            if (angleDegrees > 20f) return 0.50f;
+            if (angleDegrees > 15f) return 0.75f;
+            if (angleDegrees > 10f) return 0.85f;
+            if (angleDegrees >  7f) return 0.95f;
+            return 0.99f;
+        }
+
         /// <summary>Returns the raw tier color for <paramref name="angleDegrees"/> with no animation.</summary>
         public static Color GetColor(float angleDegrees)
         {

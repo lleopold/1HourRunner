@@ -64,6 +64,8 @@ namespace ZombieGame
         private MeshRenderer _meshRendererAimingCircle;
         private MeshCollider _meshColliderAimingCircle;
         private AimingCircleTrigger _aimingCircleTrigger;
+        /// <summary>The trigger component on the AnnularSector — available after Initialize().</summary>
+        public AimingCircleTrigger AimingCircleTrigger => _aimingCircleTrigger;
         private readonly float _aimingCircleHeight = 0.11f;
 
         private ParticleSystem _laserSmokeLeft;
@@ -284,8 +286,6 @@ namespace ZombieGame
             _meshAimingCircle = new Mesh { name = "AnnularSector" };
             _meshFilterAimingCircle.mesh = _meshAimingCircle;
             _meshColliderAimingCircle.sharedMesh = _meshAimingCircle;
-
-            _gameObjectAimingCircle.AddComponent<AimingCircleTrigger>();
 
             Rigidbody rb = _gameObjectAimingCircle.AddComponent<Rigidbody>();
             rb.isKinematic = true;

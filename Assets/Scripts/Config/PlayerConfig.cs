@@ -41,5 +41,6 @@ public class PlayerConfig : ScriptableObject
     public int Level = 1;
     public string PerkName;
     public string PerkDescription;
+    public float Accuracy;
 
 }

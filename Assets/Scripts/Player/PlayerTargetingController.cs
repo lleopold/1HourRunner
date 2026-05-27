@@ -16,6 +16,8 @@ namespace ZombieGame
         public bool IsAiming { get; set; }
         public AimingType CurrentAimingType { get; private set; }
         public Vector2 AimControllerInput { get; private set; }
+        public Vector3 MouseGroundPoint => _lastRaycastHit.point;
+        public GameObject CurrentTarget => _currentTarget;
 
         // ── Private state ─────────────────────────────────────────────────────
         private Camera _mainCamera;
