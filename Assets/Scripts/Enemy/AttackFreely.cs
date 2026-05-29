@@ -30,6 +30,7 @@ public class AttackFreely : IState
     {
         if (_attacking) return;
         _attacking = true;
+        _enemy.AttackFinished = false;
 
         if (_navMeshAgent != null)
         {

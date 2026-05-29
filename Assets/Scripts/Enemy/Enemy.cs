@@ -112,8 +112,8 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
         At(walkToSelected, stop, CloseToPlayer);
         At(stop, attackFreely, () => CloseToPlayer() && stop.CanExit);
-        //At(stop, searchForVictim, () => !CloseToPlayer() && stop.CanExit);
-        //At(attackFreely, stop, FinishedAttack);
+        At(attackFreely, stop, () => FinishedAttack() && CloseToPlayer());
+        At(attackFreely, walkToSelected, () => FinishedAttack() && FarToPlayer());
 
 
 
