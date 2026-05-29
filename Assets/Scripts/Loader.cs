@@ -35,25 +35,35 @@ public static class Loader
             OnLoaderCallback = null;
         }
     }
+    public static bool AllowActivation { get; set; } = false;
+
     private static IEnumerator LoadSceneAsync(Scene scene)
     {
+        AllowActivation = false;
         yield return null;
         loadingAsyncOperation = SceneManager.LoadSceneAsync(scene.ToString());
-        while (!loadingAsyncOperation.isDone)
+        loadingAsyncOperation.allowSceneActivation = false;
+
+        // Wait until Unity has fully loaded the scene data (progress reaches 0.9)
+        while (loadingAsyncOperation.progress < 0.9f)
         {
             yield return null;
         }
+
+        // Wait for UITLoadingScreen to signal the bar animation is done
+        while (!AllowActivation)
+        {
+            yield return null;
+        }
+
+        loadingAsyncOperation.allowSceneActivation = true;
     }
+
     public static float GetLoaderProgress()
     {
-        if (loadingAsyncOperation != null)
-        {
-            return loadingAsyncOperation.progress;
-        }
-        else
-        {
-            return 0f;
-        }
+        if (loadingAsyncOperation == null) return 0f;
+        // progress maxes at 0.9 until allowSceneActivation; remap 0–0.9 → 0–1
+        return Mathf.Clamp01(loadingAsyncOperation.progress / 0.9f);
     }
     public static void LoaderCallback()
     {

@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+	<Style src="project://database/Assets/UIToolkit/Loading.uss" />
+	<ui:VisualElement name="loading-root" class="loading-root">
+		<ui:VisualElement name="accent-bar" class="loading-accent-bar" />
+		<ui:Label name="title-top" text="1 HOUR" class="loading-title-top" />
+		<ui:Label name="title-bottom" text="RUNNER" class="loading-title-bottom" />
+		<ui:Label name="loading-label" text="LOADING" class="loading-label" />
+		<ui:VisualElement name="bar-track" class="loading-bar-track">
+			<ui:VisualElement name="bar-fill" class="loading-bar-fill" />
+		</ui:VisualElement>
+		<ui:Label name="percent-label" text="0%" class="loading-percent" />
+	</ui:VisualElement>
+</ui:UXML>
