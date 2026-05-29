@@ -13,7 +13,7 @@ public class CameraManager : MonoBehaviour
 
     private void Awake()
     {
-        currentZoom = 4;// 15.0f;
+        currentZoom = 14;// 15.0f;
     }
     private void Start()
     {
