@@ -89,7 +89,7 @@ namespace ZombieGame
                     _precisionLogTimer = 0.5f;
                     float angle = _aimVisuals != null ? _aimVisuals.CurrentAngle : -1f;
                     int zombieCount = _aimingCircleTrigger != null ? _aimingCircleTrigger.GetZombiesInside().Count : -1;
-                    Debug.Log($"[AIM] CurrentAngle={angle:F2}° | IsAiming={isAiming} | ZombiesInGizmo={zombieCount}");
+                    //Debug.Log($"[AIM] CurrentAngle={angle:F2}° | IsAiming={isAiming} | ZombiesInGizmo={zombieCount}");
                 }
                 if (IsShooting && _bulletsInClip > 0 && isAiming)
                 {
@@ -144,10 +144,10 @@ namespace ZombieGame
             ApplyRecoil(_aimVisuals != null ? _aimVisuals.CurrentAngle : 0f);
 
             // ── Probability roll ──────────────────────────────────────────────
-            float weaponAcc  = WeaponConfigSingleton.Instance.WeaponConfig.Accuracy / 100f;
-            float playerAcc  = PlayerConfigSingleton.Instance.PlayerConfig.Accuracy  / 100f;
+            float weaponAcc = WeaponConfigSingleton.Instance.WeaponConfig.Accuracy / 100f;
+            float playerAcc = PlayerConfigSingleton.Instance.PlayerConfig.Accuracy / 100f;
             float multiplier = AimPrecisionColors.GetHitMultiplier(_aimVisuals != null ? _aimVisuals.CurrentAngle : 30f);
-            float hitChance  = weaponAcc * playerAcc * multiplier;
+            float hitChance = weaponAcc * playerAcc * multiplier;
 
             Debug.Log($"[SHOT] Angle={(_aimVisuals != null ? _aimVisuals.CurrentAngle : -1f):F2}° | WeaponAcc={weaponAcc:F2} PlayerAcc={playerAcc:F2} Multiplier={multiplier:F2} | HitChance={hitChance:F3} | AimMode={(_targeting != null ? _targeting.CurrentAimingType.ToString() : "null")}");
 
