@@ -147,9 +147,8 @@ namespace ZombieGame
             float weaponAcc = WeaponConfigSingleton.Instance.WeaponConfig.Accuracy / 100f;
             float playerAcc = PlayerConfigSingleton.Instance.PlayerConfig.Accuracy / 100f;
             float multiplier = AimPrecisionColors.GetHitMultiplier(_aimVisuals != null ? _aimVisuals.CurrentAngle : 30f);
-            float hitChance = weaponAcc * playerAcc * multiplier;
 
-            Debug.Log($"[SHOT] Angle={(_aimVisuals != null ? _aimVisuals.CurrentAngle : -1f):F2}° | WeaponAcc={weaponAcc:F2} PlayerAcc={playerAcc:F2} Multiplier={multiplier:F2} | HitChance={hitChance:F3} | AimMode={(_targeting != null ? _targeting.CurrentAimingType.ToString() : "null")}");
+            float hitChance = weaponAcc * playerAcc * multiplier;
 
             var zombies = _aimingCircleTrigger != null ? _aimingCircleTrigger.GetZombiesInside() : null;
             if (zombies == null || zombies.Count == 0)
@@ -163,6 +162,15 @@ namespace ZombieGame
 
             GameObject primary = GetPrimaryTarget(zombies);
             Debug.Log($"[SHOT] Primary target: {(primary != null ? primary.name : "none")}");
+
+            // Distance multiplier — measured to the actual primary target
+            var weaponCfg = WeaponConfigSingleton.Instance.WeaponConfig;
+            Vector3 targetPos = primary != null ? primary.transform.position : transform.position;
+            float distance = Vector3.Distance(transform.position, targetPos);
+            float distanceMultiplier = AimPrecisionColors.GetDistanceMultiplier(distance, weaponCfg.OptimalRange, weaponCfg.MaxEffectiveRange);
+            hitChance *= distanceMultiplier;
+
+            Debug.Log($"[SHOT] Angle={(_aimVisuals != null ? _aimVisuals.CurrentAngle : -1f):F2}° | WeaponAcc={weaponAcc:F2} PlayerAcc={playerAcc:F2} Multiplier={multiplier:F2} | Dist={distance:F1} DistMult={distanceMultiplier:F2} | HitChance={hitChance:F3} | AimMode={(_targeting != null ? _targeting.CurrentAimingType.ToString() : "null")}");
 
             GameObject hit = null;
 

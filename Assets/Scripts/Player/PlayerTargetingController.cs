@@ -143,7 +143,7 @@ namespace ZombieGame
 
         // ── GUI / Gizmo helpers (debug) ───────────────────────────────────────
 
-        public void DrawDebugGUI()
+        public int DrawDebugGUI()
         {
             int y = 10;
             GUI.Label(new Rect(10, y, 300, 20), "_current " + (_currentTarget != null ? _currentTarget.name : "null")); y += 20;
@@ -161,6 +161,8 @@ namespace ZombieGame
                 }
             }
             GUI.Label(new Rect(10, y, 300, 20), "Raycast hit:" + _lastRaycastHit.ToString());
+            y += 20;
+            return y;
         }
 
         // ── Private rotation logic ────────────────────────────────────────────

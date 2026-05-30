@@ -31,5 +31,7 @@ public class WeaponConfig : ScriptableObject
     public AudioClip shootingClip;
     public ParticleSystem muzzleFlash;
     public float Accuracy;
+    public float OptimalRange;          // full hit chance up to this distance
+    public float MaxEffectiveRange;     // hit chance drops to ~10% at this distance
 
 }

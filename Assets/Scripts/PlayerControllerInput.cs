@@ -217,7 +217,68 @@ namespace ZombieGame
             if (_uiT_EndGamePopUp._root.visible && !_isGamePaused) PauseGame(true);
         }
 
-        void OnGUI() => _targeting.DrawDebugGUI();
+        void OnGUI()
+        {
+            int y = _targeting.DrawDebugGUI();
+            y += 10;
+
+            // ── Shot chance breakdown ─────────────────────────────────────────
+            var wCfg = WeaponConfigSingleton.Instance?.WeaponConfig;
+            var pCfg = PlayerConfigSingleton.Instance?.PlayerConfig;
+            if (wCfg == null || pCfg == null) return;
+
+            float angle     = _aimVisuals != null ? _aimVisuals.CurrentAngle : 30f;
+            float weaponAcc = wCfg.Accuracy / 100f;
+            float playerAcc = pCfg.Accuracy / 100f;
+            float aimMult   = AimPrecisionColors.GetHitMultiplier(angle);
+
+            // Find closest zombie inside the gizmo
+            var trigger = _aimVisuals?.AimingCircleTrigger;
+            var zombiesInGizmo = trigger?.GetZombiesInside();
+
+            float gizmoClosestDist = 0f;
+            string gizmoClosestName = "none";
+            if (zombiesInGizmo != null && zombiesInGizmo.Count > 0)
+            {
+                float bestDist = float.MaxValue;
+                foreach (var c in zombiesInGizmo)
+                {
+                    if (c == null) continue;
+                    float d = Vector3.Distance(transform.position, c.transform.position);
+                    if (d < bestDist) { bestDist = d; gizmoClosestName = c.gameObject.name; }
+                }
+                gizmoClosestDist = bestDist;
+            }
+
+            // Use gizmo-closest distance for multiplier when available, else locked target
+            float distance;
+            if (gizmoClosestDist > 0f)
+                distance = gizmoClosestDist;
+            else
+            {
+                GameObject tgt = _targeting.CurrentTarget;
+                distance = tgt != null ? Vector3.Distance(transform.position, tgt.transform.position) : 0f;
+            }
+
+            float distMult = (distance > 0f && wCfg.MaxEffectiveRange > 0f)
+                ? AimPrecisionColors.GetDistanceMultiplier(distance, wCfg.OptimalRange, wCfg.MaxEffectiveRange)
+                : 1f;
+
+            float hitChance = weaponAcc * playerAcc * aimMult * distMult;
+
+            GUI.Label(new Rect(10, y, 400, 20), "── Shot Chance ──────────────────"); y += 20;
+            GUI.Label(new Rect(10, y, 400, 20), $"Aim angle:        {angle:F1}°"); y += 20;
+            GUI.Label(new Rect(10, y, 400, 20), $"Weapon accuracy:  {weaponAcc:F2}  ({wCfg.Accuracy:F0}%)"); y += 20;
+            GUI.Label(new Rect(10, y, 400, 20), $"Player accuracy:  {playerAcc:F2}  ({pCfg.Accuracy:F0}%)"); y += 20;
+            GUI.Label(new Rect(10, y, 400, 20), $"Aim multiplier:   {aimMult:F2}"); y += 20;
+            GUI.Label(new Rect(10, y, 500, 20), $"Gizmo zombies:    {(zombiesInGizmo != null ? zombiesInGizmo.Count : 0)}  closest: {gizmoClosestName}  ({gizmoClosestDist:F1} u)"); y += 20;
+            if (distance > 0f)
+            {
+                GUI.Label(new Rect(10, y, 500, 20), $"Distance:         {distance:F1} u  (opt {wCfg.OptimalRange:F0} / max {wCfg.MaxEffectiveRange:F0})"); y += 20;
+                GUI.Label(new Rect(10, y, 400, 20), $"Distance mult:    {distMult:F2}"); y += 20;
+            }
+            GUI.Label(new Rect(10, y, 400, 20), $"TOTAL hit chance: {hitChance * 100f:F1}%"); y += 20;
+        }
 
         // ─────────────────────────────────────────────────────────────────────
         // Input callbacks

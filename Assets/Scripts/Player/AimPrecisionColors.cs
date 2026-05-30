@@ -54,6 +54,15 @@ namespace ZombieGame
             return 0.99f;
         }
 
+        /// <summary>Returns a distance-based hit multiplier: 1.0 within optimalRange, linear falloff to 0.1 at maxEffectiveRange, clamped to 0.1 beyond.</summary>
+        public static float GetDistanceMultiplier(float distance, float optimalRange, float maxEffectiveRange)
+        {
+            if (distance <= optimalRange) return 1.0f;
+            if (distance >= maxEffectiveRange) return 0.1f;
+            float t = (distance - optimalRange) / (maxEffectiveRange - optimalRange);
+            return Mathf.Lerp(1.0f, 0.1f, t);
+        }
+
         /// <summary>Returns the raw tier color for <paramref name="angleDegrees"/> with no animation.</summary>
         public static Color GetColor(float angleDegrees)
         {
