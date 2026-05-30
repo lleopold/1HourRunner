@@ -83,6 +83,7 @@ namespace ZombieGame
         {
             try
             {
+                if (WeaponConfigSingleton.Instance.WeaponConfig == null) return;
                 _precisionLogTimer -= Time.deltaTime;
                 if (_precisionLogTimer <= 0f)
                 {
@@ -120,7 +121,7 @@ namespace ZombieGame
             }
             catch (Exception e)
             {
-                Debug.LogError("Error in PlayerWeaponController.Tick: " + e.Message);
+                Debug.LogError("Error in PlayerWeaponController.Tick: " + e.Message + "\n" + e.StackTrace);
             }
         }
 
@@ -132,7 +133,8 @@ namespace ZombieGame
             _nextFireTime = Time.time + 1f / WeaponConfigSingleton.Instance.WeaponConfig.FireRate;
 
             MuzzleFlash();
-            SoundFXManager.Instance.PlaySoundFXClip(WeaponConfigSingleton.Instance.WeaponConfig.shootingClip, transform, 1f);
+            var clip = WeaponConfigSingleton.Instance.WeaponConfig.shootingClip;
+            if (clip != null) SoundFXManager.Instance.PlaySoundFXClip(clip, transform, 1f);
 
             if (CameraShakeManager.Instance != null)
             {
@@ -369,8 +371,28 @@ namespace ZombieGame
         public Transform GetWeaponPosition()
         {
             Transform weaponTransform = FindRecursive(transform, "Weapon")
-                                     ?? FindRecursive(transform, "Pistol(Clone)");
+                                     ?? FindRecursive(transform, "Pistol(Clone)")
+                                     ?? FindRecursive(transform, "Pistol")
+                                     ?? FindRecursive(transform, "Gun")
+                                     ?? FindRecursive(transform, "weapon");
+            if (weaponTransform == null)
+            {
+                // Log all children to identify the correct weapon name
+                var sb = new System.Text.StringBuilder("[WEAPON] Children of player: ");
+                LogChildNames(transform, sb, 0);
+                Debug.LogWarning(sb.ToString());
+                return transform; // fallback to player root so bullets still fire
+            }
             return AddOnZAxis(weaponTransform, 1f);
+        }
+
+        private static void LogChildNames(Transform t, System.Text.StringBuilder sb, int depth)
+        {
+            foreach (Transform child in t)
+            {
+                sb.Append('\n').Append(' ', depth * 2).Append(child.name);
+                if (depth < 4) LogChildNames(child, sb, depth + 1);
+            }
         }
 
         public Transform GetBonePosition(string boneName, GameObject searchObject)

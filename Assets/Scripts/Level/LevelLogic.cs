@@ -34,8 +34,16 @@ public class LevelLogic : MonoBehaviour
         }
         player1.playerGameObjectInstance = Instantiate(PlayerConfigSingleton.Instance.PlayerConfig.Prefab, transform.position, transform.rotation);
         player1.playerGameObjectInstance.name = "Player";
-        player1.weaponGameObjectInstance = Instantiate(WeaponConfigSingleton.Instance.WeaponConfig.prefab, transform.position, transform.rotation);
-        player1.AttachWeapon();
+        var weaponPrefab = WeaponConfigSingleton.Instance.WeaponConfig?.prefab;
+        if (weaponPrefab == null)
+        {
+            Debug.LogWarning($"[LevelLogic] No prefab assigned for weapon {DataHolder.chosenWeapon} — skipping weapon spawn.");
+        }
+        else
+        {
+            player1.weaponGameObjectInstance = Instantiate(weaponPrefab, transform.position, transform.rotation);
+            player1.AttachWeapon();
+        }
         //SetPlayerPostitionOnCenterofTerrain();
     }
     void SetPlayerPostitionOnCenterofTerrain()

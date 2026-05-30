@@ -12,10 +12,22 @@ public class WeaponConfigSingleton
     public static WeaponConfig weaponConfig;
     private WeaponConfigManager weaponConfigManager;
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatic()
+    {
+        instance = null;
+        weaponConfig = null;
+    }
+
     public WeaponConfig WeaponConfig
     {
         get
         {
+            if (weaponConfigManager == null)
+            {
+                weaponConfigManager = Resources.Load<WeaponConfigManager>("Config/Weapon/WeaponConfigManager");
+                if (weaponConfigManager == null) { Debug.LogError("WeaponConfigManager asset not found in Resources/Config/Weapon/"); return null; }
+            }
             return weaponConfigManager.GetConfig(DataHolder.chosenWeapon.ToString());
         }
         set
@@ -31,6 +43,13 @@ public class WeaponConfigSingleton
             {
                 instance = new WeaponConfigSingleton();
             }
+            else if (DataHolder.chosenWeapon != chosenWeapon)
+            {
+                // Weapon changed since last instantiation — reload config
+                chosenWeapon = DataHolder.chosenWeapon;
+                if (instance.weaponConfigManager != null)
+                    weaponConfig = instance.weaponConfigManager.GetConfig(chosenWeapon.ToString());
+            }
             return instance;
         }
     }
@@ -39,7 +58,8 @@ public class WeaponConfigSingleton
         // Set default values
         chosenWeapon = DataHolder.chosenWeapon;
         weaponConfigManager = Resources.Load<WeaponConfigManager>("Config/Weapon/WeaponConfigManager");
-        weaponConfig = weaponConfigManager.GetConfig(DataHolder.chosenWeapon.ToString());
+        if (weaponConfigManager == null) { Debug.LogError("WeaponConfigManager asset not found in Resources/Config/Weapon/"); return; }
+        weaponConfig = weaponConfigManager.GetConfig(chosenWeapon.ToString());
 
     }
 
