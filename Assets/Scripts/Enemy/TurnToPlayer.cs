@@ -39,7 +39,10 @@ public class TurnToPlayer : IState
     public void OnExit()
     {
         if (_navMeshAgent.enabled)
+        {
+            _navMeshAgent.ResetPath();         // clear stale path before handing rotation back
             _navMeshAgent.updateRotation = true;
+        }
     }
 
     public void Tick()

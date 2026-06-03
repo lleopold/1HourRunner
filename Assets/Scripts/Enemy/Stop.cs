@@ -23,11 +23,11 @@ public class Stop : IState
     {
         if (!_agent.enabled) _agent.enabled = true;
 
-        // Immediate stop — let NavMeshAgent decelerate naturally; hard-zeroing velocity causes a snap
-        _agent.updatePosition = true;
-        _agent.updateRotation = true;
+        // Immediate stop — reset path BEFORE re-enabling updateRotation to avoid a one-frame rotation snap
         _agent.isStopped = true;
         _agent.ResetPath();
+        _agent.updatePosition = true;
+        _agent.updateRotation = true;
 
         if (_anim == null) _anim = _enemy.GetComponent<Animator>();
 
