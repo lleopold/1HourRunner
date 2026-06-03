@@ -15,15 +15,16 @@ public class Roam : IState
     MonoBehaviour _monoBehaviour;
     private float _roamingTimePassed;
     private float _velocity;
+    private readonly EnemyAnimator _enemyAnimator;
 
-
-    public Roam(Enemy enemy, Transform player, NavMeshAgent navMeshAgent, Animator animator, EnemyConfig enemyConfig, MonoBehaviour monoBehaviour)
+    public Roam(Enemy enemy, Transform player, NavMeshAgent navMeshAgent, Animator animator, EnemyConfig enemyConfig, MonoBehaviour monoBehaviour, EnemyAnimator enemyAnimator)
     {
         _enemy = enemy;
         _navMeshAgent = navMeshAgent;
         _animator = animator;
         _enemyConfig = enemyConfig;
         _monoBehaviour = monoBehaviour;
+        _enemyAnimator = enemyAnimator;
         _roamingTimePassed = 0;
 
 
@@ -60,7 +61,7 @@ public class Roam : IState
         _velocity = _navMeshAgent.velocity.magnitude / _navMeshAgent.speed;
         _velocity = Mathf.Clamp(_velocity, 0, 0.2f);
         //Debug.Log("Roam Velocity: " + _velocity);
-        _animator.SetFloat("velocity", _velocity);
+        _enemyAnimator.SetVelocity(_velocity);
 
 
     }
@@ -77,6 +78,6 @@ public class Roam : IState
 
     public void OnExit()
     {
-        _animator.SetFloat("velocity", 0);
+        _enemyAnimator.SetVelocity(0f);
     }
 }

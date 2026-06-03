@@ -21,15 +21,17 @@ public class WalkToSelected : IState
     private const float StuckMoveEpsSqr = 0.0004f;             // ~2cm squared movement between frames
     private const float StuckRecoverSeconds = 2f;              // time of no progress before recovery
     private const bool DebugLogs = true;                      // flip to true to see periodic logs
+    private readonly EnemyAnimator _enemyAnimator;
     private static readonly int VelocityHash = Animator.StringToHash("velocity");
 
-    public WalkToSelected(Enemy enemy, NavMeshAgent navMeshAgent, Animator animator, EnemyConfig enemyConfig, Transform target)
+    public WalkToSelected(Enemy enemy, NavMeshAgent navMeshAgent, Animator animator, EnemyConfig enemyConfig, Transform target, EnemyAnimator enemyAnimator)
     {
         _enemy = enemy;
         _navMeshAgent = navMeshAgent;
         _animator = animator;
         _enemyConfig = enemyConfig;
         _target = target;
+        _enemyAnimator = enemyAnimator;
     }
 
     public void OnEnter()
@@ -134,7 +136,7 @@ public class WalkToSelected : IState
                 ? Mathf.Clamp01(_navMeshAgent.desiredVelocity.magnitude / speed)
                 : 0f;
             _velocity = norm;
-            _animator.SetFloat(VelocityHash, _velocity, 0.05f, Time.deltaTime);
+            _enemyAnimator.SetVelocity(_velocity, 0.05f);
         }
 
         // Stuck detection & recovery

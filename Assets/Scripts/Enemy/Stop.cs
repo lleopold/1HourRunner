@@ -5,18 +5,22 @@ public class Stop : IState
 {
     private readonly Enemy _enemy;
     private readonly NavMeshAgent _agent;
-    private Animator _anim;
+    private readonly EnemyAnimator _enemyAnimator;
 
     private float _t;
-    private const float WaitDuration = 0.60f; // also used as damping time
-    private static readonly int VelocityHash = Animator.StringToHash("velocity");
+    private const float MinWaitDuration = 0.3f;
+    private const float DampTime = 0.6f;
+    private const float VelocityEps = 0.05f;
 
-    public bool CanExit => _t >= WaitDuration;
+    public bool CanExit =>
+        _t >= MinWaitDuration &&
+        _enemyAnimator.Velocity < VelocityEps;
 
-    public Stop(Enemy enemy, NavMeshAgent agent)
+    public Stop(Enemy enemy, NavMeshAgent agent, EnemyAnimator enemyAnimator)
     {
         _enemy = enemy;
         _agent = agent;
+        _enemyAnimator = enemyAnimator;
     }
 
     public void OnEnter()
@@ -29,8 +33,6 @@ public class Stop : IState
         _agent.updatePosition = true;
         _agent.updateRotation = true;
 
-        if (_anim == null) _anim = _enemy.GetComponent<Animator>();
-
         _t = 0f;
         // Do not snap the blend tree; Tick will damp it to 0 over WaitDuration.
     }
@@ -39,20 +41,12 @@ public class Stop : IState
     {
         _t += Time.deltaTime;
 
-        if (_anim)
-        {
-            // Valid overload: SetFloat(id, value, dampTime, deltaTime)
-            _anim.SetFloat(VelocityHash, 0f, WaitDuration, Time.deltaTime);
-
-            // Optional clamp to avoid tail drift
-            if (_anim.GetFloat(VelocityHash) < 0.01f)
-                _anim.SetFloat(VelocityHash, 0f);
-        }
+        _enemyAnimator.SetVelocity(0f, DampTime);
+        _enemyAnimator.SyncFromAnimator();
     }
 
     public void OnExit()
     {
-        if (_anim) _anim.SetFloat(VelocityHash, 0f);
-        // Leave agent stopped; the next state should decide when to resume.
+        // Do NOT snap velocity here — let the next state (StartMoving/AttackFreely) own the blend tree.
     }
 }

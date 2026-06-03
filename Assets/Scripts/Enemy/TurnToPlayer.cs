@@ -7,20 +7,20 @@ public class TurnToPlayer : IState
     private readonly NavMeshAgent _navMeshAgent;
     private readonly Animator _animator;
     private readonly EnemyConfig _enemyConfig;
+    private readonly EnemyAnimator _enemyAnimator;
 
-    private const float TurnSpeed = 360f;       // degrees per second
-    private const float FacingThreshold = 15f;  // degrees — close enough to "facing"
+    private const float TurnSpeed = 360f;
+    private const float FacingThreshold = 15f;
 
     public bool CanExit { get; private set; }
 
-    private static readonly int VelocityHash = Animator.StringToHash("velocity");
-
-    public TurnToPlayer(Enemy enemy, NavMeshAgent navMeshAgent, Animator animator, EnemyConfig enemyConfig)
+    public TurnToPlayer(Enemy enemy, NavMeshAgent navMeshAgent, Animator animator, EnemyConfig enemyConfig, EnemyAnimator enemyAnimator)
     {
         _enemy = enemy;
         _navMeshAgent = navMeshAgent;
         _animator = animator;
         _enemyConfig = enemyConfig;
+        _enemyAnimator = enemyAnimator;
     }
 
     public void OnEnter()
@@ -33,7 +33,7 @@ public class TurnToPlayer : IState
             _navMeshAgent.updateRotation = false;
         }
 
-        _animator.SetFloat(VelocityHash, 0f);
+        _enemyAnimator.SetVelocity(0f);
     }
 
     public void OnExit()

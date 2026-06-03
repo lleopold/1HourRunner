@@ -5,14 +5,15 @@ using UnityEngine.AI;
 
 public class FullStop : IState
 {
-
     private readonly Enemy _enemy;
     private NavMeshAgent _navMeshAgent;
+    private readonly EnemyAnimator _enemyAnimator;
 
-    public FullStop(Enemy enemy, NavMeshAgent navMeshAgent)
+    public FullStop(Enemy enemy, NavMeshAgent navMeshAgent, EnemyAnimator enemyAnimator)
     {
         _enemy = enemy;
         _navMeshAgent = navMeshAgent;
+        _enemyAnimator = enemyAnimator;
     }
     public void OnEnter()
     {
@@ -25,7 +26,7 @@ public class FullStop : IState
     private void SetIdleAnimation()
     {
         Debug.Log("SetIdleAnimation");
-        _enemy.GetComponent<Animator>().SetFloat("velocity", 0);
+        _enemyAnimator.SetVelocity(0f);
     }
 
     public void OnExit()

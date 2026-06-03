@@ -14,14 +14,16 @@ public class SptintToSelected : IState
     private EnemyConfig _enemyConfig;
     private Transform _target;
     private float _velocity;
+    private readonly EnemyAnimator _enemyAnimator;
 
-    public SptintToSelected(Enemy enemy, NavMeshAgent navMeshAgent, Animator animator, EnemyConfig enemyConfig, Transform target)
+    public SptintToSelected(Enemy enemy, NavMeshAgent navMeshAgent, Animator animator, EnemyConfig enemyConfig, Transform target, EnemyAnimator enemyAnimator)
     {
         _enemy = enemy;
         _navMeshAgent = navMeshAgent;
         _animator = animator;
         _enemyConfig = enemyConfig;
         _target = target;
+        _enemyAnimator = enemyAnimator;
     }
 
     public void OnEnter()
@@ -56,6 +58,6 @@ public class SptintToSelected : IState
             _navMeshAgent.SetDestination(_target.position);
         }
         _velocity = _navMeshAgent.velocity.magnitude / _navMeshAgent.speed;
-        _animator.SetFloat("velocity", _velocity);
+        _enemyAnimator.SetVelocity(_velocity);
     }
 }

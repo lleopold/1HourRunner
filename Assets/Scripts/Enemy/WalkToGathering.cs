@@ -12,14 +12,16 @@ public class WalkToGathering : IState
     private Transform _target;
     private static readonly float Run = Animator.StringToHash("Run");
     private float _velocity;
+    private readonly EnemyAnimator _enemyAnimator;
 
-    public WalkToGathering(Enemy enemy, NavMeshAgent navMeshAgent, Animator animator, EnemyConfig enemyConfig, Transform target)
+    public WalkToGathering(Enemy enemy, NavMeshAgent navMeshAgent, Animator animator, EnemyConfig enemyConfig, Transform target, EnemyAnimator enemyAnimator)
     {
         _enemy = enemy;
         _navMeshAgent = navMeshAgent;
         _animator = animator;
         _enemyConfig = enemyConfig;
         _target = target;
+        _enemyAnimator = enemyAnimator;
     }
 
     public void OnEnter()
@@ -49,7 +51,7 @@ public class WalkToGathering : IState
             _navMeshAgent.SetDestination(_target.position);
         }
         _velocity = _navMeshAgent.velocity.magnitude / _navMeshAgent.speed;
-        _animator.SetFloat("velocity", _velocity);
+        _enemyAnimator.SetVelocity(_velocity);
 
     }
 }

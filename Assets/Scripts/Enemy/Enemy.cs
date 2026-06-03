@@ -96,16 +96,18 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
         _gathering = GameObject.Find("GatheringPoint");
 
+        var enemyAnimator = new EnemyAnimator(_animator);
+
         var searchForVictim = new SearchForVictim(this, _player);
-        var walkToSelected = new WalkToSelected(this, zombieNavMeshAgent, _animator, _enemyConfig, _player.transform);
+        var walkToSelected = new WalkToSelected(this, zombieNavMeshAgent, _animator, _enemyConfig, _player.transform, enemyAnimator);
         var attackFreely = new AttackFreely(this, _player, _animator, _enemyConfig, _monoBehaviour);
-        var turnToPlayer = new TurnToPlayer(this, zombieNavMeshAgent, _animator, _enemyConfig);
-        var stop = new Stop(this, zombieNavMeshAgent);
-        var startMoving = new StartMoving(this, zombieNavMeshAgent);
-        var fullStop = new FullStop(this, zombieNavMeshAgent);
+        var turnToPlayer = new TurnToPlayer(this, zombieNavMeshAgent, _animator, _enemyConfig, enemyAnimator);
+        var stop = new Stop(this, zombieNavMeshAgent, enemyAnimator);
+        var startMoving = new StartMoving(this, zombieNavMeshAgent, enemyAnimator);
+        var fullStop = new FullStop(this, zombieNavMeshAgent, enemyAnimator);
         var searchForGatheringSpot = new SearchForGathering(this, _gathering);
-        var walkToGathering = new WalkToGathering(this, zombieNavMeshAgent, _animator, _enemyConfig, _gathering.transform);
-        var roam = new Roam(this, _player.transform, zombieNavMeshAgent, _animator, _enemyConfig, _monoBehaviour);
+        var walkToGathering = new WalkToGathering(this, zombieNavMeshAgent, _animator, _enemyConfig, _gathering.transform, enemyAnimator);
+        var roam = new Roam(this, _player.transform, zombieNavMeshAgent, _animator, _enemyConfig, _monoBehaviour, enemyAnimator);
 
 
 
