@@ -99,6 +99,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         var searchForVictim = new SearchForVictim(this, _player);
         var walkToSelected = new WalkToSelected(this, zombieNavMeshAgent, _animator, _enemyConfig, _player.transform);
         var attackFreely = new AttackFreely(this, _player, _animator, _enemyConfig, _monoBehaviour);
+        var turnToPlayer = new TurnToPlayer(this, zombieNavMeshAgent, _animator, _enemyConfig);
         var stop = new Stop(this, zombieNavMeshAgent);
         var fullStop = new FullStop(this, zombieNavMeshAgent);
         var searchForGatheringSpot = new SearchForGathering(this, _gathering);
@@ -112,8 +113,13 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
         At(walkToSelected, stop, CloseToPlayer);
         At(stop, attackFreely, () => CloseToPlayer() && stop.CanExit);
-        At(attackFreely, stop, () => FinishedAttack() && CloseToPlayer());
-        At(attackFreely, walkToSelected, () => FinishedAttack() && FarToPlayer());
+
+        // After attack: always turn to face the player first
+        At(attackFreely, turnToPlayer, FinishedAttack);
+
+        // After turning: attack again if close, chase if far
+        At(turnToPlayer, stop, () => turnToPlayer.CanExit && CloseToPlayer());
+        At(turnToPlayer, walkToSelected, () => turnToPlayer.CanExit && FarToPlayer());
 
 
 
