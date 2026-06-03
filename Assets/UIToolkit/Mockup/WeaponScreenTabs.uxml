@@ -3,40 +3,176 @@
     <Style src="project://database/Assets/Resources/UI/WeaponsScreen.uss?fileID=7433441132597879392&amp;guid=f042e9e913aa4c144b4a634150a7b58d&amp;type=3#WeaponsScreen" />
     <ui:VisualElement name="ws_root" style="flex-direction: column; width: 100%; height: 100%;">
 
-        <!-- Back button — absolute top-left, same position as ChoosePlayer -->
+        <ui:VisualElement class="ws-accent-bar" />
         <ui:Button text="← BACK" name="btn_back" class="btn-back" />
 
         <ui:VisualElement name="ws_tabs" style="flex-direction: row; gap: 8px; padding: 8px; justify-content: center;">
-            <ui:Button text="Pistols" name="tab_pistols" class="tab" />
-            <ui:Button text="SMGs" name="tab_smgs" class="tab" style="-unity-text-align: middle-center;" />
-            <ui:Button text="Rifles" name="tab_rifles" class="tab" />
-            <ui:Button text="Shotguns" name="tab_shotguns" class="tab" style="white-space: pre;" />
-            <ui:Button text="Snipers" name="tab_snipers" class="tab" />
+            <ui:Button text="Pistols"  name="tab_pistols"  class="tab" />
+            <ui:Button text="SMGs"     name="tab_smgs"     class="tab" />
+            <ui:Button text="Rifles"   name="tab_rifles"   class="tab" />
+            <ui:Button text="Shotguns" name="tab_shotguns" class="tab" />
+            <ui:Button text="Snipers"  name="tab_snipers"  class="tab" />
         </ui:VisualElement>
-        <ui:VisualElement name="ws_main" style="flex-direction: row; flex-grow: 1; gap: 8px; padding: 8px;">
+
+        <ui:VisualElement name="ws_main" style="flex-direction: row; flex-grow: 1; gap: 8px; padding: 0 8px 8px 8px;">
+
+            <!-- LEFT: weapon list + choose level -->
             <ui:VisualElement name="ws_left_col" style="flex-direction: column; width: 280px; flex-shrink: 0;">
-                <ui:ScrollView name="ws_weapon_list" style="flex-grow: 1;">
-                    <ui:Button text="AP85" name="btn_ap85" />
-                    <ui:Button text="MK18" name="btn_mk18" />
-                    <ui:Button text="P350" name="btn_p350" />
-                </ui:ScrollView>
+                <ui:ScrollView name="ws_weapon_list" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" style="flex-grow: 1;" />
                 <ui:Button text="CHOOSE LEVEL" name="btn_choose_level" class="btn-action" />
             </ui:VisualElement>
-            <ui:VisualElement name="ws_right" style="flex-direction: column; flex-grow: 1; gap: 8px;">
-                    <!-- Preview fills all available space above stats -->
-                    <ui:VisualElement name="ws_preview"
-                    style="flex-grow: 1; flex-shrink: 1; position: relative; background-color: rgba(0, 0, 0, 0); -unity-picking-mode: ignore;" />
 
-                    <!-- BOTTOM: stats fixed height, does not steal space from preview -->
-                    <ui:VisualElement name="ws_stats"
-                        style="flex-grow: 0; flex-shrink: 0; height: 48px; flex-direction: row; justify-content: space-around; padding: 8px;">
-                        <ui:Label text="Damage: 42" />
-                        <ui:Label text="Fire rate: 5.6" />
-                        <ui:Label text="Reload: 1.8s" />
-                        <ui:Label text="Clip: 30" />
+            <!-- CENTRE: 3D preview -->
+            <ui:VisualElement name="ws_preview"
+                style="flex-grow: 1; flex-shrink: 1; position: relative; background-color: rgba(0,0,0,0);" />
+
+            <!-- RIGHT: stats panel -->
+            <ui:ScrollView name="ws_stats" class="ws-stats"
+                vertical-scroller-visibility="Hidden"
+                horizontal-scroller-visibility="Hidden">
+
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Damage" class="stat-name" />
+                        <ui:FloatField name="fl_damage" value="0" picking-mode="Ignore" class="stat-num" />
                     </ui:VisualElement>
-            </ui:VisualElement>
-        </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_damage" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
 
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Fire Rate" class="stat-name" />
+                        <ui:FloatField name="fl_fire_rate" value="0" picking-mode="Ignore" class="stat-num" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_fire_rate" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Dmg Fluctuation" class="stat-name" />
+                        <ui:FloatField name="fl_damage_fluctuation" value="0" picking-mode="Ignore" class="stat-num" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_damage_fluctuation" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Clip Size" class="stat-name" />
+                        <ui:FloatField name="fl_clip_size" value="0" picking-mode="Ignore" class="stat-num" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_clip_size" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Precision" class="stat-name" />
+                        <ui:FloatField name="fl_precision" value="0" picking-mode="Ignore" class="stat-num" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_precision" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Reload Time" class="stat-name" />
+                        <ui:FloatField name="fl_reload_time" value="0" picking-mode="Ignore" class="stat-num" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_reload_time" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Simultaneous" class="stat-name" />
+                        <ui:FloatField name="fl_simultanious_bullets" value="0" picking-mode="Ignore" class="stat-num" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_simultanious_bullets" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Crit Chance" class="stat-name" />
+                        <ui:FloatField name="fl_critical_chance" value="0" picking-mode="Ignore" class="stat-num" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_critical_chance" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Stagger" class="stat-name" />
+                        <ui:FloatField name="fl_stagger" value="0" picking-mode="Ignore" class="stat-num" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_stagger" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Recoil" class="stat-name" />
+                        <ui:FloatField name="fl_recoil" value="0" picking-mode="Ignore" class="stat-num" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_recoil" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Accuracy" class="stat-name" />
+                        <ui:FloatField name="fl_accuracy" value="0" picking-mode="Ignore" class="stat-num" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_accuracy" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Weight" class="stat-name" />
+                        <ui:FloatField name="fl_weight" value="0" picking-mode="Ignore" class="stat-num" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_weight" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Optimal Range" class="stat-name" />
+                        <ui:FloatField name="fl_optimal_range" value="0" picking-mode="Ignore" class="stat-num" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_optimal_range" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="stat-row">
+                    <ui:VisualElement class="stat-top">
+                        <ui:Label text="Max Range" class="stat-name" />
+                        <ui:FloatField name="fl_max_range" value="0" picking-mode="Ignore" class="stat-num" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-bar-track">
+                        <ui:VisualElement name="bar_fill_max_range" class="stat-bar-fill" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:ScrollView>
+
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

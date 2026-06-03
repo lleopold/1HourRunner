@@ -1,4 +1,4 @@
-ï»¿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -43,9 +43,31 @@ public class WeaponsCarouselController : MonoBehaviour
     private bool _dragging;
     private Vector3 _lastPointer;
 
-    // New: stat fields (optional)
+    // Stat FloatFields (optional — all queried by name, null if not in UXML)
     private FloatField _fDamage, _fFireRate, _fDamageFluct, _fClip, _fPrecision,
-                       _fReload, _fSimul, _fCrit, _fStagger, _fRecoil;
+                       _fReload, _fSimul, _fCrit, _fStagger, _fRecoil,
+                       _fAccuracy, _fWeight, _fOptimalRange, _fMaxRange;
+
+    // Bar-fill elements — parallel array to _statBarFillNames
+    private VisualElement[] _statBarFills;
+
+    private static readonly string[] _statBarFillNames =
+    {
+        "bar_fill_damage",
+        "bar_fill_fire_rate",
+        "bar_fill_damage_fluctuation",
+        "bar_fill_clip_size",
+        "bar_fill_precision",
+        "bar_fill_reload_time",
+        "bar_fill_simultanious_bullets",
+        "bar_fill_critical_chance",
+        "bar_fill_stagger",
+        "bar_fill_recoil",
+        "bar_fill_accuracy",
+        "bar_fill_weight",
+        "bar_fill_optimal_range",
+        "bar_fill_max_range",
+    };
 
     // Optional: external observers
     public static event System.Action<WeaponEnum> WeaponChanged;
@@ -118,7 +140,7 @@ public class WeaponsCarouselController : MonoBehaviour
         var found = root.Q<VisualElement>("ws_weapon_list");
         _container = found is ScrollView sv ? sv.contentContainer : found;
 
-        // Big preview panel (weâ€™ll add an Image inside so we can bind a RenderTexture)
+        // Big preview panel (we’ll add an Image inside so we can bind a RenderTexture)
         _preview = root.Q<VisualElement>("ws_preview");
         if (_preview == null)
         {
@@ -129,7 +151,7 @@ public class WeaponsCarouselController : MonoBehaviour
         QueryStatFields(root);
         EnsurePreviewImage();
 
-        // Tabs carousel events â€” registered once in HookCarouselCategoryEvents (called from OnRootReady)
+        // Tabs carousel events — registered once in HookCarouselCategoryEvents (called from OnRootReady)
         var named = root.Q<VisualElement>(containerName);
         if (named == null)
         {
@@ -198,7 +220,7 @@ public class WeaponsCarouselController : MonoBehaviour
 
     private void QueryStatFields(VisualElement root)
     {
-        // Safe: if the fields arenâ€™t on this screen, all stay null and we skip updates.
+        // Safe: if the fields aren’t on this screen, all stay null and we skip updates.
         _fDamage = root.Q<FloatField>("fl_damage");
         _fFireRate = root.Q<FloatField>("fl_fire_rate");
         _fDamageFluct = root.Q<FloatField>("fl_damage_fluctuation");
@@ -364,19 +386,55 @@ public class WeaponsCarouselController : MonoBehaviour
         // Push current config into UI fields (if present)
         if (_fDamage != null)
         {
-            _fDamage.value = cfg.Damage;
-            _fFireRate.value = cfg.FireRate;
-            _fDamageFluct.value = cfg.DamageFluctuation;
-            _fClip.value = cfg.ClipSize;
-            _fPrecision.value = cfg.Precision;
-            _fReload.value = cfg.ReloadTime;
-            _fSimul.value = cfg.SimultaniousBullets;
-            _fCrit.value = cfg.CritChance;
-            _fStagger.value = cfg.Stagger;
-            _fRecoil.value = cfg.Recoil;
+            _fDamage.value       = cfg.Damage;
+            _fFireRate.value     = cfg.FireRate;
+            _fDamageFluct.value  = cfg.DamageFluctuation;
+            _fClip.value         = cfg.ClipSize;
+            _fPrecision.value    = cfg.Precision;
+            _fReload.value       = cfg.ReloadTime;
+            _fSimul.value        = cfg.SimultaniousBullets;
+            _fCrit.value         = cfg.CritChance;
+            _fStagger.value      = cfg.Stagger;
+            _fRecoil.value       = cfg.Recoil;
+            _fAccuracy.value     = cfg.Accuracy;
+            _fWeight.value       = cfg.Weight;
+            _fOptimalRange.value = cfg.OptimalRange;
+            _fMaxRange.value     = cfg.MaxEffectiveRange;
         }
 
+        UpdateStatBars(cfg);
         WeaponChanged?.Invoke(weaponEnum);
+    }
+
+    private void UpdateStatBars(WeaponConfig cfg)
+    {
+        if (_statBarFills == null) return;
+
+        // All values normalized 0–100 ? bar width 0%–100%
+        float[] values =
+        {
+            cfg.Damage,
+            cfg.FireRate,
+            cfg.DamageFluctuation,
+            cfg.ClipSize,
+            cfg.Precision,
+            cfg.ReloadTime,
+            cfg.SimultaniousBullets,
+            cfg.CritChance,
+            cfg.Stagger,
+            cfg.Recoil,
+            cfg.Accuracy,
+            cfg.Weight,
+            cfg.OptimalRange,
+            cfg.MaxEffectiveRange,
+        };
+
+        for (int i = 0; i < _statBarFills.Length; i++)
+        {
+            if (_statBarFills[i] == null) continue;
+            float pct = Mathf.Clamp01(values[i] / 100f);
+            _statBarFills[i].style.width = Length.Percent(pct * 100f);
+        }
     }
 
     // ---------- Preview image holder (UI Toolkit) ----------
@@ -414,7 +472,7 @@ public class WeaponsCarouselController : MonoBehaviour
         _preview.RegisterCallback<PointerMoveEvent>(e =>
         {
             if (!_dragging || _spawned == null) return;
-            Vector2 delta = e.position - _lastPointer; // Vector2 - Vector2 âœ“
+            Vector2 delta = e.position - _lastPointer; // Vector2 - Vector2 ?
             _lastPointer = e.position;
 
             // yaw around up axis
@@ -606,7 +664,7 @@ public class WeaponsCarouselController : MonoBehaviour
     {
         if (_spawned == null || _cam == null) return;
 
-        // Only use MeshRenderer / SkinnedMeshRenderer â€” ignore ParticleSystemRenderer,
+        // Only use MeshRenderer / SkinnedMeshRenderer — ignore ParticleSystemRenderer,
         // LineRenderer, etc. that can inflate bounds far beyond the visible gun geometry
         var meshRenderers = _spawned.GetComponentsInChildren<MeshRenderer>();
         var skinnedRenderers = _spawned.GetComponentsInChildren<SkinnedMeshRenderer>();
