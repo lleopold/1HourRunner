@@ -58,8 +58,8 @@ public class WalkToSelected : IState
 
         _nextRepathTime = Time.time + RepathInterval;
         _lastPosition = _enemy.transform.position;
-        _velocity = 0f;
-        _animator.SetFloat(VelocityHash, 0f);
+        // Do NOT reset the animator here — let it carry its current value.
+        // Tick() will ramp it up via desiredVelocity as soon as the path resolves.
 
         Debug.Log("WalkToSelected OnEnter:" + (playerT != null ? playerT.name : "null"));
     }
@@ -124,21 +124,18 @@ public class WalkToSelected : IState
             _nextRepathTime = Time.time + RepathInterval;
         }
 
-        // Animator: normalized speed using actual world displacement (robust vs agent.velocity==0)
+        // Animator: drive blend tree from desiredVelocity.
+        // While pathPending, desiredVelocity is 0 but the agent hasn't moved yet either,
+        // so just hold the current value and let it ramp naturally once the path resolves.
         float speed = _navMeshAgent.speed;
-        float dt = Time.deltaTime;
-        float actualSpeed = (dt > 0f) ? (_enemy.transform.position - _lastPosition).magnitude / dt : 0f;
-
-        float norm = (speed > 0.001f) ? actualSpeed / speed : 0f;
-
-        // Fallback: if we're not moving yet but agent wants to, use desiredVelocity to avoid idle "sliding"
-        if (norm < 0.01f && _navMeshAgent.hasPath && _navMeshAgent.desiredVelocity.sqrMagnitude > 0.01f)
+        if (!_navMeshAgent.pathPending)
         {
-            norm = Mathf.Clamp01(_navMeshAgent.desiredVelocity.magnitude / Mathf.Max(speed, 0.001f));
+            float norm = (speed > 0.001f)
+                ? Mathf.Clamp01(_navMeshAgent.desiredVelocity.magnitude / speed)
+                : 0f;
+            _velocity = norm;
+            _animator.SetFloat(VelocityHash, _velocity, 0.05f, Time.deltaTime);
         }
-
-        _velocity = norm;
-        _animator.SetFloat(VelocityHash, _velocity, 0.1f, Time.deltaTime);
 
         // Stuck detection & recovery
         Vector3 pos = _enemy.transform.position;
