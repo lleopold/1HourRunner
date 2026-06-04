@@ -100,7 +100,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
         var searchForVictim = new SearchForVictim(this, _player);
         var walkToSelected = new WalkToSelected(this, zombieNavMeshAgent, _animator, _enemyConfig, _player.transform, enemyAnimator);
-        var attackFreely = new AttackFreely(this, _player, _animator, _enemyConfig, _monoBehaviour);
+        var attackFreely = new AttackFreely(this, _player, _animator, _enemyConfig, _monoBehaviour, enemyAnimator);
         var turnToPlayer = new TurnToPlayer(this, zombieNavMeshAgent, _animator, _enemyConfig, enemyAnimator);
         var stop = new Stop(this, zombieNavMeshAgent, enemyAnimator);
         var startMoving = new StartMoving(this, zombieNavMeshAgent, enemyAnimator);

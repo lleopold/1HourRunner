@@ -20,6 +20,10 @@ public class EnemyKicking : StateMachineBehaviour
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         animator.SetInteger("Kick", 0);
+
+        var enemy = animator.GetComponent<Enemy>();
+        if (enemy != null)
+            enemy.AttackFinished = true;
     }
 
     // OnStateMove is called right after Animator.OnAnimatorMove()

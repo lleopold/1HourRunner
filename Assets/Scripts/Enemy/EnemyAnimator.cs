@@ -2,17 +2,15 @@ using UnityEngine;
 
 /// <summary>
 /// Owns all velocity writes to the enemy Animator.
-/// Enforces smooth transitions — if any caller tries to jump velocity by more
-/// than MaxDeltaPerFrame in a single frame, an error is logged and the value
-/// is clamped instead of snapped.
+/// Velocity NEVER snaps — every write is forced through a minimum damp time.
 /// </summary>
 public class EnemyAnimator
 {
     private readonly Animator _animator;
     private static readonly int VelocityHash = Animator.StringToHash("velocity");
 
-    private const float DefaultDampTime  = 0.15f;
-    private const float MaxDeltaPerFrame = 0.30f; // max allowed jump per frame (0–1 scale)
+    private const float DefaultDampTime = 0.15f;
+    private const float MinDampTime     = 0.12f; // absolute floor — velocity can never jump instantly
 
     private float _current = 0f;
 
@@ -25,7 +23,7 @@ public class EnemyAnimator
     }
 
     /// <summary>
-    /// Set target velocity with damping. Use this everywhere instead of raw SetFloat.
+    /// Set target velocity. dampTime is clamped to MinDampTime so snapping is physically impossible.
     /// </summary>
     public void SetVelocity(float target, float dampTime = DefaultDampTime)
     {
@@ -33,13 +31,12 @@ public class EnemyAnimator
 
         target = Mathf.Clamp01(target);
 
-        float delta = target - _current;
-        if (Mathf.Abs(delta) > MaxDeltaPerFrame)
+        if (dampTime < MinDampTime)
         {
             Debug.LogError(
-                $"[EnemyAnimator] Velocity jump of {delta:F3} detected (current={_current:F3} → target={target:F3}). " +
-                $"Clamping to ±{MaxDeltaPerFrame} — fix the caller to use damped transitions.");
-            target = _current + Mathf.Sign(delta) * MaxDeltaPerFrame;
+                $"[EnemyAnimator] SetVelocity called with dampTime={dampTime:F3} < MinDampTime={MinDampTime:F3}. " +
+                $"This would cause flickering. Fix the caller.");
+            dampTime = MinDampTime;
         }
 
         _animator.SetFloat(VelocityHash, target, dampTime, Time.deltaTime);
@@ -47,7 +44,7 @@ public class EnemyAnimator
     }
 
     /// <summary>
-    /// Instantly sync internal cache from the animator (call after external writes you cannot avoid).
+    /// Sync internal cache from the animator (use after external writes you cannot avoid).
     /// </summary>
     public void SyncFromAnimator()
     {

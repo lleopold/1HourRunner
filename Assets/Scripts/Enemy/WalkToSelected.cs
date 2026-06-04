@@ -136,7 +136,7 @@ public class WalkToSelected : IState
                 ? Mathf.Clamp01(_navMeshAgent.desiredVelocity.magnitude / speed)
                 : 0f;
             _velocity = norm;
-            _enemyAnimator.SetVelocity(_velocity, 0.05f);
+            _enemyAnimator.SetVelocity(_velocity);
         }
 
         // Stuck detection & recovery

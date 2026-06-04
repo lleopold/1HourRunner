@@ -12,12 +12,14 @@ public class AttackFreely : IState
     private NavMeshAgent _navMeshAgent;
     private Coroutine _attackTimeoutCo;
     private Coroutine _sequenceCo;
+    private readonly EnemyAnimator _enemyAnimator;
 
     // Telegraph timing tweakable
     private const float TelegraphDuration = 0.5f;
 
-    public AttackFreely(Enemy enemy, GameObject victim, Animator animator, EnemyConfig enemyConfig, MonoBehaviour monoBehaviour)
+    public AttackFreely(Enemy enemy, GameObject victim, Animator animator, EnemyConfig enemyConfig, MonoBehaviour monoBehaviour, EnemyAnimator enemyAnimator)
     {
+        _enemyAnimator = enemyAnimator;
         _enemy = enemy;
         _victim = victim;
         _animator = animator;
@@ -68,11 +70,18 @@ public class AttackFreely : IState
 
     public void Tick()
     {
-        // Rotation while attacking intentionally skipped (commented logic retained in original)
+        if (_navMeshAgent != null && !_navMeshAgent.isStopped)
+            _navMeshAgent.isStopped = true;
+
+        _enemyAnimator.SetVelocity(0f);
     }
 
     private System.Collections.IEnumerator AttackSequence()
     {
+        // Wait until zombie has fully stopped before attacking
+        while (_enemyAnimator.Velocity > 0.05f)
+            yield return null;
+
         bool useKick = (Random.Range(1, 3) == 1);
 
         bool canAttack = true;
