@@ -47,8 +47,9 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     //[SerializeField] private Animator _animator;
     private static DamageNumber _damageNumberPrefab;
     public EnemyAlertIndicator AlertIndicator { get; private set; }
-
-
+    private EnemyAnimator _enemyAnimator;
+    private static Enemy _closestEnemy;
+    private static int _lastClosestFrame = -1;
 
     private void Awake()
     {
@@ -57,13 +58,9 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         CacheRagdollParts();
         DisableRagdoll();
 
-        Target = _player;
         zombieNavMeshAgent = GetComponent<NavMeshAgent>();
         zombieNavMeshAgent.updateRotation = true;
         _animator = GetComponent<Animator>();
-        int zombieLayer = LayerMask.NameToLayer("Zombies");
-        Debug.Log("Zombie Layer: " + zombieLayer);
-
 
         AttackFinished = false;
         _monoBehaviour = this;
@@ -86,6 +83,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         string prefabName = gameObject.name;
         _player = GameObject.FindWithTag("Player");
         if (_player == null) _player = GameObject.Find("Player");
+        Target = _player;
 
         PlayerConfigManager playerConfigManager = Resources.Load<PlayerConfigManager>("Config/Player/PlayerConfigManager"); // Load the config manager
         if (_player != null)
@@ -101,19 +99,19 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
         _gathering = GameObject.Find("GatheringPoint");
 
-        var enemyAnimator = new EnemyAnimator(_animator);
+        _enemyAnimator = new EnemyAnimator(_animator);
 
         var searchForVictim = new SearchForVictim(this, _player);
-        var walkToSelected = new WalkToSelected(this, zombieNavMeshAgent, _animator, _enemyConfig, _player.transform, enemyAnimator);
-        var attackFreely = new AttackFreely(this, _player, _animator, _enemyConfig, _monoBehaviour, enemyAnimator);
-        var turnToPlayer = new TurnToPlayer(this, zombieNavMeshAgent, _animator, _enemyConfig, enemyAnimator);
-        var stop = new Stop(this, zombieNavMeshAgent, enemyAnimator);
-        var idleZombie = new IdleZombie(enemyAnimator, zombieNavMeshAgent); // New state
-        var startMoving = new StartMoving(this, zombieNavMeshAgent, enemyAnimator);
-        var fullStop = new FullStop(this, zombieNavMeshAgent, enemyAnimator);
+        var walkToSelected = new WalkToSelected(this, zombieNavMeshAgent, _animator, _enemyConfig, _player.transform, _enemyAnimator);
+        var attackFreely = new AttackFreely(this, _player, _animator, _enemyConfig, _monoBehaviour, _enemyAnimator);
+        var turnToPlayer = new TurnToPlayer(this, zombieNavMeshAgent, _animator, _enemyConfig, _enemyAnimator);
+        var stop = new Stop(this, zombieNavMeshAgent, _enemyAnimator);
+        var idleZombie = new IdleZombie(_enemyAnimator, zombieNavMeshAgent); // New state
+        var startMoving = new StartMoving(this, zombieNavMeshAgent, _enemyAnimator);
+        var fullStop = new FullStop(this, zombieNavMeshAgent, _enemyAnimator);
         var searchForGatheringSpot = new SearchForGathering(this, _gathering);
-        var walkToGathering = new WalkToGathering(this, zombieNavMeshAgent, _animator, _enemyConfig, _gathering.transform, enemyAnimator);
-        var roam = new Roam(this, _player.transform, zombieNavMeshAgent, _animator, _enemyConfig, _monoBehaviour, enemyAnimator);
+        var walkToGathering = new WalkToGathering(this, zombieNavMeshAgent, _animator, _enemyConfig, _gathering.transform, _enemyAnimator);
+        var roam = new Roam(this, _player.transform, zombieNavMeshAgent, _animator, _enemyConfig, _monoBehaviour, _enemyAnimator);
 
 
         // 0. 
@@ -289,10 +287,62 @@ public bool FarToGathering()
         // DO NOT deactivate healthBarUI here anymore
     }
 
-    void Update()
+    private void UpdateClosestEnemy()
     {
+        if (Time.frameCount == _lastClosestFrame) return;
+        _lastClosestFrame = Time.frameCount;
+
+        _closestEnemy = null;
+        float minDist = float.MaxValue;
+        Enemy[] allEnemies = UnityEngine.Object.FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+
+        if (_player == null) return;
+
+        foreach (var e in allEnemies)
+        {
+            if (e._player == null || e._health <= 0) continue;
+            float d = Vector3.Distance(e.transform.position, e._player.transform.position);
+            if (d < minDist)
+            {
+                minDist = d;
+                _closestEnemy = e;
+            }
+        }
+    }
+
+    private void OnGUI()
+    {
+        if (_closestEnemy != this) return;
+
+        GUIStyle style = new GUIStyle(GUI.skin.label);
+        style.fontSize = 18;
+        style.normal.textColor = Color.yellow;
+        style.alignment = TextAnchor.UpperRight;
+        style.fontStyle = FontStyle.Bold;
+
+        string info = $"[CLOSEST ZOMBIE DEBUG]\n" +
+                      $"Name: {gameObject.name}\n" +
+                      $"State: {_stateMachine.CurrentState?.GetType().Name ?? "None"}\n" +
+                      $"Health: {_health:F1}\n" +
+                      $"Target: {(Target != null ? Target.name : "None")}\n" +
+                      $"CloseToPlayer: {CloseToPlayer()}\n" +
+                      $"FarToPlayer: {FarToPlayer()}\n" +
+                      $"Velocity: {(_enemyAnimator != null ? _enemyAnimator.Velocity.ToString("F2") : "N/A")}";
+
+        // Position in upper right corner with some padding
+        float width = 300;
+        float height = 200;
+        Rect rect = new Rect(Screen.width - width - 10, 10, width, height);
+        
+        GUI.Box(new Rect(Screen.width - width - 20, 5, width + 10, height + 10), ""); // Background box
+        GUI.Label(rect, info, style);
+    }
+
+    void Update()
+{
+        UpdateClosestEnemy();
         _stateMachine.Tick();
-        Debug.DrawRay(transform.position, transform.forward * 5, Color.red);  // Expected forward
+Debug.DrawRay(transform.position, transform.forward * 5, Color.red);  // Expected forward
         Debug.DrawRay(transform.position, zombieNavMeshAgent.velocity.normalized * 5, Color.green); // Movement direction
 
         Vector3 directionToPlayer = (_player.transform.position - transform.position).normalized;

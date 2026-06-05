@@ -41,11 +41,16 @@ public class Stop : IState
     {
         _t += Time.deltaTime;
 
-        // Optional: Force a smoother physical glide if the NavMeshAgent acceleration is too high
-        _agent.velocity = Vector3.Lerp(_agent.velocity, Vector3.zero, Time.deltaTime * 4f);
+        // Linear physical glide to zero instead of exponential Lerp
+        if (_agent.isActiveAndEnabled)
+        {
+            _agent.velocity = Vector3.MoveTowards(_agent.velocity, Vector3.zero, Time.deltaTime * 12f);
+        }
 
-        // Damp the animation velocity to 0
-        _enemyAnimator.SetVelocity(0f, DampTime);
+        // Linear animation stop
+        float currentAnim = _enemyAnimator.Velocity;
+        float newAnim = Mathf.MoveTowards(currentAnim, 0f, Time.deltaTime / DampTime);
+        _enemyAnimator.SetVelocity(newAnim, 0.12f); 
         _enemyAnimator.SyncFromAnimator();
     }
 
