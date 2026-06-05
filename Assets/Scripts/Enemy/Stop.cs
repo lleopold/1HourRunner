@@ -8,13 +8,15 @@ public class Stop : IState
     private readonly EnemyAnimator _enemyAnimator;
 
     private float _t;
-    private const float MinWaitDuration = 0.3f;
-    private const float DampTime = 0.6f;
+    private const float MinWaitDuration = 0.4f; // Minimum time to spend braking
+    private const float DampTime = 0.6f;        // How fast animation reaches 0
     private const float VelocityEps = 0.05f;
 
+    // Exit when both physical movement and animation have settled
     public bool CanExit =>
         _t >= MinWaitDuration &&
-        _enemyAnimator.Velocity < VelocityEps;
+        _enemyAnimator.Velocity < VelocityEps &&
+        _agent.velocity.magnitude < 0.1f;
 
     public Stop(Enemy enemy, NavMeshAgent agent, EnemyAnimator enemyAnimator)
     {
@@ -27,26 +29,30 @@ public class Stop : IState
     {
         if (!_agent.enabled) _agent.enabled = true;
 
-        // Immediate stop — reset path BEFORE re-enabling updateRotation to avoid a one-frame rotation snap
-        _agent.isStopped = true;
+        // CRITICAL: Clear path but DO NOT set isStopped = true.
+        // This lets the agent "glide" using its acceleration/deceleration properties.
         _agent.ResetPath();
-        _agent.updatePosition = true;
-        _agent.updateRotation = true;
+        _agent.isStopped = false;
 
         _t = 0f;
-        // Do not snap the blend tree; Tick will damp it to 0 over WaitDuration.
     }
 
     public void Tick()
     {
         _t += Time.deltaTime;
 
+        // Optional: Force a smoother physical glide if the NavMeshAgent acceleration is too high
+        _agent.velocity = Vector3.Lerp(_agent.velocity, Vector3.zero, Time.deltaTime * 4f);
+
+        // Damp the animation velocity to 0
         _enemyAnimator.SetVelocity(0f, DampTime);
         _enemyAnimator.SyncFromAnimator();
     }
 
     public void OnExit()
     {
-        // Do NOT snap velocity here — let the next state (StartMoving/AttackFreely) own the blend tree.
+        // Now that we've "arrived" at a stop, we can hard-stop the agent to prevent drifting
+        if (_agent.isActiveAndEnabled)
+            _agent.isStopped = true;
     }
 }

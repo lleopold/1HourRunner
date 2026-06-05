@@ -4,27 +4,26 @@ using UnityEngine.AI;
 public class AttackFreely : IState
 {
     private readonly Enemy _enemy;
-    private GameObject _victim;
-    private Animator _animator;
-    private EnemyConfig _enemyConfig;
-    private bool _attacking;
-    private MonoBehaviour _monoBehaviour;
-    private NavMeshAgent _navMeshAgent;
-    private Coroutine _attackTimeoutCo;
-    private Coroutine _sequenceCo;
+    private readonly Animator _animator;
+    private readonly EnemyConfig _enemyConfig;
+    private readonly MonoBehaviour _monoBehaviour;
+    private readonly NavMeshAgent _navMeshAgent;
     private readonly EnemyAnimator _enemyAnimator;
 
-    // Telegraph timing tweakable
     private const float TelegraphDuration = 0.5f;
+    private const float AttackTimeoutSeconds = 2.5f;
+
+    private bool _attacking;
+    private Coroutine _attackTimeoutCo;
+    private Coroutine _sequenceCo;
 
     public AttackFreely(Enemy enemy, GameObject victim, Animator animator, EnemyConfig enemyConfig, MonoBehaviour monoBehaviour, EnemyAnimator enemyAnimator)
     {
-        _enemyAnimator = enemyAnimator;
         _enemy = enemy;
-        _victim = victim;
         _animator = animator;
         _enemyConfig = enemyConfig;
         _monoBehaviour = monoBehaviour;
+        _enemyAnimator = enemyAnimator;
         _navMeshAgent = enemy.GetComponent<NavMeshAgent>();
     }
 
@@ -36,11 +35,11 @@ public class AttackFreely : IState
 
         if (_navMeshAgent != null)
         {
+            _navMeshAgent.ResetPath();         // clear destination so agent has nowhere to slide toward
             _navMeshAgent.isStopped = true;
             _navMeshAgent.updateRotation = false;
         }
 
-        // Start full attack sequence (telegraph -> animation)
         _sequenceCo = _monoBehaviour.StartCoroutine(AttackSequence());
     }
 
@@ -48,29 +47,18 @@ public class AttackFreely : IState
     {
         _attacking = false;
 
-        if (_attackTimeoutCo != null)
-        {
-            _monoBehaviour.StopCoroutine(_attackTimeoutCo);
-            _attackTimeoutCo = null;
-        }
+        if (_attackTimeoutCo != null) { _monoBehaviour.StopCoroutine(_attackTimeoutCo); _attackTimeoutCo = null; }
+        if (_sequenceCo != null) { _monoBehaviour.StopCoroutine(_sequenceCo); _sequenceCo = null; }
 
-        if (_sequenceCo != null)
-        {
-            _monoBehaviour.StopCoroutine(_sequenceCo);
-            _sequenceCo = null;
-        }
-
-        // Hide indicator if still showing
-        _enemy.AlertIndicator?.Cancel();
-
-        // Reset animator params
         _animator.ResetTrigger("ZombieAttack");
         _animator.SetInteger("Kick", 0);
+
+        _enemy.AlertIndicator?.Cancel();
     }
 
     public void Tick()
     {
-        if (_navMeshAgent != null && !_navMeshAgent.isStopped)
+        if (_navMeshAgent != null)
             _navMeshAgent.isStopped = true;
 
         _enemyAnimator.SetVelocity(0f);
@@ -78,45 +66,32 @@ public class AttackFreely : IState
 
     private System.Collections.IEnumerator AttackSequence()
     {
-        // Wait until zombie has fully stopped before attacking
+        // Wait until zombie has fully stopped
         while (_enemyAnimator.Velocity > 0.05f)
             yield return null;
 
-        bool useKick = (Random.Range(1, 3) == 1);
-
-        bool canAttack = true;
-        // Optional: you could add conditions here (e.g. still in melee range)
-        if (!canAttack)
-        {
-            _enemy.AttackFinished = true;
-            yield break;
-        }
-
-        // Telegraph phase
+        // Telegraph
         if (_enemy.AlertIndicator != null)
         {
-            bool telegraphDone = false;
-            _enemy.AlertIndicator.Telegraph(_monoBehaviour, TelegraphDuration, () => telegraphDone = true);
-            while (!telegraphDone)
-                yield return null;
+            bool done = false;
+            _enemy.AlertIndicator.Telegraph(_monoBehaviour, TelegraphDuration, () => done = true);
+            while (!done) yield return null;
         }
         else
         {
             yield return new WaitForSeconds(TelegraphDuration);
         }
 
-        // Play actual attack animation
+        // Pick attack type and play it
+        bool useKick = (Random.Range(0, 2) == 0);
         if (useKick)
-        {
             _animator.SetInteger("Kick", 1);
-        }
         else
-        {
             _animator.SetTrigger("ZombieAttack");
-        }
 
-        // Fail-safe exit
-        _attackTimeoutCo = _monoBehaviour.StartCoroutine(AttackEndFailSafe(2.0f));
+        // AttackFinished set by EnemyKicking / EnemyCrossPunch StateMachineBehaviour OnStateExit.
+        // Failsafe in case animator event never fires.
+        _attackTimeoutCo = _monoBehaviour.StartCoroutine(AttackEndFailSafe(AttackTimeoutSeconds));
     }
 
     private System.Collections.IEnumerator AttackEndFailSafe(float seconds)
@@ -124,8 +99,8 @@ public class AttackFreely : IState
         yield return new WaitForSeconds(seconds);
         if (!_enemy.AttackFinished)
         {
+            Debug.LogWarning("[AttackFreely] Failsafe triggered — AttackFinished was never set by animator.");
             _enemy.AttackFinished = true;
-            Debug.Log("AttackEndFailSafe triggered");
         }
     }
 }

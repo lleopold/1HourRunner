@@ -103,6 +103,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         var attackFreely = new AttackFreely(this, _player, _animator, _enemyConfig, _monoBehaviour, enemyAnimator);
         var turnToPlayer = new TurnToPlayer(this, zombieNavMeshAgent, _animator, _enemyConfig, enemyAnimator);
         var stop = new Stop(this, zombieNavMeshAgent, enemyAnimator);
+        var idleZombie = new IdleZombie(enemyAnimator, zombieNavMeshAgent); // New state
         var startMoving = new StartMoving(this, zombieNavMeshAgent, enemyAnimator);
         var fullStop = new FullStop(this, zombieNavMeshAgent, enemyAnimator);
         var searchForGatheringSpot = new SearchForGathering(this, _gathering);
@@ -110,21 +111,36 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         var roam = new Roam(this, _player.transform, zombieNavMeshAgent, _animator, _enemyConfig, _monoBehaviour, enemyAnimator);
 
 
-
-        At(stop, searchForVictim, () => HasTarget() && stop.CanExit);
-        At(searchForVictim, startMoving, FarToPlayer);
-
-        At(startMoving, walkToSelected, () => startMoving.CanExit);
-
+        // 0. 
+        At(stop, walkToSelected, FarToPlayer);
+        // 1. When close, start braking
         At(walkToSelected, stop, CloseToPlayer);
-        At(stop, attackFreely, () => CloseToPlayer() && stop.CanExit);
 
-        // After attack: always turn to face the player first
-        At(attackFreely, turnToPlayer, FinishedAttack);
+        // 2. Once braking is done, go to stable Idle
+        At(stop, idleZombie, () => stop.CanExit);
 
-        // After turning: attack again if close, start moving if far
-        At(turnToPlayer, stop, () => turnToPlayer.CanExit && CloseToPlayer());
-        At(turnToPlayer, startMoving, () => turnToPlayer.CanExit && FarToPlayer());
+        // 3. From Idle, choose what to do next
+        At(idleZombie, attackFreely, CloseToPlayer); // Re-enable attacking!
+        At(idleZombie, startMoving, FarToPlayer);
+
+        // 4. If we lose the player while stopping/idling, go back to searching
+        At(idleZombie, searchForVictim, () => !HasTarget());
+
+        //At(stop, searchForVictim, () => HasTarget() && stop.CanExit);
+        //At(searchForVictim, startMoving, FarToPlayer);
+
+        //At(startMoving, walkToSelected, () => startMoving.CanExit);
+
+        //At(walkToSelected, stop, CloseToPlayer);
+        ////At(stop, attackFreely, () => CloseToPlayer() && stop.CanExit);
+
+
+        //// After attack: always turn to face the player first
+        //At(attackFreely, turnToPlayer, FinishedAttack);
+
+        //// After turning: attack again if close, start moving if far
+        //At(turnToPlayer, stop, () => turnToPlayer.CanExit && CloseToPlayer());
+        //At(turnToPlayer, startMoving, () => turnToPlayer.CanExit && FarToPlayer());
 
 
 
