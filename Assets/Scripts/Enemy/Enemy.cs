@@ -84,9 +84,14 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         _healthBarVisible = false;
 
         string prefabName = gameObject.name;
-        _player = GameObject.Find("Player");
+        _player = GameObject.FindWithTag("Player");
+        if (_player == null) _player = GameObject.Find("Player");
+
         PlayerConfigManager playerConfigManager = Resources.Load<PlayerConfigManager>("Config/Player/PlayerConfigManager"); // Load the config manager
-        playerConfig = playerConfigManager.GetConfig(DataHolder.ChosenPlayer.ToString());
+        if (_player != null)
+        {
+            playerConfig = playerConfigManager.GetConfig(DataHolder.ChosenPlayer.ToString());
+        }
 
         EnemyConfigManager configManager = Resources.Load<EnemyConfigManager>("Config/Enemy/EnemyConfigManager"); // Load the config manager
         _enemyConfig = configManager.GetConfig(prefabName.Replace("(Clone)", ""));//MRS
@@ -126,21 +131,19 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         // 4. If we lose the player while stopping/idling, go back to searching
         At(idleZombie, searchForVictim, () => !HasTarget());
 
-        //At(stop, searchForVictim, () => HasTarget() && stop.CanExit);
-        //At(searchForVictim, startMoving, FarToPlayer);
-
-        //At(startMoving, walkToSelected, () => startMoving.CanExit);
+        At(searchForVictim, startMoving, FarToPlayer);
+        At(startMoving, walkToSelected, () => startMoving.CanExit);
 
         //At(walkToSelected, stop, CloseToPlayer);
         ////At(stop, attackFreely, () => CloseToPlayer() && stop.CanExit);
 
 
-        //// After attack: always turn to face the player first
-        //At(attackFreely, turnToPlayer, FinishedAttack);
+        // After attack: always turn to face the player first
+        At(attackFreely, turnToPlayer, FinishedAttack);
 
-        //// After turning: attack again if close, start moving if far
-        //At(turnToPlayer, stop, () => turnToPlayer.CanExit && CloseToPlayer());
-        //At(turnToPlayer, startMoving, () => turnToPlayer.CanExit && FarToPlayer());
+        // After turning: attack again if close, start moving if far
+        At(turnToPlayer, stop, () => turnToPlayer.CanExit && CloseToPlayer());
+        At(turnToPlayer, startMoving, () => turnToPlayer.CanExit && FarToPlayer());
 
 
 
@@ -211,6 +214,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     }
     public bool CloseToPlayer()
     {
+        if (_player == null) return false;
         var retval = Vector3.Distance(transform.position, _player.transform.position) < _enemyConfig.meleeRadius;
         if (retval)
         {
@@ -218,7 +222,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         }
         return retval;
     }
-    public bool CloseToGather()
+public bool CloseToGather()
     {
         var retval = Vector3.Distance(transform.position, _gathering.transform.position) < _enemyConfig.meleeRadius;
         if (retval)
@@ -229,6 +233,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     }
     public bool FarToPlayer()
     {
+        if (_player == null) return false;
         var retval = Vector3.Distance(transform.position, _player.transform.position) > _enemyConfig.meleeRadius;
         if (retval)
         {
@@ -236,7 +241,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         }
         return retval;
     }
-    public bool FarToGathering()
+public bool FarToGathering()
     {
         var retval = Vector3.Distance(transform.position, _gathering.transform.position) > _enemyConfig.meleeRadius;
         if (retval)
@@ -714,12 +719,12 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
     private void EnableRagdoll()
     {
-        // 1) Turn off the main root Rigidbody entirely — if you just make it kinematic,
-        //    it can still “hold” all children in place.
+        // 1) Turn off the main root Rigidbody entirely ï¿½ if you just make it kinematic,
+        //    it can still ï¿½holdï¿½ all children in place.
         var mainRb = GetComponent<Rigidbody>();
         if (mainRb != null) Destroy(mainRb);
 
-        // 2) Activate each bone’s physics
+        // 2) Activate each boneï¿½s physics
         foreach (var rb in _ragdollBodies)
         {
             rb.isKinematic = false;   // allow physics sim
@@ -731,7 +736,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         // 3) Enable their colliders
         foreach (var col in _ragdollColliders)
         {
-            // skip the root object’s collider if it’s in your list
+            // skip the root objectï¿½s collider if itï¿½s in your list
             if (col.gameObject != gameObject)
             {
                 col.enabled = true;
@@ -757,8 +762,8 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         //if (mainCol != null)
         //    mainCol.enabled = false;
 
-        //// You no longer need this Rigidbody — removing it avoids
-        //// the “floating” effect of a kinematic parent
+        //// You no longer need this Rigidbody ï¿½ removing it avoids
+        //// the ï¿½floatingï¿½ effect of a kinematic parent
         //var mainRb = GetComponent<Rigidbody>();
         //if (mainRb != null)
         //    Destroy(mainRb);

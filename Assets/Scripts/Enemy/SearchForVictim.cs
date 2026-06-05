@@ -24,9 +24,17 @@ public class SearchForVictim : IState
 
     public void Tick()
     {
+        if (_victim == null)
+        {
+            _victim = GameObject.FindWithTag("Player");
+            if (_victim == null) _victim = GameObject.Find("Player");
+        }
+
         if (_victim != null)
         {
             _enemy.Target = _victim;
+            // Ensure the enemy's internal player reference is also set
+            if (_enemy._player == null) _enemy._player = _victim;
         }
     }
 
