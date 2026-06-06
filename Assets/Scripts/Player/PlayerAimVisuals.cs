@@ -68,6 +68,8 @@ namespace ZombieGame
         public AimingCircleTrigger AimingCircleTrigger => _aimingCircleTrigger;
         private readonly float _aimingCircleHeight = 0.11f;
 
+        private Texture2D _radarTex;
+
         private ParticleSystem _laserSmokeLeft;
         private ParticleSystem _laserSmokeRight;
 
@@ -283,6 +285,8 @@ namespace ZombieGame
                   ?? Shader.Find("Sprites/Default");
 
             _meshRendererAimingCircle.material = new Material(sh);
+            _radarTex = MakeRadarTexture(256, 7);
+_meshRendererAimingCircle.material.mainTexture = _radarTex;
 
             if (sh.name.Contains("Universal Render Pipeline"))
             {
@@ -424,18 +428,23 @@ namespace ZombieGame
                 Color themeColor = GetInterpolatedColor(angle);
                 float focusProgress = Mathf.InverseLerp(_gameStats._precisionMax, _gameStats._precisionMin, angle);
 
-                // Use themeColor with a controlled boost as the base multiplier.
-                // This ensures the vertex color gradients (alpha) correctly define the shape.
-                float boost = Mathf.Lerp(1.5f, 5.0f, focusProgress);
+                // Reduce boost for a more transparent, less solid look
+                float boost = Mathf.Lerp(0.8f, 1.8f, focusProgress);
                 Color baseCol = themeColor * boost;
-                baseCol.a = 1.0f;
+                baseCol.a = 0.6f; // Reduced alpha for overall transparency
 
                 meshRenderer.material.color = baseCol;
-                if (meshRenderer.material.HasProperty("_BaseColor"))
+if (meshRenderer.material.HasProperty("_BaseColor"))
                     meshRenderer.material.SetColor("_BaseColor", baseCol);
 
+                // Animate radar lines scrolling outward
+                float radarSpeed = 1.2f;
+                Vector2 offset = meshRenderer.material.mainTextureOffset;
+                offset.y -= Time.deltaTime * radarSpeed;
+                meshRenderer.material.mainTextureOffset = offset;
+
                 // Disable the static global emission to avoid the "solid block" effect.
-                // We want the glow to follow the vertex alpha gradients.
+                // We want the glow to follow the vertex alpha gradients and texture.
                 if (meshRenderer.material.HasProperty("_EmissionColor"))
                     meshRenderer.material.SetColor("_EmissionColor", Color.black);
 
@@ -558,6 +567,7 @@ namespace ZombieGame
         {
             int vertexCount = (_resolution + 1) * 2;
             Vector3[] vertices = new Vector3[vertexCount];
+            Vector2[] uvs = new Vector2[vertexCount];
             int[] triangles = new int[_resolution * 6];
             float angleRad = Mathf.Deg2Rad * angle;
             float halfAngle = angleRad / 2f;
@@ -568,8 +578,12 @@ namespace ZombieGame
                 float currentAngle = -halfAngle + (t * angleRad);
                 float normalizedCenterBias = Mathf.Cos(currentAngle / halfAngle * Mathf.PI / 2f);
                 float dynamicOuterRadius = _outerRadius + _pointyTipFactor * normalizedCenterBias;
+                
                 vertices[i * 2] = new Vector3(0f, 0f, 0f);
                 vertices[i * 2 + 1] = new Vector3(Mathf.Sin(currentAngle) * dynamicOuterRadius, 0f, Mathf.Cos(currentAngle) * dynamicOuterRadius);
+                
+                uvs[i * 2] = new Vector2(t, 0f);
+                uvs[i * 2 + 1] = new Vector2(t, 1f);
             }
 
             int index = 0;
@@ -589,6 +603,7 @@ namespace ZombieGame
             Color[] colors = GenerateDirectionalSweepColors(vertexCount, _resolution, angle, themeColor);
             _meshAimingCircle.Clear();
             _meshAimingCircle.vertices = vertices;
+            _meshAimingCircle.uv = uvs;
             _meshAimingCircle.triangles = triangles;
             _meshAimingCircle.RecalculateNormals();
             _meshAimingCircle.colors = colors;
@@ -596,15 +611,33 @@ namespace ZombieGame
             _meshColliderAimingCircle.sharedMesh = _meshAimingCircle;
         }
 
+        private Texture2D MakeRadarTexture(int height, int lineCount)
+        {
+            var tex = new Texture2D(1, height, TextureFormat.RGBA32, false);
+            tex.wrapMode = TextureWrapMode.Repeat;
+            tex.filterMode = FilterMode.Bilinear;
+            for (int y = 0; y < height; y++)
+            {
+                float v = (float)y / height;
+                // Create concentric arcs
+                float lines = Mathf.Sin(v * Mathf.PI * 2f * lineCount);
+                float a = Mathf.Pow(Mathf.Max(0, lines), 12f); // even sharper arcs
+
+                // Add a faint base glow that is stronger at the outer edge
+                float baseGlow = Mathf.Pow(v, 2f) * 0.2f;
+                
+                Color c = Color.white;
+                c.a = Mathf.Clamp01(a + baseGlow);
+                tex.SetPixel(0, y, c);
+            }
+            tex.Apply();
+            return tex;
+        }
+
         private Color[] GenerateDirectionalSweepColors(int vertexCount, int resolution, float angle, Color themeColor)
         {
             Color[] colors = new Color[vertexCount];
-            float t = Time.time;
             float focusProgress = Mathf.InverseLerp(_gameStats._precisionMax, _gameStats._precisionMin, CurrentAngle);
-
-            // Energy pulse properties
-            float pulseSpeed = Mathf.Lerp(4f, 12f, focusProgress);
-            float pulseFreq = 4.0f;
 
             for (int i = 0; i <= resolution; i++)
             {
@@ -613,24 +646,17 @@ namespace ZombieGame
                 
                 // Aggressive side glow: center is very transparent, edges are bright.
                 // sideGlow is 0 at center, 1 at edges.
-                float sideGlow = Mathf.Pow(horizontalDistFromCenter, 4.0f);
-                float baseAlpha = Mathf.Lerp(0.05f, 0.6f, sideGlow);
-
-                // Radial waves pulsing outward
-                float waveRoot = Mathf.Sin(t * pulseSpeed);
-                float waveEdge = Mathf.Sin(t * pulseSpeed - pulseFreq);
-                
-                float waveAlphaRoot = Mathf.Pow(Mathf.Max(0, waveRoot), 4.0f) * 0.35f;
-                float waveAlphaEdge = Mathf.Pow(Mathf.Max(0, waveEdge), 4.0f) * 0.35f;
+                float sideGlow = Mathf.Pow(horizontalDistFromCenter, 2.0f);
+                float baseAlpha = Mathf.Lerp(0.15f, 0.4f, sideGlow);
 
                 Color c = Color.white; // We use material color for theme, vertex for shape/glow
                 
                 // Root vertex: fade out near feet (very faint)
-                c.a = Mathf.Clamp01((baseAlpha + waveAlphaRoot) * 0.1f);
+                c.a = baseAlpha * 0.1f;
                 colors[i * 2] = c;
 
                 // Edge vertex: full intensity with waves
-                c.a = Mathf.Clamp01(baseAlpha + waveAlphaEdge);
+                c.a = baseAlpha;
                 colors[i * 2 + 1] = c;
             }
             return colors;
