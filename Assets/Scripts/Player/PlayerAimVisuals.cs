@@ -12,6 +12,7 @@ namespace ZombieGame
     /// </summary>
     public class PlayerAimVisuals : MonoBehaviour
     {
+        private float _radarTimeTranslation;
         // ── Sweep / radar ─────────────────────────────────────────────────────
         [SerializeField] private float _sweepDuration = 2f;
         [SerializeField] private float _sweepLineWidthPct = 0.05f;
@@ -33,7 +34,7 @@ namespace ZombieGame
         [SerializeField] private float _radarBoostMax = 1.8f;
 
         // ── Laser ──────────────────────────────────────────────────────────────
-[SerializeField] private float baseWidth = 0.045f;
+        [SerializeField] private float baseWidth = 0.045f;
         [SerializeField] private float scrollSpeed = 1.6f;
         [SerializeField] private float pulseSpeed = 2.2f;
         [SerializeField] private float pulseMin = 0.85f;
@@ -72,11 +73,14 @@ namespace ZombieGame
         private MeshRenderer _meshRendererAimingCircle;
         private MeshCollider _meshColliderAimingCircle;
         private AimingCircleTrigger _aimingCircleTrigger;
+
         /// <summary>The trigger component on the AnnularSector — available after Initialize().</summary>
         public AimingCircleTrigger AimingCircleTrigger => _aimingCircleTrigger;
         private readonly float _aimingCircleHeight = 0.11f;
 
         private Texture2D _radarTex;
+        private Material _instancedRadarMat; // FIX: Cached to avoid memory leaking and retain correct reference
+        private float _currentRadarOffset;   // FIX: Tracked internally to guarantee smooth scrolling frame rates
 
         private ParticleSystem _laserSmokeLeft;
         private ParticleSystem _laserSmokeRight;
@@ -118,6 +122,11 @@ namespace ZombieGame
             if (isAiming)
             {
                 SetAimLinesActive(true);
+                // FIX: Check if Inspector values changed during gameplay and regenerate texture
+                if (_radarLineCount != _lastRadarLineCount || !Mathf.Approximately(_radarLineSharpness, _lastRadarLineSharpness))
+                {
+                    RegenerateRadarTexture();
+                }
 
                 bool isMoving = movementInput.magnitude > 0f;
                 if (!isMoving)
@@ -296,23 +305,26 @@ namespace ZombieGame
                   ?? Shader.Find("Sprites/Default");
 
             _meshRendererAimingCircle.material = new Material(sh);
-            
+
             _lastRadarLineCount = _radarLineCount;
             _lastRadarLineSharpness = _radarLineSharpness;
             _radarTex = MakeRadarTexture(256, _radarLineCount, _radarLineSharpness);
-            
+
             _meshRendererAimingCircle.material.mainTexture = _radarTex;
+
+            // FIX: Safely capture the created material reference to manipulate values without cloning properties every frame
+            _instancedRadarMat = _meshRendererAimingCircle.material;
 
             if (sh.name.Contains("Universal Render Pipeline"))
             {
-                _meshRendererAimingCircle.material.SetFloat("_Surface", 1); // Transparent
-                _meshRendererAimingCircle.material.SetFloat("_Blend", 1);   // Additive
-                _meshRendererAimingCircle.material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                _meshRendererAimingCircle.material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                _meshRendererAimingCircle.material.SetInt("_ZWrite", 0);
-                _meshRendererAimingCircle.material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-                _meshRendererAimingCircle.material.EnableKeyword("_ADDITIVE_BLENDING");
-                _meshRendererAimingCircle.material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                _instancedRadarMat.SetFloat("_Surface", 1); // Transparent
+                _instancedRadarMat.SetFloat("_Blend", 1);   // Additive
+                _instancedRadarMat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                _instancedRadarMat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                _instancedRadarMat.SetInt("_ZWrite", 0);
+                _instancedRadarMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                _instancedRadarMat.EnableKeyword("_ADDITIVE_BLENDING");
+                _instancedRadarMat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
             }
 
             _meshAimingCircle = new Mesh { name = "AnnularSector" };
@@ -326,6 +338,27 @@ namespace ZombieGame
 
             _meshRendererAimingCircle.enabled = true;
             _aimingCircleTrigger = _gameObjectAimingCircle.AddComponent<AimingCircleTrigger>();
+        }
+        private void RegenerateRadarTexture()
+        {
+            // Update our tracking states
+            _lastRadarLineCount = _radarLineCount;
+            _lastRadarLineSharpness = _radarLineSharpness;
+
+            // Clean up the old texture from memory to avoid leakage
+            if (_radarTex != null)
+            {
+                Destroy(_radarTex);
+            }
+
+            // Generate the new texture with updated values
+            _radarTex = MakeRadarTexture(256, _radarLineCount, _radarLineSharpness);
+
+            // Apply it back to our instanced material
+            if (_instancedRadarMat != null)
+            {
+                _instancedRadarMat.mainTexture = _radarTex;
+            }
         }
 
         private void InitLaserMaterials()
@@ -410,10 +443,10 @@ namespace ZombieGame
             // Vector3 precisionRight = triangleBase + playerRotation * Quaternion.Euler(0, halfPrecisionAngle, 0) * Vector3.forward * currentRadius;
             // if (_lineRendererPrecisionLeft != null && _lineRendererPrecisionRight != null)
             // {
-            //     _lineRendererPrecisionLeft.positionCount = 2;
-            //     _lineRendererPrecisionLeft.SetPositions(new[] { triangleBase, precisionLeft });
-            //     _lineRendererPrecisionRight.positionCount = 2;
-            //     _lineRendererPrecisionRight.SetPositions(new[] { triangleBase, precisionRight });
+            //      _lineRendererPrecisionLeft.positionCount = 2;
+            //      _lineRendererPrecisionLeft.SetPositions(new[] { triangleBase, precisionLeft });
+            //      _lineRendererPrecisionRight.positionCount = 2;
+            //      _lineRendererPrecisionRight.SetPositions(new[] { triangleBase, precisionRight });
             // }
         }
 
@@ -421,52 +454,48 @@ namespace ZombieGame
         {
             Color vColor = AimPrecisionColors.GetAnimatedColor(angle);
 
-            // 1. Create a softer, more "glowing" gradient for the laser lines
+            // 1. Line renderer gradients
             Gradient gradient = new Gradient();
             gradient.SetKeys(
                 new[] {
-                    new GradientColorKey(Color.Lerp(vColor, Color.white, 0.4f), 0f),
-                    new GradientColorKey(vColor, 0.2f),
-                    new GradientColorKey(vColor, 0.8f),
-                    new GradientColorKey(Color.Lerp(vColor, Color.white, 0.4f), 1f),
+            new GradientColorKey(Color.Lerp(vColor, Color.white, 0.4f), 0f),
+            new GradientColorKey(vColor, 0.2f),
+            new GradientColorKey(vColor, 0.8f),
+            new GradientColorKey(Color.Lerp(vColor, Color.white, 0.4f), 1f),
                 },
                 new[] {
-                    new GradientAlphaKey(0.0f, 0f),
-                    new GradientAlphaKey(1.0f, 0.05f),
-                    new GradientAlphaKey(1.0f, 0.95f),
-                    new GradientAlphaKey(0.0f, 1f),
+            new GradientAlphaKey(0.0f, 0f),
+            new GradientAlphaKey(1.0f, 0.05f),
+            new GradientAlphaKey(1.0f, 0.95f),
+            new GradientAlphaKey(0.0f, 1f),
                 });
             lineRenderer.colorGradient = gradient;
 
-            if (meshRenderer != null && meshRenderer.material != null)
+            if (meshRenderer != null && _instancedRadarMat != null)
             {
                 Color themeColor = GetInterpolatedColor(angle);
                 float focusProgress = Mathf.InverseLerp(_gameStats._precisionMax, _gameStats._precisionMin, angle);
 
-                // Reduce boost for a more transparent, less solid look
                 float boost = Mathf.Lerp(0.8f, 1.8f, focusProgress);
                 Color baseCol = themeColor * boost;
-                baseCol.a = 0.6f; // Reduced alpha for overall transparency
+                baseCol.a = 0.6f;
 
-                meshRenderer.material.color = baseCol;
-                if (meshRenderer.material.HasProperty("_BaseColor"))
-                    meshRenderer.material.SetColor("_BaseColor", baseCol);
+                _instancedRadarMat.color = baseCol;
+                if (_instancedRadarMat.HasProperty("_BaseColor"))
+                    _instancedRadarMat.SetColor("_BaseColor", baseCol);
 
-                // Animate radar lines scrolling outward
-                Vector2 offset = meshRenderer.material.mainTextureOffset;
-                offset.y -= Time.deltaTime * _radarSpeed;
-                meshRenderer.material.mainTextureOffset = offset;
+                // FIX: Hooking up the Inspector variable _radarSpeed here.
+                // Lower values in the inspector (e.g., 0.2) will drastically slow it down.
+                _radarTimeTranslation -= Time.deltaTime * _radarSpeed;
+                _radarTimeTranslation %= 1f;
 
-                // Disable the static global emission to avoid the "solid block" effect.
-                // We want the glow to follow the vertex alpha gradients and texture.
-                if (meshRenderer.material.HasProperty("_EmissionColor"))
-                    meshRenderer.material.SetColor("_EmissionColor", Color.black);
+                if (_instancedRadarMat.HasProperty("_EmissionColor"))
+                    _instancedRadarMat.SetColor("_EmissionColor", Color.black);
 
-                meshRenderer.material.SetInt("_ZWrite", 0);
-                meshRenderer.material.renderQueue = 3105; // Slightly above lasers
+                _instancedRadarMat.SetInt("_ZWrite", 0);
+                _instancedRadarMat.renderQueue = 3105;
             }
         }
-
         private void ApplyPrecisionVisuals(LineRenderer lineRenderer)
         {
             Gradient gradient = new Gradient();
@@ -596,8 +625,9 @@ namespace ZombieGame
                 vertices[i * 2] = new Vector3(0f, 0f, 0f);
                 vertices[i * 2 + 1] = new Vector3(Mathf.Sin(currentAngle) * dynamicOuterRadius, 0f, Mathf.Cos(currentAngle) * dynamicOuterRadius);
 
-                uvs[i * 2] = new Vector2(t, 0f);
-                uvs[i * 2 + 1] = new Vector2(t, 1f);
+                // Applying the tracked translation right to the UV data
+                uvs[i * 2] = new Vector2(t, 0f + _radarTimeTranslation);
+                uvs[i * 2 + 1] = new Vector2(t, 1f + _radarTimeTranslation);
             }
 
             int index = 0;
@@ -607,7 +637,6 @@ namespace ZombieGame
                 int outerStart = i * 2 + 1;
                 int outerNext = (i + 1) * 2 + 1;
 
-                // Clockwise from origin to outer to next outer (top-down view)
                 triangles[index++] = innerStart;
                 triangles[index++] = outerStart;
                 triangles[index++] = outerNext;
@@ -624,7 +653,6 @@ namespace ZombieGame
             _meshColliderAimingCircle.sharedMesh = null;
             _meshColliderAimingCircle.sharedMesh = _meshAimingCircle;
         }
-
         private Texture2D MakeRadarTexture(int height, int lineCount, float sharpness)
         {
             var tex = new Texture2D(1, height, TextureFormat.RGBA32, false);
@@ -633,12 +661,11 @@ namespace ZombieGame
             for (int y = 0; y < height; y++)
             {
                 float v = (float)y / height;
-                // Sawtooth-like pulse: sharp leading edge, trailing fade
                 float fract = (v * lineCount) % 1.0f;
-                float a = Mathf.Pow(fract, sharpness); 
-                
+                float a = Mathf.Pow(fract, sharpness);
+
                 Color c = Color.white;
-                c.a = a; 
+                c.a = a;
                 tex.SetPixel(0, y, c);
             }
             tex.Apply();
@@ -653,20 +680,16 @@ namespace ZombieGame
             for (int i = 0; i <= resolution; i++)
             {
                 float horizontalT = (float)i / resolution;
-                float horizontalDistFromCenter = Mathf.Abs(horizontalT - 0.5f) * 2f; // 0 at center, 1 at edges
+                float horizontalDistFromCenter = Mathf.Abs(horizontalT - 0.5f) * 2f;
 
-                // Aggressive side glow: center is very transparent, edges are bright.
-                // sideGlow is 0 at center, 1 at edges.
                 float sideGlow = Mathf.Pow(horizontalDistFromCenter, 2.0f);
                 float baseAlpha = Mathf.Lerp(0.15f, 0.4f, sideGlow);
 
-                Color c = Color.white; // We use material color for theme, vertex for shape/glow
+                Color c = Color.white;
 
-                // Root vertex: fade out near feet (very faint)
                 c.a = baseAlpha * 0.1f;
                 colors[i * 2] = c;
 
-                // Edge vertex: full intensity with waves
                 c.a = baseAlpha;
                 colors[i * 2 + 1] = c;
             }
@@ -679,7 +702,6 @@ namespace ZombieGame
             float maxAngle = _gameStats._precisionMax;
             float normalizedValue = Mathf.InverseLerp(minAngle, maxAngle, angle);
 
-            // Brighter, more vibrant colors for better visibility on dark ground
             Color deepPurple = new Color(0.8f, 0.2f, 1f);
             Color brightRed = new Color(1f, 0.1f, 0.1f);
             Color brightOrange = new Color(1f, 0.5f, 0f);
@@ -809,7 +831,6 @@ namespace ZombieGame
                 float u = (x + 0.5f) / width;
                 float d = Mathf.Abs(u - 0.5f) * 2f;
 
-                // Gaussian-like falloff for a "glow" texture
                 float a = Mathf.Exp(-Mathf.Pow(d * sharpness * 0.8f, 2f));
 
                 Color c = Color.Lerp(laserColor, Color.white, Mathf.Pow(1f - d, 4f));
