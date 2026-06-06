@@ -9,26 +9,34 @@ public class Coin : MonoBehaviour
     public int CoinAmount { get; set; }
     public float magnetRange; // Magnet range for the coin
     private bool isMagnetized = false;
-    private float movementSpeed = 7f; // Speed at which the coin moves towards the player
+    private float movementSpeed = 7f; // Initial chase speed
+    private float _maxSpeed = 15f;    // Target chase speed (will be set to player max speed)
     private GameObject _player;
     AudioClip _coinSound;
     private bool _pickedUp = false;
 
     private float _jumpTimer = 0f;
-    private const float JUMP_DURATION = 0.5f;
+    private const float JUMP_DURATION = 0.4f;
     private Vector3 _jumpStartPos;
-    private float _chaseAcceleration = 20f;
+    private float _chaseAcceleration = 60f;
     private float _currentChaseSpeed = 0f;
-
+    private bool _isInitialized = false;
+    private Vector3 _jumpTargetPos;
+    private float _distanceCheckTimer = 0f;
+    private const float DISTANCE_CHECK_INTERVAL = 0.2f;
 
     public static Coin Create(Vector3 position, int coinAmount)
     {
         GameObject coinPrefab = Resources.Load<GameObject>("Enemies/Coins/CopperCoin");
+        if (coinPrefab == null)
+        {
+            Debug.LogError("Coin prefab not found at Resources/Enemies/Coins/CopperCoin");
+            return null;
+        }
         Transform coinTransform = Instantiate(coinPrefab.transform, position, Quaternion.identity);
         Coin coin = coinTransform.GetComponent<Coin>();
 
         coin.Setup(coinAmount);
-        coin.magnetRange = 15f; // Adjusted to a more reasonable range
         return (coin);
     }
 
@@ -41,24 +49,52 @@ public class Coin : MonoBehaviour
     void Start()
     {
         _coinSound = Resources.Load<AudioClip>("Enemies/Coins/cashRegister");
-        _player = GameObject.Find("Player");
+        _player = GameObject.FindWithTag("Player");
         transform.Rotate(0, 0, 90);
-        _currentChaseSpeed = movementSpeed;
+        
+        if (PlayerConfigSingleton.Instance != null && PlayerConfigSingleton.Instance.PlayerConfig != null)
+        {
+            var pCfg = PlayerConfigSingleton.Instance.PlayerConfig;
+            magnetRange = pCfg.PickupDistance;
+            
+            // Calculate player's max running speed: speed * (1 + RunningSpeed_pct/100)
+            float runMultiplier = (pCfg.RunningSpeed_pct / 100f) + 1f;
+            _maxSpeed = pCfg.speed * runMultiplier;
+            
+            // If max speed is very low (e.g. config not set), use a sane default
+            if (_maxSpeed < 5f) _maxSpeed = 10f;
+        }
+        
+        _currentChaseSpeed = _maxSpeed * 0.5f; // Start at 50% max speed
+        _isInitialized = true;
     }
 
     void Update()
     {
-        if (_pickedUp) return;
+        if (!_isInitialized || _pickedUp) return;
 
         // Visual rotation
         transform.Rotate(6, 0, 0);
 
+        if (_player == null)
+        {
+            _player = GameObject.FindWithTag("Player");
+            if (_player == null) return;
+        }
+
         switch (_currentState)
         {
             case State.Idle:
-                if (isMagnetized && _player != null)
+                _distanceCheckTimer -= Time.deltaTime;
+                if (_distanceCheckTimer <= 0f)
                 {
-                    StartJump();
+                    _distanceCheckTimer = DISTANCE_CHECK_INTERVAL;
+                    float dist = Vector3.Distance(transform.position, _player.transform.position);
+                    if (dist <= magnetRange)
+                    {
+                        isMagnetized = true;
+                        StartJump();
+                    }
                 }
                 break;
 
@@ -74,9 +110,18 @@ public class Coin : MonoBehaviour
 
     private void StartJump()
     {
+        if (_currentState == State.Jumping) return;
+        
         _currentState = State.Jumping;
         _jumpTimer = 0f;
         _jumpStartPos = transform.position;
+        
+        // Horizontal jump: pop slightly away from the player to create a better "collect" arc
+        Vector3 dirFromPlayer = (transform.position - _player.transform.position).normalized;
+        if (dirFromPlayer == Vector3.zero) dirFromPlayer = Vector3.forward;
+        
+        _jumpTargetPos = _jumpStartPos + dirFromPlayer * 1.0f + Random.insideUnitSphere * 0.5f;
+        _jumpTargetPos.y = _jumpStartPos.y; 
     }
 
     private void UpdateJump()
@@ -91,20 +136,23 @@ public class Coin : MonoBehaviour
         }
 
         // Parabola logic for jump
-        Vector3 targetPos = _player != null ? _player.transform.position : _jumpStartPos;
-        Vector3 horizontalPos = Vector3.Lerp(_jumpStartPos, targetPos, t * 0.5f); // Move halfway towards player during jump
-        float height = Mathf.Sin(t * Mathf.PI) * 2.5f; // Arc height
+        Vector3 horizontalPos = Vector3.Lerp(_jumpStartPos, _jumpTargetPos, t);
+        float height = Mathf.Sin(t * Mathf.PI) * 1.5f; 
         transform.position = horizontalPos + Vector3.up * height;
+        
+        // During jump, we don't check for pickup distance to ensure the "pop" is visible
+        // unless the player moves directly into it (handled by OnTriggerEnter)
     }
 
     private void UpdateChase()
     {
         if (_player == null) return;
 
-        _currentChaseSpeed += _chaseAcceleration * Time.deltaTime;
+        // Accelerate to max speed
+        _currentChaseSpeed = Mathf.MoveTowards(_currentChaseSpeed, _maxSpeed, _chaseAcceleration * Time.deltaTime);
         transform.position = Vector3.MoveTowards(transform.position, _player.transform.position, _currentChaseSpeed * Time.deltaTime);
         
-        // Scale punch effect as it gets closer
+        // Scale effect as it gets closer
         float dist = Vector3.Distance(transform.position, _player.transform.position);
         if (dist < 2f)
         {
@@ -112,46 +160,44 @@ public class Coin : MonoBehaviour
             transform.localScale = Vector3.one * scale;
         }
 
-        PickUpAndDestroyCoin(_player, gameObject);
+        CheckPickupDistance();
     }
 
-    void PickUpAndDestroyCoin(GameObject player, GameObject coin)
+    private void CheckPickupDistance()
     {
-        float distance = Vector3.Distance(player.transform.position, coin.transform.position);
-        // Increased distance slightly to feel more responsive with high speed
-        if (distance <= 0.5f && !_pickedUp)
+        if (_pickedUp || _player == null) return;
+        
+        float distance = Vector3.Distance(_player.transform.position, transform.position);
+        // Distance check for pickup - slightly more generous range for reliability at high speed
+        if (distance <= 1.2f)
         {
-            if (SoundFXManager.Instance != null)
-                SoundFXManager.Instance.PlaySoundFXClip(_coinSound, transform, 1f);
-            
-            _player.GetComponent<PlayerControllerInput>().AddCoins(CoinAmount);
-            _pickedUp = true;
-            
-            // Pop effect before destruction
-            transform.localScale = Vector3.zero;
-            Invoke("DestroyCoin", 0.1f);
+            HandlePickup();
         }
     }
 
-    private void OnTriggerStay(Collider other)
+    void HandlePickup()
     {
-        if (other.CompareTag("Player"))
+        if (_pickedUp) return;
+        
+        _pickedUp = true;
+        
+        if (SoundFXManager.Instance != null)
+            SoundFXManager.Instance.PlaySoundFXClip(_coinSound, transform, 1f);
+        
+        PlayerControllerInput playerScript = _player.GetComponent<PlayerControllerInput>();
+        if (playerScript == null)
         {
-            float distance = Vector3.Distance(transform.position, other.transform.position);
-            if (distance <= magnetRange)
-            {
-                isMagnetized = true;
-            }
+            playerScript = _player.GetComponentInParent<PlayerControllerInput>();
         }
-    }
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player"))
+        if (playerScript != null)
         {
-            // We don't disable magnetization once started for better feel
-            // isMagnetized = false; 
+            playerScript.AddCoins(CoinAmount);
         }
+        
+        // Immediate visual disappearance
+        transform.localScale = Vector3.zero;
+        DestroyCoin();
     }
 
     private void DestroyCoin()

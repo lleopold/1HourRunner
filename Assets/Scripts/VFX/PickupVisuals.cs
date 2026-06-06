@@ -49,8 +49,8 @@ public class PickupVisuals : MonoBehaviour
             _pointLight.intensity = Mathf.Lerp(_minLightIntensity, _maxLightIntensity, normalizedSine);
         }
 
-        // Bobbing effect
-        transform.localPosition = _startLocalPosition + Vector3.up * Mathf.Sin((Time.time + _timeOffset) * _bobSpeed) * _bobAmount;
+        // Bobbing effect - Removed because it overrides global movement in Coin.cs
+        // transform.localPosition = _startLocalPosition + Vector3.up * Mathf.Sin((Time.time + _timeOffset) * _bobSpeed) * _bobAmount;
     }
 
     private void OnDestroy()

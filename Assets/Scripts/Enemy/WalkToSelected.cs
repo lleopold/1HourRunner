@@ -168,7 +168,7 @@ public class WalkToSelected : IState
         }
 
         // Optional periodic debug
-        if (DebugLogs && Time.time - _lastLogTime >= 1f)
+        if (DebugLogs && Time.time - _lastLogTime >= 1f && 1 == 2)
         {
             Debug.Log($"[WalkToSelected] onNavMesh={_navMeshAgent.isOnNavMesh}, " +
                 $"velocity={_velocity}," +

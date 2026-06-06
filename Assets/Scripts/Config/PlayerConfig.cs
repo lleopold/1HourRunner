@@ -42,5 +42,6 @@ public class PlayerConfig : ScriptableObject
     public string PerkName;
     public string PerkDescription;
     public float Accuracy;
+    public float PickupDistance = 15f;
 
 }

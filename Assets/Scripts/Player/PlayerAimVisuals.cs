@@ -278,10 +278,23 @@ namespace ZombieGame
             _meshColliderAimingCircle.convex = true;
             _meshColliderAimingCircle.isTrigger = true;
 
-            _meshRendererAimingCircle.material = new Material(Shader.Find("Sprites/Default"))
+            var sh = Shader.Find("Universal Render Pipeline/Particles/Unlit")
+                  ?? Shader.Find("Particles/Additive")
+                  ?? Shader.Find("Sprites/Default");
+
+            _meshRendererAimingCircle.material = new Material(sh);
+
+            if (sh.name.Contains("Universal Render Pipeline"))
             {
-                color = new Color(0, 1, 0, 0.5f)
-            };
+                _meshRendererAimingCircle.material.SetFloat("_Surface", 1); // Transparent
+                _meshRendererAimingCircle.material.SetFloat("_Blend", 1);   // Additive
+                _meshRendererAimingCircle.material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                _meshRendererAimingCircle.material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                _meshRendererAimingCircle.material.SetInt("_ZWrite", 0);
+                _meshRendererAimingCircle.material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                _meshRendererAimingCircle.material.EnableKeyword("_ADDITIVE_BLENDING");
+                _meshRendererAimingCircle.material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+            }
 
             _meshAimingCircle = new Mesh { name = "AnnularSector" };
             _meshFilterAimingCircle.mesh = _meshAimingCircle;
@@ -388,38 +401,46 @@ namespace ZombieGame
         private void ApplyVisuals(LineRenderer lineRenderer, MeshRenderer meshRenderer, float angle)
         {
             Color vColor = AimPrecisionColors.GetAnimatedColor(angle);
+            
+            // 1. Create a softer, more "glowing" gradient for the laser lines
             Gradient gradient = new Gradient();
             gradient.SetKeys(
                 new[] {
-                    new GradientColorKey(Color.white, 0f),
-                    new GradientColorKey(vColor, 0.35f),
-                    new GradientColorKey(vColor, 0.65f),
-                    new GradientColorKey(Color.white, 1f),
+                    new GradientColorKey(Color.Lerp(vColor, Color.white, 0.4f), 0f),
+                    new GradientColorKey(vColor, 0.2f),
+                    new GradientColorKey(vColor, 0.8f),
+                    new GradientColorKey(Color.Lerp(vColor, Color.white, 0.4f), 1f),
                 },
                 new[] {
                     new GradientAlphaKey(0.0f, 0f),
-                    new GradientAlphaKey(1.0f, 0.08f),
-                    new GradientAlphaKey(1.0f, 0.92f),
+                    new GradientAlphaKey(1.0f, 0.05f),
+                    new GradientAlphaKey(1.0f, 0.95f),
                     new GradientAlphaKey(0.0f, 1f),
                 });
             lineRenderer.colorGradient = gradient;
 
             if (meshRenderer != null && meshRenderer.material != null)
             {
-                Color newColor = GetInterpolatedColor(angle);
-                Color transparentColor = newColor;
-                transparentColor.a = 0.2f;
-                meshRenderer.material.color = transparentColor;
-                meshRenderer.material.SetFloat("_Mode", 3);
-                meshRenderer.material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                meshRenderer.material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                Color themeColor = GetInterpolatedColor(angle);
+                float focusProgress = Mathf.InverseLerp(_gameStats._precisionMax, _gameStats._precisionMin, angle);
+
+                // Use themeColor with a controlled boost as the base multiplier.
+                // This ensures the vertex color gradients (alpha) correctly define the shape.
+                float boost = Mathf.Lerp(1.5f, 5.0f, focusProgress);
+                Color baseCol = themeColor * boost;
+                baseCol.a = 1.0f;
+
+                meshRenderer.material.color = baseCol;
+                if (meshRenderer.material.HasProperty("_BaseColor"))
+                    meshRenderer.material.SetColor("_BaseColor", baseCol);
+
+                // Disable the static global emission to avoid the "solid block" effect.
+                // We want the glow to follow the vertex alpha gradients.
+                if (meshRenderer.material.HasProperty("_EmissionColor"))
+                    meshRenderer.material.SetColor("_EmissionColor", Color.black);
+
                 meshRenderer.material.SetInt("_ZWrite", 0);
-                meshRenderer.material.DisableKeyword("_ALPHATEST_ON");
-                meshRenderer.material.EnableKeyword("_ALPHABLEND_ON");
-                meshRenderer.material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                meshRenderer.material.renderQueue = 3000;
-                meshRenderer.material.EnableKeyword("_EMISSION");
-                meshRenderer.material.SetColor("_EmissionColor", newColor * 2f);
+                meshRenderer.material.renderQueue = 3105; // Slightly above lasers
             }
         }
 
@@ -445,15 +466,40 @@ namespace ZombieGame
         private void AnimateLaser(LineRenderer lr, Material mat)
         {
             float t = Time.time;
+            float focusProgress = Mathf.InverseLerp(_gameStats._precisionMax, _gameStats._precisionMin, CurrentAngle);
+
+            // 1. Faster texture scrolling for "energy flow"
+            float currentScrollSpeed = Mathf.Lerp(scrollSpeed * 0.8f, scrollSpeed * 6f, focusProgress);
             Vector2 o = mat.mainTextureOffset;
-            o.x = -t * scrollSpeed;
+            o.x = -t * currentScrollSpeed;
             mat.mainTextureOffset = o;
 
-            float pulse = Mathf.Lerp(pulseMin, pulseMax, 0.5f + 0.5f * Mathf.Sin(t * pulseSpeed));
-            lr.widthMultiplier = baseWidth * pulse;
+            // 2. Dynamic Width - thinner lines when focused, but thicker base for "glow"
+            float targetWidthMultiplier = Mathf.Lerp(1.4f, 0.6f, focusProgress);
+            float stabilityPulse = 1.0f;
 
+            if (focusProgress < 0.2f) // PHASE 1
+            {
+                stabilityPulse = Mathf.Lerp(0.6f, 1.4f, 0.5f + 0.5f * Mathf.Sin(t * 45f));
+                stabilityPulse *= (0.9f + UnityEngine.Random.value * 0.2f);
+            }
+            else if (focusProgress < 0.85f) // PHASE 2
+            {
+                float pSpeed = Mathf.Lerp(pulseSpeed, pulseSpeed * 2f, focusProgress);
+                stabilityPulse = Mathf.Lerp(0.9f, 1.1f, 0.5f + 0.5f * Mathf.Sin(t * pSpeed));
+            }
+            else // PHASE 3
+            {
+                stabilityPulse = 1.0f + Mathf.Sin(t * 120f) * 0.03f;
+            }
+
+            lr.widthMultiplier = baseWidth * targetWidthMultiplier * stabilityPulse;
+
+            // 3. Emission Boost for HDR Bloom
             Color vColor = AimPrecisionColors.GetAnimatedColor(CurrentAngle);
-            float e = emissionBase + Mathf.Sin(t * (pulseSpeed * 1.3f)) * emissionPulse;
+            float boost = Mathf.Lerp(2.0f, 6.0f, Mathf.Pow(focusProgress, 3));
+            float e = (emissionBase + Mathf.Sin(t * (pulseSpeed * 1.5f)) * emissionPulse) * boost;
+
             mat.SetColor("_BaseColor", vColor);
             mat.SetColor("_Color", vColor);
             mat.SetColor("_EmissionColor", vColor * e);
@@ -531,17 +577,16 @@ namespace ZombieGame
             {
                 int innerStart = i * 2;
                 int outerStart = i * 2 + 1;
-                int innerNext = (i + 1) * 2;
                 int outerNext = (i + 1) * 2 + 1;
+
+                // Clockwise from origin to outer to next outer (top-down view)
                 triangles[index++] = innerStart;
                 triangles[index++] = outerStart;
-                triangles[index++] = innerNext;
-                triangles[index++] = outerStart;
                 triangles[index++] = outerNext;
-                triangles[index++] = innerNext;
             }
 
-            Color[] colors = GenerateDirectionalSweepColors(vertexCount, _resolution, angle);
+            Color themeColor = GetInterpolatedColor(angle);
+            Color[] colors = GenerateDirectionalSweepColors(vertexCount, _resolution, angle, themeColor);
             _meshAimingCircle.Clear();
             _meshAimingCircle.vertices = vertices;
             _meshAimingCircle.triangles = triangles;
@@ -551,58 +596,42 @@ namespace ZombieGame
             _meshColliderAimingCircle.sharedMesh = _meshAimingCircle;
         }
 
-        private Color[] GenerateDirectionalSweepColors(int vertexCount, int resolution, float angle)
+        private Color[] GenerateDirectionalSweepColors(int vertexCount, int resolution, float angle, Color themeColor)
         {
             Color[] colors = new Color[vertexCount];
-            float currentTime = Time.time;
-            float halfAngle = angle / 2f;
+            float t = Time.time;
+            float focusProgress = Mathf.InverseLerp(_gameStats._precisionMax, _gameStats._precisionMin, CurrentAngle);
 
-            float sweepT = Mathf.PingPong(currentTime / (_sweepDuration / 2f), 1f);
-            float previousSweepT = Mathf.PingPong((currentTime - Time.deltaTime) / (_sweepDuration / 2f), 1f);
-            float sweepDir = sweepT - previousSweepT;
-            bool isSweepingRight = sweepDir > 0;
-
-            bool hitRightEdge = sweepT >= 1f;
-            bool hitLeftEdge = sweepT <= 0f;
-
-            if ((hitRightEdge || hitLeftEdge) && !_isPausedAtEdge)
-            {
-                _isPausedAtEdge = true;
-                _lastSweepEndTime = currentTime;
-                _pauseOnRightEdge = hitRightEdge;
-            }
-
-            if (_isPausedAtEdge)
-            {
-                float pauseTimeElapsed = currentTime - _lastSweepEndTime;
-                if (pauseTimeElapsed < _sweepPauseDuration)
-                    sweepT = _pauseOnRightEdge ? 1f : 0f;
-                else
-                    _isPausedAtEdge = false;
-            }
-
-            float sweepAngle = Mathf.Lerp(-halfAngle, halfAngle, sweepT);
-            float lineHalfWidthDeg = angle * _sweepLineWidthPct / 2f;
-            float trailMaxLengthDeg = angle * _sweepTrailWidthPct;
+            // Energy pulse properties
+            float pulseSpeed = Mathf.Lerp(4f, 12f, focusProgress);
+            float pulseFreq = 4.0f;
 
             for (int i = 0; i <= resolution; i++)
             {
-                float t = i / (float)resolution;
-                float vertexAngle = Mathf.Lerp(-halfAngle, halfAngle, t);
-                float angleOffset = vertexAngle - sweepAngle;
-                bool isBehind = isSweepingRight ? (vertexAngle < sweepAngle) : (vertexAngle > sweepAngle);
+                float horizontalT = (float)i / resolution;
+                float horizontalDistFromCenter = Mathf.Abs(horizontalT - 0.5f) * 2f; // 0 at center, 1 at edges
+                
+                // Aggressive side glow: center is very transparent, edges are bright.
+                // sideGlow is 0 at center, 1 at edges.
+                float sideGlow = Mathf.Pow(horizontalDistFromCenter, 4.0f);
+                float baseAlpha = Mathf.Lerp(0.05f, 0.6f, sideGlow);
 
-                float alpha;
-                if (Mathf.Abs(angleOffset) <= lineHalfWidthDeg)
-                    alpha = _sweepLineAlpha;
-                else if (isBehind && Mathf.Abs(angleOffset) <= trailMaxLengthDeg)
-                    alpha = Mathf.Lerp(_sweepLineAlpha, _sweepTrailAlpha, Mathf.InverseLerp(lineHalfWidthDeg, trailMaxLengthDeg, Mathf.Abs(angleOffset)));
-                else
-                    alpha = 0f;
+                // Radial waves pulsing outward
+                float waveRoot = Mathf.Sin(t * pulseSpeed);
+                float waveEdge = Mathf.Sin(t * pulseSpeed - pulseFreq);
+                
+                float waveAlphaRoot = Mathf.Pow(Mathf.Max(0, waveRoot), 4.0f) * 0.35f;
+                float waveAlphaEdge = Mathf.Pow(Mathf.Max(0, waveEdge), 4.0f) * 0.35f;
 
-                Color finalColor = new Color(_sweepColor.r, _sweepColor.g, _sweepColor.b, alpha);
-                colors[i * 2] = finalColor;
-                colors[i * 2 + 1] = finalColor;
+                Color c = Color.white; // We use material color for theme, vertex for shape/glow
+                
+                // Root vertex: fade out near feet (very faint)
+                c.a = Mathf.Clamp01((baseAlpha + waveAlphaRoot) * 0.1f);
+                colors[i * 2] = c;
+
+                // Edge vertex: full intensity with waves
+                c.a = Mathf.Clamp01(baseAlpha + waveAlphaEdge);
+                colors[i * 2 + 1] = c;
             }
             return colors;
         }
@@ -613,22 +642,23 @@ namespace ZombieGame
             float maxAngle = _gameStats._precisionMax;
             float normalizedValue = Mathf.InverseLerp(minAngle, maxAngle, angle);
 
-            Color deepPurple = new Color(0.4f, 0f, 0.4f);
-            Color darkRed = new Color(0.5f, 0f, 0f);
-            Color burntOrange = new Color(0.6f, 0.25f, 0f);
-            Color mutedYellow = new Color(0.5f, 0.4f, 0f);
-            Color darkGreen = new Color(0f, 0.3f, 0f);
+            // Brighter, more vibrant colors for better visibility on dark ground
+            Color deepPurple = new Color(0.8f, 0.2f, 1f);
+            Color brightRed = new Color(1f, 0.1f, 0.1f);
+            Color brightOrange = new Color(1f, 0.5f, 0f);
+            Color brightYellow = new Color(1f, 0.9f, 0f);
+            Color brightGreen = new Color(0.2f, 1f, 0.2f);
 
             if (normalizedValue > 0.8f)
-                return Color.Lerp(darkRed, deepPurple, Mathf.InverseLerp(0.8f, 1f, normalizedValue));
+                return Color.Lerp(brightRed, deepPurple, Mathf.InverseLerp(0.8f, 1f, normalizedValue));
             else if (normalizedValue > 0.6f)
-                return Color.Lerp(burntOrange, darkRed, Mathf.InverseLerp(0.6f, 0.8f, normalizedValue));
+                return Color.Lerp(brightOrange, brightRed, Mathf.InverseLerp(0.6f, 0.8f, normalizedValue));
             else if (normalizedValue > 0.4f)
-                return Color.Lerp(mutedYellow, burntOrange, Mathf.InverseLerp(0.4f, 0.6f, normalizedValue));
+                return Color.Lerp(brightYellow, brightOrange, Mathf.InverseLerp(0.4f, 0.6f, normalizedValue));
             else if (normalizedValue > 0.2f)
-                return Color.Lerp(darkGreen, mutedYellow, Mathf.InverseLerp(0.2f, 0.4f, normalizedValue));
+                return Color.Lerp(brightGreen, brightYellow, Mathf.InverseLerp(0.2f, 0.4f, normalizedValue));
             else
-                return darkGreen;
+                return brightGreen;
         }
 
         private void AlignEmitterToLine(ParticleSystem ps, LineRenderer lr, float thickness)
@@ -679,10 +709,10 @@ namespace ZombieGame
                     new GradientColorKey(Color.white, 1f),
                 },
                 new[] {
-                    new GradientAlphaKey(0.0f, 0f),
+                    new GradientAlphaKey(0.0f, 0.02f),
                     new GradientAlphaKey(1.0f, 0.08f),
                     new GradientAlphaKey(1.0f, 0.92f),
-                    new GradientAlphaKey(0.0f, 1f),
+                    new GradientAlphaKey(0.0f, 0.98f),
                 });
             lr.colorGradient = g;
             lr.material = _laserMat;
@@ -741,8 +771,11 @@ namespace ZombieGame
             {
                 float u = (x + 0.5f) / width;
                 float d = Mathf.Abs(u - 0.5f) * 2f;
-                float a = Mathf.Exp(-Mathf.Pow(d * sharpness, 2f));
-                Color c = Color.Lerp(laserColor, Color.white, Mathf.Pow(1f - d, 3f));
+                
+                // Gaussian-like falloff for a "glow" texture
+                float a = Mathf.Exp(-Mathf.Pow(d * sharpness * 0.8f, 2f));
+                
+                Color c = Color.Lerp(laserColor, Color.white, Mathf.Pow(1f - d, 4f));
                 c.a = a;
                 tex.SetPixel(x, 0, c);
             }
