@@ -123,18 +123,14 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         At(stop, idleZombie, () => stop.CanExit);
 
         // 3. From Idle, choose what to do next
-        At(idleZombie, attackFreely, CloseToPlayer); // Re-enable attacking!
-        At(idleZombie, startMoving, FarToPlayer);
+        //At(idleZombie, attackFreely, CloseToPlayer); // Re-enable attacking!
+        //At(idleZombie, startMoving, FarToPlayer);
 
         // 4. If we lose the player while stopping/idling, go back to searching
-        At(idleZombie, searchForVictim, () => !HasTarget());
+        //At(idleZombie, searchForVictim, () => !HasTarget());
 
-        At(searchForVictim, startMoving, FarToPlayer);
-        At(startMoving, walkToSelected, () => startMoving.CanExit);
-
-        //At(walkToSelected, stop, CloseToPlayer);
-        ////At(stop, attackFreely, () => CloseToPlayer() && stop.CanExit);
-
+        //At(searchForVictim, startMoving, FarToPlayer);
+        //At(startMoving, walkToSelected, () => startMoving.CanExit);
 
         // After attack: always turn to face the player first
         At(attackFreely, turnToPlayer, FinishedAttack);
@@ -220,7 +216,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         }
         return retval;
     }
-public bool CloseToGather()
+    public bool CloseToGather()
     {
         var retval = Vector3.Distance(transform.position, _gathering.transform.position) < _enemyConfig.meleeRadius;
         if (retval)
@@ -239,7 +235,7 @@ public bool CloseToGather()
         }
         return retval;
     }
-public bool FarToGathering()
+    public bool FarToGathering()
     {
         var retval = Vector3.Distance(transform.position, _gathering.transform.position) > _enemyConfig.meleeRadius;
         if (retval)
@@ -333,16 +329,16 @@ public bool FarToGathering()
         float width = 300;
         float height = 200;
         Rect rect = new Rect(Screen.width - width - 10, 10, width, height);
-        
+
         GUI.Box(new Rect(Screen.width - width - 20, 5, width + 10, height + 10), ""); // Background box
         GUI.Label(rect, info, style);
     }
 
     void Update()
-{
+    {
         UpdateClosestEnemy();
         _stateMachine.Tick();
-Debug.DrawRay(transform.position, transform.forward * 5, Color.red);  // Expected forward
+        Debug.DrawRay(transform.position, transform.forward * 5, Color.red);  // Expected forward
         Debug.DrawRay(transform.position, zombieNavMeshAgent.velocity.normalized * 5, Color.green); // Movement direction
 
         Vector3 directionToPlayer = (_player.transform.position - transform.position).normalized;

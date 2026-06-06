@@ -24,8 +24,16 @@ namespace ZombieGame
         [SerializeField] private float _outerRadius = 10f;
         [SerializeField] private float _pointyTipFactor = 0.25f;
 
+        [Header("Radar Visuals")]
+        [SerializeField] private float _radarSpeed = 2.5f;
+        [SerializeField] private int _radarLineCount = 10;
+        [SerializeField] private float _radarLineSharpness = 32f;
+        [SerializeField] private float _radarOpacity = 0.6f;
+        [SerializeField] private float _radarBoostMin = 0.8f;
+        [SerializeField] private float _radarBoostMax = 1.8f;
+
         // ── Laser ──────────────────────────────────────────────────────────────
-        [SerializeField] private float baseWidth = 0.045f;
+[SerializeField] private float baseWidth = 0.045f;
         [SerializeField] private float scrollSpeed = 1.6f;
         [SerializeField] private float pulseSpeed = 2.2f;
         [SerializeField] private float pulseMin = 0.85f;
@@ -271,6 +279,9 @@ namespace ZombieGame
             return lr;
         }
 
+        private int _lastRadarLineCount;
+        private float _lastRadarLineSharpness;
+
         private void CreateAimingCircle()
         {
             _gameObjectAimingCircle = new GameObject("AnnularSector");
@@ -285,8 +296,12 @@ namespace ZombieGame
                   ?? Shader.Find("Sprites/Default");
 
             _meshRendererAimingCircle.material = new Material(sh);
-            _radarTex = MakeRadarTexture(256, 7);
-_meshRendererAimingCircle.material.mainTexture = _radarTex;
+            
+            _lastRadarLineCount = _radarLineCount;
+            _lastRadarLineSharpness = _radarLineSharpness;
+            _radarTex = MakeRadarTexture(256, _radarLineCount, _radarLineSharpness);
+            
+            _meshRendererAimingCircle.material.mainTexture = _radarTex;
 
             if (sh.name.Contains("Universal Render Pipeline"))
             {
@@ -405,7 +420,7 @@ _meshRendererAimingCircle.material.mainTexture = _radarTex;
         private void ApplyVisuals(LineRenderer lineRenderer, MeshRenderer meshRenderer, float angle)
         {
             Color vColor = AimPrecisionColors.GetAnimatedColor(angle);
-            
+
             // 1. Create a softer, more "glowing" gradient for the laser lines
             Gradient gradient = new Gradient();
             gradient.SetKeys(
@@ -434,13 +449,12 @@ _meshRendererAimingCircle.material.mainTexture = _radarTex;
                 baseCol.a = 0.6f; // Reduced alpha for overall transparency
 
                 meshRenderer.material.color = baseCol;
-if (meshRenderer.material.HasProperty("_BaseColor"))
+                if (meshRenderer.material.HasProperty("_BaseColor"))
                     meshRenderer.material.SetColor("_BaseColor", baseCol);
 
                 // Animate radar lines scrolling outward
-                float radarSpeed = 1.2f;
                 Vector2 offset = meshRenderer.material.mainTextureOffset;
-                offset.y -= Time.deltaTime * radarSpeed;
+                offset.y -= Time.deltaTime * _radarSpeed;
                 meshRenderer.material.mainTextureOffset = offset;
 
                 // Disable the static global emission to avoid the "solid block" effect.
@@ -578,10 +592,10 @@ if (meshRenderer.material.HasProperty("_BaseColor"))
                 float currentAngle = -halfAngle + (t * angleRad);
                 float normalizedCenterBias = Mathf.Cos(currentAngle / halfAngle * Mathf.PI / 2f);
                 float dynamicOuterRadius = _outerRadius + _pointyTipFactor * normalizedCenterBias;
-                
+
                 vertices[i * 2] = new Vector3(0f, 0f, 0f);
                 vertices[i * 2 + 1] = new Vector3(Mathf.Sin(currentAngle) * dynamicOuterRadius, 0f, Mathf.Cos(currentAngle) * dynamicOuterRadius);
-                
+
                 uvs[i * 2] = new Vector2(t, 0f);
                 uvs[i * 2 + 1] = new Vector2(t, 1f);
             }
@@ -611,7 +625,7 @@ if (meshRenderer.material.HasProperty("_BaseColor"))
             _meshColliderAimingCircle.sharedMesh = _meshAimingCircle;
         }
 
-        private Texture2D MakeRadarTexture(int height, int lineCount)
+        private Texture2D MakeRadarTexture(int height, int lineCount, float sharpness)
         {
             var tex = new Texture2D(1, height, TextureFormat.RGBA32, false);
             tex.wrapMode = TextureWrapMode.Repeat;
@@ -619,15 +633,12 @@ if (meshRenderer.material.HasProperty("_BaseColor"))
             for (int y = 0; y < height; y++)
             {
                 float v = (float)y / height;
-                // Create concentric arcs
-                float lines = Mathf.Sin(v * Mathf.PI * 2f * lineCount);
-                float a = Mathf.Pow(Mathf.Max(0, lines), 12f); // even sharper arcs
-
-                // Add a faint base glow that is stronger at the outer edge
-                float baseGlow = Mathf.Pow(v, 2f) * 0.2f;
+                // Sawtooth-like pulse: sharp leading edge, trailing fade
+                float fract = (v * lineCount) % 1.0f;
+                float a = Mathf.Pow(fract, sharpness); 
                 
                 Color c = Color.white;
-                c.a = Mathf.Clamp01(a + baseGlow);
+                c.a = a; 
                 tex.SetPixel(0, y, c);
             }
             tex.Apply();
@@ -643,14 +654,14 @@ if (meshRenderer.material.HasProperty("_BaseColor"))
             {
                 float horizontalT = (float)i / resolution;
                 float horizontalDistFromCenter = Mathf.Abs(horizontalT - 0.5f) * 2f; // 0 at center, 1 at edges
-                
+
                 // Aggressive side glow: center is very transparent, edges are bright.
                 // sideGlow is 0 at center, 1 at edges.
                 float sideGlow = Mathf.Pow(horizontalDistFromCenter, 2.0f);
                 float baseAlpha = Mathf.Lerp(0.15f, 0.4f, sideGlow);
 
                 Color c = Color.white; // We use material color for theme, vertex for shape/glow
-                
+
                 // Root vertex: fade out near feet (very faint)
                 c.a = baseAlpha * 0.1f;
                 colors[i * 2] = c;
@@ -797,10 +808,10 @@ if (meshRenderer.material.HasProperty("_BaseColor"))
             {
                 float u = (x + 0.5f) / width;
                 float d = Mathf.Abs(u - 0.5f) * 2f;
-                
+
                 // Gaussian-like falloff for a "glow" texture
                 float a = Mathf.Exp(-Mathf.Pow(d * sharpness * 0.8f, 2f));
-                
+
                 Color c = Color.Lerp(laserColor, Color.white, Mathf.Pow(1f - d, 4f));
                 c.a = a;
                 tex.SetPixel(x, 0, c);
