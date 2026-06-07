@@ -138,7 +138,7 @@ namespace ZombieGame
             Stamina = PlayerConfigSingleton.Instance.PlayerConfig.stamina;
 
             _uiT_GameScreen = FindFirstObjectByType<UIT_GameScreen>();
-            _uiT_GameScreen._bullets.text = WeaponConfigSingleton.Instance.WeaponConfig.ClipSize.ToString();
+            _uiT_GameScreen.InitializeWeaponUI(WeaponConfigSingleton.Instance.WeaponConfig.ClipSize);
             _uiT_GameScreen.SetHealth(100);
             _uiT_GameScreen.SetStamina(100);
 
@@ -227,10 +227,10 @@ namespace ZombieGame
             var pCfg = PlayerConfigSingleton.Instance?.PlayerConfig;
             if (wCfg == null || pCfg == null) return;
 
-            float angle     = _aimVisuals != null ? _aimVisuals.CurrentAngle : 30f;
+            float angle = _aimVisuals != null ? _aimVisuals.CurrentAngle : 30f;
             float weaponAcc = wCfg.Accuracy / 100f;
             float playerAcc = pCfg.Accuracy / 100f;
-            float aimMult   = AimPrecisionColors.GetHitMultiplier(angle);
+            float aimMult = AimPrecisionColors.GetHitMultiplier(angle);
 
             // Find closest zombie inside the gizmo
             var trigger = _aimVisuals?.AimingCircleTrigger;

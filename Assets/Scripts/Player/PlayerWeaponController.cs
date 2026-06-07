@@ -111,7 +111,7 @@ namespace ZombieGame
                 if (_bulletsInClip > 0 && !_reloadingInProgress)
                 {
                     _uiGameScreen.SetAmmoBar(GetPercentageOfClipLeft());
-                    _uiGameScreen._bullets.text = _bulletsInClip.ToString();
+                    _uiGameScreen.SetBullets(_bulletsInClip);
                 }
 
                 if (_reloadingInProgress)
@@ -329,10 +329,11 @@ namespace ZombieGame
             if (_reloadingProgress >= 100)
             {
                 _bulletsInClip = WeaponConfigSingleton.Instance.WeaponConfig.ClipSize;
+                _uiGameScreen.SetBullets(_bulletsInClip);
                 _reloadingProgress = 100;
                 _reloadingInProgress = false;
             }
-        }
+}
 
         private float GetPercentageOfClipLeft()
         {

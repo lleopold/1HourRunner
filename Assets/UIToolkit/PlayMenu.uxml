@@ -1,16 +1,32 @@
+<!--
+2026-06-07 AI-Tag
+This was created with the help of Assistant, a Unity Artificial Intelligence product.
+-->
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UIToolkit/PlayHUD.uss?fileID=7433441132597879392&amp;guid=438f7fc86e9b197409e4017d0e26730c&amp;type=3#PlayHUD" />
     <ui:VisualElement name="root" style="position: absolute; left: 1px; right: 0; top: 0; bottom: 0;">
         <ui:ProgressBar name="pb_xp" class="xp" style="position: absolute; left: 0; right: 0; bottom: 0;" />
-        <ui:VisualElement name="bars_stack" style="position: absolute; left: 56px; bottom: 24px; width: 30%; display: flex; flex-direction: column;">
-            <ui:ProgressBar name="pb_health" class="bar health" />
-            <ui:ProgressBar name="pb_stamina" class="bar stamina" />
-            <ui:ProgressBar name="pb_reload" class="bar reload" />
+        
+        <ui:VisualElement name="bars_stack" style="position: absolute; left: 40px; bottom: 30px; width: 30%; display: flex; flex-direction: column;">
+            <ui:VisualElement class="bar-row">
+                <ui:VisualElement class="bar-icon icon-health" />
+                <ui:ProgressBar name="pb_health" class="bar health" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement class="bar-row">
+                <ui:VisualElement class="bar-icon icon-stamina" />
+                <ui:ProgressBar name="pb_stamina" class="bar stamina" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement class="bar-row">
+                <ui:VisualElement class="bar-icon icon-reload" />
+                <ui:VisualElement name="ammo_bar" class="ammo-bar" />
+            </ui:VisualElement>
         </ui:VisualElement>
+
         <ui:VisualElement name="debug_panel" style="position: absolute; left: 8px; top: 30%; width: 80px; padding: 1px; background-color: rgba(15, 15, 15, 0.85); 
         border-radius: 4px; border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; border-left-color: rgba(80, 80, 80, 0.5); 
         border-right-color: rgba(80, 80, 80, 0.5); border-top-color: rgba(80, 80, 80, 0.5); border-bottom-color: rgba(80, 80, 80, 0.5);">
-            <ui:Label name="lab_bullets" text="Bullets: 0" style="color: rgb(220, 220, 220); font-size: 11px; margin-bottom: 6px; -unity-font-style: bold;" />
             <ui:Button name="bt_exit" text="Exit" style="margin-bottom: 3px; font-size: 8px; padding: 4px;" />
             <ui:Button name="bt_main_screen" text="Main Menu" style="margin-bottom: 3px; font-size: 8px; padding: 4px;" />
             <ui:Button name="bt_zombie" text="Spawn Zombie" style="margin-bottom: 3px; font-size: 8px; padding: 4px;" />

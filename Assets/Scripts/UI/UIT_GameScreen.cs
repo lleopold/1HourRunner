@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -9,8 +10,8 @@ public class UIT_GameScreen : MonoBehaviour
     private ProgressBar _healthBar;
     private ProgressBar _staminaBar;
     private ProgressBar _xpBar;
-    private ProgressBar _ammoBar;
-    public Label _bullets;
+    private VisualElement _ammoBar;
+    private List<VisualElement> _bulletSegments = new List<VisualElement>();
     private Button _btn_exit;
     private Button _btn_mainScreen;
     private Button _btn_spawn_zombie;
@@ -35,16 +36,20 @@ public class UIT_GameScreen : MonoBehaviour
             _levelBoundaries[i] = _levelBoundaries[i - 1] * 1.5f;
         }
     }
-    private void OnEnable()
+    private void Awake()
     {
-        SetLevelBoundaries();
-        _level = 1;
         _root = _uiDocument.rootVisualElement;
         _healthBar = _root.Q<ProgressBar>("pb_health");
         _staminaBar = _root.Q<ProgressBar>("pb_stamina");
         _xpBar = _root.Q<ProgressBar>("pb_xp");
-        _ammoBar = _root.Q<ProgressBar>("pb_reload");
-        _bullets = _root.Q<Label>("lab_bullets");
+        _ammoBar = _root.Q<VisualElement>("ammo_bar");
+    }
+    private void OnEnable()
+    {
+        SetLevelBoundaries();
+        _level = 1;
+
+        // Move the button and event hookups here as usual
         _btn_exit = _root.Q<Button>("bt_exit");
         _btn_mainScreen = _root.Q<Button>("bt_main_screen");
         _btn_spawn_zombie = _root.Q<Button>("bt_zombie");
@@ -61,7 +66,7 @@ public class UIT_GameScreen : MonoBehaviour
         _totalXP = 0;
 
         var actualBar = _root.Q(className: "unity-progress-bar__progress");
-        actualBar.style.backgroundColor = Color.yellow;
+        if (actualBar != null) actualBar.style.backgroundColor = Color.yellow;
         _xpBar.value = 0;
     }
 
@@ -135,7 +140,58 @@ public class UIT_GameScreen : MonoBehaviour
     }
     public void SetAmmoBar(float value)
     {
-        _ammoBar.value = value;
+        // Value is 0-100 reload progress. We fill the spent bullets.
+        if (_bulletSegments.Count == 0) return;
+
+        int bulletsToFill = Mathf.FloorToInt((value / 100f) * _bulletSegments.Count);
+        for (int i = 0; i < _bulletSegments.Count; i++)
+        {
+            _bulletSegments[i].RemoveFromClassList("bullet-segment--active");
+            if (i < bulletsToFill)
+            {
+                _bulletSegments[i].AddToClassList("bullet-segment--reloading");
+            }
+            else
+            {
+                _bulletSegments[i].RemoveFromClassList("bullet-segment--reloading");
+            }
+        }
+    }
+
+    public void SetBullets(int current)
+    {
+        if (_bulletSegments.Count == 0) return;
+
+        for (int i = 0; i < _bulletSegments.Count; i++)
+        {
+            _bulletSegments[i].RemoveFromClassList("bullet-segment--reloading");
+            if (i < current)
+            {
+                _bulletSegments[i].AddToClassList("bullet-segment--active");
+            }
+            else
+            {
+                _bulletSegments[i].RemoveFromClassList("bullet-segment--active");
+            }
+        }
+    }
+
+    public void InitializeWeaponUI(int clipSize)
+    {
+        if (_ammoBar == null) return;
+
+        _ammoBar.Clear();
+        _bulletSegments.Clear();
+
+        for (int i = 0; i < clipSize; i++)
+        {
+            VisualElement bullet = new VisualElement();
+            bullet.AddToClassList("bullet-segment");
+            _ammoBar.Add(bullet);
+            _bulletSegments.Add(bullet);
+        }
+
+        SetBullets(clipSize);
     }
     public void SetHealth(float value)
     {

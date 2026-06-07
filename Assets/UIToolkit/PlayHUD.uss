@@ -1,61 +1,136 @@
-/* Base bar geometry: thin + wide */
-.bar {
-    width: 100%;
-    height: 9px;              /* thin */
-    flex-grow: 0;
-    flex-shrink: 0;
-    margin: 8px 8px 8px 8px;        /* spacing between bars */
-    padding: 0;
+/*
+2026-06-07 AI-Tag
+This was created with the help of Assistant, a Unity Artificial Intelligence product.
+*/
+:root {
+    --color-bg-panel: rgba(15, 18, 22, 0.8);
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-health: rgb(239, 68, 68);
+    --color-stamina: rgb(250, 204, 21);
+    --color-ammo: rgb(34, 197, 94);
+    --color-xp: rgb(96, 165, 250);
+}
+
+/* Container */
+#bars_stack {
+    /* Completely removed the flat gray background and solid border line */
+    background-color: rgba(0, 0, 0, 0); 
     border-width: 0;
+    
+    /* Adds a very soft drop shadow to the elements so they pop out against dark or light ground textures */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    
+    padding: 4px;
     border-radius: 0;
 }
-.bar:last-child { margin-bottom: 0; }
 
-/* Remove Unity defaults */
+.bar-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.bar-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 12px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-health {
+    background-image: url("project://database/Assets/Resources/PowerUp/Icons/more_health.png");
+}
+
+.icon-stamina {
+    background-image: url("project://database/Assets/Resources/PowerUp/Icons/faster_run.png");
+}
+
+.icon-reload {
+    background-image: url("project://database/Assets/Resources/PowerUp/Icons/faster_reload.png");
+}
+
+/* Base bar geometry */
+.bar {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+}
+
+/* Progress Bar overrides */
 .bar .unity-progress-bar__title { display: none; }
 .bar .unity-progress-bar__low   { display: none; }
 .bar .unity-progress-bar__back  { display: none; }
-
-/* Background track */
 .bar .unity-progress-bar__background {
-    background-color: rgb(24,28,32);
+    background-color: rgb(24, 28, 32);
     border-width: 0;
     border-radius: 0;
 }
-
-/* Fill strip */
 .bar .unity-progress-bar__progress {
     border-width: 0;
     border-radius: 0;
 }
 
-/* Colors */
-#pb_health  .unity-progress-bar__progress { background-color: rgb(239,68,68); }   /* red */
-#pb_stamina .unity-progress-bar__progress { background-color: rgb(250,204,21); }  /* yellow */
-#pb_reload  .unity-progress-bar__progress { background-color: rgb(34,197,94); }   /* green */
+/* Asymmetrical Stacking */
+.health {
+    height: 12px;
+    max-width: 320px;
+}
+#pb_health .unity-progress-bar__progress { background-color: var(--color-health); }
 
+.stamina {
+    height: 8px;
+    max-width: 260px;
+}
+#pb_stamina .unity-progress-bar__progress { background-color: var(--color-stamina); }
+
+/* New Segmented Ammo Bar */
+/* New Segmented Ammo Bar */
+.ammo-bar {
+    flex-direction: row;
+    align-items: flex-end; /* Anchors the bottom of the bullets on a clean "table" line */
+    height: 55px;          /* Increased height room for the massive vertical rounds */
+    max-width: 100%;
+    flex-grow: 1;
+    padding-bottom: 2px;
+}
+
+.bullet-segment {
+    /* Tall, vertical box layout definitions */
+    width: 20px;         
+    height: 44px;        
+    margin-right: 6px;     /* Extra breathing room between the larger cartridges */
+    
+    background-image: url("project://database/Assets/Resources/UI/bullet_indicator.png");
+    -unity-background-scale-mode: scale-to-fit;
+    flex-shrink: 0;      
+    
+    /* ROTATION ENGINE: Rotates the lying graphic 90 degrees so it stands perfectly upright */
+    rotate: -90deg;
+    
+    /* Spent / Empty state: Clean 15% opacity silhouette */
+    opacity: 0.15;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+}
+
+.bullet-segment--active {
+    opacity: 1.0;          /* Fully crisp and visible */
+    -unity-background-image-tint-color: rgb(255, 255, 255); 
+}
+
+.bullet-segment--reloading {
+    opacity: 0.4;        
+    -unity-background-image-tint-color: rgb(255, 225, 120); 
+}
 /* XP full-width bottom */
-#pb_xp { height: 4px; border-width: 0; }           /* was 16px */
-#pb_xp .unity-progress-bar__background { background-color: rgb(16,20,24); }
-#pb_xp .unity-progress-bar__progress   { background-color: rgb(96,165,250); }     /* blue */
+#pb_xp { height: 4px; border-width: 0; }
+#pb_xp .unity-progress-bar__background { background-color: rgb(16, 20, 24); }
+#pb_xp .unity-progress-bar__progress   { background-color: var(--color-xp); }
 
 /* Force inner Unity progress bar to match parent size */
-#pb_health .unity-progress-bar,
-#pb_stamina .unity-progress-bar,
-#pb_reload .unity-progress-bar,
-#pb_xp .unity-progress-bar {
+.bar .unity-progress-bar {
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
-    flex-grow: 1;
-    flex-shrink: 1;
-}
-
-#pb_xp,
-#pb_xp .unity-progress-bar__background,
-#pb_xp .unity-progress-bar__progress {
-    border-width: 0;
-    border-color: transparent;
-    border-radius: 0;
 }
