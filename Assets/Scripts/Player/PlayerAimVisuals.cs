@@ -79,8 +79,8 @@ namespace ZombieGame
         private readonly float _aimingCircleHeight = 0.11f;
 
         private Texture2D _radarTex;
-        private Material _instancedRadarMat; // FIX: Cached to avoid memory leaking and retain correct reference
-        private float _currentRadarOffset;   // FIX: Tracked internally to guarantee smooth scrolling frame rates
+        private Material _instancedRadarMat;
+        private float _currentRadarOffset;
 
         private ParticleSystem _laserSmokeLeft;
         private ParticleSystem _laserSmokeRight;
@@ -122,7 +122,6 @@ namespace ZombieGame
             if (isAiming)
             {
                 SetAimLinesActive(true);
-                // FIX: Check if Inspector values changed during gameplay and regenerate texture
                 if (_radarLineCount != _lastRadarLineCount || !Mathf.Approximately(_radarLineSharpness, _lastRadarLineSharpness))
                 {
                     RegenerateRadarTexture();
@@ -146,25 +145,14 @@ namespace ZombieGame
                 UpdateLinePoints(CurrentAngle);
                 ApplyVisuals(LineRendererLeft, _meshRendererAimingCircle, CurrentAngle);
                 ApplyVisuals(LineRendererRight, _meshRendererAimingCircle, CurrentAngle);
-                // TODO: precision shooting disabled — re-enable when returning to the feature
-                // ApplyPrecisionVisuals(_lineRendererPrecisionLeft);
-                // ApplyPrecisionVisuals(_lineRendererPrecisionRight);
 
                 AnimateLaser(LineRendererLeft, _laserMat);
                 AnimateLaser(LineRendererRight, _laserMat);
-                // AnimatePrecisionZone(_lineRendererPrecisionLeft, _precisionLaserMat);
-                // AnimatePrecisionZone(_lineRendererPrecisionRight, _precisionLaserMat);
-
-                // if (!_lineRendererPrecisionLeft.enabled) _lineRendererPrecisionLeft.enabled = true;
-                // if (!_lineRendererPrecisionRight.enabled) _lineRendererPrecisionRight.enabled = true;
             }
             else
             {
                 SetAimLinesActive(false);
                 CurrentAngle = _gameStats._precisionStartingAim;
-
-                // if (_lineRendererPrecisionLeft != null && _lineRendererPrecisionLeft.enabled) _lineRendererPrecisionLeft.enabled = false;
-                // if (_lineRendererPrecisionRight != null && _lineRendererPrecisionRight.enabled) _lineRendererPrecisionRight.enabled = false;
 
                 if (_laserSmokeLeft.isPlaying) _laserSmokeLeft.Stop(true, ParticleSystemStopBehavior.StopEmitting);
                 if (_laserSmokeRight.isPlaying) _laserSmokeRight.Stop(true, ParticleSystemStopBehavior.StopEmitting);
@@ -227,15 +215,8 @@ namespace ZombieGame
             }
         }
 
-        // TODO: precision shooting disabled — re-enable when returning to the feature
         public bool IsRadarInPrecisionZone()
         {
-            // float sweepT = Mathf.PingPong(Time.time / (_sweepDuration / 2f), 1f);
-            // if (_isPausedAtEdge) return false;
-            // float distanceFromCenter = Mathf.Abs(sweepT - 0.5f);
-            // float halfAngle = CurrentAngle / 2f;
-            // float tolerance = _precisionZoneToleranceDegrees / halfAngle;
-            // return distanceFromCenter <= tolerance;
             return false;
         }
 
@@ -243,7 +224,8 @@ namespace ZombieGame
 
         private void CreateLineRenderers()
         {
-            _laserTex = MakeLaserTexture(64, 1.8f);
+            // Modifying texture size to 128x32 to cleanly fit our procedural dash segments
+            _laserTex = MakeLaserTexture(128, 32, 1.8f);
 
             var sh = Shader.Find("Universal Render Pipeline/Particles/Unlit")
                   ?? Shader.Find("Particles/Additive");
@@ -255,14 +237,6 @@ namespace ZombieGame
             _laserMat.EnableKeyword("_EMISSION");
             _laserMat.SetColor("_EmissionColor", laserColor * emissionBase);
 
-            // TODO: precision shooting disabled — re-enable when returning to the feature
-            // _precisionLaserMat = new Material(sh);
-            // _precisionLaserMat.mainTexture = _laserTex;
-            // _precisionLaserMat.SetColor("_BaseColor", _precisionVColor);
-            // _precisionLaserMat.SetColor("_Color", _precisionVColor);
-            // _precisionLaserMat.EnableKeyword("_EMISSION");
-            // _precisionLaserMat.SetColor("_EmissionColor", _precisionVColor * emissionBase);
-
             LineRendererLeft = CreateLineRendererChild("LeftLine");
             LineRendererRight = CreateLineRendererChild("RightLine");
             SetupLaser(LineRendererLeft);
@@ -270,13 +244,6 @@ namespace ZombieGame
             EnsureLineRenderersOnTop();
             SetLineAlpha(LineRendererLeft, 0);
             SetLineAlpha(LineRendererRight, 0);
-
-            // _lineRendererPrecisionLeft = CreateLineRendererChild("PrecisionLeftLine");
-            // _lineRendererPrecisionRight = CreateLineRendererChild("PrecisionRightLine");
-            // SetupPrecisionLaser(_lineRendererPrecisionLeft);
-            // SetupPrecisionLaser(_lineRendererPrecisionRight);
-            // _lineRendererPrecisionLeft.enabled = false;
-            // _lineRendererPrecisionRight.enabled = false;
         }
 
         private LineRenderer CreateLineRendererChild(string name)
@@ -308,17 +275,15 @@ namespace ZombieGame
 
             _lastRadarLineCount = _radarLineCount;
             _lastRadarLineSharpness = _radarLineSharpness;
-            _radarTex = MakeRadarTexture(256, _radarLineCount, _radarLineSharpness);
+            _radarTex = MakeRadarTexture(256, 256, _radarLineCount, _radarLineSharpness);
 
             _meshRendererAimingCircle.material.mainTexture = _radarTex;
-
-            // FIX: Safely capture the created material reference to manipulate values without cloning properties every frame
             _instancedRadarMat = _meshRendererAimingCircle.material;
 
             if (sh.name.Contains("Universal Render Pipeline"))
             {
-                _instancedRadarMat.SetFloat("_Surface", 1); // Transparent
-                _instancedRadarMat.SetFloat("_Blend", 1);   // Additive
+                _instancedRadarMat.SetFloat("_Surface", 1);
+                _instancedRadarMat.SetFloat("_Blend", 1);
                 _instancedRadarMat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 _instancedRadarMat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);
                 _instancedRadarMat.SetInt("_ZWrite", 0);
@@ -339,22 +304,19 @@ namespace ZombieGame
             _meshRendererAimingCircle.enabled = true;
             _aimingCircleTrigger = _gameObjectAimingCircle.AddComponent<AimingCircleTrigger>();
         }
+
         private void RegenerateRadarTexture()
         {
-            // Update our tracking states
             _lastRadarLineCount = _radarLineCount;
             _lastRadarLineSharpness = _radarLineSharpness;
 
-            // Clean up the old texture from memory to avoid leakage
             if (_radarTex != null)
             {
                 Destroy(_radarTex);
             }
 
-            // Generate the new texture with updated values
-            _radarTex = MakeRadarTexture(256, _radarLineCount, _radarLineSharpness);
+            _radarTex = MakeRadarTexture(256, 256, _radarLineCount, _radarLineSharpness);
 
-            // Apply it back to our instanced material
             if (_instancedRadarMat != null)
             {
                 _instancedRadarMat.mainTexture = _radarTex;
@@ -422,7 +384,6 @@ namespace ZombieGame
             float lengthMultiplier = 5f;
             float currentRadius = baseRadiusLocal * lengthMultiplier;
             float halfAngle = angle / 2f;
-            // float halfPrecisionAngle = _precisionVAngle / 2f;  // TODO: precision shooting disabled
             float yOffset = 0.03f;
 
             Vector3 playerPosition = transform.position;
@@ -437,37 +398,25 @@ namespace ZombieGame
             LineRendererLeft.SetPositions(new[] { triangleBase, leftPoint });
             LineRendererRight.positionCount = 2;
             LineRendererRight.SetPositions(new[] { triangleBase, rightPoint });
-
-            // TODO: precision shooting disabled — re-enable when returning to the feature
-            // Vector3 precisionLeft = triangleBase + playerRotation * Quaternion.Euler(0, -halfPrecisionAngle, 0) * Vector3.forward * currentRadius;
-            // Vector3 precisionRight = triangleBase + playerRotation * Quaternion.Euler(0, halfPrecisionAngle, 0) * Vector3.forward * currentRadius;
-            // if (_lineRendererPrecisionLeft != null && _lineRendererPrecisionRight != null)
-            // {
-            //      _lineRendererPrecisionLeft.positionCount = 2;
-            //      _lineRendererPrecisionLeft.SetPositions(new[] { triangleBase, precisionLeft });
-            //      _lineRendererPrecisionRight.positionCount = 2;
-            //      _lineRendererPrecisionRight.SetPositions(new[] { triangleBase, precisionRight });
-            // }
         }
 
         private void ApplyVisuals(LineRenderer lineRenderer, MeshRenderer meshRenderer, float angle)
         {
             Color vColor = AimPrecisionColors.GetAnimatedColor(angle);
 
-            // 1. Line renderer gradients
             Gradient gradient = new Gradient();
             gradient.SetKeys(
                 new[] {
-            new GradientColorKey(Color.Lerp(vColor, Color.white, 0.4f), 0f),
-            new GradientColorKey(vColor, 0.2f),
-            new GradientColorKey(vColor, 0.8f),
-            new GradientColorKey(Color.Lerp(vColor, Color.white, 0.4f), 1f),
+                    new GradientColorKey(Color.Lerp(vColor, Color.white, 0.4f), 0f),
+                    new GradientColorKey(vColor, 0.2f),
+                    new GradientColorKey(vColor, 0.8f),
+                    new GradientColorKey(Color.Lerp(vColor, Color.white, 0.4f), 1f),
                 },
                 new[] {
-            new GradientAlphaKey(0.0f, 0f),
-            new GradientAlphaKey(1.0f, 0.05f),
-            new GradientAlphaKey(1.0f, 0.95f),
-            new GradientAlphaKey(0.0f, 1f),
+                    new GradientAlphaKey(0.0f, 0f),
+                    new GradientAlphaKey(1.0f, 0.05f),
+                    new GradientAlphaKey(1.0f, 0.95f),
+                    new GradientAlphaKey(0.0f, 1f),
                 });
             lineRenderer.colorGradient = gradient;
 
@@ -484,8 +433,6 @@ namespace ZombieGame
                 if (_instancedRadarMat.HasProperty("_BaseColor"))
                     _instancedRadarMat.SetColor("_BaseColor", baseCol);
 
-                // FIX: Hooking up the Inspector variable _radarSpeed here.
-                // Lower values in the inspector (e.g., 0.2) will drastically slow it down.
                 _radarTimeTranslation -= Time.deltaTime * _radarSpeed;
                 _radarTimeTranslation %= 1f;
 
@@ -496,58 +443,43 @@ namespace ZombieGame
                 _instancedRadarMat.renderQueue = 3105;
             }
         }
-        private void ApplyPrecisionVisuals(LineRenderer lineRenderer)
-        {
-            Gradient gradient = new Gradient();
-            gradient.SetKeys(
-                new[] {
-                    new GradientColorKey(Color.white, 0f),
-                    new GradientColorKey(_precisionVColor, 0.35f),
-                    new GradientColorKey(_precisionVColor, 0.65f),
-                    new GradientColorKey(Color.white, 1f),
-                },
-                new[] {
-                    new GradientAlphaKey(0.0f, 0f),
-                    new GradientAlphaKey(_precisionVAlpha, 0.08f),
-                    new GradientAlphaKey(_precisionVAlpha, 0.92f),
-                    new GradientAlphaKey(0.0f, 1f),
-                });
-            lineRenderer.colorGradient = gradient;
-        }
 
         private void AnimateLaser(LineRenderer lr, Material mat)
         {
             float t = Time.time;
             float focusProgress = Mathf.InverseLerp(_gameStats._precisionMax, _gameStats._precisionMin, CurrentAngle);
 
-            // 1. Faster texture scrolling for "energy flow"
             float currentScrollSpeed = Mathf.Lerp(scrollSpeed * 0.8f, scrollSpeed * 6f, focusProgress);
             Vector2 o = mat.mainTextureOffset;
             o.x = -t * currentScrollSpeed;
             mat.mainTextureOffset = o;
 
-            // 2. Dynamic Width - thinner lines when focused, but thicker base for "glow"
+            // 2. DYNAMIC TILING FIX: Scale the texture pattern to the line's real-world length
+            float lineLength = Vector3.Distance(lr.GetPosition(0), lr.GetPosition(1));
+            // Adjust the '2.0f' multiplier to make the dashes tighter or longer
+            mat.mainTextureScale = new Vector2(lineLength * 2.0f, 1f);
+
+
             float targetWidthMultiplier = Mathf.Lerp(1.4f, 0.6f, focusProgress);
             float stabilityPulse = 1.0f;
 
-            if (focusProgress < 0.2f) // PHASE 1
+            if (focusProgress < 0.2f)
             {
                 stabilityPulse = Mathf.Lerp(0.6f, 1.4f, 0.5f + 0.5f * Mathf.Sin(t * 45f));
                 stabilityPulse *= (0.9f + UnityEngine.Random.value * 0.2f);
             }
-            else if (focusProgress < 0.85f) // PHASE 2
+            else if (focusProgress < 0.85f)
             {
                 float pSpeed = Mathf.Lerp(pulseSpeed, pulseSpeed * 2f, focusProgress);
                 stabilityPulse = Mathf.Lerp(0.9f, 1.1f, 0.5f + 0.5f * Mathf.Sin(t * pSpeed));
             }
-            else // PHASE 3
+            else
             {
                 stabilityPulse = 1.0f + Mathf.Sin(t * 120f) * 0.03f;
             }
 
             lr.widthMultiplier = baseWidth * targetWidthMultiplier * stabilityPulse;
 
-            // 3. Emission Boost for HDR Bloom
             Color vColor = AimPrecisionColors.GetAnimatedColor(CurrentAngle);
             float boost = Mathf.Lerp(2.0f, 6.0f, Mathf.Pow(focusProgress, 3));
             float e = (emissionBase + Mathf.Sin(t * (pulseSpeed * 1.5f)) * emissionPulse) * boost;
@@ -555,20 +487,6 @@ namespace ZombieGame
             mat.SetColor("_BaseColor", vColor);
             mat.SetColor("_Color", vColor);
             mat.SetColor("_EmissionColor", vColor * e);
-        }
-
-        private void AnimatePrecisionZone(LineRenderer lr, Material mat)
-        {
-            float t = Time.time;
-            Vector2 o = mat.mainTextureOffset;
-            o.x = -t * scrollSpeed;
-            mat.mainTextureOffset = o;
-
-            float pulse = Mathf.Lerp(pulseMin, pulseMax, 0.5f + 0.5f * Mathf.Sin(t * pulseSpeed * 1.2f));
-            lr.widthMultiplier = baseWidth * pulse * 0.7f;
-
-            float e = emissionBase + Mathf.Sin(t * (pulseSpeed * 1.3f)) * emissionPulse;
-            mat.SetColor("_EmissionColor", _precisionVColor * e);
         }
 
         private void RefreshAimLineWidth()
@@ -585,10 +503,6 @@ namespace ZombieGame
 
             LineRendererLeft.startWidth = LineRendererLeft.endWidth = worldWidth;
             LineRendererRight.startWidth = LineRendererRight.endWidth = worldWidth;
-
-            float precisionWidth = worldWidth * 0.7f;
-            if (_lineRendererPrecisionLeft) _lineRendererPrecisionLeft.startWidth = _lineRendererPrecisionLeft.endWidth = precisionWidth;
-            if (_lineRendererPrecisionRight) _lineRendererPrecisionRight.startWidth = _lineRendererPrecisionRight.endWidth = precisionWidth;
         }
 
         private float GetWorldWidthForPixels(Camera cam, float distance, int pixels)
@@ -625,7 +539,6 @@ namespace ZombieGame
                 vertices[i * 2] = new Vector3(0f, 0f, 0f);
                 vertices[i * 2 + 1] = new Vector3(Mathf.Sin(currentAngle) * dynamicOuterRadius, 0f, Mathf.Cos(currentAngle) * dynamicOuterRadius);
 
-                // Applying the tracked translation right to the UV data
                 uvs[i * 2] = new Vector2(t, 0f + _radarTimeTranslation);
                 uvs[i * 2 + 1] = new Vector2(t, 1f + _radarTimeTranslation);
             }
@@ -653,37 +566,53 @@ namespace ZombieGame
             _meshColliderAimingCircle.sharedMesh = null;
             _meshColliderAimingCircle.sharedMesh = _meshAimingCircle;
         }
-        private Texture2D MakeRadarTexture(int height, int lineCount, float sharpness)
+
+        // Updated signature: Now generates a true 2D matrix texture with horizontal bands AND vertical grid ticks
+        private Texture2D MakeRadarTexture(int width, int height, int lineCount, float sharpness)
         {
-            var tex = new Texture2D(1, height, TextureFormat.RGBA32, false);
+            var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             tex.wrapMode = TextureWrapMode.Repeat;
             tex.filterMode = FilterMode.Bilinear;
-            for (int y = 0; y < height; y++)
-            {
-                float v = (float)y / height;
-                float fract = (v * lineCount) % 1.0f;
-                float a = Mathf.Pow(fract, sharpness);
 
-                Color c = Color.white;
-                c.a = a;
-                tex.SetPixel(0, y, c);
+            for (int x = 0; x < width; x++)
+            {
+                float u = (float)x / width;
+                // Vertical alignment grids: check spacing across the horizontal axis
+                float horizontalGrid = Mathf.Pow(Mathf.Sin(u * Mathf.PI * 6f), 40f);
+
+                for (int y = 0; y < height; y++)
+                {
+                    float v = (float)y / height;
+                    float fract = (v * lineCount) % 1.0f;
+                    float horizontalSweepBands = Mathf.Pow(fract, sharpness);
+
+                    // Combine horizontal target rings with sharp vertical grid marks
+                    float combinedPattern = Mathf.Max(horizontalSweepBands, horizontalGrid * 0.4f);
+
+                    Color c = Color.white;
+                    c.a = combinedPattern;
+                    tex.SetPixel(x, y, c);
+                }
             }
             tex.Apply();
             return tex;
         }
 
+        // Fixes the faded visual core: Aggressively dropping alpha in the dead center while spiking borders
         private Color[] GenerateDirectionalSweepColors(int vertexCount, int resolution, float angle, Color themeColor)
         {
             Color[] colors = new Color[vertexCount];
-            float focusProgress = Mathf.InverseLerp(_gameStats._precisionMax, _gameStats._precisionMin, CurrentAngle);
 
             for (int i = 0; i <= resolution; i++)
             {
                 float horizontalT = (float)i / resolution;
                 float horizontalDistFromCenter = Mathf.Abs(horizontalT - 0.5f) * 2f;
 
-                float sideGlow = Mathf.Pow(horizontalDistFromCenter, 2.0f);
-                float baseAlpha = Mathf.Lerp(0.15f, 0.4f, sideGlow);
+                // Sharp mathematical edge-glow power falloff curve
+                float edgeGlow = Mathf.Pow(horizontalDistFromCenter, 4.0f);
+
+                // Dead center drops down to near-invisible baseline (0.02f) to avoid hiding targets
+                float baseAlpha = Mathf.Lerp(0.02f, 0.75f, edgeGlow);
 
                 Color c = Color.white;
 
@@ -756,6 +685,8 @@ namespace ZombieGame
             lr.positionCount = 2;
             lr.widthMultiplier = baseWidth;
             lr.textureMode = LineTextureMode.Tile;
+
+            lr.textureMode = LineTextureMode.Tile;
             lr.numCapVertices = 4;
             lr.numCornerVertices = 2;
             lr.alignment = LineAlignment.View;
@@ -775,33 +706,11 @@ namespace ZombieGame
                 });
             lr.colorGradient = g;
             lr.material = _laserMat;
-        }
-
-        private void SetupPrecisionLaser(LineRenderer lr)
-        {
-            lr.positionCount = 2;
-            lr.widthMultiplier = baseWidth;
-            lr.textureMode = LineTextureMode.Tile;
-            lr.numCapVertices = 4;
-            lr.numCornerVertices = 2;
-            lr.alignment = LineAlignment.View;
-            var g = new Gradient();
-            g.SetKeys(
-                new[] {
-                    new GradientColorKey(Color.white, 0f),
-                    new GradientColorKey(_precisionVColor, 0.35f),
-                    new GradientColorKey(_precisionVColor, 0.65f),
-                    new GradientColorKey(Color.white, 1f),
-                },
-                new[] {
-                    new GradientAlphaKey(0.0f, 0f),
-                    new GradientAlphaKey(_precisionVAlpha, 0.08f),
-                    new GradientAlphaKey(_precisionVAlpha, 0.92f),
-                    new GradientAlphaKey(0.0f, 1f),
-                });
-            lr.colorGradient = g;
-            lr.material = _precisionLaserMat;
-            lr.sortingOrder = 5001;
+            if (_laserMat != null)
+            {
+                _laserMat.mainTexture = _laserTex;
+            }
+            lr.material = _laserMat;
         }
 
         private void EnsureLineRenderersOnTop()
@@ -822,20 +731,30 @@ namespace ZombieGame
             Color e = lr.endColor; e.a = alpha; lr.endColor = e;
         }
 
-        private Texture2D MakeLaserTexture(int width, float sharpness)
+        // Updated signature: carving out periodic intervals along the length (width axis) for high-energy dash segments
+        private Texture2D MakeLaserTexture(int width, int height, float sharpness)
         {
-            var tex = new Texture2D(width, 1, TextureFormat.RGBA32, false);
+            var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             tex.wrapMode = TextureWrapMode.Repeat;
-            for (int x = 0; x < width; x++)
+
+            for (int y = 0; y < height; y++)
             {
-                float u = (x + 0.5f) / width;
-                float d = Mathf.Abs(u - 0.5f) * 2f;
+                float v = (float)y / height;
+                float d = Mathf.Abs(v - 0.5f) * 2f;
+                // Normal cross-section alpha attenuation profile
+                float coreAlpha = Mathf.Exp(-Mathf.Pow(d * sharpness * 0.8f, 2f));
 
-                float a = Mathf.Exp(-Mathf.Pow(d * sharpness * 0.8f, 2f));
+                for (int x = 0; x < width; x++)
+                {
+                    float u = (float)x / width;
 
-                Color c = Color.Lerp(laserColor, Color.white, Mathf.Pow(1f - d, 4f));
-                c.a = a;
-                tex.SetPixel(x, 0, c);
+                    // Slice the texture horizontally into repeating tactical dash blocks
+                    float dashMask = Mathf.Sin(u * Mathf.PI * 4f) > -0.2f ? 1f : 0f;
+
+                    Color c = Color.Lerp(laserColor, Color.white, Mathf.Pow(1f - d, 4f));
+                    c.a = coreAlpha * dashMask;
+                    tex.SetPixel(x, y, c);
+                }
             }
             tex.Apply(false, false);
             return tex;
