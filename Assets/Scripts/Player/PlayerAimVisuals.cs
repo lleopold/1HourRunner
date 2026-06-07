@@ -478,11 +478,16 @@ namespace ZombieGame
                 stabilityPulse = 1.0f + Mathf.Sin(t * 120f) * 0.03f;
             }
 
-            lr.widthMultiplier = baseWidth * targetWidthMultiplier * stabilityPulse;
+            // Relative pulse only — absolute world width is owned by RefreshAimLineWidth.
+            // (Previously multiplied baseWidth here AND clamped width there → compounded to a hairline.)
+            lr.widthMultiplier = targetWidthMultiplier * stabilityPulse;
 
             Color vColor = AimPrecisionColors.GetAnimatedColor(CurrentAngle);
-            float boost = Mathf.Lerp(2.0f, 6.0f, Mathf.Pow(focusProgress, 3));
-            float e = (emissionBase + Mathf.Sin(t * (pulseSpeed * 1.5f)) * emissionPulse) * boost;
+            // Keep emission modest so the BEAM STAYS COLORED. Pushing vColor*e too high drives every
+            // channel past 1.0 and the laser clips to flat white. ~1.0–2.2 keeps the dominant channel
+            // hot (so Bloom catches it) while the others stay low → colored beam + colored glow.
+            float boost = Mathf.Lerp(0.8f, 1.8f, focusProgress);
+            float e = emissionBase * (0.85f + 0.15f * Mathf.Sin(t * (pulseSpeed * 1.5f)) * emissionPulse) * boost;
 
             mat.SetColor("_BaseColor", vColor);
             mat.SetColor("_Color", vColor);
@@ -498,7 +503,11 @@ namespace ZombieGame
                 : transform.position;
 
             float dist = Vector3.Distance(_mainCamera.transform.position, basePoint);
-            float worldWidth = GetWorldWidthForPixels(_mainCamera, dist, aimLinePixels);
+            // Pixel-constant width when aimLinePixels>0, otherwise fall back to a real world width
+            // (baseWidth). Without this fallback aimLinePixels=0 collapsed the beam to minWorldWidth.
+            float worldWidth = aimLinePixels > 0
+                ? GetWorldWidthForPixels(_mainCamera, dist, aimLinePixels)
+                : baseWidth;
             worldWidth = Mathf.Clamp(worldWidth, minWorldWidth, maxWorldWidth);
 
             LineRendererLeft.startWidth = LineRendererLeft.endWidth = worldWidth;
@@ -731,28 +740,35 @@ namespace ZombieGame
             Color e = lr.endColor; e.a = alpha; lr.endColor = e;
         }
 
-        // Updated signature: carving out periodic intervals along the length (width axis) for high-energy dash segments
+        // Two-layer laser cross-section: razor-thin white-hot core + wide soft colored glow halo,
+        // continuous beam with soft travelling energy pulses (never breaks into dots).
         private Texture2D MakeLaserTexture(int width, int height, float sharpness)
         {
             var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             tex.wrapMode = TextureWrapMode.Repeat;
+            tex.filterMode = FilterMode.Bilinear;
 
             for (int y = 0; y < height; y++)
             {
                 float v = (float)y / height;
-                float d = Mathf.Abs(v - 0.5f) * 2f;
-                // Normal cross-section alpha attenuation profile
-                float coreAlpha = Mathf.Exp(-Mathf.Pow(d * sharpness * 0.8f, 2f));
+                float d = Mathf.Abs(v - 0.5f) * 2f; // 0 = center, 1 = edge
+
+                // Razor-thin white-hot core (saturates under additive blending → blooms)
+                float core = Mathf.Exp(-Mathf.Pow(d * sharpness * 3.2f, 2f));
+                // Wide soft colored glow halo around the core
+                float glow = Mathf.Exp(-Mathf.Pow(d * sharpness * 1.0f, 2f)) * 0.55f;
+                float alpha = Mathf.Clamp01(core + glow);
 
                 for (int x = 0; x < width; x++)
                 {
                     float u = (float)x / width;
 
-                    // Slice the texture horizontally into repeating tactical dash blocks
-                    float dashMask = Mathf.Sin(u * Mathf.PI * 4f) > -0.2f ? 1f : 0f;
+                    // Continuous beam: soft energy pulse travelling along length, never drops to 0
+                    float pulse = 0.8f + 0.2f * (0.5f + 0.5f * Mathf.Sin(u * Mathf.PI * 6f));
 
-                    Color c = Color.Lerp(laserColor, Color.white, Mathf.Pow(1f - d, 4f));
-                    c.a = coreAlpha * dashMask;
+                    // White-hot at the core, laser color out in the halo
+                    Color c = Color.Lerp(laserColor, Color.white, core);
+                    c.a = alpha * pulse;
                     tex.SetPixel(x, y, c);
                 }
             }

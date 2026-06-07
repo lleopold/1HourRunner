@@ -123,14 +123,14 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         At(stop, idleZombie, () => stop.CanExit);
 
         // 3. From Idle, choose what to do next
-        //At(idleZombie, attackFreely, CloseToPlayer); // Re-enable attacking!
-        //At(idleZombie, startMoving, FarToPlayer);
+        At(idleZombie, attackFreely, CloseToPlayer); // Re-enable attacking!
+        At(idleZombie, startMoving, FarToPlayer);
 
         // 4. If we lose the player while stopping/idling, go back to searching
-        //At(idleZombie, searchForVictim, () => !HasTarget());
+        At(idleZombie, searchForVictim, () => !HasTarget());
 
-        //At(searchForVictim, startMoving, FarToPlayer);
-        //At(startMoving, walkToSelected, () => startMoving.CanExit);
+        At(searchForVictim, startMoving, FarToPlayer);
+        At(startMoving, walkToSelected, () => startMoving.CanExit);
 
         // After attack: always turn to face the player first
         At(attackFreely, turnToPlayer, FinishedAttack);
