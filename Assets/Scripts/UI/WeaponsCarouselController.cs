@@ -231,6 +231,11 @@ public class WeaponsCarouselController : MonoBehaviour
         _fCrit = root.Q<FloatField>("fl_critical_chance");
         _fStagger = root.Q<FloatField>("fl_stagger");
         _fRecoil = root.Q<FloatField>("fl_recoil");
+        _fRecoil = root.Q<FloatField>("fl_recoil");
+        _fAccuracy = root.Q<FloatField>("fl_accuracy");
+        _fWeight = root.Q<FloatField>("fl_weight");
+        _fOptimalRange = root.Q<FloatField>("fl_optimal_range");
+        _fMaxRange = root.Q<FloatField>("fl_max_range");
     }
 
     // ---------- Tabs & list ----------
@@ -386,20 +391,20 @@ public class WeaponsCarouselController : MonoBehaviour
         // Push current config into UI fields (if present)
         if (_fDamage != null)
         {
-            _fDamage.value       = cfg.Damage;
-            _fFireRate.value     = cfg.FireRate;
-            _fDamageFluct.value  = cfg.DamageFluctuation;
-            _fClip.value         = cfg.ClipSize;
-            _fPrecision.value    = cfg.Precision;
-            _fReload.value       = cfg.ReloadTime;
-            _fSimul.value        = cfg.SimultaniousBullets;
-            _fCrit.value         = cfg.CritChance;
-            _fStagger.value      = cfg.Stagger;
-            _fRecoil.value       = cfg.Recoil;
-            _fAccuracy.value     = cfg.Accuracy;
-            _fWeight.value       = cfg.Weight;
+            _fDamage.value = cfg.Damage;
+            _fFireRate.value = cfg.FireRate;
+            _fDamageFluct.value = cfg.DamageFluctuation;
+            _fClip.value = cfg.ClipSize;
+            _fPrecision.value = cfg.Precision;
+            _fReload.value = cfg.ReloadTime;
+            _fSimul.value = cfg.SimultaniousBullets;
+            _fCrit.value = cfg.CritChance;
+            _fStagger.value = cfg.Stagger;
+            _fRecoil.value = cfg.Recoil;
+            _fAccuracy.value = cfg.Accuracy;
+            _fWeight.value = cfg.Weight;
             _fOptimalRange.value = cfg.OptimalRange;
-            _fMaxRange.value     = cfg.MaxEffectiveRange;
+            _fMaxRange.value = cfg.MaxEffectiveRange;
         }
 
         UpdateStatBars(cfg);
@@ -616,8 +621,8 @@ public class WeaponsCarouselController : MonoBehaviour
         Vector3 inCenter = inWeapon != null ? inWeapon.transform.localPosition : Vector3.zero;
         Vector3 outCenter = outWeapon != null ? outWeapon.transform.localPosition : Vector3.zero;
 
-        Vector3 inStart  = inCenter  + new Vector3( slideX, 0f, 0f);
-        Vector3 outEnd   = outCenter + new Vector3(-slideX, 0f, 0f);
+        Vector3 inStart = inCenter + new Vector3(slideX, 0f, 0f);
+        Vector3 outEnd = outCenter + new Vector3(-slideX, 0f, 0f);
 
         if (inWeapon != null) inWeapon.transform.localPosition = inStart;
 
@@ -625,12 +630,12 @@ public class WeaponsCarouselController : MonoBehaviour
         {
             float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
             if (outWeapon != null) outWeapon.transform.localPosition = Vector3.Lerp(outCenter, outEnd, t);
-            if (inWeapon != null)  inWeapon.transform.localPosition  = Vector3.Lerp(inStart,  inCenter, t);
+            if (inWeapon != null) inWeapon.transform.localPosition = Vector3.Lerp(inStart, inCenter, t);
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        if (inWeapon != null)  inWeapon.transform.localPosition = inCenter;
+        if (inWeapon != null) inWeapon.transform.localPosition = inCenter;
         if (outWeapon != null) Destroy(outWeapon);
 
         _outgoingSpawned = null;

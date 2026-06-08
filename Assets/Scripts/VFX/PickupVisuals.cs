@@ -7,9 +7,9 @@ public class PickupVisuals : MonoBehaviour
     [SerializeField] private Light _pointLight;
     [SerializeField] private float _pulseSpeed = 2f;
     [SerializeField] private float _minEmissionMultiplier = 0.5f;
-    [SerializeField] private float _maxEmissionMultiplier = 2.0f;
-    [SerializeField] private float _minLightIntensity = 0.5f;
-    [SerializeField] private float _maxLightIntensity = 1.5f;
+    [SerializeField] private float _maxEmissionMultiplier = 1.0f;
+    [SerializeField] private float _minLightIntensity = 0f;
+    [SerializeField] private float _maxLightIntensity = 1f;
 
     [Header("Animation Settings")]
     [SerializeField] private float _bobSpeed = 1.5f;
