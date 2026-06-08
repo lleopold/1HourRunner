@@ -21,6 +21,7 @@ public class UIT_GameScreen : MonoBehaviour
     private float _totalXP;
     private int _level;
     private float[] _levelBoundaries;
+    private int _lastBulletCount = -1;
 
 
     private void SetLevelBoundaries()
@@ -35,6 +36,12 @@ public class UIT_GameScreen : MonoBehaviour
             }
             _levelBoundaries[i] = _levelBoundaries[i - 1] * 1.5f;
         }
+    }
+
+    private System.Collections.IEnumerator ClearFiring(VisualElement seg)
+    {
+        yield return new WaitForSeconds(0.10f);
+        seg.RemoveFromClassList("bullet-segment--firing");
     }
     private void Awake()
     {
@@ -166,14 +173,20 @@ public class UIT_GameScreen : MonoBehaviour
         {
             _bulletSegments[i].RemoveFromClassList("bullet-segment--reloading");
             if (i < current)
-            {
                 _bulletSegments[i].AddToClassList("bullet-segment--active");
-            }
             else
-            {
                 _bulletSegments[i].RemoveFromClassList("bullet-segment--active");
-            }
         }
+
+        // flash only when count dropped by one (a shot), not on reload/init
+        if (current == _lastBulletCount - 1 && current < _bulletSegments.Count)
+        {
+            VisualElement fired = _bulletSegments[current];
+            fired.AddToClassList("bullet-segment--firing");
+            StartCoroutine(ClearFiring(fired));
+        }
+
+        _lastBulletCount = current;
     }
 
     public void InitializeWeaponUI(int clipSize)

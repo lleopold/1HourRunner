@@ -39,14 +39,17 @@ This was created with the help of Assistant, a Unity Artificial Intelligence pro
 
 .icon-health {
     background-image: url("project://database/Assets/Resources/PowerUp/Icons/more_health.png");
+    margin-top: 5px;
 }
 
 .icon-stamina {
     background-image: url("project://database/Assets/Resources/PowerUp/Icons/faster_run.png");
+    margin-top: 5px;
 }
 
 .icon-reload {
     background-image: url("project://database/Assets/Resources/PowerUp/Icons/faster_reload.png");
+    margin-top: 5px;
 }
 
 /* Base bar geometry */
@@ -89,33 +92,36 @@ This was created with the help of Assistant, a Unity Artificial Intelligence pro
 .ammo-bar {
     flex-direction: row;
     align-items: flex-end; /* Anchors the bottom of the bullets on a clean "table" line */
-    height: 55px;          /* Increased height room for the massive vertical rounds */
+    height: 100px;          /* Increased height room for the massive vertical rounds */
     max-width: 100%;
     flex-grow: 1;
     padding-bottom: 2px;
+    margin-top: 40px;
 }
 
 .bullet-segment {
-    /* Tall, vertical box layout definitions */
-    width: 12px;         
-    height: 44px;        
-    margin-right: 1px;     /* Tightened spacing between cartridges */
-    
+    width: 24px;
+    height: 88px;
+    margin-right: 1px;
     background-image: url("project://database/Assets/Resources/UI/bullet_indicator.png");
     -unity-background-scale-mode: scale-to-fit;
-    flex-shrink: 0;      
-    
-    /* ROTATION ENGINE: Rotates the lying graphic 90 degrees so it stands perfectly upright */
+    flex-shrink: 0;
     rotate: -90deg;
-    
-    /* Spent / Empty state: Clean 15% opacity silhouette */
-    opacity: 0.15;
+    opacity: 0.15;                 /* spent - UNCHANGED */
     -unity-background-image-tint-color: rgb(255, 255, 255);
+    transition-property: opacity, scale, background-color;
+    transition-duration: 0.10s;
 }
 
 .bullet-segment--active {
-    opacity: 1.0;          /* Fully crisp and visible */
-    -unity-background-image-tint-color: rgb(255, 255, 255); 
+    opacity: 1.0;
+    scale: 1.1;
+}
+
+.bullet-segment--firing {
+    opacity: 1.0;
+    scale: 1.5;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
 }
 
 .bullet-segment--reloading {
@@ -134,3 +140,5 @@ This was created with the help of Assistant, a Unity Artificial Intelligence pro
     margin: 0;
     padding: 0;
 }
+.bar-row:last-child { align-items: center; }
+
