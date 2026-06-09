@@ -251,6 +251,7 @@ public class UIT_GameScreen : MonoBehaviour
 
     private void GoToMainScreen(ClickEvent evt)
     {
-        SceneManager.LoadScene("ChoosePlayer");
+        //SceneManager.LoadScene("ChoosePlayer");
+        Loader.Load(Loader.Scene.ChoosePlayer);
     }
 }

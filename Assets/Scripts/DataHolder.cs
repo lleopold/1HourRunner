@@ -22,6 +22,12 @@ public class DataHolder : MonoBehaviour
     }
     // Other data variables can be added as needed
 
+    public static void ResetStats()
+    {
+        EnemiesKilled = 0;
+        EnemiesSpawned = 0;
+    }
+
     void Start()
     {
         // Make sure the object isn't destroyed when loading a new scene

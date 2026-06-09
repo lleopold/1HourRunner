@@ -20,6 +20,8 @@ public class UIT_EndGamePopUp : MonoBehaviour
     private void OnEnable()
     {
         _root = _uiDocument.rootVisualElement;
+        _root.visible = false; // Ensure it starts hidden every time it's enabled
+
         _game_epilog = _root.Q<Label>("lab_game_epilog");
         _time_passed = _root.Q<Label>("lab_time_passed");
         _enemies_defeated = _root.Q<Label>("lab_enemies_defeated");
@@ -34,7 +36,8 @@ public class UIT_EndGamePopUp : MonoBehaviour
         {
             Destroy(GameObject.Find("Player"));
         }
-        SceneManager.LoadScene("ChoosePlayer");
+        //SceneManager.LoadScene("ChoosePlayer");
+        Loader.Load(Loader.Scene.ChoosePlayer);
     }
 
     public void SetEndGamePopUp(string game_epilog, string time_passed, string enemies_defeated, string expirience_earned)

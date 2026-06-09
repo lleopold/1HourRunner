@@ -19,6 +19,7 @@ public static class Loader
     public static void Load(Scene scene)
     {
         Time.timeScale = 1;
+        DataHolder.ResetStats();
         OnLoaderCallback = () =>
         {
             GameObject loadingGameObject = new GameObject("Loading game object");

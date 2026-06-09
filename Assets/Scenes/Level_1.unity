@@ -24857,6 +24857,76 @@ MonoBehaviour:
   m_VisibleInScene: 1
   version: 1
   m_DecalLayerMask: 1
+--- !u!1 &447221168
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 447221171}
+  - component: {fileID: 447221170}
+  - component: {fileID: 447221169}
+  m_Layer: 0
+  m_Name: LEVEL_LOGIC
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &447221169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 447221168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c61b9009649fa964daf4d9334a4bf69c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TestScript
+  minFromPlayer: 12
+  maxFromPlayer: 28
+  containerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  navSampleMax: 6
+  maxTries: 20
+  spawnRadius: 5
+  zombiePrefab: {fileID: 0}
+  timeBetweenSpawns: 7
+  minZombiesOnScreen: 1
+  maxZombiesOnScreen: 1
+  zombiePrefabNames: []
+--- !u!114 &447221170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 447221168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5780f262ea0eb1f4dac4bac0da4e3be4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelLogic
+--- !u!4 &447221171
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 447221168}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.85, z: -262.61}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &447328764
 GameObject:
   m_ObjectHideFlags: 0
@@ -143441,7 +143511,7 @@ GameObject:
   - component: {fileID: 2017148176}
   - component: {fileID: 2017148179}
   m_Layer: 0
-  m_Name: ScriptLogicPlayerSpawnSpot
+  m_Name: BloodHUD
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -143454,7 +143524,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2017148175}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c61b9009649fa964daf4d9334a4bf69c, type: 3}
   m_Name: 
@@ -143479,12 +143549,11 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2017148175}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5780f262ea0eb1f4dac4bac0da4e3be4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bloodDecal: {fileID: 11400000, guid: b583ac8a4aa9e473195e7b75d85f7986, type: 2}
 --- !u!4 &2017148178
 Transform:
   m_ObjectHideFlags: 0
@@ -150637,6 +150706,7 @@ SceneRoots:
   - {fileID: 1434057886}
   - {fileID: 89384354}
   - {fileID: 2017148178}
+  - {fileID: 447221171}
   - {fileID: 1496689676}
   - {fileID: 1515862682}
   - {fileID: 1956491876}

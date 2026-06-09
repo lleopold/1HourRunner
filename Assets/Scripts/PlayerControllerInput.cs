@@ -143,7 +143,10 @@ namespace ZombieGame
             _uiT_GameScreen.SetStamina(100);
 
             _uiT_EndGamePopUp = FindObjectOfType<UIT_EndGamePopUp>();
-            _uiT_EndGamePopUp._root.visible = false;
+            if (_uiT_EndGamePopUp != null && _uiT_EndGamePopUp._root != null)
+            {
+                _uiT_EndGamePopUp._root.visible = false;
+            }
             _uiT_EndGamePopUp.enabled = false;
 
             _gameStats = new GameStats

@@ -1,23 +1,16 @@
-using LUZEMRIK.BloodDecals;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class LevelLogic : MonoBehaviour
 {
     Player player1;
-    public BloodDecalAsset bloodDecal;
     void Start()
     {
         SpawnMainPlayer();
     }
-    string GetAssetPath(BloodDecalAsset b)
-    {
-        //return "Assets/LUZEMRIK/Realistic Animated Blood Decals Pack/Assets/" + b.name + ".asset";
-        return "";
-    }
     void Update()
     {
-        if (player1 == null)
+        if (player1 == null || player1.weaponGameObjectPrefab == null)
         {
             player1 = new Player();
             player1 = player1.CreatePlayer();

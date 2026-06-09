@@ -23,8 +23,17 @@ public class CameraManager : MonoBehaviour
     {
         if (target == null)
         {
-            target = GameObject.Find("Player").transform;
+            // 1. Find the GameObject first
+            GameObject playerObj = GameObject.Find("Player");
+
+            // 2. Only access .transform if the object actually exists
+            if (playerObj != null)
+            {
+                target = playerObj.transform;
+            }
         }
+
+        // 3. Only run logic if we have a valid target
         if (target != null)
         {
             SetXRotationTo60Degrees(transform);

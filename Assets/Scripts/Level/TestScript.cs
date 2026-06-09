@@ -63,7 +63,11 @@ public class TestScript : MonoBehaviour
 
         var player = GameObject.Find("Player");
         var cam = Camera.main;
-        if (!player || !cam) return;
+        if (!player || !cam)
+        {
+            Debug.LogError("Player or Main Camera not found in scene — cannot spawn zombies.");
+            return;
+        }
 
         if (!TryGetSpawnPoint(player.transform.position, cam, out var pos))
         {
