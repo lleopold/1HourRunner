@@ -18,7 +18,10 @@ public class UIT_GameScreen : MonoBehaviour
     private Button _btn_end_game;
     private Button _btn_level_up;
     private Button _btn_take_damage;
+    private float _currentLevelXP;
     private float _totalXP;
+    public float TotalXP => _totalXP;
+    private float _sessionStartTime;
     private int _level;
     private float[] _levelBoundaries;
     private int _lastBulletCount = -1;
@@ -71,6 +74,8 @@ public class UIT_GameScreen : MonoBehaviour
         _btn_level_up.RegisterCallback<ClickEvent>(GoToPowerUp);
         _btn_take_damage.RegisterCallback<ClickEvent>(TestBloodHUD);
         _totalXP = 0;
+        _currentLevelXP = 0;
+        _sessionStartTime = Time.time;
 
         var actualBar = _root.Q(className: "unity-progress-bar__progress");
         if (actualBar != null) actualBar.style.backgroundColor = Color.yellow;
@@ -118,26 +123,36 @@ public class UIT_GameScreen : MonoBehaviour
         GameObject scriptLogic = GameObject.Find("UIEndGame");
         if (scriptLogic != null)
         {
-            scriptLogic.GetComponent<UIT_EndGamePopUp>().SetEndGamePopUp("Game Over", "10:00", "100", "1000");
+            float timePassed = Time.time - _sessionStartTime;
+            int minutes = Mathf.FloorToInt(timePassed / 60f);
+            int seconds = Mathf.FloorToInt(timePassed % 60f);
+            string timeStr = string.Format("{0:00}:{1:00}", minutes, seconds);
+
+            scriptLogic.GetComponent<UIT_EndGamePopUp>().SetEndGamePopUp(
+                "Game Over", 
+                timeStr, 
+                DataHolder.EnemiesKilled.ToString(), 
+                TotalXP.ToString("F0")
+            );
             scriptLogic.GetComponent<UIT_EndGamePopUp>()._root.visible = true;
         }
     }
 
     public bool AddXP(float value)
     {
+        _currentLevelXP += value;
         _totalXP += value;
-        if (_totalXP >= _levelBoundaries[_level])
+        if (_currentLevelXP >= _levelBoundaries[_level])
         {
             _level++;
-            _totalXP = 0;
+            _currentLevelXP = 0;
             _xpBar.value = 0;
             _xpBar.title = "Level " + _level;
             return true;
         }
         else
         {
-            _totalXP = _totalXP + value;
-            _xpBar.value = _totalXP / _levelBoundaries[_level] * 100;
+            _xpBar.value = _currentLevelXP / _levelBoundaries[_level] * 100;
             return false;
         }
     }
