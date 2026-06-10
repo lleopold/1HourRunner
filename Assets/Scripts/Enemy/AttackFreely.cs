@@ -10,7 +10,7 @@ public class AttackFreely : IState
     private readonly NavMeshAgent _navMeshAgent;
     private readonly EnemyAnimator _enemyAnimator;
 
-    private const float TelegraphDuration = 0.5f;
+    private const float TelegraphDuration = 0.1f;
     private const float AttackTimeoutSeconds = 2.5f;
 
     private bool _attacking;
@@ -66,6 +66,7 @@ public class AttackFreely : IState
 
     private System.Collections.IEnumerator AttackSequence()
     {
+        _animator.speed = 2f;
         // Wait until zombie has fully stopped
         while (_enemyAnimator.Velocity > 0.05f)
             yield return null;
