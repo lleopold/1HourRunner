@@ -17,22 +17,38 @@ public class UIT_PreMainScreen : MonoBehaviour
         _btn_options = _root.Q<Button>("btn_options");
         _btn_quit = _root.Q<Button>("btn_quit");
 
-        // Use Button.clicked -> works with mouse, keyboard Submit, and gamepad South (A)
-        _btn_play.clicked += () => SceneManager.LoadScene("ChoosePlayer");
-        _btn_language.clicked += () => { /* SceneManager.LoadScene("LanguageScreen"); */ };
-        _btn_options.clicked += () => { /* SceneManager.LoadScene("OptionsScreen");  */ };
-        _btn_quit.clicked += Application.Quit;
+        // Use named methods instead of lambdas for reliable unsubscription
+        if (_btn_play != null) _btn_play.clicked += OnPlayClicked;
+        if (_btn_language != null) _btn_language.clicked += OnLanguageClicked;
+        if (_btn_options != null) _btn_options.clicked += OnOptionsClicked;
+        if (_btn_quit != null) _btn_quit.clicked += OnQuitClicked;
 
-        // Give focus so D-pad/Left Stick navigate and Submit activates
-        _root.schedule.Execute(() => _btn_play.Focus());
+        // Focus the first button for controller/keyboard support
+        _root.schedule.Execute(() => _btn_play?.Focus());
     }
 
     void OnDisable()
     {
-        // Unsubscribe to avoid duplicate bindings if the document is re-enabled
-        if (_btn_play != null) _btn_play.clicked -= () => SceneManager.LoadScene("ChoosePlayer");
-        if (_btn_language != null) _btn_language.clicked -= () => { };
-        if (_btn_options != null) _btn_options.clicked -= () => { };
-        if (_btn_quit != null) _btn_quit.clicked -= Application.Quit;
+        // Unsubscribe to prevent memory leaks and duplicate triggers
+        if (_btn_play != null) _btn_play.clicked -= OnPlayClicked;
+        if (_btn_language != null) _btn_language.clicked -= OnLanguageClicked;
+        if (_btn_options != null) _btn_options.clicked -= OnOptionsClicked;
+        if (_btn_quit != null) _btn_quit.clicked -= OnQuitClicked;
+    }
+
+    private void OnPlayClicked() => SceneManager.LoadScene("ChoosePlayer");
+    private void OnLanguageClicked() { /* Add language logic here */ }
+    private void OnOptionsClicked() { /* Add options logic here */ }
+
+    private void OnQuitClicked()
+    {
+        Debug.Log("Quit button clicked!");
+#if UNITY_EDITOR
+        // This stops the game while running in the Unity Editor
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        // This closes the application in a build
+        Application.Quit();
+#endif
     }
 }
