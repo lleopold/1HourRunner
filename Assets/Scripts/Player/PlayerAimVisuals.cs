@@ -56,8 +56,11 @@ namespace ZombieGame
 
         // ── Smoke ──────────────────────────────────────────────────────────────
         [SerializeField] private string laserSmokePrefabPath = "VFX/LaserSmoke";
+        [SerializeField] private float _defaultVLength = 10f;
         public float CurrentHitChance { get; set; } = 1f;
+        public float CurrentDistanceMultiplier { get; set; } = 1f;
         public bool IsPointBlank { get; set; }
+        public float CurrentTargetDistance { get; set; } = -1f;
 
         // ── Internal references ────────────────────────────────────────────────
         public LineRenderer LineRendererLeft { get; private set; }
@@ -380,11 +383,19 @@ namespace ZombieGame
             }
         }
 
+        private float ComputeVLength()
+        {
+            if (CurrentTargetDistance > 0f)
+            {
+                float maxRange = WeaponConfigSingleton.Instance?.WeaponConfig?.MaxEffectiveRange ?? _defaultVLength;
+                return Mathf.Min(CurrentTargetDistance * 1.15f, maxRange);
+            }
+            return _defaultVLength;
+        }
+
         private void UpdateLinePoints(float angle)
         {
-            float baseRadiusLocal = 2f;
-            float lengthMultiplier = 5f;
-            float currentRadius = baseRadiusLocal * lengthMultiplier;
+            float currentRadius = ComputeVLength();
             float halfAngle = angle / 2f;
             float yOffset = 0.03f;
 
@@ -404,27 +415,26 @@ namespace ZombieGame
 
         private void ApplyVisuals(LineRenderer lineRenderer, MeshRenderer meshRenderer, float angle)
         {
-            Color vColor = AimPrecisionColors.GetOutlineColor(CurrentHitChance);
-
             Gradient gradient = new Gradient();
             gradient.SetKeys(
                 new[] {
-                    new GradientColorKey(Color.Lerp(vColor, Color.white, 0.4f), 0f),
-                    new GradientColorKey(vColor, 0.2f),
-                    new GradientColorKey(vColor, 0.8f),
-                    new GradientColorKey(Color.Lerp(vColor, Color.white, 0.4f), 1f),
+                    new GradientColorKey(Color.white,           0.00f),
+                    new GradientColorKey(Color.white,           0.08f),
+                    new GradientColorKey(Color.green,           0.50f),
+                    new GradientColorKey(Color.red,             0.92f),
+                    new GradientColorKey(Color.red,             1.00f),
                 },
                 new[] {
-                    new GradientAlphaKey(0.0f, 0f),
+                    new GradientAlphaKey(0.0f, 0.00f),
                     new GradientAlphaKey(1.0f, 0.05f),
                     new GradientAlphaKey(1.0f, 0.95f),
-                    new GradientAlphaKey(0.0f, 1f),
+                    new GradientAlphaKey(0.0f, 1.00f),
                 });
             lineRenderer.colorGradient = gradient;
 
             if (meshRenderer != null && _instancedRadarMat != null)
             {
-                Color themeColor = AimPrecisionColors.GetOutlineColor(CurrentHitChance);
+                Color themeColor = Color.green;
                 float focusProgress = Mathf.InverseLerp(_gameStats._precisionMax, _gameStats._precisionMin, angle);
 
                 float boost = Mathf.Lerp(0.8f, 1.8f, focusProgress);
@@ -482,13 +492,12 @@ namespace ZombieGame
 
             lr.widthMultiplier = targetWidthMultiplier * stabilityPulse;
 
-            Color vColor = AimPrecisionColors.GetOutlineColor(CurrentHitChance);
             float boost = Mathf.Lerp(0.8f, 1.8f, focusProgress);
             float e = emissionBase * (0.85f + 0.15f * Mathf.Sin(t * (pulseSpeed * 1.5f)) * emissionPulse) * boost;
 
-            mat.SetColor("_BaseColor", vColor);
-            mat.SetColor("_Color", vColor);
-            mat.SetColor("_EmissionColor", vColor * e);
+            mat.SetColor("_BaseColor", Color.white);
+            mat.SetColor("_Color", Color.white);
+            mat.SetColor("_EmissionColor", Color.white * e);
         }
 
         private void RefreshAimLineWidth()
@@ -534,13 +543,14 @@ namespace ZombieGame
             int[] triangles = new int[_resolution * 6];
             float angleRad = Mathf.Deg2Rad * angle;
             float halfAngle = angleRad / 2f;
+            float vLength = ComputeVLength();
 
             for (int i = 0; i <= _resolution; i++)
             {
                 float t = i / (float)_resolution;
                 float currentAngle = -halfAngle + (t * angleRad);
                 float normalizedCenterBias = Mathf.Cos(currentAngle / halfAngle * Mathf.PI / 2f);
-                float dynamicOuterRadius = _outerRadius + _pointyTipFactor * normalizedCenterBias;
+                float dynamicOuterRadius = vLength + _pointyTipFactor * normalizedCenterBias;
 
                 vertices[i * 2] = new Vector3(0f, 0f, 0f);
                 vertices[i * 2 + 1] = new Vector3(Mathf.Sin(currentAngle) * dynamicOuterRadius, 0f, Mathf.Cos(currentAngle) * dynamicOuterRadius);
@@ -561,7 +571,7 @@ namespace ZombieGame
                 triangles[index++] = outerNext;
             }
 
-            Color themeColor = GetInterpolatedColor(angle);
+            Color themeColor = AimPrecisionColors.GetOutlineColor(CurrentHitChance);
             Color[] colors = GenerateDirectionalSweepColors(vertexCount, _resolution, angle, themeColor);
             _meshAimingCircle.Clear();
             _meshAimingCircle.vertices = vertices;
@@ -763,8 +773,7 @@ namespace ZombieGame
                     // Continuous beam: soft energy pulse travelling along length, never drops to 0
                     float pulse = 0.8f + 0.2f * (0.5f + 0.5f * Mathf.Sin(u * Mathf.PI * 6f));
 
-                    // White-hot at the core, laser color out in the halo
-                    Color c = Color.Lerp(laserColor, Color.white, core);
+                    Color c = Color.white;
                     c.a = alpha * pulse;
                     tex.SetPixel(x, y, c);
                 }

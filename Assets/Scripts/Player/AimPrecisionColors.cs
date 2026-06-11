@@ -62,10 +62,11 @@ namespace ZombieGame
             float t = (distance - optimalRange) / (maxEffectiveRange - optimalRange);
             return Mathf.Lerp(1.0f, 0.1f, t);
         }
-        public static Color GetOutlineColor(float hitChance)
+        public static Color GetOutlineColor(float value, bool pointBlank = false)
         {
-            if (hitChance >= 0.7f) return Color.Lerp(Color.green, Color.white, (hitChance - 0.7f) / 0.3f);
-            if (hitChance >= 0.35f) return Color.Lerp(Color.red, Color.green, (hitChance - 0.35f) / 0.35f);
+            if (pointBlank) return Color.white;
+            if (value >= 0.75f) return Color.Lerp(Color.yellow, Color.green, (value - 0.75f) / 0.25f);
+            if (value >= 0.40f) return Color.Lerp(Color.red, Color.yellow, (value - 0.40f) / 0.35f);
             return Color.red;
         }
 

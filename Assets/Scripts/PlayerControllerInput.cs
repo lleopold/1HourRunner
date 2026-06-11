@@ -245,6 +245,7 @@ namespace ZombieGame
             if (inside == null) return;
 
             float closestHc = 1f;
+            float closestDistMult = 1f;
             bool closestPb = false;
             float closestDist = float.MaxValue;
 
@@ -262,15 +263,16 @@ namespace ZombieGame
                 float hc = baseAcc * distMult;
 
                 enemy.SetOutline(true);
-                enemy.SetOutlineColor(AimPrecisionColors.GetOutlineColor(hc));
+                enemy.SetOutlineColor(AimPrecisionColors.GetOutlineColor(hc, pb));
 
-                // zapamti najbližeg za laser/površinu
-                if (dist < closestDist) { closestDist = dist; closestHc = hc; closestPb = pb; }
+                if (dist < closestDist) { closestDist = dist; closestHc = hc; closestDistMult = distMult; closestPb = pb; }
             }
 
-            // laser/površina = najbliži u gizmu
+            // laser/površina = samo distanca najbližeg; outline = pun hitChance po zombiju
             _aimVisuals.CurrentHitChance = closestHc;
+            _aimVisuals.CurrentDistanceMultiplier = closestDist < float.MaxValue ? closestDistMult : 1f;
             _aimVisuals.IsPointBlank = closestPb;
+            _aimVisuals.CurrentTargetDistance = closestDist < float.MaxValue ? closestDist : -1f;
         }
         private float ComputeHitChance(out bool isPointBlank)
         {
