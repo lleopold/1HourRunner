@@ -135,6 +135,17 @@ public class UIT_GameScreen : MonoBehaviour
                 TotalXP.ToString("F0")
             );
             scriptLogic.GetComponent<UIT_EndGamePopUp>()._root.visible = true;
+
+            // Pause the game via PlayerControllerInput if available
+            GameObject player = GameObject.FindWithTag("Player");
+            if (player != null && player.TryGetComponent<ZombieGame.PlayerControllerInput>(out var playerInput))
+            {
+                playerInput.PauseGame(true);
+            }
+            else
+            {
+                Time.timeScale = 0f;
+            }
         }
     }
 

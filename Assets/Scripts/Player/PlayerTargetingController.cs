@@ -215,6 +215,7 @@ namespace ZombieGame
 
             if (groundMask != 0 && Physics.Raycast(ray, out _lastRaycastHit, 1000f, groundMask, QueryTriggerInteraction.Ignore))
             {
+                _currentTarget = GetZombieNearestMousePoint(_lastRaycastHit.point);
                 Vector3 target = _lastRaycastHit.point;
                 target.y = transform.position.y;
                 Vector3 dir = target - transform.position;
@@ -236,6 +237,25 @@ namespace ZombieGame
             }
 
             return transform.rotation;
+        }
+        private GameObject GetZombieNearestMousePoint(Vector3 mousePoint)
+        {
+            GameObject closest = null;
+            float closestSqr = Mathf.Infinity;
+
+            foreach (GameObject zombie in _onScreenZombies)
+            {
+                if (zombie == null) continue;
+                if (!ZombieInClearLineOfSight(zombie.transform.position, zombie)) continue;
+
+                // ravna (XZ) udaljenost zombija od tačke pod mišem
+                Vector3 d = zombie.transform.position - mousePoint;
+                d.y = 0f;
+                float sqr = d.sqrMagnitude;
+                if (sqr < closestSqr) { closestSqr = sqr; closest = zombie; }
+            }
+
+            return closest;
         }
 
         private Quaternion RotateTowardsGameObject(GameObject zombie)

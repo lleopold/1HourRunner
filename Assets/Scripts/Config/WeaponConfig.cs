@@ -19,6 +19,7 @@ public class WeaponConfig : ScriptableObject
     /// </summary>
     public float SimultaniousBullets;
     public float CritChance;
+    public float CritMultiplier;
     /// <summary>
     /// Stagger, how much staggers enemy on hit
     /// </summary>

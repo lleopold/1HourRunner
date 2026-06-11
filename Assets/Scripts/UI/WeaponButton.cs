@@ -55,9 +55,12 @@ public class WeaponButton : VisualElement
 
     bool _built;
     bool _isActive;
+    bool _locked;
     float _pulseStartTime;
     IVisualElementScheduledItem _pulseJob;
+    VisualElement _lockedOverlay;
 
+    public bool IsLocked => _locked;
     public event Action<WeaponButton> Clicked;
 
     public WeaponButton() => BuildIfNeeded();
@@ -85,7 +88,7 @@ public class WeaponButton : VisualElement
         // Click/hover states
         this.RegisterCallback<PointerEnterEvent>(_ => AddToClassList("hover"));
         this.RegisterCallback<PointerLeaveEvent>(_ => RemoveFromClassList("hover"));
-        this.RegisterCallback<ClickEvent>(_ => Clicked?.Invoke(this));
+        this.RegisterCallback<ClickEvent>(_ => { if (!_locked) Clicked?.Invoke(this); });
 
         // When attached to panel, restart pulse if already marked active (handles early SetActive calls)
         this.RegisterCallback<AttachToPanelEvent>(_ =>
@@ -134,6 +137,42 @@ public class WeaponButton : VisualElement
         {
             RemoveFromClassList("is-active");
             StopPulse();
+        }
+    }
+
+    public void SetLocked(bool locked)
+    {
+        _locked = locked;
+        if (locked)
+        {
+            if (_lockedOverlay == null)
+            {
+                _lockedOverlay = new VisualElement { name = "locked-overlay" };
+                _lockedOverlay.style.position = Position.Absolute;
+                _lockedOverlay.style.left = 0; _lockedOverlay.style.top = 0;
+                _lockedOverlay.style.right = 0; _lockedOverlay.style.bottom = 0;
+                _lockedOverlay.style.backgroundColor = new Color(0f, 0f, 0f, 0.62f);
+                _lockedOverlay.style.alignItems = Align.Center;
+                _lockedOverlay.style.justifyContent = Justify.Center;
+                _lockedOverlay.pickingMode = PickingMode.Ignore;
+
+                var lbl = new Label("LOCKED");
+                lbl.pickingMode = PickingMode.Ignore;
+                lbl.style.color = new Color(0.55f, 0.55f, 0.55f, 1f);
+                lbl.style.fontSize = 10;
+                lbl.style.unityFontStyleAndWeight = FontStyle.Bold;
+                lbl.style.letterSpacing = 3f;
+                _lockedOverlay.Add(lbl);
+                Add(_lockedOverlay);
+            }
+            _lockedOverlay.style.display = DisplayStyle.Flex;
+            style.opacity = 0.45f;
+        }
+        else
+        {
+            if (_lockedOverlay != null)
+                _lockedOverlay.style.display = DisplayStyle.None;
+            style.opacity = 1f;
         }
     }
 

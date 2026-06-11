@@ -253,6 +253,8 @@ namespace ZombieGame
 
         private void SpawnHitBullet(GameObject targetZombie)
         {
+            bool crit;
+            crit = WeaponConfigSingleton.weaponConfig.CritChance > 0 && UnityEngine.Random.value <= WeaponConfigSingleton.weaponConfig.CritChance / 100f;
             Transform gunBarrel = GetWeaponPosition();
             Vector3 dir = (targetZombie.transform.position - gunBarrel.position).normalized;
             dir.y = 0;
@@ -262,12 +264,16 @@ namespace ZombieGame
                            * (1 + UnityEngine.Random.Range(
                                -WeaponConfigSingleton.Instance.WeaponConfig.DamageFluctuation,
                                 WeaponConfigSingleton.Instance.WeaponConfig.DamageFluctuation) / 100f);
+            if (crit)
+            {
+                damage *= WeaponConfigSingleton.Instance.WeaponConfig.CritMultiplier;
+            }
             // Collider may be on a child — walk up the hierarchy
             Enemy enemy = targetZombie.GetComponent<Enemy>() ?? targetZombie.GetComponentInParent<Enemy>();
             if (enemy == null)
                 Debug.LogWarning($"[SHOT] SpawnHitBullet: no Enemy component found on {targetZombie.name} or its parents!");
             else
-                Debug.Log($"[SHOT] Applying damage={damage:F1} to {enemy.gameObject.name}");
+                Debug.Log($"[SHOT] Applying damage={damage:F1} to {enemy.gameObject.name} Crit: {crit.ToString()}");
             enemy?.DamageReceived(damage, dir);
             // Note: Enemy.DamageReceived already spawns the damage number internally
 
@@ -333,7 +339,7 @@ namespace ZombieGame
                 _reloadingProgress = 100;
                 _reloadingInProgress = false;
             }
-}
+        }
 
         private float GetPercentageOfClipLeft()
         {

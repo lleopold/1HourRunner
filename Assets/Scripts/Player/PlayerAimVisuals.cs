@@ -56,6 +56,8 @@ namespace ZombieGame
 
         // ── Smoke ──────────────────────────────────────────────────────────────
         [SerializeField] private string laserSmokePrefabPath = "VFX/LaserSmoke";
+        public float CurrentHitChance { get; set; } = 1f;
+        public bool IsPointBlank { get; set; }
 
         // ── Internal references ────────────────────────────────────────────────
         public LineRenderer LineRendererLeft { get; private set; }
@@ -402,7 +404,7 @@ namespace ZombieGame
 
         private void ApplyVisuals(LineRenderer lineRenderer, MeshRenderer meshRenderer, float angle)
         {
-            Color vColor = AimPrecisionColors.GetAnimatedColor(angle);
+            Color vColor = AimPrecisionColors.GetOutlineColor(CurrentHitChance);
 
             Gradient gradient = new Gradient();
             gradient.SetKeys(
@@ -422,7 +424,7 @@ namespace ZombieGame
 
             if (meshRenderer != null && _instancedRadarMat != null)
             {
-                Color themeColor = GetInterpolatedColor(angle);
+                Color themeColor = AimPrecisionColors.GetOutlineColor(CurrentHitChance);
                 float focusProgress = Mathf.InverseLerp(_gameStats._precisionMax, _gameStats._precisionMin, angle);
 
                 float boost = Mathf.Lerp(0.8f, 1.8f, focusProgress);
@@ -478,14 +480,9 @@ namespace ZombieGame
                 stabilityPulse = 1.0f + Mathf.Sin(t * 120f) * 0.03f;
             }
 
-            // Relative pulse only — absolute world width is owned by RefreshAimLineWidth.
-            // (Previously multiplied baseWidth here AND clamped width there → compounded to a hairline.)
             lr.widthMultiplier = targetWidthMultiplier * stabilityPulse;
 
-            Color vColor = AimPrecisionColors.GetAnimatedColor(CurrentAngle);
-            // Keep emission modest so the BEAM STAYS COLORED. Pushing vColor*e too high drives every
-            // channel past 1.0 and the laser clips to flat white. ~1.0–2.2 keeps the dominant channel
-            // hot (so Bloom catches it) while the others stay low → colored beam + colored glow.
+            Color vColor = AimPrecisionColors.GetOutlineColor(CurrentHitChance);
             float boost = Mathf.Lerp(0.8f, 1.8f, focusProgress);
             float e = emissionBase * (0.85f + 0.15f * Mathf.Sin(t * (pulseSpeed * 1.5f)) * emissionPulse) * boost;
 

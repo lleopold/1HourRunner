@@ -99,11 +99,20 @@ namespace ZombieGame
                 if (_currentHealth <= 0)
                 {
                     GameObject scriptLogic = GameObject.Find("UIEndGame");
-                    _uiT_EndGamePopUp.enabled = true;
-                    scriptLogic.GetComponent<UIT_EndGamePopUp>().SetEndGamePopUp("Game Over", "10:00", DataHolder.EnemiesKilled.ToString(), "1000");
-                    _uiT_EndGamePopUp._root.visible = true;
-                    _uiT_EndGamePopUp.enabled = true;
+                    if (scriptLogic != null)
+                    {
+                        if (_uiT_EndGamePopUp == null)
+                            _uiT_EndGamePopUp = scriptLogic.GetComponent<UIT_EndGamePopUp>();
+
+                        if (_uiT_EndGamePopUp != null)
+                        {
+                            _uiT_EndGamePopUp.enabled = true;
+                            _uiT_EndGamePopUp.SetEndGamePopUp("Game Over", "10:00", DataHolder.EnemiesKilled.ToString(), "1000");
+                            if (_uiT_EndGamePopUp._root != null) _uiT_EndGamePopUp._root.visible = true;
+                        }
+                    }
                     Debug.Log("Player died");
+                    PauseGame(true);
                 }
             }
         }
@@ -215,9 +224,92 @@ namespace ZombieGame
             _aimVisuals.UpdateAimingCircle(_targeting.IsAiming, transform.rotation);
             _aimVisuals.UpdateVisuals(_targeting.IsAiming, _input);
 
+            UpdateAimColors();
+
             if (!_targeting.IsAiming) _aimVisuals.ClearAimingCircleOutlines();
 
             if (_uiT_EndGamePopUp._root.visible && !_isGamePaused) PauseGame(true);
+        }
+        private void UpdateAimColors()
+        {
+            if (!_targeting.IsAiming) return;
+
+            var wCfg = WeaponConfigSingleton.Instance?.WeaponConfig;
+            var pCfg = PlayerConfigSingleton.Instance?.PlayerConfig;
+            if (wCfg == null || pCfg == null) return;
+
+            float aimMult = AimPrecisionColors.GetHitMultiplier(_aimVisuals.CurrentAngle);
+            float baseAcc = (wCfg.Accuracy / 100f) * (pCfg.Accuracy / 100f) * aimMult;
+
+            var inside = _aimVisuals?.AimingCircleTrigger?.GetZombiesInside();
+            if (inside == null) return;
+
+            float closestHc = 1f;
+            bool closestPb = false;
+            float closestDist = float.MaxValue;
+
+            foreach (var c in inside)
+            {
+                if (c == null) continue;
+                var enemy = c.GetComponent<Enemy>();
+                if (enemy == null) continue;
+
+                float dist = Vector3.Distance(transform.position, c.transform.position);
+                bool pb = dist <= wCfg.OptimalRange;
+                float distMult = wCfg.MaxEffectiveRange > 0f
+                    ? AimPrecisionColors.GetDistanceMultiplier(dist, wCfg.OptimalRange, wCfg.MaxEffectiveRange)
+                    : 1f;
+                float hc = baseAcc * distMult;
+
+                enemy.SetOutline(true);
+                enemy.SetOutlineColor(AimPrecisionColors.GetOutlineColor(hc));
+
+                // zapamti najbližeg za laser/površinu
+                if (dist < closestDist) { closestDist = dist; closestHc = hc; closestPb = pb; }
+            }
+
+            // laser/površina = najbliži u gizmu
+            _aimVisuals.CurrentHitChance = closestHc;
+            _aimVisuals.IsPointBlank = closestPb;
+        }
+        private float ComputeHitChance(out bool isPointBlank)
+        {
+            isPointBlank = false;
+            var wCfg = WeaponConfigSingleton.Instance?.WeaponConfig;
+            var pCfg = PlayerConfigSingleton.Instance?.PlayerConfig;
+            if (wCfg == null || pCfg == null) return 1f;
+
+            float angle = _aimVisuals != null ? _aimVisuals.CurrentAngle : 30f;
+            float aimMult = AimPrecisionColors.GetHitMultiplier(angle);
+
+            // ista logika distance kao u OnGUI: najbliži u gizmu, pa fallback na metu
+            var zombiesInGizmo = _aimVisuals?.AimingCircleTrigger?.GetZombiesInside();
+            float distance = 0f;
+            if (zombiesInGizmo != null && zombiesInGizmo.Count > 0)
+            {
+                float best = float.MaxValue;
+                foreach (var c in zombiesInGizmo)
+                {
+                    if (c == null) continue;
+                    float d = Vector3.Distance(transform.position, c.transform.position);
+                    if (d < best) best = d;
+                }
+                distance = best;
+            }
+            else
+            {
+                var tgt = _targeting.CurrentTarget;
+                distance = tgt != null ? Vector3.Distance(transform.position, tgt.transform.position) : 0f;
+            }
+
+            // point-blank: ispod OptimalRange garantovano
+            if (distance > 0f && distance <= wCfg.OptimalRange) isPointBlank = true;
+
+            float distMult = (distance > 0f && wCfg.MaxEffectiveRange > 0f)
+                ? AimPrecisionColors.GetDistanceMultiplier(distance, wCfg.OptimalRange, wCfg.MaxEffectiveRange)
+                : 1f;
+
+            return (wCfg.Accuracy / 100f) * (pCfg.Accuracy / 100f) * aimMult * distMult;
         }
 
         void OnGUI()

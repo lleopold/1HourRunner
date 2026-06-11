@@ -31,16 +31,16 @@ namespace ZombieGame
 
         // ── Tier colors ───────────────────────────────────────────────────────
         private static readonly Color Trash = Color.white;
-        private static readonly Color Good  = Color.green;
+        private static readonly Color Good = Color.green;
         private static readonly Color Great = Color.blue;
         private static readonly Color Elite = new Color(0.6f, 0f, 1f);   // purple
-        private static readonly Color Crit  = Color.red;
+        private static readonly Color Crit = Color.red;
 
         // ── Transition state ─────────────────────────────────────────────────
-        private static Color   _currentColor    = Color.white;
-        private static Color   _previousTier    = Color.white;
-        private static float   _flashTimer      = 0f;  // counts down from FlashDuration
-        private static bool    _initialized     = false;
+        private static Color _currentColor = Color.white;
+        private static Color _previousTier = Color.white;
+        private static float _flashTimer = 0f;  // counts down from FlashDuration
+        private static bool _initialized = false;
 
         // ─────────────────────────────────────────────────────────────────────
 
@@ -50,7 +50,7 @@ namespace ZombieGame
             if (angleDegrees > 20f) return 0.50f;
             if (angleDegrees > 15f) return 0.75f;
             if (angleDegrees > 10f) return 0.85f;
-            if (angleDegrees >  7f) return 0.95f;
+            if (angleDegrees > 7f) return 0.95f;
             return 0.99f;
         }
 
@@ -62,6 +62,12 @@ namespace ZombieGame
             float t = (distance - optimalRange) / (maxEffectiveRange - optimalRange);
             return Mathf.Lerp(1.0f, 0.1f, t);
         }
+        public static Color GetOutlineColor(float hitChance)
+        {
+            if (hitChance >= 0.7f) return Color.Lerp(Color.green, Color.white, (hitChance - 0.7f) / 0.3f);
+            if (hitChance >= 0.35f) return Color.Lerp(Color.red, Color.green, (hitChance - 0.35f) / 0.35f);
+            return Color.red;
+        }
 
         /// <summary>Returns the raw tier color for <paramref name="angleDegrees"/> with no animation.</summary>
         public static Color GetColor(float angleDegrees)
@@ -69,7 +75,7 @@ namespace ZombieGame
             if (angleDegrees > 20f) return Trash;
             if (angleDegrees > 15f) return Good;
             if (angleDegrees > 10f) return Great;
-            if (angleDegrees >  7f) return Elite;
+            if (angleDegrees > 7f) return Elite;
             return Crit;
         }
 
@@ -92,14 +98,14 @@ namespace ZombieGame
             {
                 _currentColor = targetTier;
                 _previousTier = targetTier;
-                _initialized  = true;
+                _initialized = true;
             }
 
             // Detect tier change → trigger flash
             if (targetTier != _previousTier)
             {
-                _flashTimer    = FlashDuration;
-                _previousTier  = targetTier;
+                _flashTimer = FlashDuration;
+                _previousTier = targetTier;
             }
 
             if (_flashTimer > 0f)

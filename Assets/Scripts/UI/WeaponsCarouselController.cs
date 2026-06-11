@@ -17,6 +17,8 @@ public class WeaponsCarouselController : MonoBehaviour
     private const string ThumbsRoot = "Thumbnails/Weapons"; // e.g. Resources/Thumbnails/Weapons/M9.png
     private const string ModelsRoot = "Models/Weapons";     // e.g. Resources/Models/Weapons/WPN_AP85
 
+    private const string UnlockedWeapon = "WPN_PT8";
+
     private VisualElement _container;      // ws_weapon_list (ScrollView content)
     private VisualElement _preview;        // ws_preview panel (we add an Image inside)
     private Image _previewImage;           // child Image that displays the RenderTexture
@@ -43,12 +45,12 @@ public class WeaponsCarouselController : MonoBehaviour
     private bool _dragging;
     private Vector3 _lastPointer;
 
-    // Stat FloatFields (optional — all queried by name, null if not in UXML)
+    // Stat FloatFields (optional ï¿½ all queried by name, null if not in UXML)
     private FloatField _fDamage, _fFireRate, _fDamageFluct, _fClip, _fPrecision,
                        _fReload, _fSimul, _fCrit, _fStagger, _fRecoil,
                        _fAccuracy, _fWeight, _fOptimalRange, _fMaxRange;
 
-    // Bar-fill elements — parallel array to _statBarFillNames
+    // Bar-fill elements ï¿½ parallel array to _statBarFillNames
     private VisualElement[] _statBarFills;
 
     private static readonly string[] _statBarFillNames =
@@ -86,12 +88,12 @@ public class WeaponsCarouselController : MonoBehaviour
         new()
         {
             { Cat.Pistols, ("PISTOL", new List<WeaponDef>{
+                new("WPN_PT8","PT8"),
                 new("WPN_AP85","AP85"),
                 new("WPN_C1911","C1911"),
                 new("WPN_Eder22","Eder22"),
                 new("WPN_M9","M9"),
                 new("WPN_P350","P350"),
-                new("WPN_PT8","PT8"),
                 new("WPN_Revolver","Revolver"),
             })},
             { Cat.SMG, ("SMG", new List<WeaponDef>{
@@ -140,7 +142,7 @@ public class WeaponsCarouselController : MonoBehaviour
         var found = root.Q<VisualElement>("ws_weapon_list");
         _container = found is ScrollView sv ? sv.contentContainer : found;
 
-        // Big preview panel (we’ll add an Image inside so we can bind a RenderTexture)
+        // Big preview panel (weï¿½ll add an Image inside so we can bind a RenderTexture)
         _preview = root.Q<VisualElement>("ws_preview");
         if (_preview == null)
         {
@@ -151,7 +153,7 @@ public class WeaponsCarouselController : MonoBehaviour
         QueryStatFields(root);
         EnsurePreviewImage();
 
-        // Tabs carousel events — registered once in HookCarouselCategoryEvents (called from OnRootReady)
+        // Tabs carousel events ï¿½ registered once in HookCarouselCategoryEvents (called from OnRootReady)
         var named = root.Q<VisualElement>(containerName);
         if (named == null)
         {
@@ -220,7 +222,7 @@ public class WeaponsCarouselController : MonoBehaviour
 
     private void QueryStatFields(VisualElement root)
     {
-        // Safe: if the fields aren’t on this screen, all stay null and we skip updates.
+        // Safe: if the fields arenï¿½t on this screen, all stay null and we skip updates.
         _fDamage = root.Q<FloatField>("fl_damage");
         _fFireRate = root.Q<FloatField>("fl_fire_rate");
         _fDamageFluct = root.Q<FloatField>("fl_damage_fluctuation");
@@ -343,6 +345,7 @@ public class WeaponsCarouselController : MonoBehaviour
                ?? Resources.Load<Texture2D>($"{ThumbsRoot}/{w.display}");
 
         wb.SetData(tex, slotText, w.display, topRight: "GUNSMITH", bottomRight: "LVL 1");
+        wb.SetLocked(w.id != UnlockedWeapon);
         wb.Clicked += _ => SelectWeapon(w, wb);
 
         return wb;
@@ -350,6 +353,8 @@ public class WeaponsCarouselController : MonoBehaviour
 
     private void SelectWeapon(WeaponDef w, WeaponButton wb)
     {
+        if (wb.IsLocked) return;
+
         bool sameWeapon = _selectedWeapon.id == w.id && _spawned != null;
 
         // Deactivate old button
@@ -415,7 +420,7 @@ public class WeaponsCarouselController : MonoBehaviour
     {
         if (_statBarFills == null) return;
 
-        // All values normalized 0–100 ? bar width 0%–100%
+        // All values normalized 0ï¿½100 ? bar width 0%ï¿½100%
         float[] values =
         {
             cfg.Damage,
@@ -669,7 +674,7 @@ public class WeaponsCarouselController : MonoBehaviour
     {
         if (_spawned == null || _cam == null) return;
 
-        // Only use MeshRenderer / SkinnedMeshRenderer — ignore ParticleSystemRenderer,
+        // Only use MeshRenderer / SkinnedMeshRenderer ï¿½ ignore ParticleSystemRenderer,
         // LineRenderer, etc. that can inflate bounds far beyond the visible gun geometry
         var meshRenderers = _spawned.GetComponentsInChildren<MeshRenderer>();
         var skinnedRenderers = _spawned.GetComponentsInChildren<SkinnedMeshRenderer>();

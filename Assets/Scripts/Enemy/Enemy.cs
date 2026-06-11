@@ -198,6 +198,10 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     {
         _outline.enabled = newSetting;
     }
+    public void SetOutlineColor(Color c)
+    {
+        _outline.OutlineColor = c;
+    }
     public bool FinishedAttack()
     {
         return AttackFinished;

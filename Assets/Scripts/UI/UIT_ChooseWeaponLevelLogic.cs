@@ -353,8 +353,8 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
     void WireWeaponButtonsSelectedState()
     {
         var weaponButtons = new WeaponButton[] {
-            _btn_WPN_AP85, _btn_WPN_MK18, _btn_WPN_P350, _btn_WPN_Revolver, _btn_WPN_Hunter85,
-            _btn_WPN_M4, _btn_WPN_M9, _btn_WPN_SMG5, _btn_WPN_PT8, _btn_WPN_R90, _btn_WPN_FBS,
+            _btn_WPN_PT8, _btn_WPN_AP85, _btn_WPN_MK18, _btn_WPN_P350, _btn_WPN_Revolver, _btn_WPN_Hunter85,
+            _btn_WPN_M4, _btn_WPN_M9, _btn_WPN_SMG5, _btn_WPN_R90, _btn_WPN_FBS,
             _btn_WPN_Eder22, _btn_WPN_DT22, _btn_WPN_CV47, _btn_WPN_C1911, _btn_WPN_M16,
             _btn_WPN_KM4, _btn_WPN_590A1, _btn_WPN_CX8
         };
@@ -404,6 +404,7 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
 
 public enum WeaponEnum
 {
+    WPN_PT8,
     WPN_AP85,
     WPN_MK18,
     WPN_P350,
@@ -412,7 +413,6 @@ public enum WeaponEnum
     WPN_M4,
     WPN_M9,
     WPN_SMG5,
-    WPN_PT8,
     WPN_R90,
     WPN_FBS,
     WPN_Eder22,
