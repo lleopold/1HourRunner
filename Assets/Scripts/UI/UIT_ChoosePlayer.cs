@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,27 +11,12 @@ public class UIT_ChoosePlayer : MonoBehaviour
     [SerializeField] public WeaponEnum weapon;
     [SerializeField] private UIDocument _uiDocument;
     [SerializeField] private PreviewAnimationConfig _previewAnimConfig;
+    [SerializeField] private VisualTreeAsset _statRowTemplateRef; // optional inspector override
     private VisualElement _root;
 
-    [Obsolete("Used for drop down")]
-    //[SerializeField] private Toggle toggleSwat, toggleBusinessGirl, toggleDr, toggleJennifer, toggleSolider, toggleGreenHatBasic;
     private WeaponConfig weaponConfig;
     private PlayerConfig playerConfig;
-    private FloatField _fl_health;
-    private FloatField _fl_weight;
-    private FloatField _fl_strength;
-    private FloatField _fl_stamina;
-    private FloatField _fl_stamina_regen;
-    private FloatField _fl_stamina_speed;
-    private FloatField _fl_speed;
-    private FloatField _fl_acceleration;
-    private FloatField _fl_running_pct;
-    private FloatField _fl_running_bck;
-    private FloatField _fl_precision;
-    private FloatField _fl_recoil;
-    private FloatField _fl_reload_speed;
-    private FloatField _fl_vision;
-    private FloatField _fl_injured_penalty;
+
     private IntegerField _int_weapon;
     private Button _btn_jennifer;
     private Button _btn_swat;
@@ -41,16 +26,13 @@ public class UIT_ChoosePlayer : MonoBehaviour
     private Button _btn_green_hat_basic;
     private Button _btn_choose_level;
 
-    private readonly Dictionary<string, Label> _statLabels = new();
     private Animator _presentedAnimator;
 
     // Selection pulse
     private Button _activePlayerBtn;
-    private VisualElement _activeAccentLine;
     private float _pulseTime;
     private Dictionary<Button, VisualElement> _accentLines = new();
     private Dictionary<Button, Label> _levelLabels = new();
-    // All buttons list for bulk pulse update
     private List<(Button btn, VisualElement accent)> _allThumbAccents = new();
 
     // Camera orbit
@@ -59,13 +41,45 @@ public class UIT_ChoosePlayer : MonoBehaviour
     private float _orbitAngle;
     private const float OrbitRadius = 3.8f;
     private const float OrbitHeight = 2.4f;
-    private const float OrbitSpeed = 18f; // degrees per second
+    private const float OrbitSpeed = 18f;
 
-    // Perk labels in stats panel
+    // Perk labels
     private Label _lbl_perk_name;
     private Label _lbl_perk_desc;
 
-    // Default perk names per character (can be overridden by PlayerConfig.PerkName)
+    // ── Dynamic stat system ──────────────────────────────────
+    private enum StatCategory { Movement, Combat, Survival }
+
+    private class StatDef
+    {
+        public string Key;
+        public string Display;
+        public StatCategory Category;
+        public Func<PlayerConfig, float> Get;
+        public Action<PlayerConfig, float> Set;
+        public float Step, Min, Max, BarMax;
+    }
+
+    private class StatRowUI
+    {
+        public StatDef Def;
+        public VisualElement Root;
+        public Label NameLabel;
+        public Label ValueLabel;
+        public Button Minus;
+        public Button Plus;
+        public VisualElement Gauge;
+    }
+
+    private VisualTreeAsset _statRowTemplate;
+    private VisualElement _statsContainer;
+    private Label _lbl_points;
+    private Button _btn_level_up;
+    private readonly List<StatDef> _statDefs = new();
+    private readonly Dictionary<string, StatRowUI> _rows = new();
+    private readonly Dictionary<string, int> _pendingClicks = new(); // points allocated but not committed
+    private StatCategory _currentCategory = StatCategory.Movement;
+
     private static readonly Dictionary<PlayerEnum, string> DefaultPerkNames = new()
     {
         { PlayerEnum.Jennifer,                "RUNNER"        },
@@ -84,21 +98,15 @@ public class UIT_ChoosePlayer : MonoBehaviour
         AttachWeaponSelectionStyles();
 
         if (DataHolder.ChosenPlayer == null)
-        {
             player = PlayerEnum.GreenHat_basic;
-        }
         else
-        {
             player = DataHolder.ChosenPlayer;
-        }
+
         if (DataHolder.chosenWeapon == null)
-        {
             DataHolder.chosenWeapon = WeaponEnum.WPN_AP85;
-        }
         else
-        {
             weapon = DataHolder.chosenWeapon;
-        }
+
         playerConfig = PlayerConfigSingleton.Instance.PlayerConfig;
 
         GameObject character = LoadModel();
@@ -109,27 +117,9 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _previewCamera = Camera.main;
         if (_previewCamera != null)
         {
-            _orbitAngle = 180f; // start facing front
+            _orbitAngle = 180f;
             UpdateOrbitCamera();
         }
-
-
-        _fl_health = _root.Q<FloatField>("fl_health");
-        _fl_weight = _root.Q<FloatField>("fl_weight");
-        _fl_strength = _root.Q<FloatField>("fl_strength");
-        _fl_stamina = _root.Q<FloatField>("fl_stamina");
-        _fl_stamina_regen = _root.Q<FloatField>("fl_stamina_regen");
-        _fl_stamina_speed = _root.Q<FloatField>("fl_stamina_speed");
-        _fl_speed = _root.Q<FloatField>("fl_speed");
-        _fl_acceleration = _root.Q<FloatField>("fl_acceleration");
-        _fl_running_pct = _root.Q<FloatField>("fl_running_pct");
-        _fl_running_bck = _root.Q<FloatField>("fl_back_move");
-        _fl_precision = _root.Q<FloatField>("fl_aim");
-        _fl_recoil = _root.Q<FloatField>("fl_recoil");
-        _fl_reload_speed = _root.Q<FloatField>("fl_reload");
-        _fl_vision = _root.Q<FloatField>("fl_vision");
-        _fl_injured_penalty = _root.Q<FloatField>("fl_injured");
-
 
         _int_weapon = _root.Q<IntegerField>("int_weapon");
 
@@ -149,7 +139,23 @@ public class UIT_ChoosePlayer : MonoBehaviour
         var btnBack = _root.Q<Button>("btn_back");
         btnBack?.RegisterCallback<ClickEvent>(_ => SceneManager.LoadScene("Start"));
 
-        // Inject WeaponButton-style overlays into all thumb buttons
+        BuildThumbOverlays();
+
+        _lbl_perk_name = _root.Q<Label>("lbl_perk_name");
+        _lbl_perk_desc = _root.Q<Label>("lbl_perk_desc");
+
+        SetActivePlayerButton(GetButtonForPlayer(player));
+
+        _btn_choose_level = _root.Q<Button>("btn_choose_weapon");
+        _btn_choose_level?.RegisterCallback<ClickEvent>(ev => ClickChooseWeapon());
+
+        InitStats();
+        LoadSettingsToUI();
+    }
+
+    // ── Thumb button overlays (perk strip, bars, level) ──────
+    private void BuildThumbOverlays()
+    {
         var thumbData = new (Button btn, PlayerEnum p)[]
         {
             (_btn_jennifer,        PlayerEnum.Jennifer),
@@ -165,18 +171,15 @@ public class UIT_ChoosePlayer : MonoBehaviour
             btn.style.position = Position.Relative;
             btn.style.overflow = Overflow.Visible;
 
-            // Dark topbar strip
             var topbar = new VisualElement();
             topbar.AddToClassList("thumb__topbar");
             btn.Add(topbar);
 
-            // Perk name — top-left on strip
             string perkName = DefaultPerkNames.TryGetValue(p, out var n) ? n : "";
             var perkLabel = new Label(perkName);
             perkLabel.AddToClassList("thumb__perk");
             btn.Add(perkLabel);
 
-            // Perk progress bar (random 30–70% placeholder)
             float perkProgress = UnityEngine.Random.Range(0.30f, 0.70f);
             var barTrack = new VisualElement();
             barTrack.AddToClassList("thumb__bar-track");
@@ -186,108 +189,283 @@ public class UIT_ChoosePlayer : MonoBehaviour
             barTrack.Add(barFill);
             btn.Add(barTrack);
 
-            // Bottom bar strip
             var bottombar = new VisualElement();
             bottombar.AddToClassList("thumb__bottombar");
             btn.Add(bottombar);
 
-            // Level — centered on bottom bar
             var levelLabel = new Label("LVL 1");
             levelLabel.AddToClassList("thumb__level");
             btn.Add(levelLabel);
             _levelLabels[btn] = levelLabel;
 
-            // Hover line — left side
             var hoverLine = new VisualElement();
             hoverLine.AddToClassList("thumb__hover-line");
             btn.Add(hoverLine);
 
-            // Accent line — right side, always pulsing when not active
             var accentLine = new VisualElement();
             accentLine.AddToClassList("thumb__accent-line");
             btn.Add(accentLine);
             _accentLines[btn] = accentLine;
             _allThumbAccents.Add((btn, accentLine));
         }
-
-        _lbl_perk_name = _root.Q<Label>("lbl_perk_name");
-        _lbl_perk_desc = _root.Q<Label>("lbl_perk_desc");
-
-        // Set initial selection based on saved player
-        SetActivePlayerButton(GetButtonForPlayer(player));
-
-
-
-        _fl_health.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.health = ev.newValue);
-        _fl_weight.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.weight = ev.newValue);
-        _fl_strength.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.strength = ev.newValue);
-        _fl_stamina.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.stamina = ev.newValue);
-        _fl_stamina_regen.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.staminaRegenSpeed = ev.newValue);
-        _fl_stamina_speed.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.staminaRegenSpeed = ev.newValue);
-        _fl_speed.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.speed = ev.newValue);
-        _fl_acceleration.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.acceleration = ev.newValue);
-        _fl_running_pct.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.RunningSpeed_pct = ev.newValue);
-        _fl_running_bck.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.BackMovementPenalty_pct = ev.newValue);
-        //_fl_precision.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.aimingPrecision = ev.newValue);
-        _fl_recoil.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.recoilReduction = ev.newValue);
-        _fl_reload_speed.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.reloadSpeed = ev.newValue);
-        _fl_vision.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.vision = ev.newValue);
-        _fl_injured_penalty.RegisterCallback<ChangeEvent<float>>(ev => PlayerConfigSingleton.Instance.PlayerConfig.InjuredPenalty = ev.newValue);
-
-        _btn_choose_level = _root.Q<Button>("btn_choose_weapon");
-        _btn_choose_level?.RegisterCallback<ClickEvent>(ev => ClickChooseWeapon());
-
-        LoadSettingsToUI();
-        RandomizeStatBars();
-
-        // Wire steppers: fieldName, minusBtn, plusBtn, step, min, max
-        WireStepper("fl_health", "btn_fl_health_minus", "btn_fl_health_plus", 5f, 0f, 500f);
-        WireStepper("fl_weight", "btn_fl_weight_minus", "btn_fl_weight_plus", 1f, 0f, 500f);
-        WireStepper("fl_strength", "btn_fl_strength_minus", "btn_fl_strength_plus", 1f, 0f, 200f);
-        WireStepper("fl_stamina", "btn_fl_stamina_minus", "btn_fl_stamina_plus", 5f, 0f, 500f);
-        WireStepper("fl_stamina_regen", "btn_fl_stamina_regen_minus", "btn_fl_stamina_regen_plus", 0.1f, 0f, 10f);
-        WireStepper("fl_stamina_speed", "btn_fl_stamina_speed_minus", "btn_fl_stamina_speed_plus", 0.1f, 0f, 10f);
-        WireStepper("fl_speed", "btn_fl_speed_minus", "btn_fl_speed_plus", 0.1f, 0f, 50f);
-        WireStepper("fl_acceleration", "btn_fl_acceleration_minus", "btn_fl_acceleration_plus", 0.1f, 0f, 50f);
-        WireStepper("fl_running_pct", "btn_fl_running_pct_minus", "btn_fl_running_pct_plus", 1f, 0f, 100f);
-        WireStepper("fl_back_move", "btn_fl_back_move_minus", "btn_fl_back_move_plus", 1f, 0f, 100f);
-        WireStepper("fl_aim", "btn_fl_aim_minus", "btn_fl_aim_plus", 0.5f, 0f, 100f);
-        WireStepper("fl_recoil", "btn_fl_recoil_minus", "btn_fl_recoil_plus", 0.5f, 0f, 100f);
-        WireStepper("fl_reload", "btn_fl_reload_minus", "btn_fl_reload_plus", 0.1f, 0f, 10f);
-        WireStepper("fl_vision", "btn_fl_vision_minus", "btn_fl_vision_plus", 1f, 0f, 100f);
-        WireStepper("fl_injured", "btn_fl_injured_minus", "btn_fl_injured_plus", 1f, 0f, 100f);
-
     }
-    void WireStepper(string floatFieldName, string minusBtnName, string plusBtnName, float step, float min, float max)
+
+    // ── Stat system ──────────────────────────────────────────
+    private void InitStats()
     {
-        var ff = _root.Q<FloatField>(floatFieldName);
-        var minus = _root.Q<Button>(minusBtnName);
-        var plus = _root.Q<Button>(plusBtnName);
-        if (ff == null || minus == null || plus == null) return;
+        _statRowTemplate = _statRowTemplateRef != null
+            ? _statRowTemplateRef
+            : Resources.Load<VisualTreeAsset>("UI/StatRow");
 
-        void ClampAndSet(float v) => ff.value = Mathf.Clamp(v, min, max);
+        _statsContainer = _root.Q<VisualElement>("stats_container");
+        _lbl_points = _root.Q<Label>("lbl_points");
+        _btn_level_up = _root.Q<Button>("btn_level_up");
+        _btn_level_up?.RegisterCallback<ClickEvent>(_ => CommitLevelUp());
 
-        minus.RegisterCallback<ClickEvent>(_ => ClampAndSet(ff.value - step));
-        plus.RegisterCallback<ClickEvent>(_ => ClampAndSet(ff.value + step));
+        // Tabs
+        _root.Q<Button>("tab_movement")?.RegisterCallback<ClickEvent>(_ => SelectCategory(StatCategory.Movement));
+        _root.Q<Button>("tab_combat")?.RegisterCallback<ClickEvent>(_ => SelectCategory(StatCategory.Combat));
+        _root.Q<Button>("tab_survival")?.RegisterCallback<ClickEvent>(_ => SelectCategory(StatCategory.Survival));
+
+        BuildStatDefs();
+        SelectCategory(_currentCategory);
     }
+
+    private void BuildStatDefs()
+    {
+        _statDefs.Clear();
+
+        // Movement
+        Add("speed",         "Speed",          StatCategory.Movement, c => c.speed,                   (c, v) => c.speed = v,                   0.1f, 0, 50,  20);
+        Add("acceleration",  "Acceleration",   StatCategory.Movement, c => c.acceleration,            (c, v) => c.acceleration = v,            0.1f, 0, 50,  20);
+        Add("running_pct",   "Running %",      StatCategory.Movement, c => c.RunningSpeed_pct,         (c, v) => c.RunningSpeed_pct = v,         1f,   0, 100, 100);
+        Add("back_move",     "Back move",      StatCategory.Movement, c => c.BackMovementPenalty_pct,  (c, v) => c.BackMovementPenalty_pct = v,  1f,   0, 100, 100);
+        Add("stamina_speed", "Stamina speed",  StatCategory.Movement, c => c.staminaRegenDelay,        (c, v) => c.staminaRegenDelay = v,        0.1f, 0, 10,  10);
+
+        // Combat
+        Add("strength",      "Strength",       StatCategory.Combat,   c => c.strength,                (c, v) => c.strength = v,                1f,   0, 200, 200);
+        Add("aim",           "Aim",            StatCategory.Combat,   c => c.Accuracy,                (c, v) => c.Accuracy = v,                0.5f, 0, 100, 100);
+        Add("recoil",        "Recoil",         StatCategory.Combat,   c => c.recoilReduction,         (c, v) => c.recoilReduction = v,         0.5f, 0, 100, 100);
+        Add("reload",        "Reload speed",   StatCategory.Combat,   c => c.reloadSpeed,             (c, v) => c.reloadSpeed = v,             0.1f, 0, 10,  10);
+        Add("vision",        "Vision",         StatCategory.Combat,   c => c.vision,                  (c, v) => c.vision = v,                  1f,   0, 100, 100);
+
+        // Survival
+        Add("health",        "Health",         StatCategory.Survival, c => c.health,                  (c, v) => c.health = v,                  5f,   0, 500, 500);
+        Add("weight",        "Weight",         StatCategory.Survival, c => c.weight,                  (c, v) => c.weight = v,                  1f,   0, 500, 200);
+        Add("stamina",       "Stamina",        StatCategory.Survival, c => c.stamina,                 (c, v) => c.stamina = v,                 5f,   0, 500, 500);
+        Add("stamina_regen", "Stamina regen",  StatCategory.Survival, c => c.staminaRegenSpeed,       (c, v) => c.staminaRegenSpeed = v,       0.1f, 0, 10,  10);
+        Add("injured",       "Injured penalty",StatCategory.Survival, c => c.InjuredPenalty,          (c, v) => c.InjuredPenalty = v,          1f,   0, 100, 100);
+
+        void Add(string key, string disp, StatCategory cat, Func<PlayerConfig, float> get, Action<PlayerConfig, float> set, float step, float min, float max, float barMax)
+            => _statDefs.Add(new StatDef { Key = key, Display = disp, Category = cat, Get = get, Set = set, Step = step, Min = min, Max = max, BarMax = barMax });
+    }
+
+    private void SelectCategory(StatCategory cat)
+    {
+        _currentCategory = cat;
+        SetTabActive("tab_movement", cat == StatCategory.Movement);
+        SetTabActive("tab_combat",   cat == StatCategory.Combat);
+        SetTabActive("tab_survival", cat == StatCategory.Survival);
+
+        if (_statsContainer == null) return;
+        _statsContainer.Clear();
+        _rows.Clear();
+
+        foreach (var def in _statDefs)
+        {
+            if (def.Category != cat) continue;
+            CreateRow(def);
+        }
+        RefreshStats();
+        UpdatePointsUI();
+        UpdateLevelUpButton();
+    }
+
+    private void SetTabActive(string tabName, bool active)
+    {
+        var t = _root.Q<Button>(tabName);
+        if (t != null) t.EnableInClassList("is-tab-active", active);
+    }
+
+    private void CreateRow(StatDef def)
+    {
+        VisualElement row;
+        if (_statRowTemplate != null)
+        {
+            var tc = _statRowTemplate.Instantiate();
+            tc.style.flexShrink = 0;
+            row = tc;
+        }
+        else
+        {
+            row = BuildRowFallback();
+        }
+
+        var ui = new StatRowUI
+        {
+            Def = def,
+            Root = row,
+            NameLabel = row.Q<Label>("stat_name"),
+            ValueLabel = row.Q<Label>("stat_value"),
+            Minus = row.Q<Button>("btn_minus"),
+            Plus = row.Q<Button>("btn_plus"),
+            Gauge = row.Q<VisualElement>("stat_gauge"),
+        };
+        if (ui.NameLabel != null) ui.NameLabel.text = def.Display;
+        ui.Minus?.RegisterCallback<ClickEvent>(_ => OnStep(def.Key, -1));
+        ui.Plus?.RegisterCallback<ClickEvent>(_ => OnStep(def.Key, +1));
+
+        _statsContainer.Add(row);
+        _rows[def.Key] = ui;
+    }
+
+    // Code-built fallback if the StatRow template asset is missing.
+    private VisualElement BuildRowFallback()
+    {
+        var root = new VisualElement();
+        root.AddToClassList("stat-row");
+
+        var gauge = new VisualElement { name = "stat_gauge" };
+        gauge.AddToClassList("stat-row__gauge");
+        root.Add(gauge);
+
+        var content = new VisualElement();
+        content.AddToClassList("stat-row__content");
+
+        var name = new Label("Stat") { name = "stat_name" };
+        name.AddToClassList("stat-name");
+        content.Add(name);
+
+        var edit = new VisualElement();
+        edit.AddToClassList("stat-edit");
+
+        var minus = new Button { name = "btn_minus", text = "−" };
+        minus.AddToClassList("step");
+        minus.AddToClassList("step--minus");
+        var val = new Label("0") { name = "stat_value" };
+        val.AddToClassList("stat-val");
+        var plus = new Button { name = "btn_plus", text = "+" };
+        plus.AddToClassList("step");
+        plus.AddToClassList("step--plus");
+
+        edit.Add(minus);
+        edit.Add(val);
+        edit.Add(plus);
+        content.Add(edit);
+        root.Add(content);
+        return root;
+    }
+
+    private int GetClicks(string key) => _pendingClicks.TryGetValue(key, out var c) ? c : 0;
+
+    private int TotalPendingClicks()
+    {
+        int sum = 0;
+        foreach (var kv in _pendingClicks) sum += kv.Value;
+        return sum;
+    }
+
+    private int AvailablePoints() => playerConfig.AttributePoints - TotalPendingClicks();
+
+    private void OnStep(string key, int dir)
+    {
+        if (!_rows.TryGetValue(key, out var ui)) return;
+        var def = ui.Def;
+        int clicks = GetClicks(key);
+
+        if (dir > 0)
+        {
+            if (AvailablePoints() <= 0) return;
+            float baseVal = def.Get(playerConfig);
+            if (baseVal + (clicks + 1) * def.Step > def.Max) return;
+            clicks++;
+        }
+        else
+        {
+            if (clicks <= 0) return; // minus only undoes pending allocation, never base
+            clicks--;
+        }
+        _pendingClicks[key] = clicks;
+
+        RefreshRow(ui);
+        UpdatePointsUI();
+        UpdateLevelUpButton();
+    }
+
+    private void RefreshStats()
+    {
+        foreach (var kv in _rows) RefreshRow(kv.Value);
+    }
+
+    private void RefreshRow(StatRowUI ui)
+    {
+        var def = ui.Def;
+        int clicks = GetClicks(def.Key);
+        float val = def.Get(playerConfig) + clicks * def.Step;
+
+        if (ui.ValueLabel != null) ui.ValueLabel.text = val.ToString("0.#");
+
+        float frac = def.BarMax > 0 ? Mathf.Clamp01(val / def.BarMax) : 0f;
+        if (ui.Gauge != null) ui.Gauge.style.width = Length.Percent(frac * 100f);
+
+        bool pending = clicks > 0;
+        ui.ValueLabel?.EnableInClassList("is-pending", pending);
+        ui.Gauge?.EnableInClassList("is-pending", pending);
+
+        // Rule 3: steppers shown only when the player has points to spend.
+        bool showSteppers = playerConfig.AttributePoints > 0;
+        var disp = showSteppers ? DisplayStyle.Flex : DisplayStyle.None;
+        if (ui.Minus != null) ui.Minus.style.display = disp;
+        if (ui.Plus != null) ui.Plus.style.display = disp;
+    }
+
+    private void UpdatePointsUI()
+    {
+        if (_lbl_points == null) return;
+        int avail = AvailablePoints();
+        _lbl_points.text = avail.ToString();
+        _lbl_points.EnableInClassList("is-depleted", avail <= 0);
+    }
+
+    private void UpdateLevelUpButton()
+    {
+        if (_btn_level_up == null) return;
+        _btn_level_up.SetEnabled(TotalPendingClicks() > 0);
+    }
+
+    private void CommitLevelUp()
+    {
+        if (TotalPendingClicks() <= 0) return;
+
+        foreach (var def in _statDefs)
+        {
+            int clicks = GetClicks(def.Key);
+            if (clicks <= 0) continue;
+            def.Set(playerConfig, def.Get(playerConfig) + clicks * def.Step);
+        }
+        playerConfig.AttributePoints -= TotalPendingClicks();
+        _pendingClicks.Clear();
+
+        RefreshStats();
+        UpdatePointsUI();
+        UpdateLevelUpButton();
+    }
+
     private void Update()
     {
         if (_presentedAnimator != null && _presentedAnimator.isActiveAndEnabled
             && _presentedAnimator.runtimeAnimatorController != null)
         {
-            // Slowly oscillate between pistol idle (0) and pistol run (1)
             float blend = Mathf.PingPong(Time.time / 5f, 1f);
             _presentedAnimator.SetFloat("Blend", blend);
         }
 
-        // Orbit camera around the preview character
         if (_previewCamera != null)
         {
             _orbitAngle += OrbitSpeed * Time.deltaTime;
             UpdateOrbitCamera();
         }
 
-        // Pulse accent line only on active thumb
         if (_activePlayerBtn != null && _accentLines.TryGetValue(_activePlayerBtn, out var activeAccent))
         {
             _pulseTime += Time.deltaTime;
@@ -309,7 +487,6 @@ public class UIT_ChoosePlayer : MonoBehaviour
 
     private void SetActivePlayerButton(Button btn)
     {
-        // Deactivate old — hide accent line
         if (_activePlayerBtn != null)
         {
             _activePlayerBtn.RemoveFromClassList("is-active");
@@ -322,7 +499,6 @@ public class UIT_ChoosePlayer : MonoBehaviour
 
         if (_activePlayerBtn != null)
             _activePlayerBtn.AddToClassList("is-active");
-        // accent-line opacity for the new active is driven by Update() pulse
     }
 
     private Button GetButtonForPlayer(PlayerEnum p) => p switch
@@ -338,10 +514,6 @@ public class UIT_ChoosePlayer : MonoBehaviour
 
     private void ClickChooseWeapon()
     {
-        // If you have a dedicated scene picker:
-        // Loader.Load(Loader.Scene.LevelSelect);
-
-        // Temporary: jump to Level1 directly (rename to your scene):
         UnityEngine.SceneManagement.SceneManager.LoadScene("ChooseWeapon");
     }
 
@@ -350,9 +522,8 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _presentedAnimator = null;
         var existing = GameObject.Find("PresentedModel");
         if (existing != null)
-        {
             Destroy(existing);
-        }
+
         GameObject model = Resources.Load<GameObject>("Models/Player/" + DataHolder.ChosenPlayer.ToString() + "_model");
         GameObject pos = GameObject.Find("CharPositionSpot");
         GameObject character = Instantiate(model, pos.transform.position, Quaternion.identity);
@@ -365,7 +536,6 @@ public class UIT_ChoosePlayer : MonoBehaviour
             var overrides = new List<KeyValuePair<AnimationClip, AnimationClip>>();
             overrideController.GetOverrides(overrides);
 
-            // Map blend tree slots (by index order) to animation1..6
             AnimationClip[] slots = new[]
             {
                 _previewAnimConfig.animation1,
@@ -395,7 +565,6 @@ public class UIT_ChoosePlayer : MonoBehaviour
         character.name = "PresentedModel";
         _presentedAnimator = animator;
 
-        // Attach weapon to right hand
         AttachPreviewWeapon(character);
 
         return character;
@@ -403,15 +572,12 @@ public class UIT_ChoosePlayer : MonoBehaviour
 
     private void AttachPreviewWeapon(GameObject character)
     {
-        // Clean up any existing preview weapon
         var existingWeapon = character.transform.Find("PreviewWeapon");
         if (existingWeapon != null) Destroy(existingWeapon.gameObject);
 
-        // Load WPN_AP85 (pistol)
         GameObject weaponPrefab = Resources.Load<GameObject>("Models/Weapons/WPN_AP85");
         if (weaponPrefab == null) return;
 
-        // Find right hand bone (handles mixamorig1, mixamorig2, etc.)
         Transform rightHand = FindBoneRecursive(character.transform, "RightHand");
         if (rightHand == null) return;
 
@@ -432,20 +598,19 @@ public class UIT_ChoosePlayer : MonoBehaviour
         }
         return null;
     }
+
     void AttachWeaponSelectionStyles()
     {
         var weaponSel = Resources.Load<StyleSheet>("UI/WeaponSelection");
         var choosePlayer = Resources.Load<StyleSheet>("UI/ChoosePlayer");
 
         if (weaponSel != null) _root.styleSheets.Add(weaponSel);
-        if (choosePlayer != null) _root.styleSheets.Add(choosePlayer); // added LAST to override
+        if (choosePlayer != null) _root.styleSheets.Add(choosePlayer);
     }
-
 
     private void ClickPlay()
     {
         playerConfig = PlayerConfigSingleton.Instance.PlayerConfig;
-        //SceneManager.LoadScene("ChooseWeapon");
         Loader.Load(Loader.Scene.ChooseWeapon);
         PlayerConfigSingleton.Instance.SaveConfigToFile();
     }
@@ -454,28 +619,14 @@ public class UIT_ChoosePlayer : MonoBehaviour
     {
         DataHolder.ChosenPlayer = player;
         playerConfig = PlayerConfigSingleton.Instance.PlayerConfig;
+        _pendingClicks.Clear(); // pending allocations don't carry across characters
         LoadSettingsToUI();
         LoadModel();
         SetActivePlayerButton(GetButtonForPlayer(player));
     }
+
     void LoadSettingsToUI()
     {
-        _fl_health.value = playerConfig.health;
-        _fl_weight.value = playerConfig.weight;
-        _fl_strength.value = playerConfig.strength;
-        _fl_stamina.value = playerConfig.stamina;
-        _fl_stamina_regen.value = playerConfig.stamina;
-        _fl_stamina_speed.value = playerConfig.staminaRegenSpeed;
-        _fl_speed.value = playerConfig.speed;
-        _fl_acceleration.value = playerConfig.acceleration;
-        _fl_running_pct.value = playerConfig.RunningSpeed_pct;
-        _fl_running_bck.value = playerConfig.BackMovementPenalty_pct;
-        //stfl_precision.value = playerConfig.aimingPrecision;
-        _fl_recoil.value = playerConfig.recoilReduction;
-        _fl_reload_speed.value = playerConfig.reloadSpeed;
-        _fl_vision.value = playerConfig.vision;
-        _fl_injured_penalty.value = playerConfig.InjuredPenalty;
-
         // Perk section
         string perkName = !string.IsNullOrEmpty(playerConfig.PerkName)
             ? playerConfig.PerkName
@@ -483,58 +634,23 @@ public class UIT_ChoosePlayer : MonoBehaviour
         if (_lbl_perk_name != null) _lbl_perk_name.text = perkName;
         if (_lbl_perk_desc != null) _lbl_perk_desc.text = playerConfig.PerkDescription ?? "";
 
-        // Level label on the active thumb button
         if (_activePlayerBtn != null && _levelLabels.TryGetValue(_activePlayerBtn, out var lvlLabel))
             lvlLabel.text = $"LVL {playerConfig.Level}";
+
+        RefreshStats();
+        UpdatePointsUI();
+        UpdateLevelUpButton();
     }
+
     public void ChoosePlayer(int index)
     {
-        if (index == 0)
-        {
-            DataHolder.ChosenPlayer = PlayerEnum.Swat;
-            player = PlayerEnum.Swat;
-
-        }
-        if (index == 1)
-        {
-            DataHolder.ChosenPlayer = PlayerEnum.BusinessGirl;
-            player = PlayerEnum.BusinessGirl;
-        }
-        if (index == 2)
-        {
-            DataHolder.ChosenPlayer = PlayerEnum.Dr;
-            player = PlayerEnum.Dr;
-        }
-        if (index == 3)
-        {
-            DataHolder.ChosenPlayer = PlayerEnum.Jennifer;
-            player = PlayerEnum.Jennifer;
-        }
-        if (index == 4)
-        {
-            DataHolder.ChosenPlayer = PlayerEnum.Solider;
-            player = PlayerEnum.Solider;
-        }
-        if (index == 5)
-        {
-            DataHolder.ChosenPlayer = PlayerEnum.GreenHat_basic;
-            player = PlayerEnum.GreenHat_basic;
-        }
+        if (index == 0) { DataHolder.ChosenPlayer = PlayerEnum.Swat; player = PlayerEnum.Swat; }
+        if (index == 1) { DataHolder.ChosenPlayer = PlayerEnum.BusinessGirl; player = PlayerEnum.BusinessGirl; }
+        if (index == 2) { DataHolder.ChosenPlayer = PlayerEnum.Dr; player = PlayerEnum.Dr; }
+        if (index == 3) { DataHolder.ChosenPlayer = PlayerEnum.Jennifer; player = PlayerEnum.Jennifer; }
+        if (index == 4) { DataHolder.ChosenPlayer = PlayerEnum.Solider; player = PlayerEnum.Solider; }
+        if (index == 5) { DataHolder.ChosenPlayer = PlayerEnum.GreenHat_basic; player = PlayerEnum.GreenHat_basic; }
     }
-
-    private void RandomizeStatBars()
-    {
-        var statsPanel = _root.Q<VisualElement>("stats");
-        if (statsPanel == null) return;
-        foreach (var row in statsPanel.Query<VisualElement>(className: "stat-row").ToList())
-        {
-            var fill = row.Q<VisualElement>(className: "stat-bar-fill");
-            if (fill == null) continue;
-            float pct = UnityEngine.Random.Range(30f, 70f);
-            fill.style.width = Length.Percent(pct);
-        }
-    }
-
 }
 
 public enum PlayerEnum

@@ -1,5 +1,5 @@
-﻿/* ============================================================
-   ChoosePlayer — styled in the spirit of the Start scene
+/* ============================================================
+   ChoosePlayer — tactical / cyberpunk refactor
    ============================================================ */
 
 /* Full-screen dark root — transparent so the 3D scene shows through */
@@ -31,7 +31,6 @@
     letter-spacing: 4px;
 }
 
-/* Accent on first letter of title (visual only — green accent bar below) */
 .accent-bar {
     position: absolute;
     top: 0; left: 0; right: 0;
@@ -101,6 +100,19 @@
     flex-grow: 1;
 }
 
+/* ── Left column ─────────────────────────────────────────── */
+.thumbs-col {
+    flex-direction: column;
+    flex-shrink: 0;
+    flex-grow: 0;
+    flex-basis: 248px;
+}
+
+.thumbs {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
 /* ── Character list panel ────────────────────────────────── */
 #choose_char {
     width: 100%;
@@ -152,13 +164,11 @@
     color: #FFFFFF;
 }
 
-/* Selected state */
 .thumb.is-active {
     background-color: rgba(255,255,255,0.1);
     color: #FFFFFF;
 }
 
-/* Right accent line — visible only when selected, pulsed via C# */
 .thumb__accent-line {
     position: absolute;
     right: 4px;
@@ -170,7 +180,6 @@
     opacity: 0;
 }
 
-/* Top dark strip — same as WeaponButton topbar */
 .thumb__topbar {
     position: absolute;
     top: 0; left: 0; right: 0;
@@ -178,7 +187,6 @@
     background-color: rgba(8,8,8,0.92);
 }
 
-/* Hover line — left side */
 .thumb__hover-line {
     position: absolute;
     left: 0;
@@ -211,71 +219,203 @@
     picking-mode: ignore;
 }
 
+/* ── Loadout box (left column, under CHOOSE WEAPON) ──────── */
+.loadout-box {
+    margin-top: 10px;
+    padding: 8px 10px 10px 10px;
+    background-color: rgba(255,255,255,0.03);
+    border-width: 1px;
+    border-color: rgba(94,225,165,0.18);
+}
+
+.loadout-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: #5EE1A5;
+    -unity-font-style: bold;
+    opacity: 0.6;
+    margin-bottom: 6px;
+}
+
+.weapon-field {
+    margin: 0;
+}
+
+.weapon-field > .unity-base-field__label {
+    color: #9BA8B9;
+    font-size: 12px;
+    min-width: 80px;
+}
+
+.weapon-field > .unity-base-field__input {
+    background-color: rgba(255,255,255,0.06);
+    border-width: 1px;
+    border-color: rgba(255,255,255,0.1);
+    color: #E5ECF7;
+}
+
+.weapon-field:focus-within > .unity-base-field__input {
+    border-color: #5EE1A5;
+}
+
 /* ── Stats panel ─────────────────────────────────────────── */
 .stats {
     flex-shrink: 0;
     flex-grow: 0;
-    flex-basis: 520px;
+    flex-basis: 460px;
     padding: 12px 16px;
     background-color: rgba(255,255,255,0.03);
     border-width: 1px;
     border-color: rgba(255,255,255,0.08);
-    gap: 4px;
 }
 
-.stat-row {
-    flex-direction: column;
-    padding: 5px 4px 6px 4px;
-    border-bottom-width: 1px;
-    border-bottom-color: rgba(255,255,255,0.06);
+/* ── Tabs ────────────────────────────────────────────────── */
+.stat-tabs {
+    flex-direction: row;
     gap: 4px;
+    margin-bottom: 12px;
 }
 
-.stat-row:last-child { border-bottom-width: 0; }
+.stat-tab {
+    flex-grow: 1;
+    height: 30px;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    border-width: 0;
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(255,255,255,0.08);
+    background-color: rgba(255,255,255,0.02);
+    color: #6E7A8A;
+    font-size: 11px;
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    transition-property: color, background-color, border-bottom-color;
+    transition-duration: 0.12s;
+}
 
-/* Top part of stat row — label left, edit right */
-.stat-top {
+.stat-tab:hover {
+    color: #B0BCCC;
+    background-color: rgba(255,255,255,0.04);
+}
+
+.stat-tab.is-tab-active {
+    color: #5EE1A5;
+    background-color: rgba(94,225,165,0.06);
+    border-bottom-color: #5EE1A5;
+}
+
+/* ── Attribute points bar ────────────────────────────────── */
+.points-bar {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    padding: 6px 4px;
+    margin-bottom: 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(94,225,165,0.2);
 }
 
-/* Stat progress bar track */
-.stat-bar-track {
-    height: 2px;
-    background-color: rgba(255,255,255,0.07);
-    border-radius: 1px;
-    margin: 0 2px;
+.points-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: #9BA8B9;
+    -unity-font-style: bold;
 }
 
-/* Stat progress bar fill */
-.stat-bar-fill {
-    height: 2px;
-    background-color: #5EE1A5;
-    border-radius: 1px;
-    opacity: 0.55;
+.points-value {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: #5EE1A5;
+}
+
+.points-value.is-depleted {
+    color: #5A6473;
+}
+
+/* ── Stats container ─────────────────────────────────────── */
+.stats-container {
+    flex-grow: 1;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* ── Stat row (filled-gauge look) ────────────────────────── */
+.stat-row {
+    position: relative;
+    flex-direction: column;
+    justify-content: center;
+    height: 38px;
+    padding: 0;
+    overflow: hidden;
+    background-color: rgba(255,255,255,0.02);
+    transition-property: background-color;
+    transition-duration: 0.12s;
+}
+
+.stat-row:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+/* Background gauge that fills the whole row */
+.stat-row__gauge {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0;
+    background-color: rgba(94,225,165,0.14);
+    border-right-width: 1px;
+    border-right-color: rgba(94,225,165,0.45);
+    transition-property: width, background-color, border-right-color;
+    transition-duration: 0.18s;
+}
+
+/* Pending (previewed, unconfirmed) allocation — orange */
+.stat-row__gauge.is-pending {
+    background-color: rgba(255,165,60,0.18);
+    border-right-color: rgba(255,165,60,0.7);
+}
+
+/* Foreground content sits above the gauge */
+.stat-row__content {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    padding: 0 10px;
 }
 
 .stat-name {
-    color: #5A6473;
+    color: #9BA8B9;
     font-size: 13px;
     letter-spacing: 1px;
 }
 
 .stat-val {
-    color: #E5ECF7;
-    font-size: 13px;
+    color: #FFFFFF;
+    font-size: 14px;
     -unity-font-style: bold;
+    min-width: 48px;
+    -unity-text-align: middle-center;
     pointer-events: none;
 }
 
+.stat-val.is-pending {
+    color: #FFB23C;
+}
+
 /* ── Stepper controls ────────────────────────────────────── */
-.stat-edit { flex-direction: row; align-items: center; gap: 6px; }
+.stat-edit {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+}
 
 .step {
     width: 22px;
     height: 22px;
     padding: 0;
+    margin: 0;
     border-radius: 0;
     border-width: 1px;
     border-color: rgba(255,255,255,0.1);
@@ -298,55 +438,7 @@
     color: #5EE1A5;
 }
 
-.num { width: 90px; min-width: 90px; }
-
-/* Numeric field input box */
-.num > .unity-base-field__input {
-    background-color: rgba(255,255,255,0.06);
-    border-radius: 0;
-    border-width: 1px;
-    border-color: rgba(255,255,255,0.1);
-    color: #E5ECF7;
-    padding: 4px 6px;
-}
-
-.num:focus-within > .unity-base-field__input {
-    border-color: #5EE1A5;
-    background-color: rgba(94,225,165,0.06);
-}
-
-/* ── Scrollbar styling ───────────────────────────────────── */
-#choose_char .unity-scroll-view__horizontal-scroller { display: none; height: 0; }
-#choose_char .unity-scroller__low-button,
-#choose_char .unity-scroller__high-button { display: none; }
-#choose_char .unity-scroll-view__vertical-scroller { width: 4px; margin-right: 2px; background-color: transparent; }
-#choose_char .unity-scroller__slider .unity-slider__tracker { background-color: rgba(255,255,255,0.06); }
-#choose_char .unity-scroller__slider .unity-slider__dragger { background-color: rgba(255,255,255,0.25); min-height: 28px; }
-
-/* ── Bottom bar ──────────────────────────────────────────── */
-.bottom {
-    height: 48px;
-    align-items: flex-start;
-    justify-content: center;
-    border-top-width: 1px;
-    border-top-color: rgba(255,255,255,0.07);
-    margin-top: 8px;
-    padding-top: 8px;
-}
-
-.weapon-field > .unity-base-field__input {
-    background-color: rgba(255,255,255,0.06);
-    border-width: 1px;
-    border-color: rgba(255,255,255,0.1);
-    color: #E5ECF7;
-}
-
-.weapon-field:focus-within > .unity-base-field__input {
-    border-color: #5EE1A5;
-}
-
 /* ── Thumb labels (injected via C#) ─────────────────────── */
-/* Perk name — top-left on the dark strip */
 .thumb__perk {
     position: absolute;
     top: 3px;
@@ -359,7 +451,6 @@
     opacity: 0.85;
 }
 
-/* Progress bar track — sits just below the perk name */
 .thumb__bar-track {
     position: absolute;
     left: 8px;
@@ -370,7 +461,6 @@
     border-radius: 2px;
 }
 
-/* Progress bar fill */
 .thumb__bar-fill {
     position: absolute;
     left: 0; top: 0; bottom: 0;
@@ -379,7 +469,6 @@
     opacity: 0.7;
 }
 
-/* Bottom bar — dark strip with LVL label */
 .thumb__bottombar {
     position: absolute;
     bottom: 0; left: 0; right: 0;
@@ -387,7 +476,6 @@
     background-color: rgba(8,8,8,0.75);
 }
 
-/* Level — right-aligned on bottom bar */
 .thumb__level {
     position: absolute;
     bottom: 2px;
@@ -398,7 +486,7 @@
     letter-spacing: 1px;
 }
 
-/* ── Perk section (inside stats panel) ──────────────────── */
+/* ── Perk section ────────────────────────────────────────── */
 .perk-section {
     margin-top: 10px;
     padding: 10px 4px 6px 4px;
@@ -430,15 +518,15 @@
 
 .perk-desc {
     font-size: 11px;
-    color: #5A6473;
+    color: #9BA8B9;
     -unity-text-align: upper-left;
     padding: 0 2px;
     white-space: normal;
 }
 
-/* ── Level Up button ─────────────────────────────────────── */
+/* ── Level Up / Choose Weapon buttons ────────────────────── */
 .btn-level-up {
-    margin-top: auto;
+    margin-top: 10px;
     height: 40px;
     border-radius: 0;
     border-width: 1px;
@@ -451,10 +539,22 @@
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     opacity: 0.4;
+    transition-property: opacity, background-color, border-color;
+    transition-duration: 0.12s;
+}
+
+/* Enabled (pending changes available) */
+.btn-level-up:enabled {
+    opacity: 1;
+}
+
+.btn-level-up:enabled:hover {
+    background-color: rgba(94,225,165,0.14);
+    border-color: rgba(94,225,165,0.6);
 }
 
 .btn-choose-weapon {
-    margin-top: auto;
+    margin-top: 10px;
     opacity: 1;
     background-color: rgba(94,225,165,0.06);
     border-color: rgba(94,225,165,0.3);
@@ -466,16 +566,4 @@
 .btn-choose-weapon:hover {
     background-color: rgba(94,225,165,0.14);
     border-color: rgba(94,225,165,0.6);
-}
-
-.thumbs-col {
-    flex-direction: column;
-    flex-shrink: 0;
-    flex-grow: 0;
-    flex-basis: 347px;
-}
-
-.thumbs {
-    flex-grow: 1;
-    flex-shrink: 1;
 }

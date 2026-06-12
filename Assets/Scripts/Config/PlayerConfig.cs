@@ -39,6 +39,8 @@ public class PlayerConfig : ScriptableObject
     /// </summary>
     public float movementAimingPenalty = 25f;
     public int Level = 1;
+    // Unallocated attribute points the player can spend on stats in the Level-Up screen.
+    public int AttributePoints = 5;
     public string PerkName;
     public string PerkDescription;
     public float Accuracy;

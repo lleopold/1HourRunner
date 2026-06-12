@@ -8,6 +8,7 @@
             <ui:VisualElement style="flex-direction: row; gap: 8px;"/>
         </ui:VisualElement>
         <ui:VisualElement class="row">
+            <!-- ── Left column: character list + loadout ─────────────── -->
             <ui:VisualElement class="thumbs-col">
                 <ui:ScrollView name="choose_char" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" class="thumbs">
                     <ui:Button name="btn_jennifer" text="Jennifer" class="thumb"/>
@@ -18,204 +19,31 @@
                     <ui:Button name="btn_green_hat" text="Green Hat" class="thumb"/>
                 </ui:ScrollView>
                 <ui:Button name="btn_choose_weapon" text="CHOOSE WEAPON" class="btn-level-up btn-choose-weapon"/>
+                <ui:VisualElement class="loadout-box">
+                    <ui:Label text="LOADOUT" class="loadout-label"/>
+                    <ui:IntegerField name="int_weapon" label="Weapon slot" class="weapon-field"/>
+                </ui:VisualElement>
             </ui:VisualElement>
+
+            <!-- ── Centre: 3D character preview ──────────────────────── -->
             <ui:VisualElement name="visual_rep" class="preview"/>
+
+            <!-- ── Right: stats panel (tabbed + dynamic) ─────────────── -->
             <ui:VisualElement name="stats" class="stats">
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Health" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_health_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_health" show-mixed-value="false" is-delayed="false" format-string="0.##" value="100" class="num"/>
-                            <ui:Button name="btn_fl_health_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
+                <ui:VisualElement class="stat-tabs">
+                    <ui:Button name="tab_movement" text="MOVEMENT" class="stat-tab is-tab-active"/>
+                    <ui:Button name="tab_combat" text="COMBAT" class="stat-tab"/>
+                    <ui:Button name="tab_survival" text="SURVIVAL" class="stat-tab"/>
                 </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Weight" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_weight_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_weight" format-string="0.#" class="num"/>
-                            <ui:Button name="btn_fl_weight_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
+
+                <ui:VisualElement class="points-bar">
+                    <ui:Label text="ATTRIBUTE POINTS" class="points-label"/>
+                    <ui:Label name="lbl_points" text="0" class="points-value"/>
                 </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Strength" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_strength_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_strength" format-string="0.#" class="num"/>
-                            <ui:Button name="btn_fl_strength_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Stamina" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_stamina_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_stamina" class="num"/>
-                            <ui:Button name="btn_fl_stamina_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Stamina regen" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_stamina_regen_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_stamina_regen" class="num"/>
-                            <ui:Button name="btn_fl_stamina_regen_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Stamina speed" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_stamina_speed_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_stamina_speed" class="num"/>
-                            <ui:Button name="btn_fl_stamina_speed_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Speed" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_speed_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_speed" class="num"/>
-                            <ui:Button name="btn_fl_speed_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Acceleration" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_acceleration_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_acceleration" class="num"/>
-                            <ui:Button name="btn_fl_acceleration_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Running %" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_running_pct_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_running_pct" class="num"/>
-                            <ui:Button name="btn_fl_running_pct_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Back move" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_back_move_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_back_move" class="num"/>
-                            <ui:Button name="btn_fl_back_move_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Aim" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_aim_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_aim" class="num"/>
-                            <ui:Button name="btn_fl_aim_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Recoil" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_recoil_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_recoil" class="num"/>
-                            <ui:Button name="btn_fl_recoil_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Reload speed" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_reload_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_reload" class="num"/>
-                            <ui:Button name="btn_fl_reload_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Vision" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_vision_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_vision" class="num"/>
-                            <ui:Button name="btn_fl_vision_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="stat-row">
-                    <ui:VisualElement class="stat-top">
-                        <ui:Label text="Injured penalty" class="stat-name"/>
-                        <ui:VisualElement class="stat-edit">
-                            <ui:Button name="btn_fl_injured_minus" text="−" class="step step--minus"/>
-                            <ui:FloatField name="fl_injured" class="num"/>
-                            <ui:Button name="btn_fl_injured_plus" text="+" class="step step--plus"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="stat-bar-track">
-                        <ui:VisualElement class="stat-bar-fill"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
+
+                <!-- Stat rows injected here by UIT_ChoosePlayer -->
+                <ui:VisualElement name="stats_container" class="stats-container"/>
+
                 <ui:VisualElement class="perk-section">
                     <ui:VisualElement class="perk-header">
                         <ui:Label text="PERK" class="perk-header-label"/>
@@ -223,11 +51,9 @@
                     </ui:VisualElement>
                     <ui:Label name="lbl_perk_desc" text="" class="perk-desc"/>
                 </ui:VisualElement>
+
                 <ui:Button name="btn_level_up" text="LEVEL UP" enabled="false" class="btn-level-up"/>
             </ui:VisualElement>
-        </ui:VisualElement>
-        <ui:VisualElement class="bottom">
-            <ui:IntegerField name="int_weapon" label="Weapon slot" class="weapon-field"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

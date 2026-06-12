@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <!-- Reusable stat row. Populated dynamically by UIT_ChoosePlayer.
+         Layout: a filled gauge fills the whole row as a background; name sits
+         left, the read-only value + optional steppers sit right. -->
+    <ui:VisualElement class="stat-row">
+        <ui:VisualElement name="stat_gauge" class="stat-row__gauge"/>
+        <ui:VisualElement class="stat-row__content">
+            <ui:Label name="stat_name" text="Stat" class="stat-name"/>
+            <ui:VisualElement class="stat-edit">
+                <ui:Button name="btn_minus" text="−" class="step step--minus"/>
+                <ui:Label name="stat_value" text="0" class="stat-val"/>
+                <ui:Button name="btn_plus" text="+" class="step step--plus"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
