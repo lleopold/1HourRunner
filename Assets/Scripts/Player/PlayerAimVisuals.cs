@@ -34,7 +34,7 @@ namespace ZombieGame
         [SerializeField] private float _radarBoostMax = 1.8f;
 
         // ── Laser ──────────────────────────────────────────────────────────────
-        [SerializeField] private float baseWidth = 0.045f;
+        [SerializeField] private float baseWidth = 0f;
         [SerializeField] private float scrollSpeed = 1.6f;
         [SerializeField] private float pulseSpeed = 2.2f;
         [SerializeField] private float pulseMin = 0.85f;
@@ -127,6 +127,13 @@ namespace ZombieGame
             if (isAiming)
             {
                 SetAimLinesActive(true);
+
+                // Radar line sharpness driven by aim: 1 when not aimed, 0 when fully aimed.
+                // Quantize to 0.1 steps so the 256x256 texture only rebakes ~10x across the
+                // whole aim sweep instead of every frame (that rebake was the 5 FPS killer).
+                float radarFocus = Mathf.InverseLerp(_gameStats._precisionMax, _gameStats._precisionMin, CurrentAngle);
+                _radarLineSharpness = Mathf.Round(Mathf.Lerp(1f, 0f, radarFocus) * 10f) / 10f;
+
                 if (_radarLineCount != _lastRadarLineCount || !Mathf.Approximately(_radarLineSharpness, _lastRadarLineSharpness))
                 {
                     RegenerateRadarTexture();
