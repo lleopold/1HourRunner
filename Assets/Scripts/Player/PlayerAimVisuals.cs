@@ -28,13 +28,13 @@ namespace ZombieGame
         [Header("Radar Visuals")]
         [SerializeField] private float _radarSpeed = 2.5f;
         [SerializeField] private int _radarLineCount = 10;
-        [SerializeField] private float _radarLineSharpness = 1f;
+        [SerializeField] private float _radarLineSharpness = 32f;
         [SerializeField] private float _radarOpacity = 0.6f;
         [SerializeField] private float _radarBoostMin = 0.8f;
         [SerializeField] private float _radarBoostMax = 1.8f;
 
         // ── Laser ──────────────────────────────────────────────────────────────
-        [SerializeField] private float baseWidth = 0.0f; //this looks ugly
+        [SerializeField] private float baseWidth = 0.045f;
         [SerializeField] private float scrollSpeed = 1.6f;
         [SerializeField] private float pulseSpeed = 2.2f;
         [SerializeField] private float pulseMin = 0.85f;
@@ -127,6 +127,10 @@ namespace ZombieGame
             if (isAiming)
             {
                 SetAimLinesActive(true);
+                if (_radarLineCount != _lastRadarLineCount || !Mathf.Approximately(_radarLineSharpness, _lastRadarLineSharpness))
+                {
+                    RegenerateRadarTexture();
+                }
 
                 bool isMoving = movementInput.magnitude > 0f;
                 if (!isMoving)
@@ -142,14 +146,6 @@ namespace ZombieGame
                 }
 
                 CurrentAngle = Mathf.Clamp(CurrentAngle, _gameStats._precisionMin, _gameStats._precisionMax);
-
-                // Sharpness 1 when not aimed, 0 when fully aimed.
-                float aimFocus = Mathf.InverseLerp(_gameStats._precisionMax, _gameStats._precisionMin, CurrentAngle);
-                _radarLineSharpness = 1f - aimFocus;
-                if (_radarLineCount != _lastRadarLineCount || !Mathf.Approximately(_radarLineSharpness, _lastRadarLineSharpness))
-                {
-                    RegenerateRadarTexture();
-                }
 
                 UpdateLinePoints(CurrentAngle);
                 ApplyVisuals(LineRendererLeft, _meshRendererAimingCircle, CurrentAngle);
