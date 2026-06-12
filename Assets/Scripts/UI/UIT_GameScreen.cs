@@ -120,6 +120,11 @@ public class UIT_GameScreen : MonoBehaviour
 
     private void GoToEndGame(ClickEvent evt)
     {
+        // Award meta-XP for this run into the persistent save: kills * XP_PER_KILL.
+        int earnedXP = DataHolder.EnemiesKilled * Progression.XP_PER_KILL;
+        SaveManager.Current.globalXP += earnedXP;
+        SaveManager.Save();
+
         GameObject scriptLogic = GameObject.Find("UIEndGame");
         if (scriptLogic != null)
         {
@@ -129,10 +134,10 @@ public class UIT_GameScreen : MonoBehaviour
             string timeStr = string.Format("{0:00}:{1:00}", minutes, seconds);
 
             scriptLogic.GetComponent<UIT_EndGamePopUp>().SetEndGamePopUp(
-                "Game Over", 
-                timeStr, 
-                DataHolder.EnemiesKilled.ToString(), 
-                TotalXP.ToString("F0")
+                "Game Over",
+                timeStr,
+                DataHolder.EnemiesKilled.ToString(),
+                earnedXP.ToString("F0")
             );
             scriptLogic.GetComponent<UIT_EndGamePopUp>()._root.visible = true;
 

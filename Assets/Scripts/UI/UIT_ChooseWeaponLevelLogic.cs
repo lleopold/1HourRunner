@@ -24,6 +24,22 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
     private FloatField _stagger;
     private FloatField _recoil;
 
+    // ── XP upgrade system ────────────────────────────────────────
+    private Label _lbl_weapon_xp;
+    private Button _btn_upgrade;
+    private Button _btn_reset;
+    private WeaponProgress _weaponProgress;
+    private readonly System.Collections.Generic.Dictionary<string, int> _pendingClicks = new();
+
+    private class WStat
+    {
+        public string Key;
+        public System.Func<WeaponConfig, float> Get;
+        public float Step, Max;
+        public FloatField Field;
+    }
+    private readonly System.Collections.Generic.List<WStat> _wStats = new();
+
     // Changed: Weapon buttons now WeaponButton
     private WeaponButton _btn_WPN_AP85;
     private WeaponButton _btn_WPN_MK18;
@@ -114,16 +130,13 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
         _btn_play?.RegisterCallback<ClickEvent>(ev => ClickPlay());
         _btn_back?.RegisterCallback<ClickEvent>(ev => ClickBack());
 
-        _damage?.RegisterCallback<ChangeEvent<float>>(ev => WeaponConfigSingleton.Instance.WeaponConfig.Damage = ev.newValue);
-        _fire_rate?.RegisterCallback<ChangeEvent<float>>(ev => WeaponConfigSingleton.Instance.WeaponConfig.FireRate = ev.newValue);
-        _damage_flustuation?.RegisterCallback<ChangeEvent<float>>(ev => WeaponConfigSingleton.Instance.WeaponConfig.DamageFluctuation = ev.newValue);
-        _clip_size?.RegisterCallback<ChangeEvent<float>>(ev => WeaponConfigSingleton.Instance.WeaponConfig.ClipSize = (int)ev.newValue);
-        _precision?.RegisterCallback<ChangeEvent<float>>(ev => WeaponConfigSingleton.Instance.WeaponConfig.Precision = ev.newValue);
-        _reload_time?.RegisterCallback<ChangeEvent<float>>(ev => WeaponConfigSingleton.Instance.WeaponConfig.ReloadTime = ev.newValue);
-        _simultanious_bullets?.RegisterCallback<ChangeEvent<float>>(ev => WeaponConfigSingleton.Instance.WeaponConfig.SimultaniousBullets = (int)ev.newValue);
-        _critical_chance?.RegisterCallback<ChangeEvent<float>>(ev => WeaponConfigSingleton.Instance.WeaponConfig.CritChance = ev.newValue);
-        _stagger?.RegisterCallback<ChangeEvent<float>>(ev => WeaponConfigSingleton.Instance.WeaponConfig.Stagger = ev.newValue);
-        _recoil?.RegisterCallback<ChangeEvent<float>>(ev => WeaponConfigSingleton.Instance.WeaponConfig.Recoil = ev.newValue);
+        _lbl_weapon_xp = _root.Q<Label>("lbl_weapon_xp");
+        _btn_upgrade = _root.Q<Button>("btn_upgrade");
+        _btn_reset = _root.Q<Button>("btn_reset");
+        _btn_upgrade?.RegisterCallback<ClickEvent>(_ => CommitUpgrade());
+        _btn_reset?.RegisterCallback<ClickEvent>(_ => ResetWeapon());
+
+        BuildWeaponStats();
 
         if (DataHolder.chosenWeapon == null)
             _weapon = WeaponEnum.WPN_M4;
@@ -224,7 +237,9 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
     {
         DataHolder.chosenWeapon = weaponEnum;
         _weapon = weaponEnum;
-        _weaponConfig = WeaponConfigSingleton.Instance.WeaponConfig;
+        _weaponConfig = WeaponConfigSingleton.Instance.WeaponConfig; // SO base (naked defaults)
+        _weaponProgress = SaveManager.Current.GetOrCreateWeapon(weaponEnum);
+        _pendingClicks.Clear(); // pending upgrades don't carry across weapons
         if (weaponEnum == WeaponEnum.WPN_M4 || weaponEnum == WeaponEnum.WPN_M16)
             DataHolder.weaponType = WeaponType.H2;
         else
@@ -338,16 +353,141 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
 
     void LoadSettingsToUI()
     {
-        _damage.value = _weaponConfig.Damage;
-        _fire_rate.value = _weaponConfig.FireRate;
-        _damage_flustuation.value = _weaponConfig.DamageFluctuation;
-        _clip_size.value = _weaponConfig.ClipSize;
-        _precision.value = _weaponConfig.Precision;
-        _reload_time.value = _weaponConfig.ReloadTime;
-        _simultanious_bullets.value = _weaponConfig.SimultaniousBullets;
-        _critical_chance.value = _weaponConfig.CritChance;
-        _stagger.value = _weaponConfig.Stagger;
-        _recoil.value = _weaponConfig.Recoil;
+        if (_weaponConfig == null) return;
+
+        // Non-upgradeable stats: pure base display.
+        _damage_flustuation?.SetValueWithoutNotify(_weaponConfig.DamageFluctuation);
+        _reload_time?.SetValueWithoutNotify(_weaponConfig.ReloadTime);
+        _simultanious_bullets?.SetValueWithoutNotify(_weaponConfig.SimultaniousBullets);
+        _recoil?.SetValueWithoutNotify(_weaponConfig.Recoil);
+
+        // Upgradeable stats: base (SO) + (committed + pending) clicks * step.
+        foreach (var s in _wStats)
+        {
+            if (s.Field == null) continue;
+            int pending = PendingClicks(s.Key);
+            int clicks = SavedClicks(s.Key) + pending;
+            s.Field.SetValueWithoutNotify(s.Get(_weaponConfig) + clicks * s.Step);
+            s.Field.EnableInClassList("is-pending", pending > 0);
+        }
+
+        UpdateXpLabel();
+        UpdateUpgradeButton();
+    }
+
+    // ── XP upgrade system ────────────────────────────────────────
+    void BuildWeaponStats()
+    {
+        _wStats.Clear();
+        AddW("damage",          _damage,          c => c.Damage,    2f,   500f);
+        AddW("fire_rate",       _fire_rate,       c => c.FireRate,  0.2f, 30f);
+        AddW("clip_size",       _clip_size,       c => c.ClipSize,  1f,   200f);
+        AddW("precision",       _precision,       c => c.Precision, 1f,   100f);
+        AddW("critical_chance", _critical_chance, c => c.CritChance,1f,   100f);
+        AddW("stagger",         _stagger,         c => c.Stagger,   1f,   100f);
+
+        // All stat fields are display-only; upgrading happens through the +/- steppers.
+        foreach (var f in new[] { _damage, _fire_rate, _damage_flustuation, _clip_size, _precision,
+                                  _reload_time, _simultanious_bullets, _critical_chance, _stagger, _recoil })
+            f?.SetEnabled(false);
+
+        foreach (var s in _wStats) InjectSteppers(s);
+    }
+
+    void AddW(string key, FloatField field, System.Func<WeaponConfig, float> get, float step, float max)
+    {
+        if (field == null) return;
+        _wStats.Add(new WStat { Key = key, Field = field, Get = get, Step = step, Max = max });
+    }
+
+    // Steppers are siblings of the field (not children) so the field's disabled
+    // state doesn't grey them out.
+    void InjectSteppers(WStat s)
+    {
+        var parent = s.Field.parent;
+        if (parent == null) return;
+        int idx = parent.IndexOf(s.Field);
+
+        var row = new VisualElement();
+        row.style.flexDirection = FlexDirection.Row;
+        row.style.justifyContent = Justify.FlexEnd;
+
+        var minus = new Button(() => OnStep(s.Key, -1)) { text = "−" };
+        var plus = new Button(() => OnStep(s.Key, +1)) { text = "+" };
+        minus.AddToClassList("wstep");
+        plus.AddToClassList("wstep");
+        row.Add(minus);
+        row.Add(plus);
+
+        parent.Insert(idx + 1, row);
+    }
+
+    int PendingClicks(string key) => _pendingClicks.TryGetValue(key, out var c) ? c : 0;
+    int SavedClicks(string key) =>
+        _weaponProgress != null ? Progression.GetClicks(_weaponProgress.stats, key) : 0;
+
+    int TotalPendingClicks()
+    {
+        int sum = 0;
+        foreach (var kv in _pendingClicks) sum += kv.Value;
+        return sum;
+    }
+
+    int AvailableXP() =>
+        SaveManager.Current.globalXP - TotalPendingClicks() * Progression.XP_PER_CLICK;
+
+    void OnStep(string key, int dir)
+    {
+        var s = _wStats.Find(w => w.Key == key);
+        if (s == null) return;
+        int clicks = PendingClicks(key);
+
+        if (dir > 0)
+        {
+            if (AvailableXP() < Progression.XP_PER_CLICK) return;
+            if (s.Get(_weaponConfig) + (SavedClicks(key) + clicks + 1) * s.Step > s.Max) return;
+            clicks++;
+        }
+        else
+        {
+            if (clicks <= 0) return;
+            clicks--;
+        }
+        _pendingClicks[key] = clicks;
+        LoadSettingsToUI();
+    }
+
+    void UpdateXpLabel()
+    {
+        if (_lbl_weapon_xp != null) _lbl_weapon_xp.text = "EXPERIENCE: " + AvailableXP();
+    }
+
+    void UpdateUpgradeButton()
+    {
+        _btn_upgrade?.SetEnabled(TotalPendingClicks() > 0);
+    }
+
+    void CommitUpgrade()
+    {
+        if (TotalPendingClicks() <= 0 || _weaponProgress == null) return;
+        if (!Progression.Commit(_weaponProgress, _pendingClicks))
+        {
+            Debug.LogWarning("[ChooseWeapon] Not enough XP to commit upgrades.");
+            return;
+        }
+        _pendingClicks.Clear();
+        SaveManager.Save();
+        LoadSettingsToUI();
+    }
+
+    void ResetWeapon()
+    {
+        if (_weaponProgress == null) return;
+        _pendingClicks.Clear();
+        int refund = Progression.ResetItem(_weaponProgress); // refunds 80% of XP spent
+        SaveManager.Save();
+        LoadSettingsToUI();
+        Debug.Log($"[ChooseWeapon] Reset {DataHolder.chosenWeapon} to defaults, refunded {refund} XP.");
     }
 
     void WireWeaponButtonsSelectedState()

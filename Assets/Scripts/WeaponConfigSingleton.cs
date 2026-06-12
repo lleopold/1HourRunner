@@ -63,10 +63,11 @@ public class WeaponConfigSingleton
 
     }
 
+    // Legacy entry point. Progression now lives in the slot-based SaveManager,
+    // so this just persists the active save instead of writing to c:\Temp.
     public void SaveConfigToFile()
     {
-        string jsonData = JsonUtility.ToJson(Instance.WeaponConfig);
-        File.WriteAllText("c:\\Temp\\" + DataHolder.chosenWeapon.ToString() + ".txt", jsonData);
+        SaveManager.Save();
     }
 
     public WeaponConfig LoadWeaponConfigFromFile(string filePath)

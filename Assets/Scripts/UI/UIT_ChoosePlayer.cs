@@ -15,7 +15,8 @@ public class UIT_ChoosePlayer : MonoBehaviour
     private VisualElement _root;
 
     private WeaponConfig weaponConfig;
-    private PlayerConfig playerConfig;
+    private PlayerConfig playerConfig;      // read-only naked defaults (SO base values)
+    private CharacterProgress _charProgress; // saved progression for the active character
 
     private IntegerField _int_weapon;
     private Button _btn_jennifer;
@@ -75,6 +76,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
     private VisualElement _statsContainer;
     private Label _lbl_points;
     private Button _btn_level_up;
+    private Button _btn_reset;
     private readonly List<StatDef> _statDefs = new();
     private readonly Dictionary<string, StatRowUI> _rows = new();
     private readonly Dictionary<string, int> _pendingClicks = new(); // points allocated but not committed
@@ -221,6 +223,8 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _lbl_points = _root.Q<Label>("lbl_points");
         _btn_level_up = _root.Q<Button>("btn_level_up");
         _btn_level_up?.RegisterCallback<ClickEvent>(_ => CommitLevelUp());
+        _btn_reset = _root.Q<Button>("btn_reset");
+        _btn_reset?.RegisterCallback<ClickEvent>(_ => ResetCharacter());
 
         // Tabs
         _root.Q<Button>("tab_movement")?.RegisterCallback<ClickEvent>(_ => SelectCategory(StatCategory.Movement));
@@ -356,7 +360,9 @@ public class UIT_ChoosePlayer : MonoBehaviour
         return root;
     }
 
-    private int GetClicks(string key) => _pendingClicks.TryGetValue(key, out var c) ? c : 0;
+    private int PendingClicks(string key) => _pendingClicks.TryGetValue(key, out var c) ? c : 0;
+    private int SavedClicks(string key) =>
+        _charProgress != null ? Progression.GetClicks(_charProgress.stats, key) : 0;
 
     private int TotalPendingClicks()
     {
@@ -365,24 +371,26 @@ public class UIT_ChoosePlayer : MonoBehaviour
         return sum;
     }
 
-    private int AvailablePoints() => playerConfig.AttributePoints - TotalPendingClicks();
+    // XP still spendable after accounting for clicks queued but not yet committed.
+    private int AvailableXP() =>
+        SaveManager.Current.globalXP - TotalPendingClicks() * Progression.XP_PER_CLICK;
 
     private void OnStep(string key, int dir)
     {
         if (!_rows.TryGetValue(key, out var ui)) return;
         var def = ui.Def;
-        int clicks = GetClicks(key);
+        int clicks = PendingClicks(key);
 
         if (dir > 0)
         {
-            if (AvailablePoints() <= 0) return;
+            if (AvailableXP() < Progression.XP_PER_CLICK) return; // can't afford another click
             float baseVal = def.Get(playerConfig);
-            if (baseVal + (clicks + 1) * def.Step > def.Max) return;
+            if (baseVal + (SavedClicks(key) + clicks + 1) * def.Step > def.Max) return;
             clicks++;
         }
         else
         {
-            if (clicks <= 0) return; // minus only undoes pending allocation, never base
+            if (clicks <= 0) return; // minus only undoes pending allocation, never committed
             clicks--;
         }
         _pendingClicks[key] = clicks;
@@ -400,7 +408,8 @@ public class UIT_ChoosePlayer : MonoBehaviour
     private void RefreshRow(StatRowUI ui)
     {
         var def = ui.Def;
-        int clicks = GetClicks(def.Key);
+        int pending = PendingClicks(def.Key);
+        int clicks = SavedClicks(def.Key) + pending;
         float val = def.Get(playerConfig) + clicks * def.Step;
 
         if (ui.ValueLabel != null) ui.ValueLabel.text = val.ToString("0.#");
@@ -408,23 +417,20 @@ public class UIT_ChoosePlayer : MonoBehaviour
         float frac = def.BarMax > 0 ? Mathf.Clamp01(val / def.BarMax) : 0f;
         if (ui.Gauge != null) ui.Gauge.style.width = Length.Percent(frac * 100f);
 
-        bool pending = clicks > 0;
-        ui.ValueLabel?.EnableInClassList("is-pending", pending);
-        ui.Gauge?.EnableInClassList("is-pending", pending);
+        ui.ValueLabel?.EnableInClassList("is-pending", pending > 0);
+        ui.Gauge?.EnableInClassList("is-pending", pending > 0);
 
-        // Rule 3: steppers shown only when the player has points to spend.
-        bool showSteppers = playerConfig.AttributePoints > 0;
-        var disp = showSteppers ? DisplayStyle.Flex : DisplayStyle.None;
-        if (ui.Minus != null) ui.Minus.style.display = disp;
-        if (ui.Plus != null) ui.Plus.style.display = disp;
+        // Steppers always visible; OnStep guards affordability and caps.
+        if (ui.Minus != null) ui.Minus.style.display = DisplayStyle.Flex;
+        if (ui.Plus != null) ui.Plus.style.display = DisplayStyle.Flex;
     }
 
     private void UpdatePointsUI()
     {
         if (_lbl_points == null) return;
-        int avail = AvailablePoints();
+        int avail = AvailableXP();
         _lbl_points.text = avail.ToString();
-        _lbl_points.EnableInClassList("is-depleted", avail <= 0);
+        _lbl_points.EnableInClassList("is-depleted", avail < Progression.XP_PER_CLICK);
     }
 
     private void UpdateLevelUpButton()
@@ -435,20 +441,33 @@ public class UIT_ChoosePlayer : MonoBehaviour
 
     private void CommitLevelUp()
     {
-        if (TotalPendingClicks() <= 0) return;
+        if (TotalPendingClicks() <= 0 || _charProgress == null) return;
 
-        foreach (var def in _statDefs)
+        // Spend XP and write the clicks into the active save. SO assets stay untouched.
+        if (!Progression.Commit(_charProgress, _pendingClicks))
         {
-            int clicks = GetClicks(def.Key);
-            if (clicks <= 0) continue;
-            def.Set(playerConfig, def.Get(playerConfig) + clicks * def.Step);
+            Debug.LogWarning("[ChoosePlayer] Not enough XP to commit upgrades.");
+            return;
         }
-        playerConfig.AttributePoints -= TotalPendingClicks();
         _pendingClicks.Clear();
+        SaveManager.Save();
 
         RefreshStats();
         UpdatePointsUI();
         UpdateLevelUpButton();
+    }
+
+    private void ResetCharacter()
+    {
+        if (_charProgress == null) return;
+        _pendingClicks.Clear();
+        int refund = Progression.ResetItem(_charProgress); // refunds 80% of XP spent
+        SaveManager.Save();
+
+        RefreshStats();
+        UpdatePointsUI();
+        UpdateLevelUpButton();
+        Debug.Log($"[ChoosePlayer] Reset {DataHolder.ChosenPlayer} to defaults, refunded {refund} XP.");
     }
 
     private void Update()
@@ -514,6 +533,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
 
     private void ClickChooseWeapon()
     {
+        SaveManager.Save(); // persist current character selection before moving on
         UnityEngine.SceneManagement.SceneManager.LoadScene("ChooseWeapon");
     }
 
@@ -627,6 +647,9 @@ public class UIT_ChoosePlayer : MonoBehaviour
 
     void LoadSettingsToUI()
     {
+        // Pull this character's saved progression (creates an empty entry if first visit).
+        _charProgress = SaveManager.Current.GetOrCreateCharacter(DataHolder.ChosenPlayer);
+
         // Perk section
         string perkName = !string.IsNullOrEmpty(playerConfig.PerkName)
             ? playerConfig.PerkName
@@ -635,7 +658,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
         if (_lbl_perk_desc != null) _lbl_perk_desc.text = playerConfig.PerkDescription ?? "";
 
         if (_activePlayerBtn != null && _levelLabels.TryGetValue(_activePlayerBtn, out var lvlLabel))
-            lvlLabel.text = $"LVL {playerConfig.Level}";
+            lvlLabel.text = $"LVL {_charProgress.level}";
 
         RefreshStats();
         UpdatePointsUI();

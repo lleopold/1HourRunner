@@ -26,6 +26,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="ve_middle" picking-mode="Ignore" class="weapon-preview" style="flex-grow: 1; width: 60%; background-color: rgba(0, 0, 0, 0);" />
             <ui:VisualElement name="ve_stats" class="stats-panel" style="flex-grow: 1; width: 20%; justify-content: space-between;">
+                <ui:Label name="lbl_weapon_xp" text="EXPERIENCE: 0" class="weapon-xp" style="-unity-font-style: bold; -unity-text-align: middle-center; margin-bottom: 6px;" />
                 <ui:FloatField label="Damage" value="42,2" name="fl_damage" />
                 <ui:FloatField label="Fire rate" value="42,2" name="fl_fire_rate" />
                 <ui:FloatField label="Damage fluctuation" value="42,2" name="fl_damage_fluctuation" />
@@ -39,6 +40,8 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="ve_bottom" class="action-buttons" style="flex-grow: 1; font-size: 20%; height: 20%; justify-content: center; align-items: center; flex-direction: row;">
+            <ui:Button text="UPGRADE" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_upgrade" enabled="false" style="font-size: 24px; margin-right: 20px;" />
+            <ui:Button text="RESET (−20%)" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_reset" style="font-size: 20px; margin-right: 20px;" />
             <ui:Button text="Play" parse-escape-sequences="true" display-tooltip-when-elided="true" name="btn_play" style="-unity-font: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/LiberationSans.ttf?fileID=12800000&amp;guid=e3265ab4bf004d28a9537516768c1c75&amp;type=3#LiberationSans&quot;); font-size: 44px;" />
         </ui:VisualElement>
     </ui:VisualElement>
