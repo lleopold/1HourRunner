@@ -57,6 +57,23 @@ namespace ZombieGame
         // ── Smoke ──────────────────────────────────────────────────────────────
         [SerializeField] private string laserSmokePrefabPath = "VFX/LaserSmoke";
         [SerializeField] private float _defaultVLength = 10f;
+
+        [Header("Plasma Shot V-Arms (replaces laser lines)")]
+        [SerializeField] private bool _usePlasmaShot = true;
+        [SerializeField] private GameObject _plasmaShotPrefab;
+        [Tooltip("Travel speed of each shot (units/sec). Lifetime is auto-set so the shot dies at the arm tip.")]
+        [SerializeField] private float _plasmaShotSpeed = 25f;
+        [Tooltip("Shots emitted per world unit of arm length. Higher = denser, more line-like.")]
+        [SerializeField] private float _plasmaShotsPerUnit = 30f;
+        [Tooltip("OFF (default) = auto color from weapon ranges: white(point-blank)→green(optimal)→orange→red(max). ON = use the manual gradient below.")]
+        [SerializeField] private bool _useManualPlasmaColor = false;
+        [Tooltip("Only used when 'Use Manual Plasma Color' is ON. Left = at player, right = at the tip.")]
+        [GradientUsage(true)]
+        [SerializeField] private Gradient _plasmaColorOverDistance;
+        private GameObject _plasmaLeft;
+        private GameObject _plasmaRight;
+        private ParticleSystem _plasmaRootLeft;
+        private ParticleSystem _plasmaRootRight;
         public float CurrentHitChance { get; set; } = 1f;
         public float CurrentDistanceMultiplier { get; set; } = 1f;
         public bool IsPointBlank { get; set; }
@@ -116,6 +133,7 @@ namespace ZombieGame
             CreateAimingCircle();
             InitLaserMaterials();
             InitLaserSmoke();
+            InitPlasmaShots();
 
             CurrentAngle = gameStats._precisionMax;
         }
@@ -160,6 +178,8 @@ namespace ZombieGame
 
                 AnimateLaser(LineRendererLeft, _laserMat);
                 AnimateLaser(LineRendererRight, _laserMat);
+
+                UpdatePlasmaShots(true);
             }
             else
             {
@@ -168,6 +188,8 @@ namespace ZombieGame
 
                 if (_laserSmokeLeft.isPlaying) _laserSmokeLeft.Stop(true, ParticleSystemStopBehavior.StopEmitting);
                 if (_laserSmokeRight.isPlaying) _laserSmokeRight.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+
+                UpdatePlasmaShots(false);
             }
 
             RefreshAimLineWidth();
@@ -367,6 +389,197 @@ namespace ZombieGame
 
             _laserSmokeLeft.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             _laserSmokeRight.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+
+        // ── Plasma shot V-arms ─────────────────────────────────────────────────
+
+        private void InitPlasmaShots()
+        {
+            if (!_usePlasmaShot || _plasmaShotPrefab == null) return;
+
+            // Remove orphans left over from a recompile/domain-reload during Play —
+            // otherwise they keep running the raw prefab defaults (fast/far/white) uncontrolled.
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                var c = transform.GetChild(i);
+                if (c.name == "PlasmaShot_Left" || c.name == "PlasmaShot_Right")
+                    Destroy(c.gameObject);
+            }
+
+            _plasmaLeft = Instantiate(_plasmaShotPrefab, transform);
+            _plasmaLeft.name = "PlasmaShot_Left";
+            _plasmaRight = Instantiate(_plasmaShotPrefab, transform);
+            _plasmaRight.name = "PlasmaShot_Right";
+
+            _plasmaRootLeft = _plasmaLeft.GetComponent<ParticleSystem>();
+            _plasmaRootRight = _plasmaRight.GetComponent<ParticleSystem>();
+
+            ConfigureStreamShooter(_plasmaLeft);
+            ConfigureStreamShooter(_plasmaRight);
+
+            _plasmaLeft.SetActive(false);
+            _plasmaRight.SetActive(false);
+        }
+
+        // Turns the one-shot impact VFX into a cheap continuous dot-stream (a line).
+        private void ConfigureStreamShooter(GameObject root)
+        {
+            var shooter = root.GetComponent<ParticleSystem>();
+
+            foreach (var ps in root.GetComponentsInChildren<ParticleSystem>(true))
+            {
+                if (ps == shooter) continue;
+                // The 7 children are Collision-triggered sub-emitters (impact burst ~131 particles).
+                // For an aiming line we never want impacts — silence them entirely.
+                var cem = ps.emission;
+                cem.enabled = false;
+                var cmain = ps.main;
+                cmain.playOnAwake = false;
+            }
+
+            if (shooter == null) return;
+
+            var main = shooter.main;
+            main.loop = true;
+            main.playOnAwake = true;
+            main.maxParticles = 600;          // hard cap against runaway
+            main.startColor = Color.white;     // gradient defines color, not a base tint
+
+            // No impacts → no sub-emitter explosion.
+            var col2 = shooter.collision;
+            col2.enabled = false;
+            var sub = shooter.subEmitters;
+            sub.enabled = false;
+
+            var em = shooter.emission;
+            em.enabled = true;
+            em.SetBursts(new ParticleSystem.Burst[0]); // drop the one-shot burst → continuous stream
+
+            // Color is applied per-frame in PlacePlasma (depends on live weapon range vs arm length).
+            var clo = shooter.colorOverLifetime;
+            clo.enabled = true;
+        }
+
+        // Color along the shot's travel mapped to WEAPON distance bands:
+        //   0..PointBlankRange  → white
+        //   ..OptimalRange      → green
+        //   ..MaxEffectiveRange → orange → red
+        // Particle age == distance fraction (constant speed), so we convert world
+        // distances into 0..1 positions along the current arm length.
+        private Gradient _distGradient;
+        private float _lastGradientArmLen = -1f;
+
+        private Gradient BuildDistanceGradient(float armLen)
+        {
+            // Manual override only when explicitly toggled on.
+            if (_useManualPlasmaColor && _plasmaColorOverDistance != null && _plasmaColorOverDistance.colorKeys.Length > 0)
+                return _plasmaColorOverDistance;
+
+            armLen = Mathf.Max(armLen, 0.01f);
+            if (_distGradient != null && Mathf.Abs(armLen - _lastGradientArmLen) < 0.1f)
+                return _distGradient;
+            _lastGradientArmLen = armLen;
+            if (_distGradient == null) _distGradient = new Gradient();
+
+            var cfg = WeaponConfigSingleton.Instance?.WeaponConfig;
+            float pb  = cfg != null ? cfg.PointBlankRange   : 2f;
+            float opt = cfg != null ? cfg.OptimalRange      : 6f;
+            float max = cfg != null ? cfg.MaxEffectiveRange : 10f;
+
+            Color white  = Color.white;
+            Color green  = Color.green;
+            Color orange = new Color(1f, 0.5f, 0f);
+            Color red    = Color.red;
+
+            float tpb  = pb  / armLen;
+            float topt = opt / armLen;
+            float tmid = (opt + (max - opt) * 0.5f) / armLen;
+            float tmax = max / armLen;
+
+            // Force strictly-increasing, in-range key times (Gradient needs ordered keys).
+            const float e = 0.001f;
+            tmax = Mathf.Clamp(tmax, 4f * e, 1f - e);
+            tmid = Mathf.Clamp(tmid, 3f * e, tmax - e);
+            topt = Mathf.Clamp(topt, 2f * e, tmid - e);
+            tpb  = Mathf.Clamp(tpb,  1f * e, topt - e);
+
+            _distGradient.SetKeys(
+                new[] {
+                    new GradientColorKey(white,  0f),
+                    new GradientColorKey(white,  tpb),
+                    new GradientColorKey(green,  topt),
+                    new GradientColorKey(orange, tmid),
+                    new GradientColorKey(red,    tmax),
+                    new GradientColorKey(red,    1f),
+                },
+                new[] {
+                    new GradientAlphaKey(1f, 0f),
+                    new GradientAlphaKey(1f, 0.92f),
+                    new GradientAlphaKey(0f, 1f),
+                });
+            return _distGradient;
+        }
+
+        private void UpdatePlasmaShots(bool isAiming)
+        {
+            if (!_usePlasmaShot) return;
+
+            // Self-heal: a script recompile / domain reload during Play wipes these
+            // non-serialized refs without re-running Initialize. Rebuild on demand.
+            if (_plasmaLeft == null || _plasmaRight == null)
+            {
+                if (_plasmaShotPrefab == null) return;
+                InitPlasmaShots();
+                if (_plasmaLeft == null || _plasmaRight == null) return;
+            }
+
+            // Plasma replaces the laser lines — hide the renderers while keeping points computed.
+            if (LineRendererLeft != null) LineRendererLeft.enabled = false;
+            if (LineRendererRight != null) LineRendererRight.enabled = false;
+
+            if (!isAiming)
+            {
+                if (_plasmaLeft.activeSelf) _plasmaLeft.SetActive(false);
+                if (_plasmaRight.activeSelf) _plasmaRight.SetActive(false);
+                return;
+            }
+
+            if (!_plasmaLeft.activeSelf) _plasmaLeft.SetActive(true);
+            if (!_plasmaRight.activeSelf) _plasmaRight.SetActive(true);
+
+            PlacePlasma(_plasmaLeft, _plasmaRootLeft, LineRendererLeft);
+            PlacePlasma(_plasmaRight, _plasmaRootRight, LineRendererRight);
+        }
+
+        private void PlacePlasma(GameObject plasma, ParticleSystem root, LineRenderer lr)
+        {
+            if (lr.positionCount < 2) return;
+            Vector3 basePos = lr.GetPosition(0);
+            Vector3 tip = lr.GetPosition(1);
+            Vector3 dir = tip - basePos;
+            float len = dir.magnitude;
+            if (len < 0.0001f) return;
+
+            // Emit from the base, fire toward the tip — the stream of shots forms the line.
+            plasma.transform.position = basePos;
+            plasma.transform.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
+
+            if (root != null)
+            {
+                float speed = Mathf.Max(_plasmaShotSpeed, 0.01f);
+                float life = len / speed;                 // shot dies exactly at the tip
+                var m = root.main;
+                m.startSpeed = speed;
+                m.startLifetime = life;
+
+                var em = root.emission;
+                em.rateOverTime = _plasmaShotsPerUnit * speed; // dots/sec → ~_plasmaShotsPerUnit per unit
+
+                // Recolor by weapon distance bands (white→green→orange→red along the arm).
+                var clo = root.colorOverLifetime;
+                clo.enabled = true;
+                clo.color = new ParticleSystem.MinMaxGradient(BuildDistanceGradient(len));
+            }
         }
 
         // ── Private visual methods ─────────────────────────────────────────────
