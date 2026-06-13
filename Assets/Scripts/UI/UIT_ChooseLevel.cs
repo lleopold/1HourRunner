@@ -15,12 +15,12 @@ public class UIT_ChooseLevel : MonoBehaviour
 
     private readonly List<LevelDef> _levels = new List<LevelDef>
     {
-        new LevelDef("Level_1", "Container Port",  "Container port at sunset.",           "OUTDOOR", 0.35f, 0.40f, 0.55f),
-        new LevelDef("Level_1", "Industrial Yard", "Closer quarters, higher spawn rates.", "INDOOR",  0.60f, 0.70f, 0.35f),
-        new LevelDef("Level_1", "Old Town",        "Maze-like alleys, tougher elites.",    "URBAN",   0.85f, 0.65f, 0.50f),
+        new LevelDef("Level_1", "Container Port",  "Container port at sunset.", "OUTDOOR", 0.35f, 0.40f, 0.55f),
+        new LevelDef("Level_2", "Industrial Yard", "Industrial yard, tighter combat.", "INDOOR",  0.60f, 0.70f, 0.35f),
     };
 
-    private int _current = -1;
+    private int _current = -1;       // hover preview index (visual only)
+    private int _selectedIndex = 0;  // clicked selection — what Play launches
     private LevelButton _activeBtn;
     private readonly List<LevelButton> _buttons = new();
 
@@ -31,19 +31,19 @@ public class UIT_ChooseLevel : MonoBehaviour
     {
         _root = _uiDocument.rootVisualElement;
 
-        _levelsList    = _root.Q<ScrollView>("levels-list");
-        _previewImage  = _root.Q<Image>("preview-image");
-        _previewTitle  = _root.Q<Label>("preview-title");
-        _previewDesc   = _root.Q<Label>("preview-desc");
-        _btnPlay       = _root.Q<Button>("btn_play_level");
-        _btnBack       = _root.Q<Button>("btn_back");
+        _levelsList = _root.Q<ScrollView>("levels-list");
+        _previewImage = _root.Q<Image>("preview-image");
+        _previewTitle = _root.Q<Label>("preview-title");
+        _previewDesc = _root.Q<Label>("preview-desc");
+        _btnPlay = _root.Q<Button>("btn_play_level");
+        _btnBack = _root.Q<Button>("btn_back");
         _difficultyBar = _root.Q<VisualElement>("difficulty-bar");
-        _densityBar    = _root.Q<VisualElement>("density-bar");
-        _areaBar       = _root.Q<VisualElement>("area-bar");
+        _densityBar = _root.Q<VisualElement>("density-bar");
+        _areaBar = _root.Q<VisualElement>("area-bar");
         _difficultyVal = _root.Q<Label>("difficulty-val");
-        _densityVal    = _root.Q<Label>("density-val");
-        _areaVal       = _root.Q<Label>("area-val");
-        _bestTimeVal   = _root.Q<Label>("best-time-val");
+        _densityVal = _root.Q<Label>("density-val");
+        _areaVal = _root.Q<Label>("area-val");
+        _bestTimeVal = _root.Q<Label>("best-time-val");
 
         BuildLevelButtons();
 
@@ -77,6 +77,7 @@ public class UIT_ChooseLevel : MonoBehaviour
 
     private void SelectLevel(int index, LevelButton btn)
     {
+        _selectedIndex = index;
         _activeBtn?.SetActive(false);
         _activeBtn = btn;
         _activeBtn.SetActive(true);
@@ -103,16 +104,16 @@ public class UIT_ChooseLevel : MonoBehaviour
         }
 
         if (_previewTitle != null) _previewTitle.text = def.DisplayName.ToUpper();
-        if (_previewDesc  != null) _previewDesc.text  = def.Description;
+        if (_previewDesc != null) _previewDesc.text = def.Description;
 
         if (_difficultyBar != null) _difficultyBar.style.width = Length.Percent(def.Difficulty * 100f);
-        if (_densityBar    != null) _densityBar.style.width    = Length.Percent(def.Density    * 100f);
-        if (_areaBar       != null) _areaBar.style.width       = Length.Percent(def.AreaSize   * 100f);
+        if (_densityBar != null) _densityBar.style.width = Length.Percent(def.Density * 100f);
+        if (_areaBar != null) _areaBar.style.width = Length.Percent(def.AreaSize * 100f);
 
         if (_difficultyVal != null) _difficultyVal.text = DifficultyToLabel(def.Difficulty);
-        if (_densityVal    != null) _densityVal.text    = DifficultyToLabel(def.Density);
-        if (_areaVal       != null) _areaVal.text       = DifficultyToLabel(def.AreaSize);
-        if (_bestTimeVal   != null) _bestTimeVal.text   = "---";
+        if (_densityVal != null) _densityVal.text = DifficultyToLabel(def.Density);
+        if (_areaVal != null) _areaVal.text = DifficultyToLabel(def.AreaSize);
+        if (_bestTimeVal != null) _bestTimeVal.text = "---";
     }
 
     private static string DifficultyToLabel(float v)
@@ -125,8 +126,8 @@ public class UIT_ChooseLevel : MonoBehaviour
 
     private void PlayCurrent()
     {
-        if (_current < 0 || _current >= _levels.Count) return;
-        var sceneName = _levels[_current].SceneName;
+        if (_selectedIndex < 0 || _selectedIndex >= _levels.Count) return;
+        var sceneName = _levels[_selectedIndex].SceneName;
         if (System.Enum.TryParse<Loader.Scene>(sceneName, ignoreCase: true, out var target))
             Loader.Load(target);
         else
@@ -154,13 +155,13 @@ public class UIT_ChooseLevel : MonoBehaviour
         public LevelDef(string sceneName, string displayName, string description, string tag,
                         float difficulty, float density, float areaSize)
         {
-            SceneName   = sceneName;
+            SceneName = sceneName;
             DisplayName = displayName;
             Description = description;
-            Tag         = tag;
-            Difficulty  = difficulty;
-            Density     = density;
-            AreaSize    = areaSize;
+            Tag = tag;
+            Difficulty = difficulty;
+            Density = density;
+            AreaSize = areaSize;
         }
     }
 }

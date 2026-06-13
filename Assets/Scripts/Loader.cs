@@ -8,6 +8,7 @@ public static class Loader
     public enum Scene
     {
         Level_1,
+        Level_2,
         Loading,
         ChoosePlayer,
         ChooseWeapon,

@@ -200,7 +200,7 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
     {
         _weaponConfig = WeaponConfigSingleton.Instance.WeaponConfig;
         WeaponConfigSingleton.Instance.SaveConfigToFile();
-        Loader.Load(Loader.Scene.Level_1);
+        Loader.Load(Loader.Scene.Level_2);
     }
 
     private GameObject LoadWeapon()
