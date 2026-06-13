@@ -12,20 +12,22 @@ public class CameraShakeSetup : MonoBehaviour
         // Check if MMCameraShaker already exists
         if (GetComponent<MMCameraShaker>() == null)
         {
-            // Add the shaker component
-            MMCameraShaker shaker = gameObject.AddComponent<MMCameraShaker>();
+            // Add the shaker component (MMWiggle is auto-added via RequireComponent)
+            gameObject.AddComponent<MMCameraShaker>();
 
-            // Configure the wiggle component
+            // Ensure the wiggle component exists and is enabled for position shake
             MMWiggle wiggle = GetComponent<MMWiggle>();
-            if (wiggle != null)
+            if (wiggle == null)
             {
-                wiggle.PositionActive = true;
-                wiggle.PositionWiggleProperties = new WiggleProperties
-                {
-                    WigglePermitted = false,
-                    WiggleType = WiggleTypes.Noise
-                };
+                wiggle = gameObject.AddComponent<MMWiggle>();
             }
+
+            wiggle.PositionActive = true;
+            wiggle.PositionWiggleProperties = new WiggleProperties
+            {
+                WigglePermitted = true,
+                WiggleType = WiggleTypes.Noise
+            };
 
             Debug.Log("MMCameraShaker component added to camera");
         }

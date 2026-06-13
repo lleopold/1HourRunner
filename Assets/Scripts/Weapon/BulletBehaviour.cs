@@ -1,4 +1,5 @@
 using UnityEngine;
+using LUZEMRIK.BloodDecals;
 
 public class BulletBehaviour : MonoBehaviour
 {
@@ -6,6 +7,11 @@ public class BulletBehaviour : MonoBehaviour
     public float maxDistance = 50f;
     public GameObject hitEffectPrefab;
     public GameObject hitEffectPrefabBloodCloud;
+
+    // Blood FX on zombie hit
+    private GameObject _bloodSplashPrefab;     // Resources/FX/BloodSplash (CFXR2 directional)
+    private BloodDecalAsset _bloodPuddleAsset; // Resources/FX/BloodPuddle (LUZEMRIK)
+    private static readonly Color32 BloodColor = new Color32(110, 0, 0, 255);
 
     private Vector3 _startPosition;
     private Vector3 _direction;
@@ -26,6 +32,8 @@ public class BulletBehaviour : MonoBehaviour
 
         hitEffectPrefab = Resources.Load<GameObject>("FX/Hit_02");
         hitEffectPrefabBloodCloud = Resources.Load<GameObject>("FX/Impact_blood");
+        _bloodSplashPrefab = Resources.Load<GameObject>("FX/BloodSplash");
+        _bloodPuddleAsset = Resources.Load<BloodDecalAsset>("FX/BloodPuddle");
     }
 
     void Update()
@@ -57,7 +65,8 @@ public class BulletBehaviour : MonoBehaviour
         {
             if (_isHitBullet)
             {
-                // Damage was already applied by the roll system — just despawn visually on contact
+                // Damage was already applied by the roll system — spawn blood, then despawn
+                SpawnBlood(transform.position, other);
                 DestroyBullet();
                 return;
             }
@@ -90,6 +99,31 @@ public class BulletBehaviour : MonoBehaviour
     {
         return WeaponConfigSingleton.Instance.WeaponConfig.Damage
                * (1 + UnityEngine.Random.Range(-randomPercentage, randomPercentage) / 100f);
+    }
+
+    private void SpawnBlood(Vector3 hitPoint, Collider zombie)
+    {
+        // Directional splash particle, sprayed along bullet travel direction
+        if (_bloodSplashPrefab != null)
+        {
+            var splash = Instantiate(_bloodSplashPrefab, hitPoint,
+                Quaternion.LookRotation(_direction == Vector3.zero ? Vector3.forward : _direction));
+            Destroy(splash, 3f);
+        }
+
+        // Ground puddle decal under the zombie (URP DecalProjector via LUZEMRIK manager)
+        if (_bloodPuddleAsset != null && BloodDecalManager.Instance != null)
+        {
+            Vector3 origin = zombie.bounds.center;
+            int groundMask = ~(1 << _zombieLayer); // ignore zombie colliders when finding floor
+            if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 10f, groundMask, QueryTriggerInteraction.Ignore))
+            {
+                float s = Random.Range(1.2f, 2.0f);
+                BloodDecalManager.Instance.AddDecal(
+                    _bloodPuddleAsset, BloodColor, hit.point + hit.normal * 0.01f, hit.normal,
+                    new Vector3(s, s, 1f));
+            }
+        }
     }
 
     private void DestroyBullet()
