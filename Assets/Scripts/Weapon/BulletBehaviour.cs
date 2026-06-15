@@ -3,7 +3,7 @@ using LUZEMRIK.BloodDecals;
 
 public class BulletBehaviour : MonoBehaviour
 {
-    public float speed = 20f;
+    public float speed = 40f;
     public float maxDistance = 50f;
     public GameObject hitEffectPrefab;
     public GameObject hitEffectPrefabBloodCloud;
@@ -34,6 +34,60 @@ public class BulletBehaviour : MonoBehaviour
         hitEffectPrefabBloodCloud = Resources.Load<GameObject>("FX/Impact_blood");
         _bloodSplashPrefab = Resources.Load<GameObject>("FX/BloodSplash");
         _bloodPuddleAsset = Resources.Load<BloodDecalAsset>("FX/BloodPuddle");
+
+        SetupTrail();
+    }
+
+    private void SetupTrail()
+    {
+        var trailGO = new GameObject("BulletTrail");
+        trailGO.transform.SetParent(transform, false);
+
+        var ps = trailGO.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        var main = ps.main;
+        main.simulationSpace = ParticleSystemSimulationSpace.World; // stay behind bullet
+        main.startLifetime = 0.10f;   // short period
+        main.startSpeed = 0f;         // particles don't drift, just fade
+        main.startSize = 0.08f;
+        main.startColor = new Color(1f, 0.85f, 0.4f, 1f); // warm tracer tint
+        main.maxParticles = 100;
+        main.playOnAwake = false;
+
+        var emission = ps.emission;
+        emission.rateOverTime = 0f;
+        emission.rateOverDistance = 35f; // dense trail, framerate-independent
+
+        var shape = ps.shape;
+        shape.enabled = false; // emit from a point
+
+        // fade alpha + shrink over lifetime
+        var colorOverLifetime = ps.colorOverLifetime;
+        colorOverLifetime.enabled = true;
+        var grad = new Gradient();
+        grad.SetKeys(
+            new[] { new GradientColorKey(new Color(1f, 0.85f, 0.4f), 0f),
+                    new GradientColorKey(new Color(1f, 0.4f, 0.1f), 1f) },
+            new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) });
+        colorOverLifetime.color = grad;
+
+        var sizeOverLifetime = ps.sizeOverLifetime;
+        sizeOverLifetime.enabled = true;
+        sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1f,
+            AnimationCurve.EaseInOut(0f, 1f, 1f, 0f));
+
+        // additive particle material (URP-friendly)
+        var renderer = trailGO.GetComponent<ParticleSystemRenderer>();
+        Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit")
+                        ?? Shader.Find("Particles/Standard Unlit")
+                        ?? Shader.Find("Sprites/Default");
+        var mat = new Material(shader);
+        mat.SetFloat("_Surface", 1f);  // transparent
+        mat.SetFloat("_Blend", 1f);    // additive
+        renderer.material = mat;
+
+        ps.Play();
     }
 
     void Update()
@@ -92,7 +146,7 @@ public class BulletBehaviour : MonoBehaviour
             Destroy(impact2, 2f);
         }
 
-        Destroy(gameObject);
+        DestroyBullet();
     }
 
     private float GetWeaponDamage(float randomPercentage)
@@ -128,6 +182,18 @@ public class BulletBehaviour : MonoBehaviour
 
     private void DestroyBullet()
     {
+        DetachTrail();
         Destroy(gameObject);
+    }
+
+    private void DetachTrail()
+    {
+        var trail = transform.Find("BulletTrail");
+        if (trail == null) return;
+        var ps = trail.GetComponent<ParticleSystem>();
+        trail.SetParent(null, true);
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmitting); // let live particles fade
+        float life = ps.main.startLifetime.constantMax;
+        Destroy(trail.gameObject, life + 0.1f);
     }
 }
