@@ -46,6 +46,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     private Collider[] _ragdollColliders;
     //[SerializeField] private Animator _animator;
     private static DamageNumber _damageNumberPrefab;
+    private static DamageNumber _damageNumberPrefab_crit;
     public EnemyAlertIndicator AlertIndicator { get; private set; }
     private EnemyAnimator _enemyAnimator;
     private static Enemy _closestEnemy;
@@ -373,7 +374,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     }
 
 
-    public void DamageReceived(float damage, Vector3 hitDirection)
+    public void DamageReceived(float damage, Vector3 hitDirection, bool isCrit = false)
     {
         if (_health <= 0) return;
 
@@ -394,7 +395,10 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         Hit();
 
         Vector3 damagePosition = transform.position + Vector3.up * 1.5f;
-        _damageNumberPrefab.Spawn(damagePosition, damage);
+        DamageNumber numberPrefab = (isCrit && _damageNumberPrefab_crit != null)
+            ? _damageNumberPrefab_crit
+            : _damageNumberPrefab;
+        numberPrefab.Spawn(damagePosition, damage);
 
         if (_health <= 0 && !_spawnedCoin)
         {
@@ -836,6 +840,15 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
             if (_damageNumberPrefab == null)
             {
                 Debug.LogError("DamageNumber prefab not found in Prefabs!");
+                return;
+            }
+        }
+        if (_damageNumberPrefab_crit == null)
+        {
+            _damageNumberPrefab_crit = Resources.Load<DamageNumber>("DamageNumbers/DamageNumbers_3");
+            if (_damageNumberPrefab_crit == null)
+            {
+                Debug.LogError("DamageNumber Crit prefab not found in Prefabs!");
                 return;
             }
         }

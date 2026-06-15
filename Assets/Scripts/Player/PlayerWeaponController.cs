@@ -271,7 +271,7 @@ namespace ZombieGame
                 Debug.LogWarning($"[SHOT] SpawnHitBullet: no Enemy component found on {targetZombie.name} or its parents!");
             else
                 Debug.Log($"[SHOT] Applying damage={damage:F1} to {enemy.gameObject.name} Crit: {crit.ToString()}");
-            enemy?.DamageReceived(damage, dir);
+            enemy?.DamageReceived(damage, dir, crit);
             // Note: Enemy.DamageReceived already spawns the damage number internally
 
             SpawnBullet(gunBarrel, dir, isHitBullet: true);
