@@ -31,6 +31,7 @@ namespace ZombieGame
         private static DamageNumber _damageNumberPrefab;
         private GameObject _bulletPrefab;
         private RigRecoilController _rigRecoilController;
+        private ParticleSystem _muzzleSmoke; // cached — one persistent PS, Emit per shot (no Instantiate)
 
         // ── Dependencies (injected via Initialize) ────────────────────────────
         private UIT_GameScreen _uiGameScreen;
@@ -133,6 +134,7 @@ namespace ZombieGame
             _nextFireTime = Time.time + 1f / WeaponConfigSingleton.Instance.WeaponConfig.FireRate;
 
             MuzzleFlash();
+            MuzzleSmoke();
             var clip = WeaponConfigSingleton.Instance.WeaponConfig.shootingClip;
             if (clip != null) SoundFXManager.Instance.PlaySoundFXClip(clip, transform, 1f);
 
@@ -367,6 +369,34 @@ namespace ZombieGame
             catch (Exception e)
             {
                 Debug.LogError($"Muzzle flash error: {e.Message}");
+            }
+        }
+
+        // ── Muzzle smoke ──────────────────────────────────────────────────────
+
+        private void MuzzleSmoke()
+        {
+            try
+            {
+                // Lazy-cache: resolve the persistent smoke PS once, then Emit each shot.
+                if (_muzzleSmoke == null)
+                {
+                    Transform weaponTransform = FindRecursive(transform, "Weapon")
+                                             ?? FindRecursive(transform, "Pistol(Clone)");
+                    if (weaponTransform == null) return;
+                    Transform smoke = weaponTransform.Find("MuzzleSmoke");
+                    if (smoke == null) { Debug.LogWarning("MuzzleSmoke not found on weapon!"); return; }
+                    _muzzleSmoke = smoke.GetComponent<ParticleSystem>();
+                }
+                if (_muzzleSmoke != null)
+                {
+                    if (!_muzzleSmoke.isPlaying) _muzzleSmoke.Play(); // keep system alive so Emit renders
+                    _muzzleSmoke.Emit(10);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Muzzle smoke error: {e.Message}");
             }
         }
 
