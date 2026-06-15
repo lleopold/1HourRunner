@@ -45,6 +45,10 @@ public class WeaponsCarouselController : MonoBehaviour
     private bool _dragging;
     private Vector3 _lastPointer;
 
+    // Idle showcase spin: weapon rotates around Y until user grabs it
+    [SerializeField] private float autoSpinSpeed = 72f; // deg/sec -> full circle in 5s
+    private bool _autoSpin = true;
+
     // Stat FloatFields (optional � all queried by name, null if not in UXML)
     private FloatField _fDamage, _fFireRate, _fDamageFluct, _fClip, _fPrecision,
                        _fReload, _fSimul, _fCrit, _fStagger, _fRecoil,
@@ -475,6 +479,7 @@ public class WeaponsCarouselController : MonoBehaviour
         _preview.RegisterCallback<PointerDownEvent>(e =>
         {
             _dragging = true;
+            _autoSpin = false; // user grabbed it -> stop idle spin
             _lastPointer = e.position; // Vector2
             _preview.CapturePointer(e.pointerId);
         });
@@ -609,6 +614,7 @@ public class WeaponsCarouselController : MonoBehaviour
         SetLayerRecursively(newWeapon, 31);
 
         _spawned = newWeapon;
+        _autoSpin = true; // fresh weapon -> resume idle spin
         _zoomFactor = 1f;
         _fitNextLateUpdate = true;
         PositionCameraForCurrentModel();
@@ -654,6 +660,10 @@ public class WeaponsCarouselController : MonoBehaviour
     void LateUpdate()
     {
         _selectedBtn?.Tick(Time.deltaTime);
+
+        // Idle spin around Y until user drags to rotate
+        if (_autoSpin && !_dragging && _spawned != null)
+            _spawned.transform.Rotate(Vector3.up, autoSpinSpeed * Time.deltaTime, Space.World);
 
         // Pulse active tab underline
         if (_activeTab != null)
