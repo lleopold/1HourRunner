@@ -146,12 +146,6 @@ namespace ZombieGame
             ApplyRecoil(_aimVisuals != null ? _aimVisuals.CurrentAngle : 0f);
 
             // ── Probability roll ──────────────────────────────────────────────
-            float weaponAcc = WeaponConfigSingleton.Instance.WeaponConfig.Accuracy / 100f;
-            float playerAcc = PlayerConfigSingleton.Instance.PlayerConfig.Accuracy / 100f;
-            float multiplier = AimPrecisionColors.GetHitMultiplier(_aimVisuals != null ? _aimVisuals.CurrentAngle : 30f);
-
-            float hitChance = weaponAcc * playerAcc * multiplier;
-
             var zombies = _aimingCircleTrigger != null ? _aimingCircleTrigger.GetZombiesInside() : null;
             if (zombies == null || zombies.Count == 0)
             {
@@ -165,14 +159,17 @@ namespace ZombieGame
             GameObject primary = GetPrimaryTarget(zombies);
             Debug.Log($"[SHOT] Primary target: {(primary != null ? primary.name : "none")}");
 
-            // Distance multiplier — measured to the actual primary target
+            // Centralized hit chance — measured to the actual primary target.
             var weaponCfg = WeaponConfigSingleton.Instance.WeaponConfig;
+            var playerCfg = PlayerConfigSingleton.Instance.PlayerConfig;
+            float angle = _aimVisuals != null ? _aimVisuals.CurrentAngle : 30f;
             Vector3 targetPos = primary != null ? primary.transform.position : transform.position;
             float distance = Vector3.Distance(transform.position, targetPos);
-            float distanceMultiplier = AimPrecisionColors.GetDistanceMultiplier(distance, weaponCfg.OptimalRange, weaponCfg.MaxEffectiveRange);
-            hitChance *= distanceMultiplier;
 
-            Debug.Log($"[SHOT] Angle={(_aimVisuals != null ? _aimVisuals.CurrentAngle : -1f):F2}° | WeaponAcc={weaponAcc:F2} PlayerAcc={playerAcc:F2} Multiplier={multiplier:F2} | Dist={distance:F1} DistMult={distanceMultiplier:F2} | HitChance={hitChance:F3} | AimMode={(_targeting != null ? _targeting.CurrentAimingType.ToString() : "null")}");
+            var hcr = AimPrecisionColors.ComputeHitChance(angle, distance, weaponCfg, playerCfg);
+            float hitChance = hcr.Value;
+
+            Debug.Log($"[SHOT] Angle={angle:F2}° | Dist={distance:F1} PB={hcr.IsPointBlank} DistMult={hcr.DistanceMultiplier:F2} | HitChance={hitChance:F3} | AimMode={(_targeting != null ? _targeting.CurrentAimingType.ToString() : "null")}");
 
             GameObject hit = null;
 

@@ -238,9 +238,6 @@ namespace ZombieGame
             var pCfg = PlayerConfigSingleton.Instance?.PlayerConfig;
             if (wCfg == null || pCfg == null) return;
 
-            float aimMult = AimPrecisionColors.GetHitMultiplier(_aimVisuals.CurrentAngle);
-            float baseAcc = (wCfg.Accuracy / 100f) * (pCfg.Accuracy / 100f) * aimMult;
-
             var inside = _aimVisuals?.AimingCircleTrigger?.GetZombiesInside();
             if (inside == null) return;
 
@@ -256,16 +253,12 @@ namespace ZombieGame
                 if (enemy == null) continue;
 
                 float dist = Vector3.Distance(transform.position, c.transform.position);
-                bool pb = dist <= wCfg.OptimalRange;
-                float distMult = wCfg.MaxEffectiveRange > 0f
-                    ? AimPrecisionColors.GetDistanceMultiplier(dist, wCfg.OptimalRange, wCfg.MaxEffectiveRange)
-                    : 1f;
-                float hc = baseAcc * distMult;
+                var hcr = AimPrecisionColors.ComputeHitChance(_aimVisuals.CurrentAngle, dist, wCfg, pCfg);
 
                 enemy.SetOutline(true);
-                enemy.SetOutlineColor(AimPrecisionColors.GetOutlineColor(hc, pb));
+                enemy.SetOutlineColor(AimPrecisionColors.GetOutlineColor(hcr));
 
-                if (dist < closestDist) { closestDist = dist; closestHc = hc; closestDistMult = distMult; closestPb = pb; }
+                if (dist < closestDist) { closestDist = dist; closestHc = hcr.Value; closestDistMult = hcr.DistanceMultiplier; closestPb = hcr.IsPointBlank; }
             }
 
             // laser/površina = samo distanca najbližeg; outline = pun hitChance po zombiju
@@ -282,11 +275,17 @@ namespace ZombieGame
             if (wCfg == null || pCfg == null) return 1f;
 
             float angle = _aimVisuals != null ? _aimVisuals.CurrentAngle : 30f;
-            float aimMult = AimPrecisionColors.GetHitMultiplier(angle);
+            float distance = ClosestTargetDistance();
 
-            // ista logika distance kao u OnGUI: najbliži u gizmu, pa fallback na metu
+            var r = AimPrecisionColors.ComputeHitChance(angle, distance, wCfg, pCfg);
+            isPointBlank = r.IsPointBlank;
+            return r.Value;
+        }
+
+        // Closest zombie inside the gizmo, else the locked target. Shared by hit calc + GUI.
+        private float ClosestTargetDistance()
+        {
             var zombiesInGizmo = _aimVisuals?.AimingCircleTrigger?.GetZombiesInside();
-            float distance = 0f;
             if (zombiesInGizmo != null && zombiesInGizmo.Count > 0)
             {
                 float best = float.MaxValue;
@@ -296,22 +295,11 @@ namespace ZombieGame
                     float d = Vector3.Distance(transform.position, c.transform.position);
                     if (d < best) best = d;
                 }
-                distance = best;
-            }
-            else
-            {
-                var tgt = _targeting.CurrentTarget;
-                distance = tgt != null ? Vector3.Distance(transform.position, tgt.transform.position) : 0f;
+                return best;
             }
 
-            // point-blank: ispod OptimalRange garantovano
-            if (distance > 0f && distance <= wCfg.OptimalRange) isPointBlank = true;
-
-            float distMult = (distance > 0f && wCfg.MaxEffectiveRange > 0f)
-                ? AimPrecisionColors.GetDistanceMultiplier(distance, wCfg.OptimalRange, wCfg.MaxEffectiveRange)
-                : 1f;
-
-            return (wCfg.Accuracy / 100f) * (pCfg.Accuracy / 100f) * aimMult * distMult;
+            var tgt = _targeting.CurrentTarget;
+            return tgt != null ? Vector3.Distance(transform.position, tgt.transform.position) : 0f;
         }
 
         void OnGUI()
@@ -357,11 +345,7 @@ namespace ZombieGame
                 distance = tgt != null ? Vector3.Distance(transform.position, tgt.transform.position) : 0f;
             }
 
-            float distMult = (distance > 0f && wCfg.MaxEffectiveRange > 0f)
-                ? AimPrecisionColors.GetDistanceMultiplier(distance, wCfg.OptimalRange, wCfg.MaxEffectiveRange)
-                : 1f;
-
-            float hitChance = weaponAcc * playerAcc * aimMult * distMult;
+            var r = AimPrecisionColors.ComputeHitChance(angle, distance, wCfg, pCfg);
 
             GUI.Label(new Rect(10, y, 400, 20), "── Shot Chance ──────────────────"); y += 20;
             GUI.Label(new Rect(10, y, 400, 20), $"Aim angle:        {angle:F1}°"); y += 20;
@@ -371,10 +355,11 @@ namespace ZombieGame
             GUI.Label(new Rect(10, y, 500, 20), $"Gizmo zombies:    {(zombiesInGizmo != null ? zombiesInGizmo.Count : 0)}  closest: {gizmoClosestName}  ({gizmoClosestDist:F1} u)"); y += 20;
             if (distance > 0f)
             {
-                GUI.Label(new Rect(10, y, 500, 20), $"Distance:         {distance:F1} u  (opt {wCfg.OptimalRange:F0} / max {wCfg.MaxEffectiveRange:F0})"); y += 20;
-                GUI.Label(new Rect(10, y, 400, 20), $"Distance mult:    {distMult:F2}"); y += 20;
+                GUI.Label(new Rect(10, y, 500, 20), $"Distance:         {distance:F1} u  (pb {wCfg.PointBlankRange:F0} / opt {wCfg.OptimalRange:F0} / max {wCfg.MaxEffectiveRange:F0})"); y += 20;
+                GUI.Label(new Rect(10, y, 400, 20), $"Distance mult:    {r.DistanceMultiplier:F2}"); y += 20;
             }
-            GUI.Label(new Rect(10, y, 400, 20), $"TOTAL hit chance: {hitChance * 100f:F1}%"); y += 20;
+            if (r.IsPointBlank) { GUI.Label(new Rect(10, y, 400, 20), "POINT BLANK (white)"); y += 20; }
+            GUI.Label(new Rect(10, y, 400, 20), $"TOTAL hit chance: {r.Value * 100f:F1}%"); y += 20;
         }
 
         // ─────────────────────────────────────────────────────────────────────

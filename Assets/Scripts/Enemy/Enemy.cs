@@ -183,7 +183,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         _outline = gameObject.AddComponent<Outline>();
         _outline.OutlineMode = Outline.Mode.OutlineAll;
         _outline.OutlineColor = Color.red;
-        _outline.OutlineWidth = 5f;
+        _outline.OutlineWidth = 2.5f;
         _outline.enabled = false;
 
 

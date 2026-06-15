@@ -62,7 +62,51 @@ namespace ZombieGame
             float t = (distance - optimalRange) / (maxEffectiveRange - optimalRange);
             return Mathf.Lerp(1.0f, 0.1f, t);
         }
-        public static Color GetOutlineColor(float value, bool pointBlank = false)
+
+        // ── Centralized hit chance ───────────────────────────────────────────
+        // Fixed hit chance when the zombie is within point-blank range (close enough).
+        public const float PointBlankHitChance = 0.98f;
+
+        /// <summary>Single source of truth for hit chance. Used by the GUI, zombie outline coloring, the actual shot roll, and anyone added later.</summary>
+        public struct HitChanceResult
+        {
+            public float Value;              // final hit chance 0..1
+            public bool IsPointBlank;        // zombie close enough → fixed white outline + 98%
+            public float DistanceMultiplier; // 1.0 inside point-blank
+            public float Distance;
+        }
+
+        /// <summary>
+        /// Computes hit chance for a single target.
+        ///   • Point blank (distance ≤ <see cref="WeaponConfig.PointBlankRange"/>) → fixed <see cref="PointBlankHitChance"/> (98%).
+        ///   • Beyond point blank → regular calc: weaponAcc · playerAcc · aimMult · distanceMult.
+        /// </summary>
+        public static HitChanceResult ComputeHitChance(float angleDegrees, float distance, WeaponConfig wCfg, PlayerConfig pCfg)
+        {
+            var r = new HitChanceResult { Distance = distance, DistanceMultiplier = 1f, Value = 1f };
+            if (wCfg == null || pCfg == null) return r;
+
+            // Point blank: zombie close enough → fixed 98%, white outline.
+            if (distance > 0f && distance <= wCfg.PointBlankRange)
+            {
+                r.IsPointBlank = true;
+                r.Value = PointBlankHitChance;
+                return r;
+            }
+
+            // Beyond point blank → regular hit calculation.
+            float aimMult = GetHitMultiplier(angleDegrees);
+            r.DistanceMultiplier = (distance > 0f && wCfg.MaxEffectiveRange > 0f)
+                ? GetDistanceMultiplier(distance, wCfg.OptimalRange, wCfg.MaxEffectiveRange)
+                : 1f;
+            r.Value = (wCfg.Accuracy / 100f) * (pCfg.Accuracy / 100f) * aimMult * r.DistanceMultiplier;
+            return r;
+        }
+
+        /// <summary>Outline color straight from a <see cref="HitChanceResult"/> — white only at point blank.</summary>
+        public static Color GetOutlineColor(HitChanceResult r) => GetOutlineColor(r.Value, r.IsPointBlank);
+
+        public static Color GetOutlineColor(float value, bool pointBlank)
         {
             if (pointBlank) return Color.white;
             if (value >= 0.75f) return Color.Lerp(Color.yellow, Color.green, (value - 0.75f) / 0.25f);

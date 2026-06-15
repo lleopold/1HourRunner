@@ -482,16 +482,16 @@ namespace ZombieGame
             if (_distGradient == null) _distGradient = new Gradient();
 
             var cfg = WeaponConfigSingleton.Instance?.WeaponConfig;
-            float pb  = cfg != null ? cfg.PointBlankRange   : 2f;
-            float opt = cfg != null ? cfg.OptimalRange      : 6f;
+            float pb = cfg != null ? cfg.PointBlankRange : 2f;
+            float opt = cfg != null ? cfg.OptimalRange : 6f;
             float max = cfg != null ? cfg.MaxEffectiveRange : 10f;
 
-            Color white  = Color.white;
-            Color green  = Color.green;
+            Color white = Color.white;
+            Color green = Color.green;
             Color orange = new Color(1f, 0.5f, 0f);
-            Color red    = Color.red;
+            Color red = Color.red;
 
-            float tpb  = pb  / armLen;
+            float tpb = pb / armLen;
             float topt = opt / armLen;
             float tmid = (opt + (max - opt) * 0.5f) / armLen;
             float tmax = max / armLen;
@@ -501,7 +501,7 @@ namespace ZombieGame
             tmax = Mathf.Clamp(tmax, 4f * e, 1f - e);
             tmid = Mathf.Clamp(tmid, 3f * e, tmax - e);
             topt = Mathf.Clamp(topt, 2f * e, tmid - e);
-            tpb  = Mathf.Clamp(tpb,  1f * e, topt - e);
+            tpb = Mathf.Clamp(tpb, 1f * e, topt - e);
 
             _distGradient.SetKeys(
                 new[] {
@@ -791,7 +791,7 @@ namespace ZombieGame
                 triangles[index++] = outerNext;
             }
 
-            Color themeColor = AimPrecisionColors.GetOutlineColor(CurrentHitChance);
+            Color themeColor = AimPrecisionColors.GetOutlineColor(CurrentHitChance, IsPointBlank);
             Color[] colors = GenerateDirectionalSweepColors(vertexCount, _resolution, angle, themeColor);
             _meshAimingCircle.Clear();
             _meshAimingCircle.vertices = vertices;
