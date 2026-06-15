@@ -109,8 +109,15 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         var idleZombie = new IdleZombie(_enemyAnimator, zombieNavMeshAgent); // New state
         var startMoving = new StartMoving(this, zombieNavMeshAgent, _enemyAnimator);
         var fullStop = new FullStop(this, zombieNavMeshAgent, _enemyAnimator);
-        var searchForGatheringSpot = new SearchForGathering(this, _gathering);
-        var walkToGathering = new WalkToGathering(this, zombieNavMeshAgent, _animator, _enemyConfig, _gathering.transform, _enemyAnimator);
+        // Gathering states are currently unused (no active transitions reference them).
+        // Only build them when a GatheringPoint exists, so a missing marker doesn't crash Awake.
+        SearchForGathering searchForGatheringSpot = null;
+        WalkToGathering walkToGathering = null;
+        if (_gathering != null)
+        {
+            searchForGatheringSpot = new SearchForGathering(this, _gathering);
+            walkToGathering = new WalkToGathering(this, zombieNavMeshAgent, _animator, _enemyConfig, _gathering.transform, _enemyAnimator);
+        }
         var roam = new Roam(this, _player.transform, zombieNavMeshAgent, _animator, _enemyConfig, _monoBehaviour, _enemyAnimator);
 
 
