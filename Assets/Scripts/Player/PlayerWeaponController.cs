@@ -276,7 +276,7 @@ namespace ZombieGame
             enemy?.DamageReceived(damage, dir, crit);
             // Note: Enemy.DamageReceived already spawns the damage number internally
 
-            SpawnBullet(gunBarrel, dir, isHitBullet: true);
+            SpawnBullet(gunBarrel, dir, isHitBullet: true, isCrit: crit);
         }
 
         private void SpawnMissBullet()
@@ -287,13 +287,13 @@ namespace ZombieGame
             SpawnBullet(gunBarrel, dir, isHitBullet: false);
         }
 
-        private void SpawnBullet(Transform gunBarrel, Vector3 dir, bool isHitBullet)
+        private void SpawnBullet(Transform gunBarrel, Vector3 dir, bool isHitBullet, bool isCrit = false)
         {
             dir = dir.normalized;
             dir.y = 0;
             Quaternion rot = Quaternion.LookRotation(dir) * Quaternion.Euler(-90, 0, 0);
             GameObject bullet = Instantiate(_bulletPrefab, gunBarrel.position, rot);
-            bullet.GetComponent<BulletBehaviour>()?.Initialize(dir, isHitBullet);
+            bullet.GetComponent<BulletBehaviour>()?.Initialize(dir, isHitBullet, isCrit);
         }
 
         private static void Shuffle(List<GameObject> list)

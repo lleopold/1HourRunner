@@ -16,18 +16,20 @@ public class BulletBehaviour : MonoBehaviour
     private Vector3 _startPosition;
     private Vector3 _direction;
     private bool _isHitBullet; // true = damage already applied; false = miss bullet (passes through zombies)
+    private bool _isCrit;      // crit shots get the warm orange/red trail; normal shots grey/white
     private int _zombieLayer;
 
     /// <summary>
     /// <paramref name="isHitBullet"/>: true = bullet visually tracks a zombie, damage already rolled.
     /// false = miss bullet, ignores zombie colliders.
     /// </summary>
-    public void Initialize(Vector3 direction, bool isHitBullet = false)
+    public void Initialize(Vector3 direction, bool isHitBullet = false, bool isCrit = false)
     {
         _direction = direction.normalized;
         _direction.y = 0;
         _startPosition = transform.position;
         _isHitBullet = isHitBullet;
+        _isCrit = isCrit;
         _zombieLayer = LayerMask.NameToLayer("Zombie");
 
         hitEffectPrefab = Resources.Load<GameObject>("FX/Hit_02");
@@ -46,12 +48,16 @@ public class BulletBehaviour : MonoBehaviour
         var ps = trailGO.AddComponent<ParticleSystem>();
         ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
+        // Crit = warm yellow→orange-red; normal = white→grey
+        Color startCol = _isCrit ? new Color(1f, 0.85f, 0.4f) : new Color(1f, 1f, 1f);
+        Color endCol   = _isCrit ? new Color(1f, 0.4f, 0.1f) : new Color(0.6f, 0.6f, 0.6f);
+
         var main = ps.main;
         main.simulationSpace = ParticleSystemSimulationSpace.World; // stay behind bullet
         main.startLifetime = 0.10f;   // short period
         main.startSpeed = 0f;         // particles don't drift, just fade
         main.startSize = 0.08f;
-        main.startColor = new Color(1f, 0.85f, 0.4f, 1f); // warm tracer tint
+        main.startColor = new Color(startCol.r, startCol.g, startCol.b, 1f);
         main.maxParticles = 100;
         main.playOnAwake = false;
 
@@ -67,8 +73,8 @@ public class BulletBehaviour : MonoBehaviour
         colorOverLifetime.enabled = true;
         var grad = new Gradient();
         grad.SetKeys(
-            new[] { new GradientColorKey(new Color(1f, 0.85f, 0.4f), 0f),
-                    new GradientColorKey(new Color(1f, 0.4f, 0.1f), 1f) },
+            new[] { new GradientColorKey(startCol, 0f),
+                    new GradientColorKey(endCol, 1f) },
             new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) });
         colorOverLifetime.color = grad;
 
