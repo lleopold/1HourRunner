@@ -52,6 +52,14 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     private static Enemy _closestEnemy;
     private static int _lastClosestFrame = -1;
 
+    // Stagger debug — last values applied, shown in OnGUI
+    private static Enemy _lastHitEnemy;
+    private float _dbgWeaponStagger = 0f;
+    private float _dbgEffStagger = 0f;
+    private float _dbgStaggerSpeed = -1f;
+    private float _dbgLastStaggerTime = -999f;
+    private float _dbgMinVelSinceHit = 999f;
+
     private void Awake()
     {
         Debug.Log("Enemy Awake");
@@ -288,6 +296,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         healthBarScroll.healthSystemArmour.Initialize(_health, 0);
         dieCondition = false;
         zombieNavMeshAgent.speed = _enemyConfig.speed;
+        zombieNavMeshAgent.acceleration = MapAcceleration(_enemyConfig.acceleration);
         if (_player == null)
         {
             Debug.LogError("Player reference is not assigned to the ZombieMovement script.");
@@ -320,7 +329,9 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
     private void OnGUI()
     {
-        if (_closestEnemy != this) return;
+        // Prefer the last-hit zombie so the panel follows whatever you just shot; fall back to closest.
+        Enemy panelTarget = _lastHitEnemy != null ? _lastHitEnemy : _closestEnemy;
+        if (panelTarget != this) return;
 
         GUIStyle style = new GUIStyle(GUI.skin.label);
         style.fontSize = 18;
@@ -335,11 +346,18 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
                       $"Target: {(Target != null ? Target.name : "None")}\n" +
                       $"CloseToPlayer: {CloseToPlayer()}\n" +
                       $"FarToPlayer: {FarToPlayer()}\n" +
-                      $"Velocity: {(_enemyAnimator != null ? _enemyAnimator.Velocity.ToString("F2") : "N/A")}";
+                      $"Velocity: {(_enemyAnimator != null ? _enemyAnimator.Velocity.ToString("F2") : "N/A")}\n" +
+                      $"--- STAGGER ---\n" +
+                      $"Resistance: {_enemyConfig.staggerResistance:F0}  Accel: {zombieNavMeshAgent.acceleration:F1}\n" +
+                      $"Weapon Stagger: {_dbgWeaponStagger:F0}\n" +
+                      $"Eff Stagger: {_dbgEffStagger:F0}\n" +
+                      $"StaggerSpeed: {(_dbgStaggerSpeed >= 0 ? _dbgStaggerSpeed.ToString("F2") : "—")} / base {_enemyConfig.speed:F2}\n" +
+                      $"AgentVel: {zombieNavMeshAgent.velocity.magnitude:F2}  (since hit {Time.time - _dbgLastStaggerTime:F1}s)\n" +
+                      $"Dip min vel: {(_dbgMinVelSinceHit < 900 ? _dbgMinVelSinceHit.ToString("F2") : "—")}";
 
         // Position in upper right corner with some padding
-        float width = 300;
-        float height = 200;
+        float width = 320;
+        float height = 320;
         Rect rect = new Rect(Screen.width - width - 10, 10, width, height);
 
         GUI.Box(new Rect(Screen.width - width - 20, 5, width + 10, height + 10), ""); // Background box
@@ -350,6 +368,13 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     {
         UpdateClosestEnemy();
         _stateMachine.Tick();
+
+        // Track lowest agent velocity since last stagger (so a fast recovery can't hide the dip)
+        if (zombieNavMeshAgent != null)
+        {
+            float v = zombieNavMeshAgent.velocity.magnitude;
+            if (v < _dbgMinVelSinceHit) _dbgMinVelSinceHit = v;
+        }
         Debug.DrawRay(transform.position, transform.forward * 5, Color.red);  // Expected forward
         Debug.DrawRay(transform.position, zombieNavMeshAgent.velocity.normalized * 5, Color.green); // Movement direction
 
@@ -374,7 +399,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     }
 
 
-    public void DamageReceived(float damage, Vector3 hitDirection, bool isCrit = false)
+    public void DamageReceived(float damage, Vector3 hitDirection, bool isCrit = false, float weaponStagger = 0f)
     {
         if (_health <= 0) return;
 
@@ -393,6 +418,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         }
 
         Hit();
+        ApplyStagger(weaponStagger, isCrit);
 
         Vector3 damagePosition = transform.position + Vector3.up * 1.5f;
         DamageNumber numberPrefab = (isCrit && _damageNumberPrefab_crit != null)
@@ -418,7 +444,46 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         zombieAnimator.SetTrigger("HitLayer");
         //zombieAnimator.SetTrigger("HitReceived");
         _hit = 1;
-        KnockBack(gameObject, transform.forward);
+    }
+
+    // Maps a 0-100 config value to a usable NavMeshAgent.acceleration.
+    // Low config = sluggish recovery ramp, high = snappy. Tune the range in inspector feel.
+    private static float MapAcceleration(float config0to100)
+    {
+        return Mathf.Lerp(2f, 40f, Mathf.Clamp01(config0to100 / 100f));
+    }
+
+    // Stagger: sharp drop to a reduced speed, then smooth climb back via NavMeshAgent.acceleration.
+    // effStagger = weaponStagger (x2 on crit) - this enemy's resistance, clamped 0-100.
+    private void ApplyStagger(float weaponStagger, bool isCrit)
+    {
+        float raw = weaponStagger * (isCrit ? 2f : 1f);
+        float effStagger = Mathf.Clamp(raw - _enemyConfig.staggerResistance, 0f, 100f);
+
+        // Debug tracking (always update so GUI reflects even fully-resisted hits)
+        _dbgWeaponStagger = weaponStagger;
+        _dbgEffStagger = effStagger;
+        _dbgLastStaggerTime = Time.time;
+        _dbgMinVelSinceHit = 999f; // reset dip tracker
+        _lastHitEnemy = this;
+
+        if (effStagger <= 0f) { _dbgStaggerSpeed = -1f; return; } // immune / fully resisted
+
+        float baseSpeed = _enemyConfig.speed;
+        float staggerSpeed = baseSpeed * (1f - effStagger / 100f);
+
+        // Re-hit takes the deeper dip so rapid fire keeps the zombie down (no accumulator).
+        staggerSpeed = Mathf.Min(zombieNavMeshAgent.velocity.magnitude, staggerSpeed);
+        _dbgStaggerSpeed = staggerSpeed;
+
+        // Fast drop: write velocity directly toward the player (bypasses acceleration = the punch).
+        Vector3 toPlayer = _player != null
+            ? (_player.transform.position - transform.position).normalized
+            : transform.forward;
+        zombieNavMeshAgent.velocity = toPlayer * staggerSpeed;
+
+        // Smooth recovery: restore the speed cap; acceleration ramps velocity back up.
+        zombieNavMeshAgent.speed = baseSpeed;
     }
     public void HitLayerPlus()
     {
@@ -429,15 +494,6 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         float currentWeight = zombieAnimator.GetLayerWeight(hitLayer);
         float newWeight = Mathf.Lerp(currentWeight, targetWeight, Time.deltaTime * weightChangeSpeed);
         zombieAnimator.SetLayerWeight(hitLayer, newWeight);
-    }
-    public void KnockBack(GameObject gameObject, Vector3 hitDirection)
-    {
-        zombieNavMeshAgent.speed = 0;
-        zombieNavMeshAgent.velocity = -hitDirection * 2;
-        zombieNavMeshAgent.speed = _enemyConfig.speed;
-
-
-        //AfterHit();
     }
     private void AfterHit(string after)
     {

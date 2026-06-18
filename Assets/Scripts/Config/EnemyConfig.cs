@@ -8,6 +8,8 @@ public class EnemyConfig : ScriptableObject
     public float health;
     public float timeBetweenAttacks;
     public float speed;
+    [Range(0f, 100f)] public float staggerResistance; // 0 = full stagger, 100 = immune
+    [Range(0f, 100f)] public float acceleration;       // 0-100, mapped to NavMeshAgent.acceleration (recovery ramp)
     public float rage;
     public float meleeRadius;
     public float meleeDamage;
