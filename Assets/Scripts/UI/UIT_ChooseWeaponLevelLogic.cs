@@ -17,7 +17,6 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
     private FloatField _fire_rate;
     private FloatField _damage_flustuation;
     private FloatField _clip_size;
-    private FloatField _precision;
     private FloatField _reload_time;
     private FloatField _simultanious_bullets;
     private FloatField _critical_chance;
@@ -70,7 +69,6 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
         _fire_rate = _root.Q<FloatField>("fl_fire_rate");
         _damage_flustuation = _root.Q<FloatField>("fl_damage_fluctuation");
         _clip_size = _root.Q<FloatField>("fl_clip_size");
-        _precision = _root.Q<FloatField>("fl_precision");
         _reload_time = _root.Q<FloatField>("fl_reload_time");
         _simultanious_bullets = _root.Q<FloatField>("fl_simultanious_bullets");
         _critical_chance = _root.Q<FloatField>("fl_critical_chance");
@@ -382,12 +380,11 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
         AddW("damage",          _damage,          c => c.Damage,    2f,   500f);
         AddW("fire_rate",       _fire_rate,       c => c.FireRate,  0.2f, 30f);
         AddW("clip_size",       _clip_size,       c => c.ClipSize,  1f,   200f);
-        AddW("precision",       _precision,       c => c.Precision, 1f,   100f);
         AddW("critical_chance", _critical_chance, c => c.CritChance,1f,   100f);
         AddW("stagger",         _stagger,         c => c.Stagger,   1f,   100f);
 
         // All stat fields are display-only; upgrading happens through the +/- steppers.
-        foreach (var f in new[] { _damage, _fire_rate, _damage_flustuation, _clip_size, _precision,
+        foreach (var f in new[] { _damage, _fire_rate, _damage_flustuation, _clip_size,
                                   _reload_time, _simultanious_bullets, _critical_chance, _stagger, _recoil })
             f?.SetEnabled(false);
 
@@ -514,7 +511,7 @@ public class UIT_ChooseWeaponLevelLogic : MonoBehaviour
     void ApplyStatsRowClass()
     {
         string[] names = {
-            "fl_damage","fl_fire_rate","fl_damage_fluctuation","fl_clip_size","fl_precision",
+            "fl_damage","fl_fire_rate","fl_damage_fluctuation","fl_clip_size",
             "fl_reload_time","fl_simultanious_bullets","fl_critical_chance","fl_stagger","fl_recoil"
         };
         foreach (var n in names)

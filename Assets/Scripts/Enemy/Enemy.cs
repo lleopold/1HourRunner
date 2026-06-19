@@ -61,6 +61,12 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     private float _dbgLastStaggerTime = -999f;
     private float _dbgMinVelSinceHit = 999f;
 
+    // Stagger VFX — electric crackle above head, lives while the zombie is recovering its speed
+    [SerializeField] private float _staggerVfxHeight = 2.0f;
+    private static GameObject _staggerVfxPrefab;
+    private GameObject _staggerVfxInstance;
+    private bool _staggerActive;
+
     private void Awake()
     {
         Debug.Log("Enemy Awake");
@@ -376,6 +382,15 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
             float v = zombieNavMeshAgent.velocity.magnitude;
             if (v < _dbgMinVelSinceHit) _dbgMinVelSinceHit = v;
         }
+
+        // End the stagger VFX once the agent has climbed back near full speed (or a safety timeout).
+        if (_staggerActive && zombieNavMeshAgent != null && _enemyConfig != null)
+        {
+            float sinceHit = Time.time - _dbgLastStaggerTime;
+            bool recovered = zombieNavMeshAgent.velocity.magnitude >= _enemyConfig.speed * 0.9f;
+            if ((recovered && sinceHit > 0.15f) || sinceHit > 4f)
+                HideStaggerVfx();
+        }
         Debug.DrawRay(transform.position, transform.forward * 5, Color.red);  // Expected forward
         Debug.DrawRay(transform.position, zombieNavMeshAgent.velocity.normalized * 5, Color.green); // Movement direction
 
@@ -501,6 +516,33 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
         // Smooth recovery: restore the speed cap; acceleration ramps velocity back up.
         zombieNavMeshAgent.speed = baseSpeed;
+
+        // Electric crackle above the head while staggered (Update ends it on recovery).
+        ShowStaggerVfx();
+    }
+
+    private void ShowStaggerVfx()
+    {
+        if (_staggerVfxPrefab == null)
+            _staggerVfxPrefab = Resources.Load<GameObject>("VFX/StaggerSpark");
+        if (_staggerVfxPrefab == null) return;
+
+        _staggerActive = true;
+        if (_staggerVfxInstance != null) return; // already showing, keep it alive
+
+        _staggerVfxInstance = Instantiate(_staggerVfxPrefab, transform);
+        _staggerVfxInstance.transform.localPosition = Vector3.up * _staggerVfxHeight;
+        _staggerVfxInstance.transform.localRotation = Quaternion.identity;
+    }
+
+    private void HideStaggerVfx()
+    {
+        _staggerActive = false;
+        if (_staggerVfxInstance != null)
+        {
+            Destroy(_staggerVfxInstance);
+            _staggerVfxInstance = null;
+        }
     }
     public void HitLayerPlus()
     {
@@ -542,6 +584,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     }
     public void Die()
     {
+        HideStaggerVfx();
         DisableMainCharacter();
         //EnableRagdoll();
         KickbackRagdoll(5f);

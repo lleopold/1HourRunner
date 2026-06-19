@@ -348,6 +348,7 @@ namespace ZombieGame
             var r = AimPrecisionColors.ComputeHitChance(angle, distance, wCfg, pCfg);
 
             GUI.Label(new Rect(10, y, 400, 20), "── Shot Chance ──────────────────"); y += 20;
+            GUI.Label(new Rect(10, y, 500, 20), $"Weapon:           {(string.IsNullOrEmpty(wCfg.Name) ? wCfg.name : wCfg.Name)}"); y += 20;
             GUI.Label(new Rect(10, y, 400, 20), $"Aim angle:        {angle:F1}°"); y += 20;
             GUI.Label(new Rect(10, y, 400, 20), $"Weapon accuracy:  {weaponAcc:F2}  ({wCfg.Accuracy:F0}%)"); y += 20;
             GUI.Label(new Rect(10, y, 400, 20), $"Player accuracy:  {playerAcc:F2}  ({pCfg.Accuracy:F0}%)"); y += 20;

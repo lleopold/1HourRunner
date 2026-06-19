@@ -12,7 +12,6 @@ public class WeaponConfig : ScriptableObject
     public float FireRate;//How many shots per second
     public float DamageFluctuation;
     public int ClipSize;
-    public float Precision;
     public float ReloadTime;
     /// <summary>
     /// Shotgun 8gauge, Bird

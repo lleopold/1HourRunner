@@ -50,7 +50,7 @@ public class WeaponsCarouselController : MonoBehaviour
     private bool _autoSpin = true;
 
     // Stat FloatFields (optional � all queried by name, null if not in UXML)
-    private FloatField _fDamage, _fFireRate, _fDamageFluct, _fClip, _fPrecision,
+    private FloatField _fDamage, _fFireRate, _fDamageFluct, _fClip,
                        _fReload, _fSimul, _fCrit, _fStagger, _fRecoil,
                        _fAccuracy, _fWeight, _fOptimalRange, _fMaxRange;
 
@@ -63,7 +63,6 @@ public class WeaponsCarouselController : MonoBehaviour
         "bar_fill_fire_rate",
         "bar_fill_damage_fluctuation",
         "bar_fill_clip_size",
-        "bar_fill_precision",
         "bar_fill_reload_time",
         "bar_fill_simultanious_bullets",
         "bar_fill_critical_chance",
@@ -231,7 +230,6 @@ public class WeaponsCarouselController : MonoBehaviour
         _fFireRate = root.Q<FloatField>("fl_fire_rate");
         _fDamageFluct = root.Q<FloatField>("fl_damage_fluctuation");
         _fClip = root.Q<FloatField>("fl_clip_size");
-        _fPrecision = root.Q<FloatField>("fl_precision");
         _fReload = root.Q<FloatField>("fl_reload_time");
         _fSimul = root.Q<FloatField>("fl_simultanious_bullets");
         _fCrit = root.Q<FloatField>("fl_critical_chance");
@@ -404,7 +402,6 @@ public class WeaponsCarouselController : MonoBehaviour
             _fFireRate.value = cfg.FireRate;
             _fDamageFluct.value = cfg.DamageFluctuation;
             _fClip.value = cfg.ClipSize;
-            _fPrecision.value = cfg.Precision;
             _fReload.value = cfg.ReloadTime;
             _fSimul.value = cfg.SimultaniousBullets;
             _fCrit.value = cfg.CritChance;
@@ -431,7 +428,6 @@ public class WeaponsCarouselController : MonoBehaviour
             cfg.FireRate,
             cfg.DamageFluctuation,
             cfg.ClipSize,
-            cfg.Precision,
             cfg.ReloadTime,
             cfg.SimultaniousBullets,
             cfg.CritChance,
