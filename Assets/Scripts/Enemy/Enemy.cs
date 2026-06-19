@@ -47,6 +47,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     //[SerializeField] private Animator _animator;
     private static DamageNumber _damageNumberPrefab;
     private static DamageNumber _damageNumberPrefab_crit;
+    private static AudioClip _hitClip;
     public EnemyAlertIndicator AlertIndicator { get; private set; }
     private EnemyAnimator _enemyAnimator;
     private static Enemy _closestEnemy;
@@ -418,6 +419,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         }
 
         Hit();
+        PlayHitSound();
         ApplyStagger(weaponStagger, isCrit);
 
         Vector3 damagePosition = transform.position + Vector3.up * 1.5f;
@@ -434,6 +436,21 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
             if (zombieCollider) zombieCollider.enabled = false;
             Die();
         }
+    }
+
+    private void PlayHitSound()
+    {
+        if (_hitClip == null)
+            _hitClip = Resources.Load<AudioClip>("Audio/SFX/Enemy/zombie_hit_1");
+
+        if (_hitClip == null)
+        {
+            Debug.LogWarning("zombie_hit_1 not found at Resources/Audio/SFX/Enemy/zombie_hit_1");
+            return;
+        }
+
+        if (SoundFXManager.Instance != null)
+            SoundFXManager.Instance.PlaySoundFXClip(_hitClip, transform, _enemyConfig.hitSoundVolume);
     }
 
     public void Hit()

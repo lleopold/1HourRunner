@@ -151,14 +151,6 @@ public class Coin : MonoBehaviour
         // Accelerate to max speed
         _currentChaseSpeed = Mathf.MoveTowards(_currentChaseSpeed, _maxSpeed, _chaseAcceleration * Time.deltaTime);
         transform.position = Vector3.MoveTowards(transform.position, _player.transform.position, _currentChaseSpeed * Time.deltaTime);
-        
-        // Scale effect as it gets closer
-        float dist = Vector3.Distance(transform.position, _player.transform.position);
-        if (dist < 2f)
-        {
-            float scale = Mathf.Lerp(1.5f, 1f, dist / 2f);
-            transform.localScale = Vector3.one * scale;
-        }
 
         CheckPickupDistance();
     }

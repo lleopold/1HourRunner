@@ -56,7 +56,7 @@ public class BulletBehaviour : MonoBehaviour
         main.simulationSpace = ParticleSystemSimulationSpace.World; // stay behind bullet
         main.startLifetime = 0.10f;   // short period
         main.startSpeed = 0f;         // particles don't drift, just fade
-        main.startSize = 0.08f;
+        main.startSize = 0.04f;
         main.startColor = new Color(startCol.r, startCol.g, startCol.b, 1f);
         main.maxParticles = 100;
         main.playOnAwake = false;
@@ -108,8 +108,10 @@ public class BulletBehaviour : MonoBehaviour
     {
         if (hitEffectPrefab != null)
         {
-            Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
-            Instantiate(hitEffectPrefabBloodCloud, transform.position, Quaternion.identity);
+            var fx1 = Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
+            var fx2 = Instantiate(hitEffectPrefabBloodCloud, transform.position, Quaternion.identity);
+            fx1.transform.localScale *= 0.5f;
+            fx2.transform.localScale *= 0.5f;
         }
         DestroyBullet();
     }
@@ -144,6 +146,8 @@ public class BulletBehaviour : MonoBehaviour
         {
             var impact = Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
             var impact2 = Instantiate(hitEffectPrefabBloodCloud, transform.position, Quaternion.identity);
+            impact.transform.localScale *= 0.5f;
+            impact2.transform.localScale *= 0.5f;
             ParticleSystem hitPart = impact.GetComponent<ParticleSystem>();
             ParticleSystem hitPart2 = impact2.GetComponent<ParticleSystem>();
             hitPart?.Play();
@@ -168,6 +172,7 @@ public class BulletBehaviour : MonoBehaviour
         {
             var splash = Instantiate(_bloodSplashPrefab, hitPoint,
                 Quaternion.LookRotation(_direction == Vector3.zero ? Vector3.forward : _direction));
+            splash.transform.localScale *= 0.5f;
             Destroy(splash, 3f);
         }
 

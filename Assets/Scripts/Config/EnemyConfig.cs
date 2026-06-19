@@ -10,6 +10,7 @@ public class EnemyConfig : ScriptableObject
     public float speed;
     [Range(0f, 100f)] public float staggerResistance; // 0 = full stagger, 100 = immune
     [Range(0f, 100f)] public float acceleration;       // 0-100, mapped to NavMeshAgent.acceleration (recovery ramp)
+    [Range(0f, 1f)] public float hitSoundVolume = 0.4f; // volume of the get-hit SFX
     public float rage;
     public float meleeRadius;
     public float meleeDamage;
