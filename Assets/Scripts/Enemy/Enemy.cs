@@ -167,7 +167,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         At(stop, idleZombie, () => stop.CanExit);
 
         // 3. From Idle, choose what to do next
-        At(idleZombie, attackFreely, CloseToPlayer); // Re-enable attacking!
+        At(idleZombie, turnToPlayer, CloseToPlayer); // turn to face the player BEFORE attacking
         At(idleZombie, startMoving, FarToPlayer);
 
         // 4. If we lose the player while stopping/idling, go back to searching
@@ -179,8 +179,8 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         // After attack: always turn to face the player first
         At(attackFreely, turnToPlayer, FinishedAttack);
 
-        // After turning: attack again if close, start moving if far
-        At(turnToPlayer, stop, () => turnToPlayer.CanExit && CloseToPlayer());
+        // After turning (now facing the player): attack if close, start moving if far
+        At(turnToPlayer, attackFreely, () => turnToPlayer.CanExit && CloseToPlayer());
         At(turnToPlayer, startMoving, () => turnToPlayer.CanExit && FarToPlayer());
 
 

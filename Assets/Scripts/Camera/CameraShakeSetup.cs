@@ -25,7 +25,9 @@ public class CameraShakeSetup : MonoBehaviour
             wiggle.PositionActive = true;
             wiggle.PositionWiggleProperties = new WiggleProperties
             {
-                WigglePermitted = true,
+                // Idle until MMCameraShaker triggers a finite WigglePosition(duration) on fire.
+                // Leaving this true makes the camera noise-wiggle permanently from game start.
+                WigglePermitted = false,
                 WiggleType = WiggleTypes.Noise
             };
 
