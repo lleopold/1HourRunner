@@ -173,6 +173,14 @@ namespace ZombieGame
 
             Debug.Log($"[SHOT] Angle={angle:F2}° | Dist={distance:F1} PB={hcr.IsPointBlank} DistMult={hcr.DistanceMultiplier:F2} | HitChance={hitChance:F3} | AimMode={(_targeting != null ? _targeting.CurrentAimingType.ToString() : "null")}");
 
+            // Downed zombie → next shot is a guaranteed point-blank hit so the bonus crit reliably lands.
+            Enemy primaryEnemy = primary != null ? (primary.GetComponent<Enemy>() ?? primary.GetComponentInParent<Enemy>()) : null;
+            if (primaryEnemy != null && primaryEnemy.HasPendingGuaranteedCrit)
+            {
+                hitChance = 1f;
+                Debug.Log("[SHOT] Primary is downed → guaranteed point-blank hit + crit");
+            }
+
             GameObject hit = null;
 
             // Primary roll
@@ -252,8 +260,17 @@ namespace ZombieGame
 
         private void SpawnHitBullet(GameObject targetZombie)
         {
-            bool crit;
-            crit = WeaponConfigSingleton.weaponConfig.CritChance > 0 && UnityEngine.Random.value <= WeaponConfigSingleton.weaponConfig.CritChance / 100f;
+            // Collider may be on a child — walk up the hierarchy
+            Enemy enemy = targetZombie.GetComponent<Enemy>() ?? targetZombie.GetComponentInParent<Enemy>();
+
+            bool crit = WeaponConfigSingleton.weaponConfig.CritChance > 0 && UnityEngine.Random.value <= WeaponConfigSingleton.weaponConfig.CritChance / 100f;
+            // Hitting a downed zombie consumes its pending bonus → forced crit (one per knockdown).
+            if (enemy != null && enemy.ConsumeGuaranteedCrit())
+            {
+                crit = true;
+                Debug.Log("[SHOT] Guaranteed crit on downed zombie");
+            }
+
             Transform gunBarrel = GetWeaponPosition();
             Vector3 dir = (targetZombie.transform.position - gunBarrel.position).normalized;
             dir.y = 0;
@@ -267,8 +284,6 @@ namespace ZombieGame
             {
                 damage *= WeaponConfigSingleton.Instance.WeaponConfig.CritMultiplier;
             }
-            // Collider may be on a child — walk up the hierarchy
-            Enemy enemy = targetZombie.GetComponent<Enemy>() ?? targetZombie.GetComponentInParent<Enemy>();
             if (enemy == null)
                 Debug.LogWarning($"[SHOT] SpawnHitBullet: no Enemy component found on {targetZombie.name} or its parents!");
             else

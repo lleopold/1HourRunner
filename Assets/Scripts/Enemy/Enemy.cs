@@ -67,6 +67,27 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     private GameObject _staggerVfxInstance;
     private bool _staggerActive;
 
+    // Knockdown — a crit floors the zombie (Fall→GettingUp anim). The next hit while it's down
+    // is a guaranteed point-blank crit. Re-knockdown is blocked until it's up + a short cooldown,
+    // so fast weapons can't chain-stunlock or farm crits.
+    [SerializeField] private float _knockdownCooldown = 0.5f;    // grace after standing up before it can be floored again
+    [SerializeField] private float _knockdownMaxDuration = 4f;   // safety auto-recover if anim states never report done
+    private bool _knockedDown;
+    private bool _pendingGuaranteedCrit;
+    private bool _seenDownAnim;                                  // confirms the fall/getup actually played before we recover
+    private float _knockdownStart;
+    private float _knockdownCooldownUntil = -999f;
+
+    public bool IsKnockedDown => _knockedDown;
+    public bool HasPendingGuaranteedCrit => _pendingGuaranteedCrit;
+    // Consumed once by the shooter — turns the shot into a forced crit, then clears.
+    public bool ConsumeGuaranteedCrit()
+    {
+        if (!_pendingGuaranteedCrit) return false;
+        _pendingGuaranteedCrit = false;
+        return true;
+    }
+
     private void Awake()
     {
         Debug.Log("Enemy Awake");
@@ -374,6 +395,10 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     void Update()
     {
         UpdateClosestEnemy();
+
+        // While floored the zombie is frozen — skip the state machine so it can't fight the anim.
+        if (_knockedDown) { TickKnockdown(); return; }
+
         _stateMachine.Tick();
 
         // Track lowest agent velocity since last stagger (so a fast recovery can't hide the dip)
@@ -437,6 +462,10 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         PlayHitSound();
         ApplyStagger(weaponStagger, isCrit);
 
+        // Crit floors the zombie (only if it survived the hit and isn't already down / on cooldown).
+        if (isCrit && _health > 0 && CanKnockDown())
+            KnockDown();
+
         Vector3 damagePosition = transform.position + Vector3.up * 1.5f;
         DamageNumber numberPrefab = (isCrit && _damageNumberPrefab_crit != null)
             ? _damageNumberPrefab_crit
@@ -489,6 +518,8 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     // effStagger = weaponStagger (x2 on crit) - this enemy's resistance, clamped 0-100.
     private void ApplyStagger(float weaponStagger, bool isCrit)
     {
+        if (_knockedDown) return; // knockdown supersedes stagger; the guaranteed-crit hit won't re-stagger
+
         float raw = weaponStagger * (isCrit ? 2f : 1f);
         float effStagger = Mathf.Clamp(raw - _enemyConfig.staggerResistance, 0f, 100f);
 
@@ -544,6 +575,47 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
             _staggerVfxInstance = null;
         }
     }
+
+    // ── Knockdown ─────────────────────────────────────────────────────────
+    private bool CanKnockDown() => !_knockedDown && Time.time >= _knockdownCooldownUntil;
+
+    private void KnockDown()
+    {
+        _knockedDown = true;
+        _pendingGuaranteedCrit = true;   // next hit while down = forced point-blank crit
+        _seenDownAnim = false;
+        _knockdownStart = Time.time;
+
+        if (_animator != null) _animator.SetTrigger("Fall");
+        if (zombieNavMeshAgent != null)
+        {
+            zombieNavMeshAgent.velocity = Vector3.zero;
+            zombieNavMeshAgent.isStopped = true;
+        }
+        HideStaggerVfx(); // no crackle while floored
+    }
+
+    // Called from Update while _knockedDown: hold the zombie frozen and detect when it has stood back up.
+    private void TickKnockdown()
+    {
+        if (zombieNavMeshAgent != null) zombieNavMeshAgent.isStopped = true;
+
+        var st = _animator.GetCurrentAnimatorStateInfo(0);
+        if (st.IsName("FallingBack") || st.IsName("GettingUp")) _seenDownAnim = true;
+
+        bool animDone = _seenDownAnim && !st.IsName("FallingBack") && !st.IsName("GettingUp");
+        if (animDone || Time.time - _knockdownStart > _knockdownMaxDuration)
+            RecoverFromKnockdown();
+    }
+
+    private void RecoverFromKnockdown()
+    {
+        _knockedDown = false;
+        _pendingGuaranteedCrit = false;  // bonus expires if it wasn't used while down
+        _seenDownAnim = false;
+        _knockdownCooldownUntil = Time.time + _knockdownCooldown;
+        if (zombieNavMeshAgent != null) zombieNavMeshAgent.isStopped = false;
+    }
     public void HitLayerPlus()
     {
         Animator zombieAnimator = GetComponent<Animator>();
@@ -585,6 +657,8 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     public void Die()
     {
         HideStaggerVfx();
+        _knockedDown = false;
+        _pendingGuaranteedCrit = false;
         DisableMainCharacter();
         //EnableRagdoll();
         KickbackRagdoll(5f);
