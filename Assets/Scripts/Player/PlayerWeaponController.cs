@@ -23,9 +23,7 @@ namespace ZombieGame
 
         private float _nextFireTime;
         private int _bulletsInClip;
-        private float _reloadTimeLeft;
-        private bool _reloadingInProgress;
-        private int _reloadingProgress;
+        private Reload _reload;
         private float _recoilAngle;
 
         private static DamageNumber _damageNumberPrefab;
@@ -55,6 +53,7 @@ namespace ZombieGame
             _aimingCircleTrigger = aimingCircleTrigger;
             _targeting = targeting;
             _rigRecoilController = new RigRecoilController(this);
+            _reload = new Reload(transform, _uiGameScreen);
             _bulletPrefab = Resources.Load<GameObject>("Weapons/bullet_1");
             if (_bulletPrefab == null) Debug.LogError("Bullet prefab is null");
             _bulletsInClip = WeaponConfigSingleton.Instance.WeaponConfig.ClipSize;
@@ -101,23 +100,22 @@ namespace ZombieGame
                     }
                 }
 
-                if (_bulletsInClip == 0 && !_reloadingInProgress)
+                if (_bulletsInClip == 0 && !_reload.InProgress)
                 {
-                    _reloadTimeLeft = GetTotalReloadTime();
-                    _nextFireTime = Time.time + _reloadTimeLeft;
-                    _reloadingInProgress = true;
-                    _uiGameScreen.SetAmmoBar(0);
+                    _nextFireTime = Time.time + _reload.Begin();
                 }
-
-                if (_bulletsInClip > 0 && !_reloadingInProgress)
+                else if (_reload.InProgress)
+                {
+                    if (_reload.Tick())
+                    {
+                        _bulletsInClip = WeaponConfigSingleton.Instance.WeaponConfig.ClipSize;
+                        _uiGameScreen.SetBullets(_bulletsInClip);
+                    }
+                }
+                else // bullets left, not reloading
                 {
                     _uiGameScreen.SetAmmoBar(GetPercentageOfClipLeft());
                     _uiGameScreen.SetBullets(_bulletsInClip);
-                }
-
-                if (_reloadingInProgress)
-                {
-                    ReloadingProgress();
                 }
             }
             catch (Exception e)
@@ -341,29 +339,9 @@ namespace ZombieGame
 
         // ── Reload ────────────────────────────────────────────────────────────
 
-        private void ReloadingProgress()
-        {
-            _reloadingProgress = (int)(100 - (100 * (_reloadTimeLeft / GetTotalReloadTime()))) + 1;
-            _reloadTimeLeft -= Time.deltaTime;
-            _uiGameScreen.SetAmmoBar(_reloadingProgress);
-            if (_reloadingProgress >= 100)
-            {
-                _bulletsInClip = WeaponConfigSingleton.Instance.WeaponConfig.ClipSize;
-                _uiGameScreen.SetBullets(_bulletsInClip);
-                _reloadingProgress = 100;
-                _reloadingInProgress = false;
-            }
-        }
-
         private float GetPercentageOfClipLeft()
         {
             return (float)_bulletsInClip / WeaponConfigSingleton.Instance.WeaponConfig.ClipSize * 100f;
-        }
-
-        private float GetTotalReloadTime()
-        {
-            return WeaponConfigSingleton.Instance.WeaponConfig.ReloadTime
-                   * (1 + PlayerConfigSingleton.Instance.PlayerConfig.reloadSpeed / 100);
         }
 
         // ── Muzzle flash ──────────────────────────────────────────────────────

@@ -29,6 +29,14 @@ public class WeaponConfig : ScriptableObject
     public float Recoil;
     public float Weight;
     public AudioClip shootingClip;
+    /// <summary>
+    /// Played once per bullet while reloading (revolver/shotgun style single loading).
+    /// </summary>
+    public AudioClip loadOneBulletClip;
+    /// <summary>
+    /// Played once when reload finishes (gun cocked / cylinder snapped shut).
+    /// </summary>
+    public AudioClip cockGunClip;
     public ParticleSystem muzzleFlash;
     public float Accuracy;
     public float PointBlankRange;        // up to this distance, hit chance is 100% (if aiming at the target)
