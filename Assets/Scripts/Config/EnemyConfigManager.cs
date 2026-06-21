@@ -18,7 +18,8 @@ public class EnemyConfigManager : ScriptableObject
     {
         foreach (var prefabConfig in prefabConfigs)
         {
-            if (prefabConfig.prefabName == prefabName)
+            // Case-insensitive: prefab/clone names vary in casing (e.g. "_Ragdoll" vs "_ragdoll").
+            if (string.Equals(prefabConfig.prefabName, prefabName, System.StringComparison.OrdinalIgnoreCase))
             {
                 return prefabConfig.config;
             }

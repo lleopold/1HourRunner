@@ -801,6 +801,10 @@ namespace ZombieGame
             _meshAimingCircle.colors = colors;
             _meshColliderAimingCircle.sharedMesh = null;
             _meshColliderAimingCircle.sharedMesh = _meshAimingCircle;
+
+            // Feed the true cone shape to the trigger so it can drop zombies that leave the
+            // arc. The convex MeshCollider can't do this reliably (hull + per-frame rebuild).
+            _aimingCircleTrigger?.SetConeShape(angle, vLength + _pointyTipFactor);
         }
 
         // Updated signature: Now generates a true 2D matrix texture with horizontal bands AND vertical grid ticks

@@ -26,7 +26,8 @@ public class TestScript : MonoBehaviour
     {
         lastSpawnTime = Time.time;
         //zombiePrefabNames = new List<string> { "fem_zombie_2", "fem_zombie_3", "male_zombie_1", "male_zombie_2", "male_zombie_3", "male_zombie_4" };
-        zombiePrefabNames = new List<string> { "male_zombie_II_1_Ragdoll" }; //"fem_zombie_II_1",
+        zombiePrefabNames = new List<string> { "male_zombie_II_1_Ragdoll", "male_zombie_sports_1_ragdoll" }; //"fem_zombie_II_1",
+
     }
     int getNumberOfZombiesOnScreen()
     {
@@ -64,9 +65,17 @@ public class TestScript : MonoBehaviour
     {
         string zombiePrefabName = zombiePrefabNames[Random.Range(0, zombiePrefabNames.Count)];
         var configManager = Resources.Load<EnemyConfigManager>("Config/Enemy/EnemyConfigManager");
+        if (configManager == null) { Debug.LogError("EnemyConfigManager not found at Resources/Config/Enemy/EnemyConfigManager"); return false; }
+
+        // GetConfig may return null (unknown name + null defaultConfig) — don't dereference it blindly.
         var enemyConfig = configManager.GetConfig(zombiePrefabName);
-        var prefab = enemyConfig.prefab ?? Resources.Load<GameObject>("Enemies/" + zombiePrefabName);
-        if (!prefab) { Debug.LogError($"Zombie prefab not found: {zombiePrefabName}"); return false; }
+        var prefab = (enemyConfig != null ? enemyConfig.prefab : null)
+                     ?? Resources.Load<GameObject>("Enemies/" + zombiePrefabName);
+        if (!prefab)
+        {
+            Debug.LogError($"Zombie prefab not found: '{zombiePrefabName}' — no config prefab and no Resources/Enemies/{zombiePrefabName}.prefab. Skipping.");
+            return false;
+        }
 
         var player = GameObject.Find("Player");
         var cam = Camera.main;
@@ -85,15 +94,36 @@ public class TestScript : MonoBehaviour
             pos = hit.position;
         }
 
+        // Instantiate inactive so we can inject the player reference BEFORE Enemy.Awake runs.
+        // Awake builds AI states that dereference _player.transform; activating an already-set
+        // instance avoids the null-ref race (the old `enemy._player = player` ran too late).
+        bool prefabWasActive = prefab.activeSelf;
+        prefab.SetActive(false);
         var go = Instantiate(prefab, pos, Quaternion.identity);
+        prefab.SetActive(prefabWasActive);
+
         // Tag first so a later missing-component error can't leave the zombie untagged (uncounted → spawn spam).
         go.tag = "Zombie";
-        DataHolder.EnemiesSpawned++;
-        go.name = zombiePrefabName + DataHolder.EnemiesSpawned;
 
         var enemy = go.GetComponent<Enemy>();
         if (enemy != null) enemy._player = player;
         else Debug.LogWarning($"Spawned zombie '{go.name}' has no Enemy component on its root.");
+
+        // Activate (runs Awake) with the player injected AND the original "(Clone)" name intact,
+        // so Enemy.Awake's config lookup — which strips "(Clone)" — still resolves. Rename after.
+        try
+        {
+            go.SetActive(true);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Exception while activating spawned zombie '{go.name}': {ex}");
+            Destroy(go);
+            return false;
+        }
+
+        DataHolder.EnemiesSpawned++;
+        go.name = zombiePrefabName + DataHolder.EnemiesSpawned;
 
         var billboard = go.GetComponentInChildren<BillbBoard>();
         if (billboard != null) billboard.cam = cam.transform;

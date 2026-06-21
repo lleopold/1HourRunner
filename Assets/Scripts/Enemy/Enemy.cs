@@ -118,8 +118,16 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         _healthBarVisible = false;
 
         string prefabName = gameObject.name;
-        _player = GameObject.FindWithTag("Player");
+        // Respect a player injected by the spawner before activation; only resolve it ourselves
+        // if nobody set it. (Awake builds AI states that dereference _player.transform.)
+        if (_player == null) _player = GameObject.FindWithTag("Player");
         if (_player == null) _player = GameObject.Find("Player");
+        if (_player == null)
+        {
+            Debug.LogError($"[Enemy] '{gameObject.name}' has no Player reference at Awake — " +
+                           "inject it before activation or ensure a 'Player' exists in the scene. Aborting AI setup.", this);
+            return;
+        }
         Target = _player;
 
         PlayerConfigManager playerConfigManager = Resources.Load<PlayerConfigManager>("Config/Player/PlayerConfigManager"); // Load the config manager
@@ -130,6 +138,12 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
         EnemyConfigManager configManager = Resources.Load<EnemyConfigManager>("Config/Enemy/EnemyConfigManager"); // Load the config manager
         _enemyConfig = configManager.GetConfig(prefabName.Replace("(Clone)", ""));//MRS
+        if (_enemyConfig == null)
+        {
+            Debug.LogError($"[Enemy] No EnemyConfig for '{prefabName.Replace("(Clone)", "")}' " +
+                           "(no matching prefabConfigs entry and defaultConfig is null). Aborting AI setup.", this);
+            return;
+        }
 
         _health = _enemyConfig.health;
         _amountOfRuns = _enemyConfig.maxAmountOfRuns; //how many times the zombie can run
@@ -240,10 +254,12 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
     public void SetOutline(bool newSetting)
     {
+        if (_outline == null) return;
         _outline.enabled = newSetting;
     }
     public void SetOutlineColor(Color c)
     {
+        if (_outline == null) return;
         _outline.OutlineColor = c;
     }
     public bool FinishedAttack()
@@ -659,20 +675,22 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         HideStaggerVfx();
         _knockedDown = false;
         _pendingGuaranteedCrit = false;
-        DisableMainCharacter();
-        //EnableRagdoll();
+
+        // Stop the agent while it's still active and on the NavMesh. Must happen BEFORE
+        // DisableMainCharacter() deactivates the GameObject — set_isStopped throws on an
+        // inactive / off-mesh agent.
+        if (zombieNavMeshAgent != null && zombieNavMeshAgent.isActiveAndEnabled && zombieNavMeshAgent.isOnNavMesh)
+            zombieNavMeshAgent.isStopped = true;
+
+        DataHolder.EnemiesKilled++;
+        if (healthBarUI != null) Destroy(healthBarUI.gameObject);
+
+        // Death visual = ragdoll head/body pieces spawned here.
         KickbackRagdoll(5f);
 
-
-
-        //SpawnBloodPoolAtSpine(gameObject);
-        //gameObject.tag = "Z_Dead";
-        Destroy(healthBarUI.gameObject);
-        zombieNavMeshAgent.isStopped = true;
-        DataHolder.EnemiesKilled++;
-        _animator.SetBool("Die", true);
-        float clipLength = GetAnimationClip("Death").length;
-        StartCoroutine(WaitForAnimationAndSpawnBloodPool(clipLength));
+        // Hide the original zombie. Keep LAST: this deactivates the GameObject, so anything
+        // after it (agent, animator, StartCoroutine) would throw or silently no-op.
+        DisableMainCharacter();
 
         //var dissolveComponent = gameObject.GetComponent<EnemyDissolve>();
         //dissolveComponent.TriggerDissolveAndDestroy();
