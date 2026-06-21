@@ -14,9 +14,9 @@ public class TestScript : MonoBehaviour
     public float spawnRadius = 5f;   // Radius around the player to spawn zombies
 
     public GameObject zombiePrefab;
-    public float timeBetweenSpawns = 7f;
-    public int minZombiesOnScreen = 1;
-    public int maxZombiesOnScreen = 1;
+    public float timeBetweenSpawns = 1f;
+    public int minZombiesOnScreen = 3;
+    public int maxZombiesOnScreen = 9;
 
     private float lastSpawnTime;
     private GameObject[] zombies;
@@ -44,29 +44,36 @@ public class TestScript : MonoBehaviour
     void Update()
     {
         zombies = GameObject.FindGameObjectsWithTag("Zombie");
-        spawnOneZombie();
+        //spawnOneZombie();
         // Check if it's time to spawn zombies, just one zombie on screen
-        //if (Time.time - lastSpawnTime >= timeBetweenSpawns && zombies.Length < minZombiesOnScreen)
-        //{
-        //    SpawnZombies();
-        //    lastSpawnTime = Time.time;
-        //}
+        Debug.Log($"Zombies on screen: {zombies.Length}, Time since last spawn: {Time.time - lastSpawnTime} Maxzombies: {maxZombiesOnScreen}");
+        if (Time.time - lastSpawnTime >= timeBetweenSpawns && zombies.Length < maxZombiesOnScreen)
+        {
+            Debug.Log("Spawning a new zombie...");
+            // Only reset the timer when a zombie actually spawned — a failed spawn shouldn't burn the cooldown.
+            if (SpawnZombies())
+                lastSpawnTime = Time.time;
+        }
+        else
+        {
+            Debug.Log("Not spawning a new zombie yet.");
+        }
     }
 
-    public void SpawnZombies()
+    public bool SpawnZombies()
     {
         string zombiePrefabName = zombiePrefabNames[Random.Range(0, zombiePrefabNames.Count)];
         var configManager = Resources.Load<EnemyConfigManager>("Config/Enemy/EnemyConfigManager");
         var enemyConfig = configManager.GetConfig(zombiePrefabName);
         var prefab = enemyConfig.prefab ?? Resources.Load<GameObject>("Enemies/" + zombiePrefabName);
-        if (!prefab) { Debug.LogError($"Zombie prefab not found: {zombiePrefabName}"); return; }
+        if (!prefab) { Debug.LogError($"Zombie prefab not found: {zombiePrefabName}"); return false; }
 
         var player = GameObject.Find("Player");
         var cam = Camera.main;
         if (!player || !cam)
         {
             Debug.LogError("Player or Main Camera not found in scene — cannot spawn zombies.");
-            return;
+            return false;
         }
 
         if (!TryGetSpawnPoint(player.transform.position, cam, out var pos))
@@ -74,20 +81,28 @@ public class TestScript : MonoBehaviour
             // fallback: spawn behind camera on NavMesh
             var back = cam.transform.position - cam.transform.forward * 10f;
             if (!UnityEngine.AI.NavMesh.SamplePosition(back, out var hit, navSampleMax, UnityEngine.AI.NavMesh.AllAreas))
-                return;
+                return false;
             pos = hit.position;
         }
 
         var go = Instantiate(prefab, pos, Quaternion.identity);
-        go.GetComponent<Enemy>()._player = player;
-        go.GetComponentInChildren<BillbBoard>().cam = cam.transform;
+        // Tag first so a later missing-component error can't leave the zombie untagged (uncounted → spawn spam).
+        go.tag = "Zombie";
         DataHolder.EnemiesSpawned++;
         go.name = zombiePrefabName + DataHolder.EnemiesSpawned;
-        go.tag = "Zombie";
+
+        var enemy = go.GetComponent<Enemy>();
+        if (enemy != null) enemy._player = player;
+        else Debug.LogWarning($"Spawned zombie '{go.name}' has no Enemy component on its root.");
+
+        var billboard = go.GetComponentInChildren<BillbBoard>();
+        if (billboard != null) billboard.cam = cam.transform;
 
         // ensure agent is validly placed
         var agent = go.GetComponent<UnityEngine.AI.NavMeshAgent>();
         if (agent) agent.Warp(pos);
+
+        return true;
     }
     bool TryGetSpawnPoint(Vector3 playerPos, Camera cam, out Vector3 spawnPos)
     {

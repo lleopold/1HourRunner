@@ -12,6 +12,7 @@ public class AttackFreely : IState
 
     private const float TelegraphDuration = 0.1f;
     private const float AttackTimeoutSeconds = 2.5f;
+    private const float AttackTrackSpeed = 720f; // deg/s the zombie keeps facing the player mid-swing (high so a close-circling player can't outrun it)
 
     private bool _attacking;
     private Coroutine _attackTimeoutCo;
@@ -62,6 +63,21 @@ public class AttackFreely : IState
             _navMeshAgent.isStopped = true;
 
         _enemyAnimator.SetVelocity(0f);
+
+        // Keep facing the player during the swing so the hit lands; agent rotation is off here,
+        // so we drive it manually. A fast player can still flank by leaving melee range.
+        var player = _enemy._player;
+        if (player != null)
+        {
+            Vector3 toPlayer = player.transform.position - _enemy.transform.position;
+            toPlayer.y = 0f;
+            if (toPlayer.sqrMagnitude > 0.001f)
+            {
+                Quaternion target = Quaternion.LookRotation(toPlayer);
+                _enemy.transform.rotation = Quaternion.RotateTowards(
+                    _enemy.transform.rotation, target, AttackTrackSpeed * Time.deltaTime);
+            }
+        }
     }
 
     private System.Collections.IEnumerator AttackSequence()

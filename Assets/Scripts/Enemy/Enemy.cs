@@ -1052,12 +1052,14 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         return Vector3.Distance(transform.position, _player.transform.position) <= _enemyConfig.meleeRadius;
     }
 
+    // Wide enough that an in-range hit lands cleanly (no fake "sure hit" whiffs); a player who
+    // gets fully behind the zombie (>90°) still dodges. Mid-swing tracking keeps this small anyway.
+    private const float FacingHitAngle = 90f;
     private bool IsFacingPlayer()
     {
         Vector3 directionToPlayer = (_player.transform.position - transform.position).normalized;
         float angle = Vector3.Angle(transform.forward, directionToPlayer);
-        Debug.Log("Angle to Player (has to be less 45%: " + angle);
-        return angle < 45f;
+        return angle < FacingHitAngle;
     }
 
     private void SpawnImpactEffect(Vector3 position)

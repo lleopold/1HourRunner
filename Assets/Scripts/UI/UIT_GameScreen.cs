@@ -118,7 +118,11 @@ public class UIT_GameScreen : MonoBehaviour
         Debug.LogError("NOT Added 100");
     }
 
-    private void GoToEndGame(ClickEvent evt)
+    private void GoToEndGame(ClickEvent evt) => ShowEndGame("Game Over");
+
+    // Single end-of-run path: awards meta-XP, fills the popup with real run stats, pauses.
+    // Call from both the timer/button end and the player-death end so stats are never hardcoded.
+    public void ShowEndGame(string epilog)
     {
         // Award meta-XP for this run into the persistent save: kills * XP_PER_KILL.
         int earnedXP = DataHolder.EnemiesKilled * Progression.XP_PER_KILL;
@@ -133,13 +137,15 @@ public class UIT_GameScreen : MonoBehaviour
             int seconds = Mathf.FloorToInt(timePassed % 60f);
             string timeStr = string.Format("{0:00}:{1:00}", minutes, seconds);
 
-            scriptLogic.GetComponent<UIT_EndGamePopUp>().SetEndGamePopUp(
-                "Game Over",
+            var popup = scriptLogic.GetComponent<UIT_EndGamePopUp>();
+            popup.enabled = true; // OnEnable re-wires labels and hides the root; we re-show it below
+            popup.SetEndGamePopUp(
+                epilog,
                 timeStr,
                 DataHolder.EnemiesKilled.ToString(),
-                earnedXP.ToString("F0")
+                earnedXP.ToString()
             );
-            scriptLogic.GetComponent<UIT_EndGamePopUp>()._root.visible = true;
+            if (popup._root != null) popup._root.visible = true;
 
             // Pause the game via PlayerControllerInput if available
             GameObject player = GameObject.FindWithTag("Player");

@@ -98,21 +98,12 @@ namespace ZombieGame
                 _currentHealth = value;
                 if (_currentHealth <= 0)
                 {
-                    GameObject scriptLogic = GameObject.Find("UIEndGame");
-                    if (scriptLogic != null)
-                    {
-                        if (_uiT_EndGamePopUp == null)
-                            _uiT_EndGamePopUp = scriptLogic.GetComponent<UIT_EndGamePopUp>();
-
-                        if (_uiT_EndGamePopUp != null)
-                        {
-                            _uiT_EndGamePopUp.enabled = true;
-                            _uiT_EndGamePopUp.SetEndGamePopUp("Game Over", "10:00", DataHolder.EnemiesKilled.ToString(), "1000");
-                            if (_uiT_EndGamePopUp._root != null) _uiT_EndGamePopUp._root.visible = true;
-                        }
-                    }
                     Debug.Log("Player died");
-                    PauseGame(true);
+                    // Real run stats (time/kills/XP) + pause are handled centrally here.
+                    if (_uiT_GameScreen != null)
+                        _uiT_GameScreen.ShowEndGame("You Died");
+                    else
+                        PauseGame(true);
                 }
             }
         }
