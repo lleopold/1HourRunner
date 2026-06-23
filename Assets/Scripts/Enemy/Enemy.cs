@@ -78,6 +78,28 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     private float _knockdownStart;
     private float _knockdownCooldownUntil = -999f;
 
+    // Scream / Shockwave rally — a zombie that's been right on the player for a while "snaps",
+    // screams, and shockwaves every nearby zombie into a permanent speed boost. Boost is
+    // permanent + non-stacking, so each zombie screams at most once and the wave self-limits
+    // as the horde gets boosted. Receivers do NOT re-emit (boost-only), so there's no cascade.
+    private int _zombieMask;
+    private float _speedMultiplier = 1f;   // applied wherever agent.speed is set (Start + stagger recovery)
+    private bool _boosted;
+    private float _nearPlayerTime;         // continuous seconds within the proximity radius
+
+    private bool _pendingAgony;            // set by a neighbour's blast; the any-transition pulls us into AgonyState
+    private bool _screaming;
+    private bool _screamBlastDone;
+    private float _screamStart;
+    private bool _agonizing;
+    private bool _agonyEndDone;
+    private float _agonyStart;
+    private GameObject _boostVfxInstance;   // persistent looping ring above head while boosted
+
+    public bool HasBoost => _boosted;
+    public bool ScreamFinished => _screamBlastDone;
+    public bool AgonyFinished => _agonyEndDone;
+
     public bool IsKnockedDown => _knockedDown;
     public bool HasPendingGuaranteedCrit => _pendingGuaranteedCrit;
     // Consumed once by the shooter — turns the shot into a forced crit, then clears.
@@ -152,6 +174,9 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
         _enemyAnimator = new EnemyAnimator(_animator);
 
+        int zombiesLayerIdx = LayerMask.NameToLayer("Zombies");
+        _zombieMask = zombiesLayerIdx >= 0 ? (1 << zombiesLayerIdx) : ~0;
+
         var searchForVictim = new SearchForVictim(this, _player);
         var walkToSelected = new WalkToSelected(this, zombieNavMeshAgent, _animator, _enemyConfig, _player.transform, _enemyAnimator);
         var attackFreely = new AttackFreely(this, _player, _animator, _enemyConfig, _monoBehaviour, _enemyAnimator);
@@ -222,7 +247,20 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         //At(walkToSelected, stop, CloseToGather);
 
         //_stateMachine.SetState(searchForGatheringSpot);
-        //_stateMachine.SetState(walkToGathering); 
+        //_stateMachine.SetState(walkToGathering);
+
+        // Scream / Shockwave: both states are entered via any-transitions (checked first, every tick).
+        // Receiving is registered first so a pending agony wins over starting a new scream.
+        var screamState = new ScreamState(this);
+        var agonyState = new AgonyState(this);
+        _stateMachine.AddAnyTransition(agonyState, () => _pendingAgony);
+        _stateMachine.AddAnyTransition(screamState, ScreamTrigger);
+        // Exit straight back into WalkToSelected: it re-pathes, resumes the agent AND drives the
+        // animator velocity, so there's no slide. It also routes to stop->idle->attack when close,
+        // unlike SearchForVictim which strands a near zombie and never drives the blend tree.
+        At(screamState, walkToSelected, () => ScreamFinished);
+        At(agonyState, walkToSelected, () => AgonyFinished);
+
         _stateMachine.SetState(searchForVictim);
 
         void At(IState from, IState to, Func<bool> condition) => _stateMachine.AddTransition(from, to, condition);
@@ -339,7 +377,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     {
         healthBarScroll.healthSystemArmour.Initialize(_health, 0);
         dieCondition = false;
-        zombieNavMeshAgent.speed = _enemyConfig.speed;
+        zombieNavMeshAgent.speed = _enemyConfig.speed * _speedMultiplier;
         zombieNavMeshAgent.acceleration = MapAcceleration(_enemyConfig.acceleration);
         if (_player == null)
         {
@@ -397,11 +435,15 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
                       $"Eff Stagger: {_dbgEffStagger:F0}\n" +
                       $"StaggerSpeed: {(_dbgStaggerSpeed >= 0 ? _dbgStaggerSpeed.ToString("F2") : "—")} / base {_enemyConfig.speed:F2}\n" +
                       $"AgentVel: {zombieNavMeshAgent.velocity.magnitude:F2}  (since hit {Time.time - _dbgLastStaggerTime:F1}s)\n" +
-                      $"Dip min vel: {(_dbgMinVelSinceHit < 900 ? _dbgMinVelSinceHit.ToString("F2") : "—")}";
+                      $"Dip min vel: {(_dbgMinVelSinceHit < 900 ? _dbgMinVelSinceHit.ToString("F2") : "—")}\n" +
+                      $"--- SCREAM ---\n" +
+                      $"CanScream: {_enemyConfig.canScream}  Boosted: {_boosted} (x{_speedMultiplier:F2})\n" +
+                      $"NearPlayer: {_nearPlayerTime:F1}/{_enemyConfig.screamProximityTime:F0}s  Neighbors: {CountNearbyUnboosted()}/{_enemyConfig.screamMinNeighbors}\n" +
+                      $"Screaming: {_screaming}  Agonizing: {_agonizing}  PendingAgony: {_pendingAgony}";
 
         // Position in upper right corner with some padding
         float width = 320;
-        float height = 320;
+        float height = 400;
         Rect rect = new Rect(Screen.width - width - 10, 10, width, height);
 
         GUI.Box(new Rect(Screen.width - width - 20, 5, width + 10, height + 10), ""); // Background box
@@ -414,6 +456,8 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
         // While floored the zombie is frozen — skip the state machine so it can't fight the anim.
         if (_knockedDown) { TickKnockdown(); return; }
+
+        UpdateScreamProximity();
 
         _stateMachine.Tick();
 
@@ -562,7 +606,8 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         zombieNavMeshAgent.velocity = toPlayer * staggerSpeed;
 
         // Smooth recovery: restore the speed cap; acceleration ramps velocity back up.
-        zombieNavMeshAgent.speed = baseSpeed;
+        // Multiplier keeps any scream boost alive — without it, recovery would wipe the buff.
+        zombieNavMeshAgent.speed = baseSpeed * _speedMultiplier;
 
         // Electric crackle above the head while staggered (Update ends it on recovery).
         ShowStaggerVfx();
@@ -632,6 +677,221 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         _knockdownCooldownUntil = Time.time + _knockdownCooldown;
         if (zombieNavMeshAgent != null) zombieNavMeshAgent.isStopped = false;
     }
+
+    // ── Scream / Shockwave ────────────────────────────────────────────────
+
+    // Counts continuous time spent right next to the player; resets the instant we leave.
+    private void UpdateScreamProximity()
+    {
+        if (_enemyConfig == null || _player == null) { _nearPlayerTime = 0f; return; }
+
+        float r = _enemyConfig.screamProximityRadius > 0f
+            ? _enemyConfig.screamProximityRadius
+            : _enemyConfig.meleeRadius * 2f;
+
+        float d = Vector3.Distance(transform.position, _player.transform.position);
+        if (d <= r) _nearPlayerTime += Time.deltaTime;
+        else        _nearPlayerTime = 0f;
+    }
+
+    // Any-transition predicate: snap into ScreamState when fed up, not already boosted/scripted,
+    // and there are actually enough un-boosted zombies nearby to make the rally worthwhile.
+    private bool ScreamTrigger()
+    {
+        if (_enemyConfig == null || !_enemyConfig.canScream) return false;
+        if (_boosted || _screaming || _agonizing || _knockedDown || _pendingAgony) return false;
+        if (_health <= 0) return false;
+        if (_nearPlayerTime < _enemyConfig.screamProximityTime) return false;
+        return CountNearbyUnboosted() >= _enemyConfig.screamMinNeighbors;
+    }
+
+    private int CountNearbyUnboosted()
+    {
+        var hits = Physics.OverlapSphere(transform.position, _enemyConfig.screamRadius, _zombieMask,
+                                         QueryTriggerInteraction.Ignore);
+        int n = 0;
+        foreach (var h in hits)
+        {
+            var e = h.GetComponentInParent<Enemy>();
+            if (e == null || e == this) continue;
+            if (e._health <= 0 || e._boosted) continue;
+            n++;
+        }
+        return n;
+    }
+
+    // ScreamState lifecycle (called from the thin IState wrapper) ----------
+    public void BeginScream()
+    {
+        _screaming = true;
+        _screamBlastDone = false;
+        _screamStart = Time.time;
+        StopAgent();
+        if (_enemyAnimator != null) _enemyAnimator.SetVelocity(0f); // no walk-blend leak -> no slide
+        if (_animator != null) _animator.SetTrigger("ZScream");
+    }
+
+    public void TickScream()
+    {
+        StopAgent();                                               // hold position through the scream
+        if (_enemyAnimator != null) _enemyAnimator.SetVelocity(0f);
+
+        // Blast fires from the OnScreamBlast event on the ZombieScream clip (@2.8s). This is the
+        // safety net only — forces the blast if the event somehow never lands so we can't hang.
+        if (!_screamBlastDone && Time.time - _screamStart > _enemyConfig.screamMaxDuration)
+            OnScreamBlast();
+    }
+
+    public void EndScreamState()
+    {
+        _screaming = false;
+        ResumeAgent();
+    }
+
+    // Animation event on the Zagonizing clip. Emits the shockwave + boosts self (so it never
+    // re-screams) + agonizes nearby zombies. Idempotent — the safety path may also call it.
+    public void OnScreamBlast()
+    {
+        if (_screamBlastDone) return;
+        _screamBlastDone = true;
+
+        SpawnShockwaveVfx();
+        AffectNeighbors();
+        ApplyBoost(); // screamer rallies itself too
+    }
+
+    private void AffectNeighbors()
+    {
+        var hits = Physics.OverlapSphere(transform.position, _enemyConfig.screamRadius, _zombieMask,
+                                         QueryTriggerInteraction.Ignore);
+        foreach (var h in hits)
+        {
+            var e = h.GetComponentInParent<Enemy>();
+            if (e == null || e == this) continue;
+            e.BecomeAgonized();
+        }
+    }
+
+    // Marks a zombie as a scream receiver; the any-transition pulls it into AgonyState next tick.
+    public void BecomeAgonized()
+    {
+        if (_boosted || _agonizing || _screaming || _knockedDown || _health <= 0) return;
+        _pendingAgony = true;
+    }
+
+    // AgonyState lifecycle -------------------------------------------------
+    public void BeginAgony()
+    {
+        _agonizing = true;
+        _agonyEndDone = false;
+        _agonyStart = Time.time;
+        _pendingAgony = false;
+        StopAgent();
+        if (_enemyAnimator != null) _enemyAnimator.SetVelocity(0f); // no walk-blend leak -> no slide
+        if (_animator != null) _animator.SetTrigger("Zagony");
+    }
+
+    public void TickAgony()
+    {
+        StopAgent();
+        if (_enemyAnimator != null) _enemyAnimator.SetVelocity(0f);
+        if (!_agonyEndDone && Time.time - _agonyStart > _enemyConfig.agonyMaxDuration)
+            OnAgonyEnd();
+    }
+
+    public void EndAgonyState()
+    {
+        _agonizing = false;
+        ResumeAgent();
+    }
+
+    // Animation event on the Zagony clip. Permanent boost (which also spawns the ring). Idempotent.
+    public void OnAgonyEnd()
+    {
+        if (_agonyEndDone) return;
+        _agonyEndDone = true;
+        ApplyBoost();
+    }
+
+    // Permanent, non-stacking. Re-applies the cap to the agent immediately so an active chase
+    // speeds up at once; Start and stagger recovery also fold the multiplier in. Spawns the
+    // persistent looping ring so every boosted zombie (screamer included) is visibly marked.
+    private void ApplyBoost()
+    {
+        if (_boosted) return;
+        _boosted = true;
+        _speedMultiplier = Mathf.Max(1f, _enemyConfig.boostMultiplier);
+        if (zombieNavMeshAgent != null)
+            zombieNavMeshAgent.speed = _enemyConfig.speed * _speedMultiplier;
+        ShowBoostVfx();
+    }
+
+    private void StopAgent()
+    {
+        if (zombieNavMeshAgent != null && zombieNavMeshAgent.isActiveAndEnabled && zombieNavMeshAgent.isOnNavMesh)
+        {
+            zombieNavMeshAgent.isStopped = true;
+            zombieNavMeshAgent.velocity = Vector3.zero;
+        }
+    }
+
+    private void ResumeAgent()
+    {
+        if (zombieNavMeshAgent != null && zombieNavMeshAgent.isActiveAndEnabled && zombieNavMeshAgent.isOnNavMesh)
+            zombieNavMeshAgent.isStopped = false;
+    }
+
+    private void SpawnShockwaveVfx()
+    {
+        var prefab = _enemyConfig.screamShockwaveVfx;
+        if (prefab == null)
+        {
+            Debug.LogWarning($"[Enemy] screamShockwaveVfx not assigned on config '{_enemyConfig.name}'.", this);
+            return;
+        }
+        // Flat on the ground at the zombie's feet; not parented so it stays put as it expands.
+        var go = Instantiate(prefab, transform.position, prefab.transform.rotation);
+        Destroy(go, 3f);
+    }
+
+    // Persistent "boosted" badge: a looping ring above the head that runs until the zombie dies.
+    private void ShowBoostVfx()
+    {
+        if (_boostVfxInstance != null) return; // already showing
+
+        var prefab = _enemyConfig.agonyBoostVfx;
+        if (prefab == null)
+        {
+            Debug.LogWarning($"[Enemy] agonyBoostVfx not assigned on config '{_enemyConfig.name}'.", this);
+            return;
+        }
+        // Parented above the head so it tracks the zombie (reuses the stagger VFX height).
+        _boostVfxInstance = Instantiate(prefab, transform);
+        _boostVfxInstance.transform.localPosition = Vector3.up * _staggerVfxHeight;
+        _boostVfxInstance.transform.localRotation = Quaternion.identity;
+
+        // Force every particle system in the effect to loop, so the badge never stops on its own
+        // (the source shockwave prefab is a one-shot). No Destroy — Die() / deactivation clears it.
+        // Simulation Space = Local so the particles ride along with the zombie instead of staying
+        // pinned to where they were emitted (the source prefab simulates in World).
+        foreach (var ps in _boostVfxInstance.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            var main = ps.main;
+            main.loop = true;
+            main.stopAction = ParticleSystemStopAction.None;
+            main.simulationSpace = ParticleSystemSimulationSpace.Local;
+            ps.Play();
+        }
+    }
+
+    private void HideBoostVfx()
+    {
+        if (_boostVfxInstance != null)
+        {
+            Destroy(_boostVfxInstance);
+            _boostVfxInstance = null;
+        }
+    }
     public void HitLayerPlus()
     {
         Animator zombieAnimator = GetComponent<Animator>();
@@ -673,6 +933,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     public void Die()
     {
         HideStaggerVfx();
+        HideBoostVfx();
         _knockedDown = false;
         _pendingGuaranteedCrit = false;
 
