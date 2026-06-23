@@ -40,6 +40,7 @@ public class EnemyConfig : ScriptableObject
     [Range(1f, 3f)] public float boostMultiplier = 1.2f; // permanent, non-stacking speed multiplier
     public GameObject screamShockwaveVfx;      // big ground distortion (e.g. VFX_Shockwave_01_Distortion_Big_1s)
     public GameObject agonyBoostVfx;           // small red ring above head (e.g. VFX_Shockwave_02_Red_1s)
+    [Range(0.05f, 3f)] public float agonyBoostVfxScale = 1f; // uniform scale for the red boost ring
 
 
     // Add other configuration fields as needed

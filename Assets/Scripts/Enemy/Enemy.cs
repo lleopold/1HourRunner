@@ -869,6 +869,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         _boostVfxInstance = Instantiate(prefab, transform);
         _boostVfxInstance.transform.localPosition = Vector3.up * _staggerVfxHeight;
         _boostVfxInstance.transform.localRotation = Quaternion.identity;
+        _boostVfxInstance.transform.localScale = Vector3.one * _enemyConfig.agonyBoostVfxScale;
 
         // Force every particle system in the effect to loop, so the badge never stops on its own
         // (the source shockwave prefab is a one-shot). No Destroy — Die() / deactivation clears it.
@@ -880,6 +881,7 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
             main.loop = true;
             main.stopAction = ParticleSystemStopAction.None;
             main.simulationSpace = ParticleSystemSimulationSpace.Local;
+            main.scalingMode = ParticleSystemScalingMode.Hierarchy; // honor root localScale
             ps.Play();
         }
     }
