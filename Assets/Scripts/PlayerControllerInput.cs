@@ -203,8 +203,13 @@ namespace ZombieGame
 
             _targeting.Tick();
 
+            Quaternion oldRotation = transform.rotation;
             Quaternion newRotation = _targeting.ComputeAndApplyRotation(_input, _direction);
             transform.rotation = newRotation;
+
+            // Swinging the aim around spreads precision just like WASD movement does.
+            if (_targeting.IsAiming)
+                _aimVisuals.ApplyTurnPenalty(Quaternion.Angle(oldRotation, newRotation), MovementPenaltyBase);
 
             ApplyGravity();
             ApplyMovement();

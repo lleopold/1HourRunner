@@ -157,12 +157,13 @@ namespace ZombieGame
                     RegenerateRadarTexture();
                 }
 
-                bool isMoving = movementInput.magnitude > 0f;
+                bool isMoving = movementInput.magnitude > 0f || _turnedThisFrame > 0.01f;
                 if (!isMoving)
                 {
                     float recoverPerSecond = _gameStats._aimingSpeed;
                     CurrentAngle = Mathf.Max(_gameStats._precisionMin, CurrentAngle - recoverPerSecond * Time.deltaTime);
                 }
+                _turnedThisFrame = 0f;
 
                 if (Recoil > 0f)
                 {
@@ -253,6 +254,19 @@ namespace ZombieGame
         {
             return false;
         }
+
+        // Swinging the aim with the mouse spreads the V the same way WASD movement does:
+        // each degree the player turns this frame adds (penaltyBase/100) to the angle.
+        public void ApplyTurnPenalty(float degreesTurned, float penaltyBase)
+        {
+            if (_gameStats == null || degreesTurned <= 0f) return;
+            // Mark as "moving" so the standing-still recovery pauses this frame —
+            // otherwise recovery eats the spread the same frame and the swing looks free.
+            _turnedThisFrame = degreesTurned;
+            float spread = degreesTurned * (penaltyBase / 100f);
+            CurrentAngle = Mathf.Min(CurrentAngle + spread, _gameStats._precisionMax);
+        }
+        private float _turnedThisFrame;
 
         // ── Setup helpers ──────────────────────────────────────────────────────
 
