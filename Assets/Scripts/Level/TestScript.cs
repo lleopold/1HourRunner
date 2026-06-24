@@ -11,6 +11,8 @@ public class TestScript : MonoBehaviour
     [SerializeField] float navSampleMax = 6f;     // how far to search for nearest NavMesh point
     [SerializeField] int maxTries = 20;
 
+    [SerializeField] bool autoSpawn = false;   // off for debug: spawn only via Debug1 button
+
     public float spawnRadius = 5f;   // Radius around the player to spawn zombies
 
     public GameObject zombiePrefab;
@@ -45,19 +47,13 @@ public class TestScript : MonoBehaviour
     void Update()
     {
         zombies = GameObject.FindGameObjectsWithTag("Zombie");
-        //spawnOneZombie();
-        // Check if it's time to spawn zombies, just one zombie on screen
-        Debug.Log($"Zombies on screen: {zombies.Length}, Time since last spawn: {Time.time - lastSpawnTime} Maxzombies: {maxZombiesOnScreen}");
+        if (!autoSpawn) return;   // debug: spawning driven by Debug1 button only
+
         if (Time.time - lastSpawnTime >= timeBetweenSpawns && zombies.Length < maxZombiesOnScreen)
         {
-            Debug.Log("Spawning a new zombie...");
             // Only reset the timer when a zombie actually spawned — a failed spawn shouldn't burn the cooldown.
             if (SpawnZombies())
                 lastSpawnTime = Time.time;
-        }
-        else
-        {
-            Debug.Log("Not spawning a new zombie yet.");
         }
     }
 

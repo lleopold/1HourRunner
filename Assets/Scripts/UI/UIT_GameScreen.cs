@@ -18,6 +18,8 @@ public class UIT_GameScreen : MonoBehaviour
     private Button _btn_end_game;
     private Button _btn_level_up;
     private Button _btn_take_damage;
+    private Button _btn_debug1;
+    private Button _btn_debug2;
     private float _currentLevelXP;
     private float _totalXP;
     public float TotalXP => _totalXP;
@@ -66,6 +68,8 @@ public class UIT_GameScreen : MonoBehaviour
         _btn_end_game = _root.Q<Button>("bt_end_game");
         _btn_level_up = _root.Q<Button>("bt_level_up");
         _btn_take_damage = _root.Q<Button>("bt_take_damage");
+        _btn_debug1 = _root.Q<Button>("bt_debug1");
+        _btn_debug2 = _root.Q<Button>("bt_debug2");
 
         _btn_exit.RegisterCallback<ClickEvent>(GoToExitApplication);
         _btn_mainScreen.RegisterCallback<ClickEvent>(GoToMainScreen);
@@ -73,6 +77,8 @@ public class UIT_GameScreen : MonoBehaviour
         _btn_end_game.RegisterCallback<ClickEvent>(GoToEndGame);
         _btn_level_up.RegisterCallback<ClickEvent>(GoToPowerUp);
         _btn_take_damage.RegisterCallback<ClickEvent>(TestBloodHUD);
+        _btn_debug1.RegisterCallback<ClickEvent>(Debug1SpawnOne);
+        _btn_debug2.RegisterCallback<ClickEvent>(Debug2Scream);
         _totalXP = 0;
         _currentLevelXP = 0;
         _sessionStartTime = Time.time;
@@ -274,6 +280,37 @@ public class UIT_GameScreen : MonoBehaviour
             //scriptLogic.GetComponent<TestScript>().SpawnZombies("male_zombie_3");
             //scriptLogic.GetComponent<TestScript>().SpawnZombies("male_zombie_4");
         }
+    }
+
+    // Debug1: spawn exactly one zombie (any). Auto-spawn is off (TestScript.autoSpawn=false).
+    private void Debug1SpawnOne(ClickEvent evt)
+    {
+        var test = Object.FindObjectOfType<TestScript>();
+        if (test != null)
+            test.SpawnZombies();
+        else
+            Debug.LogWarning("Debug1: TestScript not found in scene.");
+    }
+
+    // Debug2: force the zombie closest to the player to scream (single-zombie scream test).
+    private void Debug2Scream(ClickEvent evt)
+    {
+        GameObject player = GameObject.FindWithTag("Player") ?? GameObject.Find("Player");
+        if (player == null) { Debug.LogWarning("Debug2: Player not found."); return; }
+
+        GameObject[] zombies = GameObject.FindGameObjectsWithTag("Zombie");
+        Enemy closest = null;
+        float best = float.MaxValue;
+        foreach (var z in zombies)
+        {
+            var e = z.GetComponent<Enemy>();
+            if (e == null) continue;
+            float d = (z.transform.position - player.transform.position).sqrMagnitude;
+            if (d < best) { best = d; closest = e; }
+        }
+
+        if (closest != null) closest.ForceScream();
+        else Debug.LogWarning("Debug2: no zombie on screen to scream.");
     }
 
     private void GoToExitApplication(ClickEvent evt)

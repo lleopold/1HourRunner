@@ -788,8 +788,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1342774614}
-  - component: {fileID: 1342774613}
-  - component: {fileID: 1342774612}
   - component: {fileID: 1342774611}
   m_Layer: 0
   m_Name: BloodHUD
@@ -824,43 +822,6 @@ MonoBehaviour:
   PoolSize: 12
   MinSplatsPerHit: 20
   MaxSplatsPerHit: 20
---- !u!114 &1342774612
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1342774610}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c61b9009649fa964daf4d9334a4bf69c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  minFromPlayer: 12
-  maxFromPlayer: 28
-  containerMask:
-    serializedVersion: 2
-    m_Bits: 0
-  navSampleMax: 6
-  maxTries: 20
-  spawnRadius: 5
-  zombiePrefab: {fileID: 0}
-  timeBetweenSpawns: 7
-  minZombiesOnScreen: 1
-  maxZombiesOnScreen: 9
-  zombiePrefabNames: []
---- !u!114 &1342774613
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1342774610}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5780f262ea0eb1f4dac4bac0da4e3be4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &1342774614
 Transform:
   m_ObjectHideFlags: 0
@@ -943,6 +904,7 @@ MonoBehaviour:
     m_Bits: 0
   navSampleMax: 6
   maxTries: 20
+  autoSpawn: 0
   spawnRadius: 5
   zombiePrefab: {fileID: 0}
   timeBetweenSpawns: 1

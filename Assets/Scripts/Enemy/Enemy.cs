@@ -696,11 +696,18 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
 
     // Any-transition predicate: snap into ScreamState when fed up, not already boosted/scripted,
     // and there are actually enough un-boosted zombies nearby to make the rally worthwhile.
+    private bool _forceScream;
+
+    // Debug hook: force this zombie into ScreamState next tick, bypassing proximity/neighbor/canScream
+    // gates. Still respects "can't scream while already screaming/agonizing/down/dead".
+    public void ForceScream() => _forceScream = true;
+
     private bool ScreamTrigger()
     {
-        if (_enemyConfig == null || !_enemyConfig.canScream) return false;
         if (_boosted || _screaming || _agonizing || _knockedDown || _pendingAgony) return false;
         if (_health <= 0) return false;
+        if (_forceScream) { _forceScream = false; return true; }
+        if (_enemyConfig == null || !_enemyConfig.canScream) return false;
         if (_nearPlayerTime < _enemyConfig.screamProximityTime) return false;
         return CountNearbyUnboosted() >= _enemyConfig.screamMinNeighbors;
     }
@@ -866,8 +873,9 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
             return;
         }
         // Parented above the head so it tracks the zombie (reuses the stagger VFX height).
+        // +0.378 on local Z (blue axis) nudges the red boost badge forward off the zombie.
         _boostVfxInstance = Instantiate(prefab, transform);
-        _boostVfxInstance.transform.localPosition = Vector3.up * _staggerVfxHeight;
+        _boostVfxInstance.transform.localPosition = Vector3.up * _staggerVfxHeight + Vector3.forward * 0.378f;
         _boostVfxInstance.transform.localRotation = Quaternion.identity;
         _boostVfxInstance.transform.localScale = Vector3.one * _enemyConfig.agonyBoostVfxScale;
 
