@@ -96,8 +96,14 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     private float _agonyStart;
     private GameObject _boostVfxInstance;   // persistent looping ring above head while boosted
 
+    // Screamer plays a 3-beat sequence: AgonyPre -> Yell (blast) -> AgonyPost, then walks again.
+    private enum ScreamPhase { None, AgonyPre, Yell, AgonyPost }
+    private ScreamPhase _screamPhase = ScreamPhase.None;
+    private float _phaseStart;
+    private bool _screamSequenceDone;
+
     public bool HasBoost => _boosted;
-    public bool ScreamFinished => _screamBlastDone;
+    public bool ScreamFinished => _screamSequenceDone;
     public bool AgonyFinished => _agonyEndDone;
 
     public bool IsKnockedDown => _knockedDown;
@@ -728,30 +734,69 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     }
 
     // ScreamState lifecycle (called from the thin IState wrapper) ----------
+    // 3-beat sequence: AgonyPre -> Yell (fires the blast) -> AgonyPost -> exit (walks again).
+    // Phases advance on the clips' animation events (OnAgonyEnd / OnScreamBlast); the per-phase
+    // timeouts in TickScream are the safety net so a missing event can never hang the sequence.
     public void BeginScream()
     {
         _screaming = true;
         _screamBlastDone = false;
-        _screamStart = Time.time;
+        _screamSequenceDone = false;
         StopAgent();
         if (_enemyAnimator != null) _enemyAnimator.SetVelocity(0f); // no walk-blend leak -> no slide
-        if (_animator != null) _animator.SetTrigger("ZScream");
+        EnterScreamPhase(ScreamPhase.AgonyPre);
+    }
+
+    private void EnterScreamPhase(ScreamPhase phase)
+    {
+        _screamPhase = phase;
+        _phaseStart = Time.time;
+        if (_animator == null) return;
+        switch (phase)
+        {
+            case ScreamPhase.AgonyPre:  _animator.SetTrigger("Zagony");  break;
+            case ScreamPhase.Yell:      _animator.SetTrigger("ZScream"); break;
+            case ScreamPhase.AgonyPost: _animator.SetTrigger("Zagony");  break;
+        }
+    }
+
+    // Single progression point — called from the clips' anim events and the timeout safeties.
+    private void AdvanceScreamPhase()
+    {
+        switch (_screamPhase)
+        {
+            case ScreamPhase.AgonyPre:  EnterScreamPhase(ScreamPhase.Yell);     break;
+            case ScreamPhase.Yell:      EnterScreamPhase(ScreamPhase.AgonyPost); break;
+            case ScreamPhase.AgonyPost: _screamPhase = ScreamPhase.None; _screamSequenceDone = true; break;
+        }
     }
 
     public void TickScream()
     {
-        StopAgent();                                               // hold position through the scream
+        StopAgent();                                               // hold position through the whole sequence
         if (_enemyAnimator != null) _enemyAnimator.SetVelocity(0f);
 
-        // Blast fires from the OnScreamBlast event on the ZombieScream clip (@2.8s). This is the
-        // safety net only — forces the blast if the event somehow never lands so we can't hang.
-        if (!_screamBlastDone && Time.time - _screamStart > _enemyConfig.screamMaxDuration)
-            OnScreamBlast();
+        float elapsed = Time.time - _phaseStart;
+        switch (_screamPhase)
+        {
+            case ScreamPhase.AgonyPre:
+                if (elapsed > _enemyConfig.agonyMaxDuration) AdvanceScreamPhase();
+                break;
+            case ScreamPhase.Yell:
+                // Blast normally fires from OnScreamBlast (anim event on the scream clip); this only
+                // forces it if the event never lands. The blast itself advances to AgonyPost.
+                if (!_screamBlastDone && elapsed > _enemyConfig.screamMaxDuration) OnScreamBlast();
+                break;
+            case ScreamPhase.AgonyPost:
+                if (elapsed > _enemyConfig.agonyMaxDuration) AdvanceScreamPhase();
+                break;
+        }
     }
 
     public void EndScreamState()
     {
         _screaming = false;
+        _screamPhase = ScreamPhase.None;
         ResumeAgent();
     }
 
@@ -765,6 +810,9 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         SpawnShockwaveVfx();
         AffectNeighbors();
         ApplyBoost(); // screamer rallies itself too
+
+        // In the screamer's sequence the blast ends the Yell beat -> roll into the closing agony.
+        if (_screaming && _screamPhase == ScreamPhase.Yell) AdvanceScreamPhase();
     }
 
     private void AffectNeighbors()
@@ -815,6 +863,16 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
     // Animation event on the Zagony clip. Permanent boost (which also spawns the ring). Idempotent.
     public void OnAgonyEnd()
     {
+        // Screamer path: the Zagony clip bookends the yell (AgonyPre / AgonyPost). Self-boost and
+        // step the sequence forward instead of running the one-shot neighbour logic.
+        if (_screaming && _screamPhase != ScreamPhase.None)
+        {
+            ApplyBoost();
+            AdvanceScreamPhase();
+            return;
+        }
+
+        // Neighbour (AgonyState) path — unchanged.
         if (_agonyEndDone) return;
         _agonyEndDone = true;
         ApplyBoost();

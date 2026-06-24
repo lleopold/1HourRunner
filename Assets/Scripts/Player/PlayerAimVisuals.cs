@@ -617,14 +617,11 @@ namespace ZombieGame
             }
         }
 
+        // Fixed total V length = weapon MaxEffectiveRange (tip lands at the real max range, so the
+        // white→green→orange→red bands map exactly). Falls back to _defaultVLength when no weapon.
         private float ComputeVLength()
         {
-            if (CurrentTargetDistance > 0f)
-            {
-                float maxRange = WeaponConfigSingleton.Instance?.WeaponConfig?.MaxEffectiveRange ?? _defaultVLength;
-                return Mathf.Min(CurrentTargetDistance * 1.15f, maxRange);
-            }
-            return _defaultVLength;
+            return WeaponConfigSingleton.Instance?.WeaponConfig?.MaxEffectiveRange ?? _defaultVLength;
         }
 
         private void UpdateLinePoints(float angle)
