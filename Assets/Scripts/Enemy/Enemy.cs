@@ -306,6 +306,30 @@ public class Enemy : MonoBehaviour, IGetHealthSystemArmour
         if (_outline == null) return;
         _outline.OutlineColor = c;
     }
+
+    // Radar "blip": briefly fattens the outline when the sonar sweep passes over this zombie.
+    private Coroutine _blipRoutine;
+    public void BlipOutline()
+    {
+        if (_outline == null || !_outline.enabled) return;
+        if (_blipRoutine != null) StopCoroutine(_blipRoutine);
+        _blipRoutine = StartCoroutine(BlipRoutine());
+    }
+
+    private System.Collections.IEnumerator BlipRoutine()
+    {
+        const float baseW = 2.5f, peakW = 8f, dur = 0.3f;
+        _outline.OutlineWidth = peakW;
+        float t = 0f;
+        while (t < dur)
+        {
+            t += Time.deltaTime;
+            _outline.OutlineWidth = Mathf.Lerp(peakW, baseW, t / dur);
+            yield return null;
+        }
+        _outline.OutlineWidth = baseW;
+        _blipRoutine = null;
+    }
     public bool FinishedAttack()
     {
         return AttackFinished;

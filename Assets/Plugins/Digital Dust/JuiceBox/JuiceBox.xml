@@ -1,0 +1,261 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>JuiceBox</name>
+    </assembly>
+    <members>
+        <member name="T:JuiceBox.Processor.EffectKind">
+            <summary>The type of animation effect.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.Waveform">
+            <summary>Oscillation waveform shapes for Shake effects.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.Effect">
+            <summary>Base class for all animation effects. Use the typed subclass Effect&lt;T&gt; for concrete access.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.Effect`1">
+            <summary>
+            Typed base class for animation effects operating on value type T.
+            Subclasses: Tween&lt;T&gt;, Follow&lt;T&gt;, Shake&lt;T&gt;.
+            </summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Effect`1.GetTargetValue">
+            <summary>Returns the value this effect moves toward. Must be set for every effect.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Effect`1.OnStart">
+            <summary>Called once when this effect begins playing.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Effect`1.OnDone">
+            <summary>Called once when this effect finishes.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Effect`1.ModifyEffectState">
+            <summary>Called each frame to override effect behavior. Return SignalEffect values to pause, restart, end early, etc.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Effect`1.SetStartingVelocity">
+            <summary>Provides the starting velocity when this effect begins. Receives inherited velocity from the previous effect.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.EasingFunction">
+            <summary>Holds an easing curve for a Tween - either a delegate, an AnimationCurve, or none (linear).</summary>
+        </member>
+        <member name="M:JuiceBox.Processor.EasingFunction.SetCurve(UnityEngine.AnimationCurve)">
+            <summary>Sets the easing to use an AnimationCurve.</summary>
+        </member>
+        <member name="M:JuiceBox.Processor.EasingFunction.SetDelegate(System.Func{System.Single,System.Single})">
+            <summary>Sets the easing to use a delegate function (e.g. StandardFunctions.Easing.Pow2InOut).</summary>
+        </member>
+        <member name="M:JuiceBox.Processor.EasingFunction.SetNone">
+            <summary>Clears the easing. The tween will interpolate linearly.</summary>
+        </member>
+        <member name="M:JuiceBox.Processor.EasingFunction.Evaluate(System.Single)">
+            <summary>Evaluates the easing at normalized time t (0 to 1). Returns t unchanged when no easing is set.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.Tween`1">
+            <summary>
+            Interpolates from the current value to a target over a fixed duration.
+            Supports easing curves for non-linear interpolation.
+            </summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Tween`1.EndCondition">
+            <summary>When the effect ends. Null uses the default for the effect type.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Tween`1.Easing">
+            <summary>The easing curve applied to this tween's interpolation.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.Follow`1">
+            <summary>
+            Chases a target continuously at a given speed. Optionally uses spring
+            physics when UseSmoothing is enabled and a Smoothing node is connected.
+            </summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Follow`1.EndCondition">
+            <summary>When the effect ends. Supports WaitForTime, WaitForCondition, or WaitForValueWithinRange.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Follow`1.Speed">
+            <summary>Units per second toward the target. PositiveInfinity means instant tracking.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Follow`1.UseSmoothing">
+            <summary>When true, the effect uses spring physics via a connected Smoothing node.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.Shake`1">
+            <summary>
+            Periodic oscillation around the starting value. Configurable waveform,
+            frequency, per-axis amplitude, and optional decay envelope.
+            </summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Shake`1.EndCondition">
+            <summary>When the effect ends. Null uses the default for the effect type.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Shake`1.WaveformType">
+            <summary>The oscillation shape (Sine, Triangle, Square, or Sawtooth).</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Shake`1.Amplitude">
+            <summary>Per-axis oscillation magnitude.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Shake`1.Frequency">
+            <summary>Oscillation frequency in Hz.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Shake`1.DeferUntilSettled">
+            <summary>When set, the shake runs past its end until the wave next returns to zero moving the way it started, so it settles at its center instead of jumping.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Shake`1.Easing">
+            <summary>Controls the decay envelope shape. The slope of the easing curve determines amplitude over time.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Shake`1.PrevWave">
+            <summary>Previous frame's raw waveform value; used to detect the zero crossing that ends a defer-until-settled shake.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Wait`1.EndCondition">
+            <summary>When the effect ends. Supports WaitForTime, WaitForCondition, or WaitForValueWithinRange.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.WaitForTime">
+            <summary>End condition: the effect completes after a fixed duration in seconds.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.WaitForTime.Time">
+            <summary>Duration in seconds.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.WaitForever">
+            <summary>End condition: the effect never completes on its own; it runs until stopped externally.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.WaitForCondition">
+            <summary>End condition: the effect completes when a user-supplied function returns true.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.WaitForCondition.EvaluateCondition">
+            <summary>Called each frame. Return true to end the effect.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.WaitForValueWithinRange`1">
+            <summary>End condition: the effect completes when the value is within a distance of the target
+            and (optionally) the velocity drops below a threshold.</summary>
+        </member>
+        <member name="P:JuiceBox.Processor.WaitForValueWithinRange`1.Range">
+            <summary>Distance from the target at which the effect ends. Negative values invert the check (ends when OUTSIDE the range).</summary>
+        </member>
+        <member name="P:JuiceBox.Processor.WaitForValueWithinRange`1.Velocity">
+            <summary>Maximum velocity magnitude at which the effect can end. Zero disables the velocity check.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.Property">
+            <summary>
+            Base class for all typed properties. Holds the effect list, delegates, and runtime
+            state for one sequence. Access the concrete type (PropertyFloat, PropertyVector3, etc.)
+            via Sequence.Property.
+            </summary>
+        </member>
+        <member name="P:JuiceBox.Processor.Property.Timescale">
+            <summary>Playback speed multiplier for this sequence. 0 pauses, negative reverses.</summary>
+        </member>
+        <member name="P:JuiceBox.Processor.Property.EffectCount">
+            <summary>Number of effects in this property's merged effect list.</summary>
+        </member>
+        <member name="M:JuiceBox.Processor.Property.GetEffect(System.Int32)">
+            <summary>Returns the effect at the given index, or null if out of range.</summary>
+        </member>
+        <member name="M:JuiceBox.Processor.Property.AddEffect(JuiceBox.Processor.IEffect)">
+            <summary>Adds an effect to the end of this property's effect list. Returns true if it was added.</summary>
+        </member>
+        <member name="M:JuiceBox.Processor.Property.RemoveEffect(JuiceBox.Processor.IEffect)">
+            <summary>Removes the given effect from this property. Returns true if it was present.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.Property`1">
+            <summary>
+            Typed property holding effects, delegates, and runtime state for a specific value type.
+            Concrete subclasses: PropertyFloat, PropertyVector2, PropertyVector3, PropertyVector4, PropertyQuaternion.
+            </summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Property`1.Effects">
+            <summary>The ordered list of effects in this sequence, merged from all effect types.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Property`1.Velocity">
+            <summary>Current velocity of the animated value. Updated each frame by active effects.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Property`1.CurrentValue">
+            <summary>Current value of the animated property. Updated each frame by active effects.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Property`1.OnUpdate">
+            <summary>Called each frame with the current animated value. This is the main output - typically writes to a transform, material, or other target.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Property`1.SetStartingValue">
+            <summary>Called once before the first effect runs to read the initial value. Return the starting value for the sequence.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Property`1.OnComplete">
+            <summary>Called when the entire sequence completes (after the last effect finishes and no loop restarts).</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Property`1.TimescaleDelegate">
+            <summary>Called each frame to dynamically set the sequence timescale. Overrides the Timescale property when assigned.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.TriggerMode">
+            <summary>
+            Unity lifecycle events that can automatically start a sequence.
+            Combine with bitwise OR for multiple triggers.
+            </summary>
+        </member>
+        <member name="T:JuiceBox.Processor.LoopMode">
+            <summary>
+            Controls what happens when a sequence reaches its loop point.
+            None: sequence ends. Loop: restarts from the beginning. Yoyo: reverses direction.
+            </summary>
+        </member>
+        <member name="T:JuiceBox.Processor.Sequence">
+            <summary>
+            A single animation sequence targeting one property type. Contains an ordered
+            list of effects, a loop mode, trigger conditions, and a reference to the
+            property being animated. Managed by JuiceBoxAnimation.
+            </summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Sequence.Name">
+            <summary>Display name and backup file key. Must be unique within a component.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Sequence.LoopMode">
+            <summary>What happens when the sequence reaches its loop point.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Sequence.Segment">
+            <summary>MEC timing segment (Update, FixedUpdate, LateUpdate, etc.).</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Sequence.Triggers">
+            <summary>Which Unity lifecycle events automatically start this sequence.</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Sequence.Type">
+            <summary>The value type this sequence operates on (Float, Vector2, Vector3, Vector4, or Quaternion).</summary>
+        </member>
+        <member name="F:JuiceBox.Processor.Sequence.Property">
+            <summary>The property instance holding this sequence's effects, delegates, and runtime state.
+            Null until the sequence is deserialized or explicitly assigned.</summary>
+        </member>
+        <member name="M:JuiceBox.Processor.Sequence.#ctor(System.String)">
+            <summary>Creates a new sequence with the given name.</summary>
+        </member>
+        <member name="T:JuiceBox.Processor.PropertyTypes">
+            <summary>The unmanaged value types that sequences can animate.</summary>
+        </member>
+        <member name="T:JuiceBox.JuiceBoxCentralController">
+            <summary>
+            Singleton that drives all JuiceBox animation playback. Created automatically
+            on first access. Most users interact with this through JuiceBoxAnimation's
+            Play/Stop/Pause API rather than calling it directly.
+            </summary>
+        </member>
+        <member name="F:JuiceBox.JuiceBoxCentralController.EnablePooling">
+            <summary>When true, completed coroutine instances are recycled instead of discarded.</summary>
+        </member>
+        <member name="P:JuiceBox.JuiceBoxCentralController.Instance">
+            <summary>The global controller instance. Auto-creates a "Timing Controller" GameObject if none exists.</summary>
+        </member>
+        <member name="M:JuiceBox.JuiceBoxCentralController.Play(JuiceBox.Processor.Sequence)">
+            <summary>Starts playing a sequence. Returns a coroutine handle that can be used with MEC.</summary>
+        </member>
+        <member name="M:JuiceBox.JuiceBoxCentralController.StopAll(JuiceBox.Processor.Sequence)">
+            <summary>Stops all running instances of the given sequence and clears its coroutine pool.</summary>
+        </member>
+        <member name="M:JuiceBox.JuiceBoxCentralController.IsRunning(JuiceBox.Processor.Sequence)">
+            <summary>Returns true if the sequence has any active coroutine instances.</summary>
+        </member>
+        <member name="M:JuiceBox.JuiceBoxCentralController.ClearPool(JuiceBox.Processor.Sequence)">
+            <summary>Discards pooled coroutine instances for the given sequence.</summary>
+        </member>
+        <member name="M:JuiceBox.JuiceBoxCentralController.SetSegment(JuiceBox.Processor.Sequence,MEC.Segment)">
+            <summary>Moves all running instances of the given sequence to a different MEC timing segment.</summary>
+        </member>
+        <member name="T:JuiceBox.SignalEffect">
+            <summary>
+            Return values for the ModifyEffectState delegate, controlling how the effect proceeds each frame.
+            </summary>
+        </member>
+    </members>
+</doc>

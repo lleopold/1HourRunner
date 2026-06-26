@@ -199,7 +199,19 @@ namespace ZombieGame
                     if (c != null && c.gameObject != primary)
                         _secondaryBuffer.Add(c.gameObject);
                 }
-                Shuffle(_secondaryBuffer);
+                // Mouse mode: closest-to-mouse zombie gets the next roll, then outward.
+                // Other modes: keep the random order.
+                if (_targeting != null && _targeting.CurrentAimingType == AimingType.Mouse)
+                {
+                    Vector3 mp = _targeting.MouseGroundPoint;
+                    _secondaryBuffer.Sort((a, b) =>
+                        (a.transform.position - mp).sqrMagnitude
+                        .CompareTo((b.transform.position - mp).sqrMagnitude));
+                }
+                else
+                {
+                    Shuffle(_secondaryBuffer);
+                }
                 float secondaryChance = hitChance * SecondaryPenaltyMultiplier;
                 Debug.Log($"[SHOT] Rolling {_secondaryBuffer.Count} secondaries, secondaryChance={secondaryChance:F3}");
                 for (int i = 0; i < _secondaryBuffer.Count; i++)

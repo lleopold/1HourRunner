@@ -1,0 +1,91 @@
+/*
+   JuiceBoxSequenceEditorWindow.uss
+   Place in any Editor/ folder alongside JuiceBoxSequenceEditorWindow.cs.
+   Located at runtime via AssetDatabase.FindAssets so the path is not hardcoded.
+
+   All --jb-* properties are read by SequenceGraphView.CustomStylesResolvedEvent
+   and propagated to FilmStripElement, EffectNode, and HookNode via JbTheme.
+   Remove any property to fall back to the hardcoded default in JbTheme.Default.
+*/
+
+.jb-seq-view {
+   background-color:  #1c1c1c;
+   flex-grow:         1;
+
+   /* ── Grid ──────────────────────────────────────────────────────────── */
+   /* (Read directly by GridBackground, not via JbTheme)                  */
+
+   /* ── Strip ─────────────────────────────────────────────────────────── */
+   --jb-strip-bg:           #232323;
+   --jb-cap-bg:             #1b2733;
+   --jb-cap-border:         #334966;
+   --jb-cap-label:          #587d9c;
+   --jb-cap-name:           #c6dff5;
+   --jb-cap-value:          #73b5e6;
+   --jb-hrule:              #334969;
+   --jb-slot-idle:          #3d3d3d;
+   --jb-slot-hi:            #599beb;
+   --jb-slot-bg-hi:         #142d47;
+   --jb-slot-num:           #474747;
+   --jb-arrow:              #474747;
+   --jb-end-arrow:          #4d4d4d;
+   --jb-run-bg:             rgba(26, 63, 179, 0.14);
+   --jb-run-border:         rgba(61, 138, 230, 0.55);
+   --jb-perf-bg:            #171717;
+   --jb-perf-border:        #333333;
+   --jb-pocket-bg:     #131d27;
+   --jb-pocket-border: #2a4e72;
+   --jb-space-bg:           #2e2109;
+   --jb-space-border:       #7f5b14;
+
+   /* ── Effect node ────────────────────────────────────────────────────── */
+   --jb-node-bg:            #1b2a39;
+   --jb-node-border:        #3b5b7c;
+   --jb-node-border-drag:   #578cb3;
+   --jb-node-border-float:  #661515;
+   --jb-node-border-sel:    #a8970f;
+   --jb-node-header:        #152130;
+   --jb-badge-tween-bg:     #152415;
+   --jb-badge-tween-text:   #5c9e5c;
+   --jb-badge-adv-bg:       #241515;
+   --jb-badge-adv-text:     #b86363;
+   --jb-badge-type-bg:      #1a1a2b;
+   --jb-badge-type-text:    #6464b3;
+   --jb-field-bg:           #111b26;
+   --jb-field-bg-miss:      #210d0d;
+   --jb-field-lbl:          #364f65;
+   --jb-field-val:          #6299bd;
+   --jb-field-miss-val:     #874141;
+   --jb-port-action:        #4d99e6;
+   --jb-port-label:         #666666;
+   --jb-port-divider:       #1f3347;
+   --jb-arc:                #3b5e75;
+
+   /* ── Hook node ──────────────────────────────────────────────────────── */
+   --jb-subnode-bg:     #14202e;
+   --jb-subnode-border: #336199;
+   --jb-hook-text:          #9ec7eb;
+   --jb-hook-ret-text:      #b38033;
+   --jb-hook-ret-bg:        #3f2609;
+
+   /* ── Message bar ────────────────────────────────────────────────────── */
+   --jb-msg-bar-bg:         #212121;
+   --jb-msg-bar-border:     #333333;
+   --jb-msg-bar-text:       #7a7a7a;
+   --jb-msg-warn-bg:        #2b2409;
+   --jb-msg-warn-border:    #665214;
+   --jb-msg-warn-text:      #e0b83a;
+
+   /* ── Routed edges ───────────────────────────────────────────────────── */
+   --jb-edge-width:         3;
+   --jb-edge-radius:        6;
+   --jb-edge-lane-pitch:    6;
+}
+
+.jb-seq-grid {
+   --grid-background-color: #1c1c1c;
+   --line-color:             rgba(255, 255, 255, 0.04);
+   --thick-line-color:       rgba(255, 255, 255, 0.09);
+   --spacing:                32;
+   --thick-lines:            8;
+}
