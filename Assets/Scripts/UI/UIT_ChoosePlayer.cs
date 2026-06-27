@@ -43,6 +43,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
     private const float OrbitRadius = 3.8f;
     private const float OrbitHeight = 2.4f;
     private const float OrbitSpeed = 18f;
+    private const float FrameOffsetX = 0.8f; // + pushes player left in frame
 
     // Perk labels
     private Label _lbl_perk_name;
@@ -240,25 +241,25 @@ public class UIT_ChoosePlayer : MonoBehaviour
         _statDefs.Clear();
 
         // Movement
-        Add("speed",         "Speed",          StatCategory.Movement, c => c.speed,                   (c, v) => c.speed = v,                   0.1f, 0, 50,  20);
-        Add("acceleration",  "Acceleration",   StatCategory.Movement, c => c.acceleration,            (c, v) => c.acceleration = v,            0.1f, 0, 50,  20);
-        Add("running_pct",   "Running %",      StatCategory.Movement, c => c.RunningSpeed_pct,         (c, v) => c.RunningSpeed_pct = v,         1f,   0, 100, 100);
-        Add("back_move",     "Back move",      StatCategory.Movement, c => c.BackMovementPenalty_pct,  (c, v) => c.BackMovementPenalty_pct = v,  1f,   0, 100, 100);
-        Add("stamina_speed", "Stamina speed",  StatCategory.Movement, c => c.staminaRegenDelay,        (c, v) => c.staminaRegenDelay = v,        0.1f, 0, 10,  10);
+        Add("speed", "Speed", StatCategory.Movement, c => c.speed, (c, v) => c.speed = v, 0.1f, 0, 50, 20);
+        Add("acceleration", "Acceleration", StatCategory.Movement, c => c.acceleration, (c, v) => c.acceleration = v, 0.1f, 0, 50, 20);
+        Add("running_pct", "Running %", StatCategory.Movement, c => c.RunningSpeed_pct, (c, v) => c.RunningSpeed_pct = v, 1f, 0, 100, 100);
+        Add("back_move", "Back move", StatCategory.Movement, c => c.BackMovementPenalty_pct, (c, v) => c.BackMovementPenalty_pct = v, 1f, 0, 100, 100);
+        Add("stamina_speed", "Stamina speed", StatCategory.Movement, c => c.staminaRegenDelay, (c, v) => c.staminaRegenDelay = v, 0.1f, 0, 10, 10);
 
         // Combat
-        Add("strength",      "Strength",       StatCategory.Combat,   c => c.strength,                (c, v) => c.strength = v,                1f,   0, 200, 200);
-        Add("aim",           "Aim",            StatCategory.Combat,   c => c.Accuracy,                (c, v) => c.Accuracy = v,                0.5f, 0, 100, 100);
-        Add("recoil",        "Recoil",         StatCategory.Combat,   c => c.recoilReduction,         (c, v) => c.recoilReduction = v,         0.5f, 0, 100, 100);
-        Add("reload",        "Reload speed",   StatCategory.Combat,   c => c.reloadSpeed,             (c, v) => c.reloadSpeed = v,             0.1f, 0, 10,  10);
-        Add("vision",        "Vision",         StatCategory.Combat,   c => c.vision,                  (c, v) => c.vision = v,                  1f,   0, 100, 100);
+        Add("strength", "Strength", StatCategory.Combat, c => c.strength, (c, v) => c.strength = v, 1f, 0, 200, 200);
+        Add("aim", "Aim", StatCategory.Combat, c => c.Accuracy, (c, v) => c.Accuracy = v, 0.5f, 0, 100, 100);
+        Add("recoil", "Recoil", StatCategory.Combat, c => c.recoilReduction, (c, v) => c.recoilReduction = v, 0.5f, 0, 100, 100);
+        Add("reload", "Reload speed", StatCategory.Combat, c => c.reloadSpeed, (c, v) => c.reloadSpeed = v, 0.1f, 0, 10, 10);
+        Add("vision", "Vision", StatCategory.Combat, c => c.vision, (c, v) => c.vision = v, 1f, 0, 100, 100);
 
         // Survival
-        Add("health",        "Health",         StatCategory.Survival, c => c.health,                  (c, v) => c.health = v,                  5f,   0, 500, 500);
-        Add("weight",        "Weight",         StatCategory.Survival, c => c.weight,                  (c, v) => c.weight = v,                  1f,   0, 500, 200);
-        Add("stamina",       "Stamina",        StatCategory.Survival, c => c.stamina,                 (c, v) => c.stamina = v,                 5f,   0, 500, 500);
-        Add("stamina_regen", "Stamina regen",  StatCategory.Survival, c => c.staminaRegenSpeed,       (c, v) => c.staminaRegenSpeed = v,       0.1f, 0, 10,  10);
-        Add("injured",       "Injured penalty",StatCategory.Survival, c => c.InjuredPenalty,          (c, v) => c.InjuredPenalty = v,          1f,   0, 100, 100);
+        Add("health", "Health", StatCategory.Survival, c => c.health, (c, v) => c.health = v, 5f, 0, 500, 500);
+        Add("weight", "Weight", StatCategory.Survival, c => c.weight, (c, v) => c.weight = v, 1f, 0, 500, 200);
+        Add("stamina", "Stamina", StatCategory.Survival, c => c.stamina, (c, v) => c.stamina = v, 5f, 0, 500, 500);
+        Add("stamina_regen", "Stamina regen", StatCategory.Survival, c => c.staminaRegenSpeed, (c, v) => c.staminaRegenSpeed = v, 0.1f, 0, 10, 10);
+        Add("injured", "Injured penalty", StatCategory.Survival, c => c.InjuredPenalty, (c, v) => c.InjuredPenalty = v, 1f, 0, 100, 100);
 
         void Add(string key, string disp, StatCategory cat, Func<PlayerConfig, float> get, Action<PlayerConfig, float> set, float step, float min, float max, float barMax)
             => _statDefs.Add(new StatDef { Key = key, Display = disp, Category = cat, Get = get, Set = set, Step = step, Min = min, Max = max, BarMax = barMax });
@@ -268,7 +269,7 @@ public class UIT_ChoosePlayer : MonoBehaviour
     {
         _currentCategory = cat;
         SetTabActive("tab_movement", cat == StatCategory.Movement);
-        SetTabActive("tab_combat",   cat == StatCategory.Combat);
+        SetTabActive("tab_combat", cat == StatCategory.Combat);
         SetTabActive("tab_survival", cat == StatCategory.Survival);
 
         if (_statsContainer == null) return;
@@ -501,7 +502,10 @@ public class UIT_ChoosePlayer : MonoBehaviour
             OrbitHeight,
             Mathf.Cos(rad) * OrbitRadius);
         _previewCamera.transform.position = camPos;
-        _previewCamera.transform.LookAt(_orbitCenter + Vector3.up * 1.0f);
+        Vector3 lookTarget = _orbitCenter + Vector3.up * 1.0f;
+        _previewCamera.transform.LookAt(lookTarget);
+        // Shift look target along camera-right so player sits off-center (left) in frame.
+        _previewCamera.transform.LookAt(lookTarget + _previewCamera.transform.right * FrameOffsetX);
     }
 
     private void SetActivePlayerButton(Button btn)
