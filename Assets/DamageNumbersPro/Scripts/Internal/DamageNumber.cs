@@ -211,9 +211,14 @@ namespace DamageNumbersPro
         // Pooling
         public bool enablePooling = false;
         [Tooltip("Maximum of damage numbers stored in pool.")]
-        public int poolSize = 50;
+        public int poolSize = 100;
         [Tooltip("Pooled damage numbers are not destroyed on load.\nThis option will fade them out on load.\nSo you don't see popups from the previous scene.")]
         public bool disableOnSceneLoad = true;
+
+
+        [Tooltip("Amount of active damage numbers is limited to the pool size.\nThis option will fade out the oldest popup when a new one spawns and all popups in the pool are active.")]
+        public bool limitActiveInstances = false;
+        public int maxActiveInstances = 50;
         #endregion
 
         #region Editor Variables
@@ -224,6 +229,7 @@ namespace DamageNumbersPro
         #endregion
 
         // References
+        protected Transform myTransform;
         TextMeshPro textMeshPro;
         MeshRenderer textMeshRenderer;
         MeshRenderer meshRendererA;
@@ -235,8 +241,8 @@ namespace DamageNumbersPro
         List<System.Tuple<MeshRenderer, MeshRenderer>> subMeshRenderers;
         List<System.Tuple<MeshFilter, MeshFilter>> subMeshFilters;
         protected List<Mesh> meshs;
-        protected List<Color[]> colors;
-        protected List<float[]> alphas;
+        protected List<List<Color>> meshColors;
+        protected List<List<float>> meshAlphas;
 
         // Fading
         protected float currentFade;
@@ -303,12 +309,17 @@ namespace DamageNumbersPro
 
         // Pooling
         DamageNumber originalPrefab;
+        int prefabID = 0;
         public static Transform poolParent;
         static Dictionary<int, HashSet<DamageNumber>> pools;
-        public static HashSet<DamageNumber> activeInstances;
         int poolingID;
         bool performRestart;
         bool destroyAfterSpawning;
+
+        // Active instances
+        public static HashSet<DamageNumber> activeInstances = new HashSet<DamageNumber>();
+        static Dictionary<int, Queue<DamageNumber>> activeInstancesQueue = new Dictionary<int, Queue<DamageNumber>>();
+        bool removedFromActiveInstanceQueue;
 
         // Fallback font fix
         static Dictionary<TMP_FontAsset, GameObject> fallbackDictionary;
@@ -326,7 +337,7 @@ namespace DamageNumbersPro
                 SceneManager.sceneLoaded += OnSceneLoaded;
             }
 
-            // Repeated for Pooling
+            // Repeated for pooling
             Restart();
         }
 
@@ -357,7 +368,7 @@ namespace DamageNumbersPro
         public void UpdateDamageNumber(float delta, float time)
         {
             // Check activity
-            if(isActiveAndEnabled == false)
+            if (isActiveAndEnabled == false)
             {
                 startTime += delta;
                 startLifeTime += delta;
@@ -436,42 +447,73 @@ namespace DamageNumbersPro
         /// <returns>The spawned popup, which can be modified at runtime.</returns>
         public DamageNumber Spawn()
         {
-            DamageNumber newDN = default;
-            int instanceID = GetInstanceID();
+            // Declare new popup
+            DamageNumber newPopup = default;
+
+            // Get instance ID
+            if (prefabID == 0)
+            {
+                prefabID = GetInstanceID();
+            }
 
             // Check Pool
-            if (enablePooling && PoolAvailable(instanceID))
+            if (enablePooling && PoolAvailable(prefabID))
             {
                 // Get from Pool
-                foreach (DamageNumber dn in pools[instanceID])
+                foreach (DamageNumber dn in pools[prefabID])
                 {
-                    newDN = dn; // This is the only way I can get a unknown element from a hashset, using a single loop iteration
+                    newPopup = dn;
                     break;
                 }
-                pools[instanceID].Remove(newDN);
+                pools[prefabID].Remove(newPopup);
             }
             else
             {
                 // Create New
                 GameObject newGO = Instantiate<GameObject>(gameObject);
-                newDN = newGO.GetComponent<DamageNumber>();
+                newPopup = newGO.GetComponent<DamageNumber>();
 
                 if (enablePooling)
                 {
-                    newDN.originalPrefab = this;
+                    newPopup.originalPrefab = this;
+                    newPopup.prefabID = prefabID;
                 }
             }
 
-            newDN.gameObject.SetActive(true); // Active Gameobject
-            newDN.InternalOnPreSpawn();
+            // Activate
+            newPopup.gameObject.SetActive(true);
+            newPopup.InternalOnPreSpawn();
 
+            // Update pooling id
             if (enablePooling)
             {
-                newDN.SetPoolingID(instanceID);
-                newDN.destroyAfterSpawning = false;
+                newPopup.SetPoolingID(prefabID);
+                newPopup.destroyAfterSpawning = false;
             }
 
-            return newDN;
+            // Limit active instances
+            if (limitActiveInstances)
+            {
+                // Initialize
+                if (activeInstancesQueue.ContainsKey(prefabID) == false)
+                {
+                    activeInstancesQueue.Add(prefabID, new Queue<DamageNumber>());
+                }
+
+                // Fade out oldest popups
+                Queue<DamageNumber> activeQueue = activeInstancesQueue[prefabID];
+                while (activeQueue.Count > maxActiveInstances)
+                {
+                    DamageNumber activePopup = activeQueue.Dequeue();
+                    if (activePopup != null)
+                    {
+                        activePopup.removedFromActiveInstanceQueue = true;
+                        activePopup.FadeOut();
+                    }
+                }
+            }
+
+            return newPopup;
         }
 
         /// <summary>
@@ -840,7 +882,7 @@ namespace DamageNumbersPro
             // Spam Group
             if (modifySpamGroup)
             {
-                spamGroup += followedTransform.GetInstanceID();
+                spamGroup += GetInstanceID();
             }
         }
         public void SetColor(Color newColor)
@@ -901,16 +943,12 @@ namespace DamageNumbersPro
             GetReferencesIfNecessary();
 
             // Get Font
-            foreach (TMP_Text tmp in GetTextMeshs())
-            {
-                if (tmp.font != null)
-                {
-                    return tmp.font;
-                }
-            }
+            TMP_Text tmp = GetTextMesh();
 
-            return null;
+            // Return font
+            return tmp != null ? tmp.font : null;
         }
+
         public void SetScale(float newScale)
         {
             originalScale = transform.localScale = new Vector3(newScale, newScale, newScale);
@@ -926,11 +964,11 @@ namespace DamageNumbersPro
         }
         public virtual Vector3 GetFreshUpVector()
         {
-            return transform.up;
+            return myTransform.up;
         }
         public virtual Vector3 GetFreshRightVector()
         {
-            return transform.right;
+            return myTransform.right;
         }
 
         #endregion
@@ -940,10 +978,11 @@ namespace DamageNumbersPro
         {
             baseAlpha = 1f;
 
-            textMeshPro = transform.Find("TMP").GetComponent<TextMeshPro>();
+            myTransform = transform;
+            textMeshPro = myTransform.Find("TMP").GetComponent<TextMeshPro>();
             textMeshRenderer = textMeshPro.GetComponent<MeshRenderer>();
-            transformA = transform.Find("MeshA");
-            transformB = transform.Find("MeshB");
+            transformA = myTransform.Find("MeshA");
+            transformB = myTransform.Find("MeshB");
             meshRendererA = transformA.GetComponent<MeshRenderer>();
             meshRendererB = transformB.GetComponent<MeshRenderer>();
             meshFilterA = transformA.GetComponent<MeshFilter>();
@@ -1061,17 +1100,17 @@ namespace DamageNumbersPro
             // Pooling / Destroying
             if (enablePooling && originalPrefab != null)
             {
+                // Initialize
                 if (pools == null)
                 {
                     pools = new Dictionary<int, HashSet<DamageNumber>>();
                 }
-
                 if (!pools.ContainsKey(poolingID))
                 {
                     pools.Add(poolingID, new HashSet<DamageNumber>());
                 }
 
-                // Static Reference
+                // Static references
                 if (activeInstances != null && activeInstances.Contains(this))
                 {
                     activeInstances.Remove(this);
@@ -1082,6 +1121,9 @@ namespace DamageNumbersPro
 
                 // Remove from dictionaries
                 RemoveFromDictionary();
+
+                // Remove from active popups queue
+                RemoveFromActivePoolQueue();
 
                 // Pooling
                 if (pools[poolingID].Count < poolSize)
@@ -1162,7 +1204,8 @@ namespace DamageNumbersPro
         {
             if (enablePooling)
             {
-                int instanceId = GetInstanceID();
+                // Get instance ID
+                prefabID = GetInstanceID();
 
                 // Initialize Dictionary
                 if (pools == null)
@@ -1171,13 +1214,13 @@ namespace DamageNumbersPro
                 }
 
                 // Initialize Pool
-                if (!pools.ContainsKey(instanceId))
+                if (!pools.ContainsKey(prefabID))
                 {
-                    pools.Add(instanceId, new HashSet<DamageNumber>());
+                    pools.Add(prefabID, new HashSet<DamageNumber>());
                 }
 
                 // Fill Pool
-                int amount = poolSize - pools[instanceId].Count;
+                int amount = poolSize - pools[prefabID].Count;
                 if(amount > poolSize * 0.5f)
                 {
                     for (int n = 0; n < amount; n++)
@@ -1300,10 +1343,6 @@ namespace DamageNumbersPro
         protected void Restart()
         {
             // Static Reference
-            if(activeInstances == null)
-            {
-                activeInstances = new HashSet<DamageNumber>();
-            }
             if (activeInstances.Contains(this) == false)
             {
                 activeInstances.Add(this);
@@ -1315,11 +1354,17 @@ namespace DamageNumbersPro
             // Get Scale
             if (originalScale.x < 0.02f)
             {
-                originalScale = transform.localScale;
+                originalScale = myTransform.localScale;
             }
 
-            // Fix Fading Scale
+            // Fix fading scale
             transformA.localScale = transformB.localScale = Vector3.one;
+
+            // Enable second mesh renderer during fade in
+            if (meshRendererB != null)
+            {
+                meshRendererB.gameObject.SetActive(true);
+            }
 
             // Event
             OnSpawn?.Invoke();
@@ -1373,6 +1418,7 @@ namespace DamageNumbersPro
                             for (int f = 0; f < fontAsset.fallbackFontAssetTable.Count; f++)
                             {
                                 TMP_FontAsset fallbackFont = fontAsset.fallbackFontAssetTable[f];
+                                int charCount = 0; // Add multiple characters due avoid issues on some fonts
 
                                 if (fallbackFont != null && fallbackFont.characterTable != null)
                                 {
@@ -1384,21 +1430,31 @@ namespace DamageNumbersPro
                                         {
                                             if (AddFallbackCharacterToString(ref textString, fallbackCharacter.unicode, fontAsset, f))
                                             {
-                                                success = true;
-                                                break;
+                                                charCount++;
+
+                                                if(charCount > 20)
+                                                {
+                                                    success = true;
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
 
-                                    if (!success && fallbackFont.atlasPopulationMode == AtlasPopulationMode.Dynamic)
+                                    if (!success && fallbackFont.atlasPopulationMode != AtlasPopulationMode.Static)
                                     {
                                         for (int unicode = 0; unicode < 40959; unicode++)
                                         {
-                                            if (fallbackFont.TryAddCharacters(new uint[] { (uint) unicode }))
+                                            if (fallbackFont.TryAddCharacters(new uint[] { (uint)unicode }))
                                             {
                                                 if (AddFallbackCharacterToString(ref textString, (uint)unicode, fontAsset, f))
                                                 {
-                                                    break;
+                                                    charCount++;
+
+                                                    if (charCount > 20)
+                                                    {
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }
@@ -1438,12 +1494,12 @@ namespace DamageNumbersPro
         bool AddFallbackCharacterToString(ref string textString, uint unicode, TMP_FontAsset mainFontAsset, int fallbackIndex)
         {
             // The unicode 0 can cause issues
-            if(unicode < 1)
+            if (unicode < 1)
             {
                 return false;
             }
 
-            if (mainFontAsset.characterLookupTable.ContainsKey(unicode) || (mainFontAsset.atlasPopulationMode == AtlasPopulationMode.Dynamic && mainFontAsset.TryAddCharacters(new uint[] { unicode })))
+            if (mainFontAsset.characterLookupTable.ContainsKey(unicode) || (mainFontAsset.atlasPopulationMode != AtlasPopulationMode.Static && mainFontAsset.TryAddCharacters(new uint[] { unicode })))
             {
                 // Character already in main font
             }
@@ -1456,7 +1512,7 @@ namespace DamageNumbersPro
                     TMP_FontAsset previousFallbackFont = mainFontAsset.fallbackFontAssetTable[pF];
                     if (previousFallbackFont != null)
                     {
-                        if (previousFallbackFont.characterLookupTable.ContainsKey(unicode) || (previousFallbackFont.atlasPopulationMode == AtlasPopulationMode.Dynamic && previousFallbackFont.TryAddCharacters(new uint[] { unicode })))
+                        if (previousFallbackFont.characterLookupTable.ContainsKey(unicode) || (previousFallbackFont.atlasPopulationMode != AtlasPopulationMode.Static && previousFallbackFont.TryAddCharacters(new uint[] { unicode })))
                         {
                             // Character already in a higher priority fallback font
                             addCharacter = false;
@@ -1634,7 +1690,7 @@ namespace DamageNumbersPro
             performRestart = true;
 
             // Reset Runtime Variables
-            transform.localScale = originalScale;
+            myTransform.localScale = originalScale;
             lastTargetPosition = targetOffset = Vector3.zero;
 
             // Clear Combination Targets
@@ -1687,6 +1743,15 @@ namespace DamageNumbersPro
             // Parent
             transform.SetParent(poolParent, true);
         }
+
+        void RemoveFromActivePoolQueue()
+        {
+            if (limitActiveInstances && removedFromActiveInstanceQueue == false && activeInstancesQueue[prefabID].Count > 0)
+            {
+                removedFromActiveInstanceQueue = true;
+                activeInstancesQueue[prefabID].Dequeue();
+            }
+        }
         #endregion
 
         #region Text
@@ -1713,12 +1778,9 @@ namespace DamageNumbersPro
                     // Add zeros to the left to fix numbers less than 1
                     int usedDecimals = digitSettings.decimals;
                     int currentLength = allDigits.Length;
-                    if(currentLength < usedDecimals)
+                    if (currentLength < usedDecimals)
                     {
-                        for(int i = 0; i < usedDecimals - currentLength; i++)
-                        {
-                            allDigits = "0" + allDigits;
-                        }
+                        allDigits = new string('0', usedDecimals - currentLength) + allDigits;
                     }
 
                     while (digitSettings.hideZeros && allDigits.EndsWith("0") && usedDecimals > 0)
@@ -1739,7 +1801,7 @@ namespace DamageNumbersPro
                     int digitLength = allDigits.Length;
                     while (digitLength < usedDecimals)
                     {
-                        if(digitSettings.hideZeros)
+                        if (digitSettings.hideZeros)
                         {
                             usedDecimals--;
                         }
@@ -1774,7 +1836,7 @@ namespace DamageNumbersPro
                     numberScale = scaleByNumberSettings.fromScale + (scaleByNumberSettings.toScale - scaleByNumberSettings.fromScale) * Mathf.Clamp01((number - scaleByNumberSettings.fromNumber) / (scaleByNumberSettings.toNumber - scaleByNumberSettings.fromNumber));
                 }
 
-                if(enableColorByNumber)
+                if (enableColorByNumber)
                 {
                     SetColor(colorByNumberSettings.colorGradient.Evaluate(Mathf.Clamp01((number - colorByNumberSettings.fromNumber) / (colorByNumberSettings.toNumber - colorByNumberSettings.fromNumber))));
                 }
@@ -1805,8 +1867,8 @@ namespace DamageNumbersPro
             GetReferencesIfNecessary();
 
             // Scale Fix
-            Vector3 currentLocalScale = transform.localScale;
-            if(!enable3DGame || !renderThroughWalls)
+            Vector3 currentLocalScale = myTransform.localScale;
+            if (!enable3DGame || !renderThroughWalls)
             {
                 renderThroughWallsScale = 1f;
             }
@@ -1817,38 +1879,62 @@ namespace DamageNumbersPro
             float minScale = renderThroughWallsScale * lastScaleFactor;
             if (currentLocalScale.x < minScale)
             {
-                transform.localScale = new Vector3(minScale, minScale, minScale);
+                myTransform.localScale = new Vector3(minScale, minScale, minScale);
             }
 
             // Update Text
             SetTextString(prefixText + numberText + suffixText);
-            transform.localScale = currentLocalScale;
+            myTransform.localScale = currentLocalScale;
 
-            // Get Colors
-            colors = new List<Color[]>();
-            alphas = new List<float[]>();
+            // Initialize colors
+            if (meshColors == null)
+            {
+                meshColors = new List<List<Color>>(meshs.Count);
+                for (int m = 0; m < meshs.Count; m++)
+                {
+                    meshColors.Add(new List<Color>());
+                }
+            }
+            for (int c = meshColors.Count; c < meshs.Count; c++)
+            {
+                meshColors.Add(new List<Color>());
+            }
 
+            // Initialize alphas
+            if (meshAlphas == null)
+            {
+                meshAlphas = new List<List<float>>(meshs.Count);
+                for (int m = 0; m < meshs.Count; m++)
+                {
+                    meshAlphas.Add(new List<float>());
+                }
+            }
+            for (int a = meshAlphas.Count; a < meshs.Count; a++)
+            {
+                meshAlphas.Add(new List<float>());
+            }
+
+            // Update colors and alphas
             for (int n = 0; n < meshs.Count; n++)
             {
                 Mesh mesh = meshs[n];
+                List<Color> colors = meshColors[n];
+                List<float> alphas = meshAlphas[n];
 
-                if(mesh != null)
+                if (mesh != null)
                 {
-                    Color[] color = mesh.colors;
-                    float[] alpha = new float[color.Length];
+                    mesh.GetColors(colors);
 
-                    for (int c = 0; c < color.Length; c++)
+                    alphas.Clear();
+                    for (int c = 0; c < colors.Count; c++)
                     {
-                        alpha[c] = color[c].a;
+                        alphas.Add(colors[c].a);
                     }
-
-                    alphas.Add(alpha);
-                    colors.Add(color);
                 }
                 else
                 {
-                    colors.Add(new Color[0]);
-                    alphas.Add(new float[0]);
+                    colors.Clear();
+                    alphas.Clear();
                 }
             }
 
@@ -1861,58 +1947,63 @@ namespace DamageNumbersPro
 
         protected virtual void SetTextString(string fullString)
         {
-            // Generate Mesh
+            // Generate new mesh
             textMeshPro.gameObject.SetActive(true);
             textMeshPro.text = fullString;
-            textMeshPro.ForceMeshUpdate();
+            textMeshPro.ForceMeshUpdate(true);
+            TMP_MeshInfo[] meshInfos = textMeshPro.textInfo.meshInfo;
+            int meshInfoCount = meshInfos.Length;
 
-            // Clear Meshs
-            ClearMeshs();
-
-            meshs = new List<Mesh>();
-            meshs.Add(Instantiate<Mesh>(textMeshPro.mesh));
-            meshFilterA.mesh = meshFilterB.mesh = meshs[0];
-            meshRendererA.sharedMaterials = meshRendererB.sharedMaterials = textMeshRenderer.sharedMaterials;
-
-            // Submeshes
-            int usedSubMeshes = 0;
-            for (int c = 0; c < textMeshPro.transform.childCount; c++)
+            // Initialize meshs
+            if (meshs == null)
             {
-                MeshRenderer subMeshRenderer = textMeshPro.transform.GetChild(c).GetComponent<MeshRenderer>();
-
-                if (subMeshRenderer != null)
-                {
-                    MeshFilter subMeshFilter = subMeshRenderer.GetComponent<MeshFilter>();
-
-                    // Create new Submesh
-                    if (subMeshRenderers.Count <= c)
-                    {
-                        GameObject subMeshA = NewMesh("Sub", meshRendererA.transform);
-                        GameObject subMeshB = NewMesh("Sub", meshRendererB.transform);
-                        subMeshRenderers.Add(new System.Tuple<MeshRenderer, MeshRenderer>(subMeshA.GetComponent<MeshRenderer>(), subMeshB.GetComponent<MeshRenderer>()));
-                        subMeshFilters.Add(new System.Tuple<MeshFilter, MeshFilter>(subMeshA.GetComponent<MeshFilter>(), subMeshB.GetComponent<MeshFilter>()));
-                    }
-
-                    // Apply
-                    System.Tuple<MeshRenderer, MeshRenderer> subRenderers = subMeshRenderers[c];
-                    System.Tuple<MeshFilter, MeshFilter> subFilters = subMeshFilters[c];
-                    subRenderers.Item1.sharedMaterials = subRenderers.Item2.sharedMaterials = subMeshRenderer.sharedMaterials;
-
-                    Mesh newSubMesh = Instantiate<Mesh>(subMeshFilter.sharedMesh);
-                    subFilters.Item1.mesh = subFilters.Item2.mesh = newSubMesh;
-                    meshs.Add(newSubMesh);
-
-                    // Enable
-                    subRenderers.Item1.transform.localScale = subRenderers.Item2.transform.localScale = Vector3.one;
-
-                    usedSubMeshes++;
-                }
+                meshs = new List<Mesh>();
             }
 
-            // Hide Unused Meshs
-            for (int n = usedSubMeshes; n < subMeshRenderers.Count; n++)
+            // Add required meshs
+            for (int m = meshs.Count; m < meshInfos.Length; m++)
             {
-                subMeshRenderers[n].Item1.transform.localScale = subMeshRenderers[n].Item2.transform.localScale = Vector3.zero;
+                meshs.Add(new Mesh());
+            }
+
+            // Copy mesh datas
+            for (int meshIndex = 0; meshIndex < meshInfoCount; meshIndex++)
+            {
+                CopyMeshInfo(meshInfos[meshIndex], meshs[meshIndex]);
+            }
+
+            // Update main mesh
+            meshFilterA.mesh = meshFilterB.mesh = meshs[0];
+            meshRendererA.sharedMaterial = meshRendererB.sharedMaterial = meshInfos[0].material;
+
+            // Update submeshs
+            for (int m = 1; m < meshInfos.Length; m++)
+            {
+                // Create submesh
+                if (subMeshRenderers.Count < m)
+                {
+                    string subMeshName = "Sub" + m;
+                    GameObject subMeshA = NewMesh(subMeshName, meshRendererA.transform);
+                    GameObject subMeshB = NewMesh(subMeshName, meshRendererB.transform);
+                    subMeshRenderers.Add(new System.Tuple<MeshRenderer, MeshRenderer>(subMeshA.GetComponent<MeshRenderer>(), subMeshB.GetComponent<MeshRenderer>()));
+                    subMeshFilters.Add(new System.Tuple<MeshFilter, MeshFilter>(subMeshA.GetComponent<MeshFilter>(), subMeshB.GetComponent<MeshFilter>()));
+                }
+
+                // Apply submesh
+                int subMeshIndex = m - 1;
+                System.Tuple<MeshRenderer, MeshRenderer> subRenderers = subMeshRenderers[subMeshIndex];
+                System.Tuple<MeshFilter, MeshFilter> subFilters = subMeshFilters[subMeshIndex];
+                subRenderers.Item1.sharedMaterial = subRenderers.Item2.sharedMaterial = meshInfos[m].material;
+                subFilters.Item1.mesh = subFilters.Item2.mesh = meshs[m];
+
+                // Enable submesh
+                subRenderers.Item1.transform.localScale = subRenderers.Item2.transform.localScale = Vector3.one;
+            }
+
+            // Disable unused submeshs
+            for(int m = meshInfos.Length; m < subMeshRenderers.Count; m++)
+            {
+                subMeshRenderers[m].Item1.transform.localScale = subMeshRenderers[m].Item2.transform.localScale = Vector3.zero;
             }
 
             // Disable TMP
@@ -2063,22 +2154,38 @@ namespace DamageNumbersPro
             return newString;
         }
 
+        private void CopyMeshInfo(TMP_MeshInfo meshInfo, Mesh mesh)
+        {
+            // Get mesh info
+            int vCount = meshInfo.vertexCount;
+            int tCount = vCount / 4 * 6;
+
+            // Apply mesh info
+            mesh.Clear();
+            mesh.SetVertices(meshInfo.vertices, 0, vCount);
+            mesh.SetUVs(0, meshInfo.uvs0, 0, vCount);
+            mesh.SetUVs(1, meshInfo.uvs2, 0, vCount);
+            mesh.SetColors(meshInfo.colors32, 0, vCount);
+            mesh.SetTriangles(meshInfo.triangles, 0, tCount, 0, false);
+            mesh.bounds = new Bounds(Vector3.zero, Vector3.one);
+        }
+        
         private void ClearMeshs()
         {
             if (meshs != null)
             {
                 if (Application.isPlaying)
                 {
-                    foreach (Mesh mesh in meshs)
+                    for (int m = 1; m < meshs.Count; m++)
                     {
-                        Destroy(mesh);
+                        Destroy(meshs[m]);
                     }
                 }
                 else
                 {
-                    foreach (Mesh mesh in meshs)
+                    for (int m = 1; m < meshs.Count; m++)
                     {
-                        DestroyImmediate(mesh);
+                        DestroyImmediate(meshs[m]);
                     }
                 }
             }
@@ -2090,8 +2197,27 @@ namespace DamageNumbersPro
         {
             if (currentFade < 1)
             {
+                // Update fade
                 currentFade = Mathf.Min(1, currentFade + delta * fadeInSpeed);
                 UpdateFade(enableOffsetFadeIn, offsetFadeIn, enableCrossScaleFadeIn, currentScaleInOffset, enableScaleFadeIn, scaleFadeIn, enableShakeFadeIn, shakeOffsetFadeIn, shakeFrequencyFadeIn);
+
+                if (currentFade >= 1f)
+                {
+                    // Disable second mesh renderer after fading in
+                    if (meshRendererB != null)
+                    {
+                        meshRendererB.gameObject.SetActive(false);
+                    }
+
+                    // Add to active queue
+                    if (activeInstancesQueue.ContainsKey(prefabID) == false)
+                    {
+                        activeInstancesQueue.Add(prefabID, new Queue<DamageNumber>());
+                    }
+                    Queue<DamageNumber> activeQueue = activeInstancesQueue[prefabID];
+                    activeQueue.Enqueue(this);
+                    removedFromActiveInstanceQueue = false;
+                }
             }
         }
         void HandleFadeOut(float delta)
@@ -2101,6 +2227,15 @@ namespace DamageNumbersPro
             {
                 isFadingOut = true;
                 OnFadeOut?.Invoke();
+
+                // Enable second mesh renderer during fade out
+                if (meshRendererB != null)
+                {
+                    meshRendererB.gameObject.SetActive(true);
+                }
+
+                // Remove from active popups queue
+                RemoveFromActivePoolQueue();
             }
 
             // Update fade value
@@ -2114,6 +2249,7 @@ namespace DamageNumbersPro
                 DestroyDNP();
             }
         }
+
         void UpdateFade(bool enablePositionOffset, Vector2 positionOffset, bool enableScaleOffset, Vector2 scaleOffset, bool enableScale, Vector2 scale, bool enableShake, Vector2 shakeOffset, float shakeFrequency)
         {
             Vector2 basePosition = Vector2.zero;
@@ -2171,25 +2307,28 @@ namespace DamageNumbersPro
             // Alpha
             UpdateAlpha(currentFade);
         }
+
         public void UpdateAlpha(float progress)
         {
             float alphaFactor = progress * progress * baseAlpha * baseAlpha;
 
-            if(meshs != null)
+            if (meshs != null)
             {
                 for (int n = 0; n < meshs.Count; n++)
                 {
-                    if (colors[n] != null && meshs[n] != null)
+                    if (meshs[n] != null)
                     {
-                        Color[] color = colors[n];
-                        float[] alpha = alphas[n];
+                        List<Color> colors = meshColors[n];
+                        List<float> alphas = meshAlphas[n];
 
-                        for (int c = 0; c < color.Length; c++)
+                        for (int c = 0; c < colors.Count; c++)
                         {
-                            color[c].a = alphaFactor * alpha[c];
+                            Color newColor = colors[c];
+                            newColor.a = alphaFactor * alphas[c];
+                            colors[c] = newColor;
                         }
 
-                        meshs[n].colors = color;
+                        meshs[n].SetColors(colors);
                     }
                 }
             }
@@ -2324,7 +2463,7 @@ namespace DamageNumbersPro
         /// </summary>
         protected virtual void SetFinalPosition(Vector3 newPosition)
         {
-            transform.position = newPosition;
+            myTransform.position = newPosition;
         }
 
         /// <summary>
@@ -2354,16 +2493,16 @@ namespace DamageNumbersPro
         public virtual void SetAnchoredPosition(Transform rectParent, Vector2 anchoredPosition)
         {
             // Old Transform
-            Vector3 oldScale = transform.localScale;
-            Vector3 oldRotation = transform.eulerAngles;
+            Vector3 oldScale = myTransform.localScale;
+            Vector3 oldRotation = myTransform.eulerAngles;
 
             // Set Parent and Position
-            transform.SetParent(rectParent, false);
-            transform.position = anchoredPosition;
+            myTransform.SetParent(rectParent, false);
+            myTransform.position = anchoredPosition;
 
             // New Transform
-            transform.localScale = oldScale;
-            transform.eulerAngles = oldRotation;
+            myTransform.localScale = oldScale;
+            myTransform.eulerAngles = oldRotation;
         }
 
         /// <summary>
@@ -2372,16 +2511,16 @@ namespace DamageNumbersPro
         public virtual void SetAnchoredPosition(Transform rectParent, Transform rectPosition, Vector2 relativeAnchoredPosition)
         {
             // Old Transform
-            Vector3 oldScale = transform.localScale;
-            Vector3 oldRotation = transform.eulerAngles;
+            Vector3 oldScale = myTransform.localScale;
+            Vector3 oldRotation = myTransform.eulerAngles;
 
             // Set Parent and Position
-            transform.SetParent(rectParent, false);
-            transform.position = rectPosition.position + (Vector3)relativeAnchoredPosition;
+            myTransform.SetParent(rectParent, false);
+            myTransform.position = rectPosition.position + (Vector3)relativeAnchoredPosition;
 
             // New Transform
-            transform.localScale = oldScale;
-            transform.eulerAngles = oldRotation;
+            myTransform.localScale = oldScale;
+            myTransform.eulerAngles = oldRotation;
         }
 
         protected virtual float GetPositionFactor()
@@ -2845,7 +2984,7 @@ namespace DamageNumbersPro
             }
 
             // Orthographic Scale
-            if (enableOrthographicScaling && !beforeMeshBuild)
+            if (enableOrthographicScaling && !beforeMeshBuild && targetOrthographicCamera != null)
             {
                 appliedScale *= Mathf.Min(maxOrthographicSize, targetOrthographicCamera.orthographicSize / defaultOrthographicSize);
             }
@@ -2859,11 +2998,11 @@ namespace DamageNumbersPro
                 {
                     if(lookAtCamera)
                     {
-                        transform.LookAt(transform.position + (transform.position - targetCamera.position));
+                        myTransform.LookAt(myTransform.position + (myTransform.position - targetCamera.position));
                     }
                     else
                     {
-                        transform.rotation = targetCamera.rotation;
+                        myTransform.rotation = targetCamera.rotation;
                     }
                 }
 
@@ -2922,7 +3061,7 @@ namespace DamageNumbersPro
                     }
                     near += 0.0005f * distance + 0.02f + near * 0.02f * Vector3.Angle(offset, targetCamera.forward);
 
-                    transform.position = offset.normalized * near + targetCamera.position;
+                    myTransform.position = offset.normalized * near + targetCamera.position;
 
                     // Adjust Scale
                     renderThroughWallsScale = near / distance;
@@ -2937,14 +3076,14 @@ namespace DamageNumbersPro
             #endregion
 
             // Apply
-            transform.localScale = appliedScale;
+            myTransform.localScale = appliedScale;
 
             // First Frame Fix
             if (firstFrameScale)
             {
                 if(durationFadeIn > 0)
                 {
-                    transform.localScale = Vector3.zero;
+                    myTransform.localScale = Vector3.zero;
                 }
                 firstFrameScale = false;
             }

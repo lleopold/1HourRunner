@@ -146,7 +146,7 @@ namespace DamageNumbersPro.Demo
                     {
                         if(newDamageNumber.spamGroup != "")
                         {
-                            newDamageNumber.spamGroup += target.GetInstanceID();
+                            newDamageNumber.spamGroup += GetInstanceID();
                         }
 
                         newDamageNumber.enableFollowing = true;

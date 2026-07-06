@@ -12,7 +12,7 @@ namespace DamageNumbersPro
     [CustomEditor(typeof(DamageNumber), true), CanEditMultipleObjects]
     public class DamageNumberEditor : Editor
     {
-        public static string version = "4.51";
+        public static string version = "4.54";
 
         void OnEnable()
         {
@@ -96,6 +96,7 @@ namespace DamageNumbersPro
                 case (7): // Performance
                     DisplayPerformanceMain();
                     DisplayFeature("enablePooling", "Pooling");
+                    DisplayFeature("limitActiveInstances", "Limit Instances");
                     DisplayPerformanceHints();
                     break;
             }
@@ -1060,6 +1061,14 @@ namespace DamageNumbersPro
                         DNPEditorInternal.Label("- Each prefab has it's <b>own</b> pool.");
                         DNPEditorInternal.Label("- Use <b>PrewarmPool()</b> on a prefab to prepare it's pool.");
                         break;
+                    case ("Limit Instances"):
+                        DNPEditorInternal.Label("<b>Function:</b>");
+                        DNPEditorInternal.Label("- Improves performance by <b>limiting</b> the amount of active damage numbers.");
+                        DNPEditorInternal.Label("");
+                        DNPEditorInternal.Label("<b>Information:</b>");
+                        DNPEditorInternal.Label("- Only fully faded in damage numbers are considered active.");
+                        DNPEditorInternal.Label("- The oldest active damage numbers of this prefab will be faded out, once the limit is reached.");
+                        break;
                 }
                 GUI.color = Color.white;
             }
@@ -1472,6 +1481,9 @@ namespace DamageNumbersPro
                     case ("Pooling"):
                         EditorGUILayout.PropertyField(serializedObject.FindProperty("poolSize"));
                         EditorGUILayout.PropertyField(serializedObject.FindProperty("disableOnSceneLoad"));
+                        break;
+                    case ("Limit Instances"):
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("maxActiveInstances"));
                         break;
                 }
             }
@@ -2293,7 +2305,7 @@ namespace DamageNumbersPro
 
                     // Performance
                     case ("Pooling"):
-                        dn.poolSize = 50;
+                        dn.poolSize = 100;
                         break;
                     case ("Update Delay"):
                         dn.updateDelay = 0.0125f;

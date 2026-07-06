@@ -20,7 +20,11 @@ namespace DamageNumbersPro.Internal
         // Settings
         public bool isUnscaled = false;
         public float updateDelay = 0.0125f;
+
+        [System.NonSerialized]
         public HashSet<DamageNumber> activePopups;
+
+        [System.NonSerialized]
         public HashSet<DamageNumber> removedPopups;
 
         // Internal
@@ -57,13 +61,13 @@ namespace DamageNumbersPro.Internal
                 }
 
                 // Clean Up
-                if(removedPopups.Count > 0)
+                if (removedPopups.Count > 0)
                 {
                     foreach (DamageNumber removed in removedPopups)
                     {
                         activePopups.Remove(removed);
                     }
-                    removedPopups = new HashSet<DamageNumber>();
+                    removedPopups.Clear();
                 }
 
                 // Wait

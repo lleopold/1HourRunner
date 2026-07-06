@@ -13,6 +13,7 @@ namespace DamageNumbersPro.Demo
         public List<string> texts;
         public List<TMP_FontAsset> fonts;
         public bool randomColor;
+        public float lowestCooldown = 0f;
 
         public void Apply(DamageNumber target)
         {

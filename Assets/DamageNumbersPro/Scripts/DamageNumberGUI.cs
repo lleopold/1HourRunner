@@ -13,10 +13,10 @@ namespace DamageNumbersPro
         /* 
          * Contact me if you need any support.
          * Email: ekincantascontact@gmail.com
-         * Discord: https:// discordcom/invite/nWbRkN8Zxr
+         * Discord: https://discordcom/invite/nWbRkN8Zxr
          * 
          * Check the manual for more information.
-         * Manual: https:// ekincantascom/damage-numbers-pro/
+         * Manual: https://ekincantascom/damage-numbers-pro/
          * 
          * Thank you for using my asset.
          * If you want to add your own code please use the functions below.
@@ -38,7 +38,7 @@ namespace DamageNumbersPro
         protected override void InternalOnSpawn()
         {
             // Only damage numbers of the same parent can interact with each other
-            if(spamGroup != "" && transform.parent != null)
+            if (spamGroup != "" && transform.parent != null)
             {
                 spamGroup += transform.parent.GetInstanceID();
             }
@@ -102,6 +102,7 @@ namespace DamageNumbersPro
         {
             baseAlpha = 0.9f;
 
+            myTransform = transform;
             myRect = GetComponent<RectTransform>();
             transformA = transform.Find("TMPA");
             transformB = transform.Find("TMPB");

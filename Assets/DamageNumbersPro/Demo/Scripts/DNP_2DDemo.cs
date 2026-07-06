@@ -11,6 +11,7 @@ namespace DamageNumbersPro.Demo
     public class DNP_2DDemo : MonoBehaviour
     {
         float nextShotTime;
+        float shootingStartTime;
 
         void Start()
         {
@@ -35,7 +36,14 @@ namespace DamageNumbersPro.Demo
             else if (DNP_InputHandler.GetRightHeld() && Time.time > nextShotTime)
             {
                 Shoot();
-                nextShotTime = Time.time + 0.06f;
+
+                // Calculate shooting cooldown which decreases while shooting
+                if (Time.time > nextShotTime + 0.1f)
+                {
+                    shootingStartTime = Time.time;
+                }
+                float shootingCooldown = Mathf.Lerp(0.075f, Mathf.Max(0.01f, DNP_DemoManager.instance.GetSettings().lowestCooldown), (Time.time - shootingStartTime) / 2f);
+                nextShotTime = Time.time + shootingCooldown;
             }
         }
 
