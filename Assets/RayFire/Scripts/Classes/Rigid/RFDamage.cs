@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace RayFire
 {
+    /// <summary>
+    /// Rayfire Rigid damage properties class.
+    /// </summary>
     [Serializable]
     public class RFDamage
     {

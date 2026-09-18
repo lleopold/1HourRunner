@@ -72,7 +72,7 @@ namespace RayFireEditor
 
         void GUI_Prop()
         {
-            RFUI.CaptionBox (TextRst.gui_cap_props);
+            RFUI.CaptionBox (TextRst.gui_cap_prp);
             RFUI.PropertyField (sp_prp_en,  TextRst.gui_prp_en);
             RFUI.PropertyField (sp_prp_act, TextRst.gui_prp_act);
             RFUI.Slider (sp_prp_del, delay_min,    delay_max, TextRst.gui_prp_del);

@@ -236,16 +236,16 @@ namespace RayFireEditor
             sp_clp_seed  = serializedObject.FindProperty(nameof(root.dml) + "." + nameof(root.dml.clsDemol) + "." + nameof(root.dml.clsDemol.collapse) + "." + nameof(root.dml.clsDemol.collapse.seed));
             
             // Find Fade properties
-            sp_fad_dml   = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.onDemolition));
-            sp_fad_act   = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.onActivation));
-            sp_fad_ofs   = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.byOffset));
-            sp_fad_tp    = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.fadeType));
-            sp_fad_tm    = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.fadeTime));
-            sp_fad_lf_tp = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.lifeType));
-            sp_fad_lf_tm = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.lifeTime));
-            sp_fad_lf_vr = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.lifeVariation));
-            sp_fad_sz    = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.sizeFilter));
-            sp_fad_sh    = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.shardAmount));
+            sp_fad_dml   = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.dml));
+            sp_fad_act   = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.act));
+            sp_fad_ofs   = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.ofs));
+            sp_fad_tp    = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.ftp));
+            sp_fad_tm    = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.ftm));
+            sp_fad_lf_tp = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.ltp));
+            sp_fad_lf_tm = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.ltm));
+            sp_fad_lf_vr = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.lvr));
+            sp_fad_sz    = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.sfl));
+            sp_fad_sh    = serializedObject.FindProperty(nameof(root.fading) + "." + nameof(root.fading.shr));
             
             // Reset Serialized properties
             sp_res_tm = serializedObject.FindProperty(nameof(root.reset) + "." + nameof(root.reset.trs));
@@ -543,9 +543,9 @@ namespace RayFireEditor
                 RFUI.Caption (TextFad.gui_cap_tp);
                 RFUI.PropertyField (sp_fad_tp, TextFad.gui_fad_tp);
                 
-                if (root.fading.fadeType == FadeType.FallDown ||
-                    root.fading.fadeType == FadeType.MoveDown ||
-                    root.fading.fadeType == FadeType.ScaleDown)
+                if (root.fading.ftp == FadeType.FallDown ||
+                    root.fading.ftp == FadeType.MoveDown ||
+                    root.fading.ftp == FadeType.ScaleDown)
                     RFUI.Slider (sp_fad_tm, fade_time_min, fade_time_max, TextFad.gui_fad_tm);
                 RFUI.Slider (sp_fad_tm, fade_time_min, fade_time_max, TextFad.gui_fad_tm);
                 

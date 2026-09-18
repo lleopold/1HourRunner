@@ -158,6 +158,7 @@ namespace RayFire
         public const string rig_noIna  = " but Fragments Sim Type is not Inactive or Kinematik. Convertation disabled.";
         public const string rig_noRead = " Mesh is not readable. Demolition type set to None. Open Import Settings and turn On Read/Write Enabled property.";
         public const string rig_child2 = " but has no children with mesh. Object Excluded from simulation.";
+        
         public const string rig_noSkin = " but object has no SkinnedMeshRenderer. Object Excluded from simulation.";
         public const string rig_dml    = " Demolition Type is ";
         public const string rig_dml1   = " but Demolition Type is ";
@@ -167,9 +168,12 @@ namespace RayFire
         public const string rig_frg2   = ". Demolition Type set to Runtime. Had prefragmented objects which were destroyed.";
         public const string rig_rnt    = ". Demolition Type is Runtime, Use Shatter is On. Unsupported fragments type. Runtime Caching supports only Voronoi, Splinters, Slabs and Radial fragmentation types. Runtime Caching was Disabled.";
         public const string rig_awk2   = ". Demolition Type set to Awake Precache. Had manually prefragmented objects which were destroyed.";
-        public const string rig_cache  = ". Demolition Type set to Awake Prefragment. Runtime Caching disabled.";
+        public const string rig_cach1  = ". Demolition Type set to Awake Precache. Runtime Caching disabled.";
+        public const string rig_cach2  = ". Demolition Type set to Awake Prefragment. Runtime Caching disabled.";
+        public const string rig_cach3  = ". Object Type set to Skinned Mesh. Fragment Object Caching disabled.";
         public const string rig_plane  = " had planar low poly mesh. Object can't get Mesh Collider.";
-        public const string rig_init   = ". Demolition Reference object has already initialized Rigid. Set By Method Initialization type or Deactivate reference.";
+        public const string rig_init1  = ". Demolition Reference object has already initialized Rigid. Set By Method Initialization type or Deactivate reference.";
+        public const string rig_init2  = ". Demolition Reference object has already initialized RigidRoot. Set By Method Initialization type or Deactivate reference.";
         public const string rig_ref    = ". Reference Demolition object is prefab asset. Reference Demolition Action property changed to Instantiate.";
         public const string rig_res1   = ". Mesh Root Fragment destroyed.";
         public const string rig_res2   = ". Reset not supported.";
@@ -206,6 +210,7 @@ namespace RayFire
         public const string sht_null   = " Null mesh.";
         public const string sht_empt   = " Empty Mesh.";
         public const string sht_low    = " Mesh amount: ";
+        public const string sht_inList = " object already in Volume list.";
         
         // Shell
         public const string shl_noEdg = " has no open edges. Shell disabled.";

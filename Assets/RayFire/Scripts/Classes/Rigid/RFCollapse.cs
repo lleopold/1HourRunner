@@ -274,6 +274,19 @@ namespace RayFire
                 CollapseCluster (scr);
         }
 
+        // Break connection randomly
+        public static void ShardCollapse (RayfireRigid scr)
+        {
+            // Not initialized
+            if (scr.initialized == false)
+                return;
+            
+            // Main cluster.
+            int removed = RemOneRandomShard (scr.clsDemol.cluster, scr.clsDemol.collapse.seed);
+            if (removed > 0)
+                CollapseCluster (scr);
+        }
+        
         // Init collapse after connection loss
         static void CollapseCluster (RayfireRigid scr)
         {
@@ -580,7 +593,43 @@ namespace RayFire
             }
             return removed;
         }
-
+        
+        // Remove neibs by area
+        static int RemOneRandomShard (RFCluster cluster, int seed)
+        {
+            int removed = 0;
+            
+            // Set random state
+            Random.InitState (seed);
+            
+            // Get random shard to destroy connections
+            int s = Random.Range (0, cluster.shards.Count);
+            
+            // Skip unyielding // TODO get another random shard
+            if (cluster.shards[s].uny == true)
+                return 0;
+            
+            // Check neibs
+            for (int n = cluster.shards[s].neibShards.Count - 1; n >= 0; n--)
+            {
+                // Remove self in neib's neib list
+                for (int i = cluster.shards[s].neibShards[n].neibShards.Count - 1; i >= 0; i--)
+                {
+                    if (cluster.shards[s].neibShards[n].neibShards[i] == cluster.shards[s])
+                    {
+                        cluster.shards[s].neibShards[n].RemoveNeibAt (i);
+                        break;
+                    }
+                }
+               
+                // Remove in self
+                cluster.shards[s].RemoveNeibAt (n);
+                removed++;
+            }
+            
+            return removed;
+        }
+        
         // Remove connection in cluster in s shard and for its n neib 
         static void RemoveConnection(RFCluster cluster, int s, int n)
         {

@@ -9,6 +9,7 @@ public static class Loader
     {
         Level_1,
         Level_2,
+        Level_3,
         Loading,
         ChoosePlayer,
         ChooseWeapon,

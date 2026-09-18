@@ -25,14 +25,14 @@ namespace RayFire
         {
             rigid    = scr;
             tm       = scr.tsf;
-            fadeType = scr.fading.fadeType;
-            lifeTime = scr.fading.lifeTime;
-            if (scr.fading.lifeVariation > 0)
-                lifeTime += Random.Range (0, scr.fading.lifeVariation);
+            fadeType = scr.fading.ftp;
+            lifeTime = scr.fading.ltm;
+            if (scr.fading.lvr > 0)
+                lifeTime += Random.Range (0, scr.fading.lvr);
             oldPos   = tm.position;
             lifeNow  = 0;
             state    = 1;
-            if (scr.fading.lifeType != RFFadeLifeType.BySimulationAndLifeTime)
+            if (scr.fading.ltp != RFFadeLifeType.BySimulationAndLifeTime)
                 state = 3;
         }
 
@@ -41,14 +41,14 @@ namespace RayFire
         {
             //root     = scr;
             tm       = shard.tm;
-            fadeType = scr.fading.fadeType;
-            lifeTime = scr.fading.lifeTime;
-            if (scr.fading.lifeVariation > 0)
-                lifeTime += Random.Range (0, scr.fading.lifeVariation);
+            fadeType = scr.fading.ftp;
+            lifeTime = scr.fading.ltm;
+            if (scr.fading.lvr > 0)
+                lifeTime += Random.Range (0, scr.fading.lvr);
             oldPos   = tm.position;
             lifeNow  = 0;
             state    = 1;
-            if (scr.fading.lifeType != RFFadeLifeType.BySimulationAndLifeTime)
+            if (scr.fading.ltp != RFFadeLifeType.BySimulationAndLifeTime)
                 state = 3;
         }
         

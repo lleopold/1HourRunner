@@ -5,17 +5,20 @@ using UnityEngine.Serialization;
 
 namespace RayFire
 {
+    /// <summary>
+    /// Rayfire Rigid and RigidRoot demolition limitations properties class.
+    /// </summary>
     [Serializable]
     public class RFLimitations
     {
-        public bool   col;
-        public float  sol;
-        public string tag;
-        public int    depth;
-        public float  time;
-        public float  size;
-        public bool   vis;
-        public bool   bld;
+        public bool   col;      // Demolition b collision     
+        public float  sol;      // Solidity
+        public string tag;      // Demolition by tag
+        public int    depth;    // Demolition Depth
+        public float  time;     // Safe time
+        public float  size;     // Minimum size
+        public bool   vis;      // Visibility
+        public bool   bld;      // Slice by blade
         public Bounds bound;
         
         // Non serialized
@@ -93,9 +96,9 @@ namespace RayFire
             demolitionShould = false;
             demolished       = false;
             affectInactive   = false;
-            currentDepth     = 0;
             birthTime        = 0f;
             sliceForce       = 0;
+            currentDepth     = 0;
         }
         
         // Pool Reset
@@ -192,6 +195,13 @@ namespace RayFire
             {
                 // Excluded from sim by default
                 scr.physics.exclude = true;
+
+                // Runtime caching disabled
+                if (scr.mshDemol.ch.tp != CachingType.Disabled && scr.mshDemol.ch.obj == true)
+                {
+                    RayfireMan.Log (RFLog.rig_dbgn + scr.name + RFLog.rig_cach3, scr.mFlt.gameObject);
+                    scr.mshDemol.ch.obj = false;
+                }
             }
             
             // ////////////////
@@ -253,7 +263,7 @@ namespace RayFire
                 }
                 
                 // No runtime caching for rigid with shatter with slices/glue
-                if (scr.mshDemol.use == true && scr.mshDemol.ch.MultiFrameState == true)
+                if (scr.mshDemol.use == true && scr.mshDemol.ch.MeshCacheState == true)
                 {
                     if (scr.mshDemol.sht.type == FragType.Decompose ||
                         scr.mshDemol.sht.type == FragType.Slices)
@@ -272,6 +282,12 @@ namespace RayFire
                     RayfireMan.Log (RFLog.rig_dbgn + scr.name + RFLog.rig_awk2, scr.gameObject);
                     scr.DeleteFragments();
                 }
+
+                if (scr.mshDemol.ch.tp != CachingType.Disabled)
+                {
+                    RayfireMan.Log (RFLog.rig_dbgn + scr.name + RFLog.rig_cach1, scr.gameObject);
+                    scr.mshDemol.ch.tp = CachingType.Disabled;
+                }
             }
 
             // Awake prefragmented check
@@ -280,7 +296,7 @@ namespace RayFire
                 // Disable runtime caching
                 if (scr.mshDemol.ch.tp != CachingType.Disabled)
                 {
-                    RayfireMan.Log (RFLog.rig_dbgn + scr.name + RFLog.rig_cache, scr.gameObject);
+                    RayfireMan.Log (RFLog.rig_dbgn + scr.name + RFLog.rig_cach2, scr.gameObject);
                     scr.mshDemol.ch.tp = CachingType.Disabled;
                 }
             }
@@ -340,6 +356,14 @@ namespace RayFire
            rfScr.rtC.SetParent (rfScr.transform.parent);
         }
 
+        // Copy contact data
+        public static void Copy (RFLimitations source, RFLimitations target)
+        {
+            target.contactPoint   = source.contactPoint;
+            target.contactVector3 = source.contactVector3;
+            target.contactNormal  = source.contactNormal;
+        }
+        
         /// /////////////////////////////////////////////////////////
         /// Demolition
         /// /////////////////////////////////////////////////////////
@@ -413,9 +437,6 @@ namespace RayFire
         /// /////////////////////////////////////////////////////////
         
         // Get use shatter state
-        public bool HasSlicePlanes { get
-        {
-            return slicePlanes != null && slicePlanes.Count > 0;
-        }}
+        public bool HasSlicePlanes { get { return slicePlanes != null && slicePlanes.Count > 0; }}
     }
 }

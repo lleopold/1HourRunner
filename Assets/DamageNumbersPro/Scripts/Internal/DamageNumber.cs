@@ -2900,11 +2900,12 @@ namespace DamageNumbersPro
         {
             if (enablePush)
             {
+                // Initialize
                 pushed = true;
-
                 Vector3 myTargetPosition = GetTargetPosition();
                 float radius = pushSettings.radius * simulatedScale * GetPositionFactor();
 
+                // Find closest target to push
                 DamageNumber bestPushTarget = null;
                 float pushDirection = pushSettings.pushOffset > 0 ? 1 : -1;
                 float heightCap = myTargetPosition.y + 1000 * pushDirection;
@@ -2913,7 +2914,7 @@ namespace DamageNumbersPro
                     if (otherNumber.enablePush && !otherNumber.pushed)
                     {
                         Vector3 targetPosition = otherNumber.GetTargetPosition();
-                        if (targetPosition.y * pushDirection < heightCap* pushDirection && Vector3.Distance(myTargetPosition, targetPosition) < radius)
+                        if (targetPosition.y * pushDirection < heightCap * pushDirection && Vector3.Distance(myTargetPosition, targetPosition) < radius)
                         {
                             heightCap = targetPosition.y;
                             bestPushTarget = otherNumber;
@@ -2923,10 +2924,21 @@ namespace DamageNumbersPro
 
                 if (bestPushTarget != null)
                 {
+                    // Calculate push distance 
                     float heightDifference = (heightCap - myTargetPosition.y);
-                    float pushDistance = (pushSettings.pushOffset * GetPositionFactor() - heightDifference);
-                    bestPushTarget.remainingOffset.y += pushDirection > 0 ? Mathf.Max(pushDistance, 0) : Mathf.Min(pushDistance, 0);
+                    float pushOffset;
+                    if (pushSettings.scaleWithMesh)
+                    {
+                        pushOffset = 0.5f * (pushSettings.pushOffset * simulatedScale * GetTextMesh().textBounds.size.y + bestPushTarget.pushSettings.pushOffset * bestPushTarget.simulatedScale * bestPushTarget.GetTextMesh().textBounds.size.y);
+                    }
+                    else
+                    {
+                        pushOffset = 0.5f * (pushSettings.pushOffset + bestPushTarget.pushSettings.pushOffset);
+                    }
+                    float pushDistance = (pushOffset * GetPositionFactor() - heightDifference);
 
+                    // Push popup
+                    bestPushTarget.remainingOffset.y += pushDirection > 0 ? Mathf.Max(pushDistance, 0) : Mathf.Min(pushDistance, 0);
                     bestPushTarget.TryPush(sourcePosition);
                 }
             }
@@ -3042,7 +3054,7 @@ namespace DamageNumbersPro
 
                 // Apply scale
                 appliedScale *= lastScaleFactor;
-                simulatedScale = appliedScale.x;
+                simulatedScale = appliedScale.y;
 
                 // Render Through Walls
                 if (renderThroughWalls)
@@ -3071,7 +3083,7 @@ namespace DamageNumbersPro
             else
             {
                 appliedScale *= lastScaleFactor;
-                simulatedScale = appliedScale.x;
+                simulatedScale = appliedScale.y;
             }
             #endregion
 

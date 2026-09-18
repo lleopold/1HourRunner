@@ -151,15 +151,12 @@ namespace RayFire
             
             // Collect prefabs
             recorder.pfList.Add (prefab);
-            
-            // https://discussions.unity.com/t/editor-scripting-how-to-save-a-script-generated-mesh-as-an-asset-fbx/12050/2
-            // https://forum.unity.com/threads/saving-modified-mesh.404212/
         }
         
         // Destroy prefab components
-        public static void DestroyPrefabComponents(List<GameObject>   pfList)
+        public static void DestroyPrefabComponents(List<GameObject> pfList)
         {
-            if (pfList != null && pfList.Count == 0)
+            if (pfList == null || pfList.Count == 0)
                 return;
 
             foreach (var pf in pfList)
@@ -197,7 +194,7 @@ namespace RayFire
             if (optimizeKeys == true)
                 keys = OptimizeKeys(keys, threshold, rate);
 
-            // All keys was reduced
+            // All keys were reduced
             if (keys.Length < 2)
                 return;
             
@@ -227,7 +224,7 @@ namespace RayFire
             if (optimizeKeys == true)
                 keys = OptimizeKeys(keys, threshold, rate);
             
-            // All keys was reduced
+            // All keys were reduced
             if (keys.Length < 2)
                 return;
             
@@ -251,17 +248,17 @@ namespace RayFire
             // Skip if always active
             if (actList.Contains (false) == false)
                 return;
-
-                // Create keys
+            
+            // Create keys
             Keyframe[] keys = new Keyframe[timeList.Count];
             for (int i = 0; i < timeList.Count; i++)
-                keys[i] = new Keyframe (timeList[i], (actList[i] == true ? 1f : 0f));
+                keys[i] = new Keyframe (timeList[i], actList[i] == true ? 1f : 0f);
             
             // Optimize
             if (optimizeKeys == true)
                 keys = OptimizeKeys(keys, threshold, rate);
             
-            // All keys was reduced
+            // All keys were reduced
             if (keys.Length < 2)
                 return;
             
@@ -271,8 +268,8 @@ namespace RayFire
             // Set key type
             for (int i = 0; i < curve.keys.Length; i++)
             {
-                AnimationUtility.SetKeyLeftTangentMode (curve, i, AnimationUtility.TangentMode.Linear);
-                AnimationUtility.SetKeyRightTangentMode (curve, i, AnimationUtility.TangentMode.Linear);
+                AnimationUtility.SetKeyLeftTangentMode (curve, i, AnimationUtility.TangentMode.Constant);
+                AnimationUtility.SetKeyRightTangentMode (curve, i, AnimationUtility.TangentMode.Constant);
             }
             
             // Set curve to track

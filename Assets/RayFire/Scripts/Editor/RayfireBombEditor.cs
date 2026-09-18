@@ -59,6 +59,7 @@ namespace RayFireEditor
         SerializedProperty sp_damageValue;
         SerializedProperty sp_heightOffset;
         SerializedProperty sp_delay;
+        SerializedProperty sp_atCol;
         SerializedProperty sp_atStart;
         SerializedProperty sp_destroy;
         SerializedProperty sp_obst_enable;
@@ -114,6 +115,7 @@ namespace RayFireEditor
             sp_damageValue     = serializedObject.FindProperty(nameof(bomb.damageValue));
             sp_heightOffset    = serializedObject.FindProperty(nameof(bomb.heightOffset));
             sp_delay           = serializedObject.FindProperty(nameof(bomb.delay));
+            sp_atCol           = serializedObject.FindProperty(nameof(bomb.colEx));
             sp_atStart         = serializedObject.FindProperty(nameof(bomb.atStart));
             sp_destroy         = serializedObject.FindProperty(nameof(bomb.destroy));
             sp_obst_enable     = serializedObject.FindProperty(nameof(bomb.obst_enable));
@@ -279,9 +281,9 @@ namespace RayFireEditor
                     RFUI.Slider (sp_heightOffset, heightOffset_min, heightOffset_max, TextBmb.gui_heightOffset);
 
                 RFUI.Slider (sp_delay, delay_min, delay_max, TextBmb.gui_delay);
+                RFUI.PropertyField (sp_atCol,   TextBmb.gui_atCol);
                 RFUI.PropertyField (sp_atStart, TextBmb.gui_atStart);
                 RFUI.PropertyField (sp_destroy, TextBmb.gui_destroy);
-
                 EditorGUI.indentLevel--;
             }
         }

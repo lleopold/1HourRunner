@@ -58,7 +58,7 @@ namespace RayFireEditor
 
         // Mesh Minimum & Maximum ranges
         const int   amount_frg_min     = 2;
-        const int   amount_frg_max     = 600;
+        const int   amount_frg_max     = 1000;
         const int   amount_frg_var_min = 0;
         const int   amount_frg_var_max = 100;
         const float depth_fade_min     = 0.01f;
@@ -187,6 +187,7 @@ namespace RayFireEditor
         SerializedProperty sp_msh_rnt;
         SerializedProperty sp_msh_rnt_fr;
         SerializedProperty sp_msh_rnt_fg;
+        SerializedProperty sp_msh_rnt_ob;
         SerializedProperty sp_msh_rnt_sk;
         SerializedProperty sp_msh_adv_slc;
         SerializedProperty sp_msh_adv_cmb;
@@ -335,6 +336,7 @@ namespace RayFireEditor
             sp_msh_rnt     = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.ch) + "." + nameof(rigid.mshDemol.ch.tp));
             sp_msh_rnt_fr  = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.ch) + "." + nameof(rigid.mshDemol.ch.frm));
             sp_msh_rnt_fg  = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.ch) + "." + nameof(rigid.mshDemol.ch.frg));
+            sp_msh_rnt_ob  = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.ch) + "." + nameof(rigid.mshDemol.ch.obj));
             sp_msh_rnt_sk  = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.ch) + "." + nameof(rigid.mshDemol.ch.skp));
             sp_msh_adv_slc = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.prp) + "." + nameof(rigid.mshDemol.prp.slc));
             sp_msh_adv_cmb = serializedObject.FindProperty(nameof(rigid.mshDemol) + "." + nameof(rigid.mshDemol.prp) + "." + nameof(rigid.mshDemol.prp.cmb));
@@ -399,16 +401,16 @@ namespace RayFireEditor
             sp_dmg_shr = serializedObject.FindProperty(nameof(rigid.damage) + "." + nameof(rigid.damage.shr));
             
             // Find Fade properties
-            sp_fad_dml   = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.onDemolition));
-            sp_fad_act   = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.onActivation));
-            sp_fad_ofs   = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.byOffset));
-            sp_fad_tp    = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.fadeType));
-            sp_fad_tm    = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.fadeTime));
-            sp_fad_lf_tp = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.lifeType));
-            sp_fad_lf_tm = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.lifeTime));
-            sp_fad_lf_vr = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.lifeVariation));
-            sp_fad_sz    = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.sizeFilter));
-            sp_fad_sh    = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.shardAmount));
+            sp_fad_dml   = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.dml));
+            sp_fad_act   = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.act));
+            sp_fad_ofs   = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.ofs));
+            sp_fad_tp    = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.ftp));
+            sp_fad_tm    = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.ftm));
+            sp_fad_lf_tp = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.ltp));
+            sp_fad_lf_tm = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.ltm));
+            sp_fad_lf_vr = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.lvr));
+            sp_fad_sz    = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.sfl));
+            sp_fad_sh    = serializedObject.FindProperty(nameof(rigid.fading) + "." + nameof(rigid.fading.shr));
             
             // Reset Serialized properties
             sp_res_tm = serializedObject.FindProperty(nameof(rigid.reset) + "." + nameof(rigid.reset.trs));
@@ -722,6 +724,7 @@ namespace RayFireEditor
                         RFUI.IntSlider (sp_msh_rnt_fr, cache_frame_min, cache_frame_max, TextMsh.gui_msh_rnt_fr);
                     if (rigid.mshDemol.ch.tp == CachingType.ByFragmentsPerFrame)
                         RFUI.IntSlider (sp_msh_rnt_fg, cache_frags_min, cache_frags_max, TextMsh.gui_msh_rnt_fg);
+                    RFUI.PropertyField (sp_msh_rnt_ob, TextMsh.gui_msh_rnt_ob);
                     RFUI.PropertyField (sp_msh_rnt_sk, TextMsh.gui_msh_rnt_sk);
                 }
                 
@@ -966,9 +969,9 @@ namespace RayFireEditor
                 RFUI.Caption (TextFad.gui_cap_tp);
                 RFUI.PropertyField (sp_fad_tp, TextFad.gui_fad_tp);
 
-                if (rigid.fading.fadeType == FadeType.FallDown ||
-                    rigid.fading.fadeType == FadeType.MoveDown ||
-                    rigid.fading.fadeType == FadeType.ScaleDown)
+                if (rigid.fading.ftp == FadeType.FallDown ||
+                    rigid.fading.ftp == FadeType.MoveDown ||
+                    rigid.fading.ftp == FadeType.ScaleDown)
                     RFUI.Slider (sp_fad_tm, fade_time_min, fade_time_max, TextFad.gui_fad_tm);
                 
                 RFUI.Caption (TextFad.gui_cap_lf);

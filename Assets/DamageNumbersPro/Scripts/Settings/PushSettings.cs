@@ -11,10 +11,12 @@ namespace DamageNumbersPro
         {
             radius = 4f;
             pushOffset = 0.8f;
+            scaleWithMesh = false;
         }
 
         [Header("Main:")]
         public float radius;
         public float pushOffset;
+        public bool scaleWithMesh;
     }
 }

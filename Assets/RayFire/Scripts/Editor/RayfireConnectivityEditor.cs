@@ -231,8 +231,6 @@ namespace RayFireEditor
                     GUILayout.Label (TextCnt.str_collapse);
                     RFUI.Space ();
                 }
-                
-                
             }
         }
 

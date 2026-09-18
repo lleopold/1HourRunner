@@ -53,17 +53,17 @@ namespace RayFire
         // Starting values
         void InitValues()
         {
-            am          = 15;
-            var         = 0;
-            dpf         = 0.5f;
-            bias        = 0f;
-            cls         = 0;
-            sd          = 1;
-            use         = false;
-            cld         = true;
-            cnv         = 0;
-            sim         = FragSimType.Dynamic;
-            sht         = null;
+            am   = 15;
+            var  = 0;
+            dpf  = 0.5f;
+            bias = 0f;
+            cls  = 0;
+            sd   = 1;
+            use  = false;
+            cld  = true;
+            cnv  = 0;
+            sim  = FragSimType.Dynamic;
+            sht  = null;
         }
 
         // Reset
@@ -119,43 +119,17 @@ namespace RayFire
             
             // Already has fragments
             if (scr.HasFragments == true)
-            {
-                // Set parent
-                RayfireMan.SetFragmentRootParent (scr.rtC, scr.transform.parent);
-                
-                // Set tm 
-                scr.rtC.position = scr.tsf.position;
-                scr.rtC.rotation = scr.tsf.rotation;
-
-                // Activate root and fragments
-                scr.rtC.gameObject.SetActive (true);
-
-                // Set demolished state
-                scr.lim.demolished = true;
-                
-                // Skip coroutines start if Awake prefragment and Convert
-                if (scr.dmlTp == DemolitionType.AwakePrefragment && scr.mshDemol.cnv != ConvertType.Disabled)
-                    return true;
-
-                // Start all coroutines
-                for (int i = 0; i < scr.fragments.Count; i++)
-                    scr.fragments[i].StartAllCoroutines();
-                
-                return true;
-            }
+                return ActivateFragments (scr);
             
             // Has unity meshes - create fragments. Multi frame create cached fragments here as well.
             if (scr.mshDemol.HasEngineAndMeshes == true)
             {
-                // Start countdown
-                // System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
-                // stopWatch.Start();
-                
                 // Create fragments
                 RFEngine.CreateRigidFragments (scr.mshDemol.engine, scr);
-                
-                // stopWatch.Stop();
-                // Debug.Log(scr.name + " Create Fragments " + stopWatch.Elapsed.TotalMilliseconds + " ms.");
+
+                // Fragments Caching in progress. Stop demolition
+                if (scr.mshDemol.ch.inProgress == true)
+                    return false;
                 
                 // Set demolished state
                 scr.lim.demolished = true;
@@ -165,47 +139,25 @@ namespace RayFire
             // Still has no Unity meshes - cache Unity meshes
             if (scr.mshDemol.HasEngineAndMeshes == false)
             {
-                // Start countdown
-                // System.Diagnostics.Stopwatch stopWatch0 = new System.Diagnostics.Stopwatch();
-                // stopWatch0.Start();
-                
-                // Start countdown
-                // System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
-                // stopWatch.Start();
-                
                 // Cache unity meshes
                 RFEngine.CacheRuntime (scr);
-                
-                // stopWatch.Stop();
-                // Debug.Log(scr.name + " Cache Fragments " + stopWatch.Elapsed.TotalMilliseconds + " ms.");
 
-                // Caching in progress. Stop demolition
+                // Mesh Caching in progress. Stop demolition
                 if (scr.mshDemol.ch.inProgress == true)
                     return false;
-                
+
                 // Fragmentation on not supported platforms. approve and set dml to none
                 if (scr.mshDemol.HasEngineAndMeshes == false)
                 {
                     scr.lim.demolished = false;
                     return true;
                 }
-                
+
                 // Has unity meshes - create fragments
                 if (scr.mshDemol.HasEngineAndMeshes == true)
                 {
-                    // Start countdown
-                    // System.Diagnostics.Stopwatch stopWatch2 = new System.Diagnostics.Stopwatch();
-                    // stopWatch2.Start();
-                    
                     RFEngine.CreateRigidFragments (scr.mshDemol.engine, scr);
                     scr.lim.demolished = true;
-                    
-                    // stopWatch2.Stop();
-                    // RayfireMan.Log(scr.name + " Create Fragments " + stopWatch2.Elapsed.TotalMilliseconds + " ms.");
-                    
-                    // stopWatch0.Stop();
-                    // RayfireMan.Log(scr.name + " Demolition Time " + stopWatch0.Elapsed.TotalMilliseconds + " ms.");
-                    
                     return true;
                 }
             }
@@ -213,6 +165,33 @@ namespace RayFire
             return false;
         }
         
+        // Activate already created fragments
+        static bool ActivateFragments (RayfireRigid scr)
+        {
+            // Set parent
+            RayfireMan.SetFragmentRootParent (scr.rtC, scr.transform.parent);
+                
+            // Set tm 
+            scr.rtC.position = scr.tsf.position;
+            scr.rtC.rotation = scr.tsf.rotation;
+
+            // Activate root and fragments
+            scr.rtC.gameObject.SetActive (true);
+            
+            // Set demolished state
+            scr.lim.demolished = true;
+                
+            // Skip coroutines start if Awake prefragment and Convert
+            if (scr.dmlTp == DemolitionType.AwakePrefragment && scr.mshDemol.cnv != ConvertType.Disabled)
+                return true;
+
+            // Start all coroutines
+            for (int i = 0; i < scr.fragments.Count; i++)
+                scr.fragments[i].StartAllCoroutines();
+            
+            return true;
+        }
+
         /// /////////////////////////////////////////////////////////
         /// Slice
         /// /////////////////////////////////////////////////////////
@@ -220,10 +199,6 @@ namespace RayFire
         // SLice mesh
         public static bool SliceMesh(RayfireRigid scr)
         {
-            // Start countdown
-            // System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
-            // stopWatch.Start();
-            
             // Cache unity meshes
             RFEngine.CacheRuntime (scr);
 
@@ -255,9 +230,6 @@ namespace RayFire
             
             // Skinned mesh ops TODO
             // if (scr.objTp == ObjectType.SkinnedMesh) SkinnedMeshOps(scr, forcePlane);
-            
-            // stopWatch.Stop();
-            // Debug.Log("Slice Time " + stopWatch.Elapsed.TotalMilliseconds + " ms.");
             
             return true;
         }
@@ -295,7 +267,13 @@ namespace RayFire
         {
             // Update depth level and amount
             rfScr.lim.currentDepth = depth + 1;
-            rfScr.mshDemol.am              = (int)(rfScr.mshDemol.am * rfScr.mshDemol.dpf);
+            
+            // Disable runtime demolition if depth reached
+            if (rfScr.lim.depth != 0 && rfScr.lim.depth == rfScr.lim.currentDepth)
+                rfScr.dmlTp = DemolitionType.None;
+            
+            // Set amount by depth 
+            rfScr.mshDemol.am = (int)(rfScr.mshDemol.am * rfScr.mshDemol.dpf);
             if (rfScr.mshDemol.am < 3)
                 rfScr.mshDemol.am = 3;
         }
@@ -312,8 +290,8 @@ namespace RayFire
         public static void CopyRenderer (RayfireRigid scr, MeshRenderer trg, Bounds bounds)
         {
             // Shadow casting
-            if (RayfireMan.inst.advancedDemolitionProperties.sizeThreshold > 0 && 
-                RayfireMan.inst.advancedDemolitionProperties.sizeThreshold > bounds.size.magnitude)
+            if (RayfireMan.inst.adp.sizeThreshold > 0 && 
+                RayfireMan.inst.adp.sizeThreshold > bounds.size.magnitude)
                 trg.shadowCastingMode = ShadowCastingMode.Off;
             
             /*
@@ -336,24 +314,27 @@ namespace RayFire
             if (scr.objTp != ObjectType.Mesh)
                 return;
                 
-            // Precache
-            if (scr.dmlTp == DemolitionType.AwakePrecache)
-                PreCache(scr);
-
-            // Precache and prefragment
-            if (scr.dmlTp == DemolitionType.AwakePrefragment)
+            // Awake demolition types
+            if (scr.dmlTp == DemolitionType.AwakePrecache || scr.dmlTp == DemolitionType.AwakePrefragment)
             {
                 // Disable runtime caching
                 scr.mshDemol.ch.tp = CachingType.Disabled;
                 
-                PreCache(scr);
-                Prefragment(scr);
+                // Precache meshes
+                PreCache (scr);
+                
+                // Precache fragments
+                if (scr.dmlTp == DemolitionType.AwakePrefragment)
+                    Prefragment(scr);
             }
         }
 
         // PreCache meshes
         static void PreCache(RayfireRigid scr)
         {
+            // Disable runtime caching
+            scr.mshDemol.ch.tp = CachingType.Disabled;
+            
             // Save and disable bias
             float bias = scr.mshDemol.bias;
             scr.mshDemol.bias = 0;
@@ -368,6 +349,9 @@ namespace RayFire
         // Predefine fragments
         static void Prefragment(RayfireRigid scr)
         {
+            // Disable runtime caching
+            scr.mshDemol.ch.tp = CachingType.Disabled;
+            
             // Delete existing
             scr.DeleteFragments();
 
@@ -476,9 +460,7 @@ namespace RayFire
             }
             
             // Set contact point for demolition
-            clsRigid.lim.contactPoint   = rigid.lim.contactPoint;
-            clsRigid.lim.contactNormal  = rigid.lim.contactNormal;
-            clsRigid.lim.contactVector3 = rigid.lim.contactVector3;
+            RFLimitations.Copy(rigid.lim, clsRigid.lim);
 
             // Inherit velocity
             clsRigid.physics.velocity    = rigid.physics.velocity;
@@ -537,6 +519,10 @@ namespace RayFire
         {
             // Connectivity disabled
             if (scr.mshDemol.cnv != ConvertType.Connectivity)
+                return;
+            
+            // Reference demolition
+            if (scr.dmlTp == DemolitionType.ReferenceDemolition)
                 return;
             
             // Component check

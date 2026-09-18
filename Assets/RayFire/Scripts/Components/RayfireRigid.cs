@@ -53,8 +53,8 @@ namespace RayFire
         [NonSerialized] public Vector3[]           pivots;
         [NonSerialized] public RayfireRigid        meshRoot;
         [NonSerialized] public RayfireRigidRoot    rigidRoot;
-        [NonSerialized] public int                 debrState = 1; // 1 - debrisList have  to be collected at Initialize
-        [NonSerialized] public int                 dustState = 1;   // 0 - dustList already set by other object, skip collecting
+        [NonSerialized] public int                 debrState = 1; // 1 - debrisList have to be collected at Initialize
+        [NonSerialized] public int                 dustState = 1; // 0 - dustList already set by other object, skip collecting
         
         // Events
         public RFDemolitionEvent  demolitionEvent  = new RFDemolitionEvent();
@@ -167,9 +167,8 @@ namespace RayFire
         void OnDisable()
         {
             // Set coroutines states
-            corState                    = false;
-            act.velocityCorState = false;
-            act.offsetCorState   = false;
+            corState        = false;
+            act.ofsCorState = false;
         }
 
         // Activation
@@ -177,9 +176,7 @@ namespace RayFire
         {
             // Start cors // TODO add support for fragment caching and the rest cors:skinned
             if (gameObject.activeSelf == true && initialized == true && corState == false)
-            {
                 StartAllCoroutines();
-            }
         }
 
         /// /////////////////////////////////////////////////////////
@@ -617,7 +614,7 @@ namespace RayFire
                 return;
             
             // Offset fade
-            if (fading.byOffset > 0)
+            if (fading.ofs > 0)
                 RayfireMan.inst.AddToOffsetFadeCor (this);
             
             // Start inactive coroutines
@@ -890,14 +887,14 @@ namespace RayFire
             RFPhysic.SetFragmentsVelocity (this);
             
             // Sum total new fragments amount
-            RayfireMan.inst.advancedDemolitionProperties.ChangeCurrentAmount (fragments.Count);
+            RayfireMan.inst.adp.ChangeCurrentAmount (fragments.Count);
             
             // Set ancestor and descendants 
             RFLimitations.SetAncestor (this);
             RFLimitations.SetDescendants (this);
 
             // Fading. move to fragment
-            if (fading.onDemolition == true)
+            if (fading.dml == true)
                 fading.DemolitionFade (fragments);
         }
         

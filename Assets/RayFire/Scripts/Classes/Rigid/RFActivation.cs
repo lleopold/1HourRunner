@@ -27,11 +27,10 @@ namespace RayFire
         public RayfireConnectivity cnt;  // TODO non serialized
         
         // Non Serialized
-        [NonSerialized] public int         lb; // Backup Layer
-        [NonSerialized] public bool        activated;
-        [NonSerialized] public bool        inactiveCorState;
-        [NonSerialized] public bool        velocityCorState;
-        [NonSerialized] public bool        offsetCorState;
+        [NonSerialized] public int  lb; // Backup Layer
+        [NonSerialized] public bool activated;
+        [NonSerialized] public bool inaCorState;
+        [NonSerialized] public bool ofsCorState;
 
         // Static
         public static float randomRot = 0.3f;
@@ -57,7 +56,7 @@ namespace RayFire
             con = false;
             uny = false;
             atb = false;
-            len   = false;
+            len = false;
             lay = 0;
             cnt = null;
             lb  = 0;
@@ -66,10 +65,9 @@ namespace RayFire
         // Turn of all activation properties
         public void LocalReset()
         {
-            activated        = false;
-            inactiveCorState = false;
-            velocityCorState = false;
-            offsetCorState   = false;
+            activated   = false;
+            inaCorState = false;
+            ofsCorState = false;
         }
         
         // Pool Reset
@@ -90,7 +88,7 @@ namespace RayFire
             con = source.con;
             uny = source.uny;
             atb = source.atb;
-            len   = source.len;
+            len = source.len;
             lay = source.lay;
         }
         
@@ -116,11 +114,11 @@ namespace RayFire
         public IEnumerator InactiveCor  (RayfireRigidRoot scr)
         {
             // Stop if running 
-            if (inactiveCorState == true)
+            if (inaCorState == true)
                 yield break;
 
             // Set running state
-            inactiveCorState = true;
+            inaCorState = true;
             int shardsAmount;
             
             while (scr.inactiveShards.Count > 0)
@@ -157,7 +155,7 @@ namespace RayFire
                     // Stop 
                     if (scr.inactiveShards.Count == 0)
                     {
-                        inactiveCorState = false;
+                        inaCorState = false;
                         yield break;
                     }
                 }
@@ -165,7 +163,7 @@ namespace RayFire
                 yield return null;
             }
             
-            inactiveCorState = false;
+            inaCorState = false;
         }
 
         /// /////////////////////////////////////////////////////////
@@ -242,7 +240,7 @@ namespace RayFire
             RFPhysic.SetDrag (scr);
 
             // Fade on activation
-            if (scr.fading.onActivation == true) 
+            if (scr.fading.act == true) 
                 scr.Fade();
 
             // Parent
@@ -302,7 +300,7 @@ namespace RayFire
                 shard.rb.useGravity = rigidRoot.physics.gr;
                 
                 // Disable drag
-                RFPhysic.SetDrag (shard, RayfireMan.inst.materialPresets.Drag (rigidRoot.physics.mt), RayfireMan.inst.materialPresets.AngularDrag (rigidRoot.physics.mt));
+                RFPhysic.SetDrag (shard, RayfireMan.inst.mp.Drag (rigidRoot.physics.mt), RayfireMan.inst.mp.AngularDrag (rigidRoot.physics.mt));
                 
                 // Add initial rotation if still
                 ActivationRandomRotation (shard.rb);
@@ -312,7 +310,7 @@ namespace RayFire
             SetActivationLayer (shard, rigidRoot.activation);
 
             // Activation Fade TODO input Fade class by RigidRoot or MeshRoot
-            if (rigidRoot.fading.onActivation == true)
+            if (rigidRoot.fading.act == true)
                 RFFade.FadeShard (rigidRoot, shard);
 
             // Parent

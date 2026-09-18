@@ -190,12 +190,8 @@ namespace RayFire
                 {
                     // Stop velocity and offset activation coroutines for not activatable uny objects 
                     if (uny.unyielding == true && uny.activatable == false)
-                    {
-                        if (uny.rigidList[i].act.velocityCorState == true)
-                            RayfireMan.inst.RemoveVelocityActivationCor (uny.rigidList[i]);
-                        if (uny.rigidList[i].act.offsetCorState == true)
+                        if (uny.rigidList[i].act.ofsCorState == true)
                             RayfireMan.inst.RemoveOffsetActivationCor (uny.rigidList[i]);
-                    } 
                 }
         }
         
@@ -292,10 +288,7 @@ namespace RayFire
             
             // Stop velocity and offset activation coroutines for not activatable uny objects 
             if (uny == true && act == false)
-            {
-                RayfireMan.inst.RemoveVelocityActivationCor (rigid);
                 RayfireMan.inst.RemoveOffsetActivationCor (rigid);
-            }
         }
         
         // Copy unyielding component

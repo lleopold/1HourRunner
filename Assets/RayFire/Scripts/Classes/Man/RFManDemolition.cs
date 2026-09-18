@@ -49,7 +49,6 @@ namespace RayFire
             if (amountWaring == false)
                 RayfireMan.Log ($"{RFLog.man_dbgn}{RayfireMan.inst.gameObject.name}{RFLog.man_amount}", RayfireMan.inst.gameObject);
             amountWaring = true;
-            
         }
 
         public void ResetCurrentAmount()

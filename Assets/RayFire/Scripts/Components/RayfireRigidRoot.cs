@@ -85,9 +85,9 @@ namespace RayFire
         void OnDisable()
         {
             // Set coroutines states
-            corState                    = false;
-            activation.inactiveCorState = false;
-            fading.offsetCorState       = false;
+            corState               = false;
+            activation.inaCorState = false;
+            fading.offsetCorState  = false;
         }
 
         // Activation

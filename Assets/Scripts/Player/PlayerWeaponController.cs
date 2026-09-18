@@ -273,9 +273,15 @@ namespace ZombieGame
             // Collider may be on a child — walk up the hierarchy
             Enemy enemy = targetZombie.GetComponent<Enemy>() ?? targetZombie.GetComponentInParent<Enemy>();
 
-            bool crit = WeaponConfigSingleton.weaponConfig.CritChance > 0 && UnityEngine.Random.value <= WeaponConfigSingleton.weaponConfig.CritChance / 100f;
+            // Fully aimed with the travelling band over the target → timing replaces the crit roll.
+            float timingScore = _aimVisuals != null ? _aimVisuals.TimingScore : 0f;
+            bool timingShot = timingScore > 0f;
+
+            bool crit = timingShot
+                        || (WeaponConfigSingleton.weaponConfig.CritChance > 0 && UnityEngine.Random.value <= WeaponConfigSingleton.weaponConfig.CritChance / 100f);
             // Hitting a downed zombie consumes its pending bonus → forced crit (one per knockdown).
-            if (enemy != null && enemy.ConsumeGuaranteedCrit())
+            bool guaranteedCrit = enemy != null && enemy.ConsumeGuaranteedCrit();
+            if (guaranteedCrit)
             {
                 crit = true;
                 Debug.Log("[SHOT] Guaranteed crit on downed zombie");
@@ -290,14 +296,21 @@ namespace ZombieGame
                            * (1 + UnityEngine.Random.Range(
                                -WeaponConfigSingleton.Instance.WeaponConfig.DamageFluctuation,
                                 WeaponConfigSingleton.Instance.WeaponConfig.DamageFluctuation) / 100f);
-            if (crit)
+            float critMultiplier = WeaponConfigSingleton.Instance.WeaponConfig.CritMultiplier;
+            if (timingShot)
             {
-                damage *= WeaponConfigSingleton.Instance.WeaponConfig.CritMultiplier;
+                float timingMultiplier = Mathf.Lerp(1f, _aimVisuals.TimingMaxMultiplier, timingScore);
+                // A downed zombie's earned bonus must never be worth less than a plain crit.
+                damage *= guaranteedCrit ? Mathf.Max(timingMultiplier, critMultiplier) : timingMultiplier;
+            }
+            else if (crit)
+            {
+                damage *= critMultiplier;
             }
             if (enemy == null)
                 Debug.LogWarning($"[SHOT] SpawnHitBullet: no Enemy component found on {targetZombie.name} or its parents!");
             else
-                Debug.Log($"[SHOT] Applying damage={damage:F1} to {enemy.gameObject.name} Crit: {crit.ToString()}");
+                Debug.Log($"[SHOT] Applying damage={damage:F1} to {enemy.gameObject.name} Crit: {crit.ToString()} Timing: {timingScore:F2}");
             enemy?.DamageReceived(damage, dir, crit, WeaponConfigSingleton.Instance.WeaponConfig.Stagger);
             // Note: Enemy.DamageReceived already spawns the damage number internally
 

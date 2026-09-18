@@ -2,6 +2,7 @@
     <Style src="project://database/Assets/UIToolkit/PlayHUD.uss?fileID=7433441132597879392&amp;guid=438f7fc86e9b197409e4017d0e26730c&amp;type=3#PlayHUD"/>
     <ui:VisualElement name="root" style="position: absolute; left: 1px; right: 0; top: 0; bottom: 0;">
         <ui:ProgressBar name="pb_xp" class="xp" style="position: absolute; left: 0; right: 0; bottom: 0;"/>
+        <ui:Label name="lbl_extraction" text="EXTRACTION 03:00" class="extraction"/>
         <ui:VisualElement name="bars_stack" style="position: absolute; left: 20px; bottom: 5px; width: 30%; display: flex; flex-direction: column;">
             <ui:VisualElement class="bar-row">
                 <ui:VisualElement class="bar-icon icon-health"/>

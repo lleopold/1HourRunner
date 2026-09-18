@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace RayFire
 {
@@ -9,37 +10,29 @@ namespace RayFire
     [Serializable]
     public class RFMaterial
     {
-        private string         name;
-        public  bool           destructible;
-        public  int            solidity;
-        public  float          density;
-        public  float          drag;
-        public  float          angularDrag;
-        public  PhysicsMaterial material;
-        public  float          dynamicFriction;
-        public  float          staticFriction;
-        public  float          bounciness;
+        private                                           string         name;
+        [FormerlySerializedAs ("destructible")] public    bool           dest;
+        [FormerlySerializedAs ("solidity")]     public    int            sol;
+        [FormerlySerializedAs ("density")]      public    float          dens;
+        public                                            float          drag;
+        [FormerlySerializedAs ("angularDrag")]     public float          ang;
+        [FormerlySerializedAs ("material")]        public PhysicsMaterial mat;
+        [FormerlySerializedAs ("dynamicFriction")] public float          dyn;
+        [FormerlySerializedAs ("staticFriction")]  public float          stat;
+        [FormerlySerializedAs ("bounciness")]      public float          bnc;
         
-        public RFMaterial(
-            string Name, 
-            float Density, 
-            float Drag, 
-            float AngularDrag, 
-            int Solidity, 
-            bool Destructible, 
-            float DynFriction,
-            float StFriction, 
-            float Bounce)
+        public RFMaterial(string Name, float Density, float Drag, float AngularDrag, 
+            int Solidity, bool Dest, float DynFriction, float StFriction, float Bounce)
         {
-            name            = Name;
-            density         = Density;
-            drag            = Drag;
-            angularDrag     = AngularDrag;
-            solidity        = Solidity;
-            destructible    = Destructible;
-            dynamicFriction = DynFriction;
-            staticFriction  = StFriction;
-            bounciness      = Bounce;
+            name = Name;
+            dens = Density;
+            drag = Drag;
+            ang  = AngularDrag;
+            sol  = Solidity;
+            dest = Dest;
+            dyn  = DynFriction;
+            stat = StFriction;
+            bnc  = Bounce;
         }
 
         // Get Physic material
@@ -48,10 +41,10 @@ namespace RayFire
             get
             {
                 PhysicsMaterial physMat = new PhysicsMaterial();
-                physMat.name = name;
-                physMat.dynamicFriction = dynamicFriction;
-                physMat.staticFriction = staticFriction;
-                physMat.bounciness = bounciness;
+                physMat.name            = name;
+                physMat.dynamicFriction = dyn;
+                physMat.staticFriction  = stat;
+                physMat.bounciness      = bnc;
                 physMat.frictionCombine = PhysicsMaterialCombine.Minimum;
                 return physMat;
             }
@@ -66,15 +59,6 @@ namespace RayFire
     {
         // UI properties. Do not change for material change
         public MaterialType   type;
-        public bool           dest;
-        public int            sol;
-        public float          dens;
-        public float          drag;
-        public float          ang;
-        public PhysicsMaterial mat;
-        public float          dyn;
-        public float          stat;
-        public float          bnc;
         
         // Actual materials to change properties via code.
         public RFMaterial   heavyMetal;
@@ -105,16 +89,16 @@ namespace RayFire
         // Create physic material if it was not applied by user
         public void SetMaterials()
         {
-            if (heavyMetal.material == null) heavyMetal.material = heavyMetal.Material;
-            if (lightMetal.material == null) lightMetal.material = lightMetal.Material;
-            if (denseRock.material == null) denseRock.material   = denseRock.Material;
-            if (porousRock.material == null) porousRock.material = porousRock.Material;
-            if (concrete.material == null) concrete.material     = concrete.Material;
-            if (brick.material == null) brick.material           = brick.Material;
-            if (glass.material == null) glass.material           = glass.Material;
-            if (rubber.material == null) rubber.material         = rubber.Material;
-            if (ice.material == null) ice.material               = ice.Material;
-            if (wood.material == null) wood.material             = wood.Material;
+            if (heavyMetal.mat == null) heavyMetal.mat = heavyMetal.Material;
+            if (lightMetal.mat == null) lightMetal.mat = lightMetal.Material;
+            if (denseRock.mat == null) denseRock.mat   = denseRock.Material;
+            if (porousRock.mat == null) porousRock.mat = porousRock.Material;
+            if (concrete.mat == null) concrete.mat     = concrete.Material;
+            if (brick.mat == null) brick.mat           = brick.Material;
+            if (glass.mat == null) glass.mat           = glass.Material;
+            if (rubber.mat == null) rubber.mat         = rubber.Material;
+            if (ice.mat == null) ice.mat               = ice.Material;
+            if (wood.mat == null) wood.mat             = wood.Material;
         }
 
         // Get density by material Type
@@ -122,16 +106,16 @@ namespace RayFire
         {
             switch (materialType)
             { 
-                case MaterialType.Concrete: return concrete.density; 
-                case MaterialType.Brick: return brick.density;
-                case MaterialType.Glass: return glass.density;
-                case MaterialType.Rubber: return rubber.density;
-                case MaterialType.Ice: return ice.density;
-                case MaterialType.Wood: return wood.density;
-                case MaterialType.HeavyMetal: return heavyMetal.density;
-                case MaterialType.LightMetal: return lightMetal.density;
-                case MaterialType.DenseRock: return denseRock.density;
-                case MaterialType.PorousRock: return porousRock.density;
+                case MaterialType.Concrete: return concrete.dens; 
+                case MaterialType.Brick: return brick.dens;
+                case MaterialType.Glass: return glass.dens;
+                case MaterialType.Rubber: return rubber.dens;
+                case MaterialType.Ice: return ice.dens;
+                case MaterialType.Wood: return wood.dens;
+                case MaterialType.HeavyMetal: return heavyMetal.dens;
+                case MaterialType.LightMetal: return lightMetal.dens;
+                case MaterialType.DenseRock: return denseRock.dens;
+                case MaterialType.PorousRock: return porousRock.dens;
             }
             return 2f;
         }
@@ -160,16 +144,16 @@ namespace RayFire
         {
             switch (materialType)
             { 
-                case MaterialType.Concrete: return concrete.angularDrag; 
-                case MaterialType.Brick: return brick.angularDrag;
-                case MaterialType.Glass: return glass.angularDrag;
-                case MaterialType.Rubber: return rubber.angularDrag;
-                case MaterialType.Ice: return ice.angularDrag;
-                case MaterialType.Wood: return wood.angularDrag;
-                case MaterialType.HeavyMetal: return heavyMetal.angularDrag;
-                case MaterialType.LightMetal: return lightMetal.angularDrag;
-                case MaterialType.DenseRock: return denseRock.angularDrag;
-                case MaterialType.PorousRock: return porousRock.angularDrag;
+                case MaterialType.Concrete: return concrete.ang; 
+                case MaterialType.Brick: return brick.ang;
+                case MaterialType.Glass: return glass.ang;
+                case MaterialType.Rubber: return rubber.ang;
+                case MaterialType.Ice: return ice.ang;
+                case MaterialType.Wood: return wood.ang;
+                case MaterialType.HeavyMetal: return heavyMetal.ang;
+                case MaterialType.LightMetal: return lightMetal.ang;
+                case MaterialType.DenseRock: return denseRock.ang;
+                case MaterialType.PorousRock: return porousRock.ang;
             }
             return 0.05f;
         }
@@ -179,16 +163,16 @@ namespace RayFire
         {
             switch (materialType)
             { 
-                case MaterialType.Concrete: return concrete.solidity; 
-                case MaterialType.Brick: return brick.solidity;
-                case MaterialType.Glass: return glass.solidity;
-                case MaterialType.Rubber: return rubber.solidity;
-                case MaterialType.Ice: return ice.solidity;
-                case MaterialType.Wood: return wood.solidity;
-                case MaterialType.HeavyMetal: return heavyMetal.solidity;
-                case MaterialType.LightMetal: return lightMetal.solidity;
-                case MaterialType.DenseRock: return denseRock.solidity;
-                case MaterialType.PorousRock: return porousRock.solidity;
+                case MaterialType.Concrete: return concrete.sol; 
+                case MaterialType.Brick: return brick.sol;
+                case MaterialType.Glass: return glass.sol;
+                case MaterialType.Rubber: return rubber.sol;
+                case MaterialType.Ice: return ice.sol;
+                case MaterialType.Wood: return wood.sol;
+                case MaterialType.HeavyMetal: return heavyMetal.sol;
+                case MaterialType.LightMetal: return lightMetal.sol;
+                case MaterialType.DenseRock: return denseRock.sol;
+                case MaterialType.PorousRock: return porousRock.sol;
             }
             return 1;
         }
@@ -198,16 +182,16 @@ namespace RayFire
         {
             switch (materialType)
             { 
-                case MaterialType.Concrete: return concrete.destructible; 
-                case MaterialType.Brick: return brick.destructible;
-                case MaterialType.Glass: return glass.destructible;
-                case MaterialType.Rubber: return rubber.destructible;
-                case MaterialType.Ice: return ice.destructible;
-                case MaterialType.Wood: return wood.destructible;
-                case MaterialType.HeavyMetal: return heavyMetal.destructible;
-                case MaterialType.LightMetal: return lightMetal.destructible;
-                case MaterialType.DenseRock: return denseRock.destructible;
-                case MaterialType.PorousRock: return porousRock.destructible;
+                case MaterialType.Concrete: return concrete.dest; 
+                case MaterialType.Brick: return brick.dest;
+                case MaterialType.Glass: return glass.dest;
+                case MaterialType.Rubber: return rubber.dest;
+                case MaterialType.Ice: return ice.dest;
+                case MaterialType.Wood: return wood.dest;
+                case MaterialType.HeavyMetal: return heavyMetal.dest;
+                case MaterialType.LightMetal: return lightMetal.dest;
+                case MaterialType.DenseRock: return denseRock.dest;
+                case MaterialType.PorousRock: return porousRock.dest;
             }
             return true;
         }
@@ -217,16 +201,16 @@ namespace RayFire
         {
             switch (materialType)
             { 
-                case MaterialType.Concrete: return concrete.dynamicFriction; 
-                case MaterialType.Brick: return brick.dynamicFriction;
-                case MaterialType.Glass: return glass.dynamicFriction;
-                case MaterialType.Rubber: return rubber.dynamicFriction;
-                case MaterialType.Ice: return ice.dynamicFriction;
-                case MaterialType.Wood: return wood.dynamicFriction;
-                case MaterialType.HeavyMetal: return heavyMetal.dynamicFriction;
-                case MaterialType.LightMetal: return lightMetal.dynamicFriction;
-                case MaterialType.DenseRock: return denseRock.dynamicFriction;
-                case MaterialType.PorousRock: return porousRock.dynamicFriction;
+                case MaterialType.Concrete: return concrete.dyn; 
+                case MaterialType.Brick: return brick.dyn;
+                case MaterialType.Glass: return glass.dyn;
+                case MaterialType.Rubber: return rubber.dyn;
+                case MaterialType.Ice: return ice.dyn;
+                case MaterialType.Wood: return wood.dyn;
+                case MaterialType.HeavyMetal: return heavyMetal.dyn;
+                case MaterialType.LightMetal: return lightMetal.dyn;
+                case MaterialType.DenseRock: return denseRock.dyn;
+                case MaterialType.PorousRock: return porousRock.dyn;
             }
             return 0.5f;
         }
@@ -236,16 +220,16 @@ namespace RayFire
         {            
             switch (materialType)
             { 
-                case MaterialType.Concrete: return concrete.staticFriction; 
-                case MaterialType.Brick: return brick.staticFriction;
-                case MaterialType.Glass: return glass.staticFriction;
-                case MaterialType.Rubber: return rubber.staticFriction;
-                case MaterialType.Ice: return ice.staticFriction;
-                case MaterialType.Wood: return wood.staticFriction;
-                case MaterialType.HeavyMetal: return heavyMetal.staticFriction;
-                case MaterialType.LightMetal: return lightMetal.staticFriction;
-                case MaterialType.DenseRock: return denseRock.staticFriction;
-                case MaterialType.PorousRock: return porousRock.staticFriction;
+                case MaterialType.Concrete: return concrete.stat; 
+                case MaterialType.Brick: return brick.stat;
+                case MaterialType.Glass: return glass.stat;
+                case MaterialType.Rubber: return rubber.stat;
+                case MaterialType.Ice: return ice.stat;
+                case MaterialType.Wood: return wood.stat;
+                case MaterialType.HeavyMetal: return heavyMetal.stat;
+                case MaterialType.LightMetal: return lightMetal.stat;
+                case MaterialType.DenseRock: return denseRock.stat;
+                case MaterialType.PorousRock: return porousRock.stat;
             }
             return 0.5f;
         }
@@ -255,16 +239,16 @@ namespace RayFire
         {
             switch (materialType)
             { 
-                case MaterialType.Concrete: return concrete.bounciness; 
-                case MaterialType.Brick: return brick.bounciness;
-                case MaterialType.Glass: return glass.bounciness;
-                case MaterialType.Rubber: return rubber.bounciness;
-                case MaterialType.Ice: return ice.bounciness;
-                case MaterialType.Wood: return wood.bounciness;
-                case MaterialType.HeavyMetal: return heavyMetal.bounciness;
-                case MaterialType.LightMetal: return lightMetal.bounciness;
-                case MaterialType.DenseRock: return denseRock.bounciness;
-                case MaterialType.PorousRock: return porousRock.bounciness;
+                case MaterialType.Concrete: return concrete.bnc; 
+                case MaterialType.Brick: return brick.bnc;
+                case MaterialType.Glass: return glass.bnc;
+                case MaterialType.Rubber: return rubber.bnc;
+                case MaterialType.Ice: return ice.bnc;
+                case MaterialType.Wood: return wood.bnc;
+                case MaterialType.HeavyMetal: return heavyMetal.bnc;
+                case MaterialType.LightMetal: return lightMetal.bnc;
+                case MaterialType.DenseRock: return denseRock.bnc;
+                case MaterialType.PorousRock: return porousRock.bnc;
             }
             return 0.5f;
         }
@@ -274,18 +258,18 @@ namespace RayFire
         {
             switch (materialType)
             { 
-                case MaterialType.Concrete: return RayfireMan.inst.materialPresets.concrete.material;
-                case MaterialType.Brick: return RayfireMan.inst.materialPresets.brick.material;
-                case MaterialType.Glass: return RayfireMan.inst.materialPresets.glass.material;
-                case MaterialType.Rubber: return RayfireMan.inst.materialPresets.rubber.material;
-                case MaterialType.Ice: return RayfireMan.inst.materialPresets.ice.material;
-                case MaterialType.Wood: return RayfireMan.inst.materialPresets.wood.material;
-                case MaterialType.HeavyMetal: return RayfireMan.inst.materialPresets.heavyMetal.material;
-                case MaterialType.LightMetal: return RayfireMan.inst.materialPresets.lightMetal.material;
-                case MaterialType.DenseRock: return RayfireMan.inst.materialPresets.denseRock.material;
-                case MaterialType.PorousRock: return RayfireMan.inst.materialPresets.porousRock.material;
+                case MaterialType.Concrete: return RayfireMan.inst.mp.concrete.mat;
+                case MaterialType.Brick: return RayfireMan.inst.mp.brick.mat;
+                case MaterialType.Glass: return RayfireMan.inst.mp.glass.mat;
+                case MaterialType.Rubber: return RayfireMan.inst.mp.rubber.mat;
+                case MaterialType.Ice: return RayfireMan.inst.mp.ice.mat;
+                case MaterialType.Wood: return RayfireMan.inst.mp.wood.mat;
+                case MaterialType.HeavyMetal: return RayfireMan.inst.mp.heavyMetal.mat;
+                case MaterialType.LightMetal: return RayfireMan.inst.mp.lightMetal.mat;
+                case MaterialType.DenseRock: return RayfireMan.inst.mp.denseRock.mat;
+                case MaterialType.PorousRock: return RayfireMan.inst.mp.porousRock.mat;
             }
-            return RayfireMan.inst.materialPresets.concrete.material;
+            return RayfireMan.inst.mp.concrete.mat;
         }
     }
 }

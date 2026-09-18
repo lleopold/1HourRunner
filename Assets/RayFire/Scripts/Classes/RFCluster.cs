@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
-using UnityEngine.Serialization;
 
 namespace RayFire
 {
+    /// <summary>
+    /// Rayfire Rigid and RayFire Connectivity cluster class.
+    /// </summary>
     [Serializable]
     public class RFCluster : IComparable<RFCluster>
     {
@@ -38,7 +40,6 @@ namespace RayFire
         [NonSerialized] public List<RFCluster> neibClusters;
         [NonSerialized] public List<float>     neibArea;
         [NonSerialized] public List<float>     neibPerc;
-
         
         /// Static
         static List<RFShard> checkShards      = new List<RFShard>();
@@ -372,7 +373,7 @@ namespace RayFire
             // Cluster has child cluster
             if (cluster.childClusters != null && cluster.childClusters.Count > 0)
             {
-                // Get biggest cluster
+                // Get the biggest cluster
                 int biggestInd = GetBiggestCluster (cluster.childClusters);
 
                 // Set biggest cluster shards to original cluster shards to reuse it
@@ -382,7 +383,7 @@ namespace RayFire
                 for (int i = 0; i < cluster.shards.Count; i++)
                     cluster.shards[i].cluster = cluster;
 
-                // Remove biggest cluster from child clusters
+                // Remove the biggest cluster from child clusters
                 cluster.childClusters.RemoveAt (biggestInd);
             }
         }
@@ -458,7 +459,7 @@ namespace RayFire
             // Get min and max vectors
             bound.min = new Vector3(minX, minY, minZ);
             bound.max = new Vector3(maxX, maxY, maxZ);
-
+            
             return bound;
         }
 
@@ -467,14 +468,14 @@ namespace RayFire
         {
             // new bound
             Bounds bound = new Bounds();
-
+            
             // No mesh renderers
             if (shards.Count == 0)
             {
                 RayfireMan.Log (RFLog.rig_dbgn + RFLog.rig_cls2);
                 return bound;
             }
-
+          
             // Basic bounds min and max values
             float minX = shards[0].bnd.min.x;
             float minY = shards[0].bnd.min.y;
@@ -496,14 +497,14 @@ namespace RayFire
                     if (shards[i].bnd.max.z > maxZ) maxZ = shards[i].bnd.max.z;
                 }
             }
-
+            
             // Get center
             bound.center = new Vector3((maxX - minX) / 2f, (maxY - minY) / 2f, (maxZ - minZ) / 2f);
 
             // Get min and max vectors
             bound.min = new Vector3(minX, minY, minZ);
             bound.max = new Vector3(maxX, maxY, maxZ);
-
+            
             return bound;
         }
         
@@ -562,7 +563,7 @@ namespace RayFire
         /// Static
         /// /////////////////////////////////////////////////////////
         
-        // Get biggest cluster
+        // Get the biggest cluster
         static int GetBiggestCluster(List<RFCluster> clusters)
         {
             // Only one cluster
@@ -767,10 +768,10 @@ namespace RayFire
             return area;
         }
 
-        // Get neib index with biggest shared area
+        // Get neib index with the biggest shared area
         public int GetNeibIndArea(List<RFCluster> clusterList = null)
         {
-            // Get neib index with biggest shared area
+            // Get neib index with the biggest shared area
             float biggestArea = 0f;
             int neibInd = 0;
             for (int i = 0; i < neibClusters.Count; i++)
@@ -788,7 +789,7 @@ namespace RayFire
                 }
             }
 
-            // Return index of neib with biggest shared area
+            // Return index of neib with the biggest shared area
             if (biggestArea > 0)
                 return neibInd;
 
@@ -907,7 +908,7 @@ namespace RayFire
                 }
             }
 
-            // Pick shard with biggest area
+            // Pick shard with the biggest area
             return biggestCluster;
         }
 

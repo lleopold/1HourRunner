@@ -33,10 +33,10 @@ namespace RayFire
         // Constructor
         public RFSnapshot(GameObject go, bool compress)
         {
-            nm = go.name;
-            oldId = go.GetInstanceID();
+            nm    = go.name;
+            oldId = GetId(go);
             if (go.transform.parent != null)
-                parentOldId = go.transform.parent.gameObject.GetInstanceID();
+                parentOldId = GetId (go.transform.parent.gameObject);
             pos = go.transform.position;
             rot = go.transform.rotation;
             scale = go.transform.localScale;
@@ -53,6 +53,20 @@ namespace RayFire
                 foreach (var mat in mr.sharedMaterials)
                     mats.Add (AssetDatabase.GetAssetPath (mat));
         }
+        
+        // Get ID
+        public static int GetId(GameObject go)
+        {
+            int id = 0;
+            
+            #if UNITY_6000_5_OR_NEWER 
+                id = go.GetEntityId().GetHashCode();
+            #else
+                id = go.GetInstanceID();
+            #endif
+            
+            return id;
+        } 
 
         // Create object
         public static GameObject Create (RFSnapshot cap, float sizeFilter)
@@ -93,7 +107,7 @@ namespace RayFire
                 mr.sharedMaterials = materials.ToArray();
             }
 
-            cap.newId = go.GetInstanceID();
+            cap.newId = GetId (go);
             cap.newTm = go.transform;
                 
             return go;

@@ -10,15 +10,16 @@ namespace RayFireEditor
     [CustomEditor (typeof(RayfireShatter))]
     public class RayfireShatterEditor : Editor
     {
-        RayfireShatter              shatter;
-        Transform                   transForm;
-        Vector3                     centerWorldPos;
-        Quaternion                  centerWorldQuat;
-        ReorderableList             rl_tp_cus_tms;
-        ReorderableList             rl_tp_cus_list;
-        ReorderableList             rl_tp_slc_list;
-        EditorWindow                uvwEditor;
-        Texture2D                   uvTexture;
+        RayfireShatter  shatter;
+        Transform       transForm;
+        Vector3         centerWorldPos;
+        Quaternion      centerWorldQuat;
+        ReorderableList rl_tp_cus_tms;
+        ReorderableList rl_tp_cus_list;
+        ReorderableList rl_tp_slc_list;
+        EditorWindow    uvwEditor;
+        Texture2D       uvTexture;
+        GameObject      acdGo;
         
         // Foldout
         static bool        exp_deb;
@@ -81,7 +82,7 @@ namespace RayFireEditor
         
         // Clusters Minimum & Maximum ranges
         const int   cls_count_min  = 2;
-        const int   cls_count_max  = 200;
+        const int   cls_count_max  = 500;
         const int   cls_seed_min   = 0;
         const int   cls_seed_max   = 100;
         const float cls_relax_min  = 0;
@@ -117,7 +118,6 @@ namespace RayFireEditor
         
         // Frag Types Serialized properties
         SerializedProperty sp_tp;
-        SerializedProperty sp_interactive;
         SerializedProperty sp_tp_vor_amount;
         SerializedProperty sp_tp_vor_bias;
         SerializedProperty sp_tp_spl_axis;
@@ -203,6 +203,7 @@ namespace RayFireEditor
         SerializedProperty sp_cls_max;
         SerializedProperty sp_cls_red;
         SerializedProperty sp_cls_out;
+        SerializedProperty sp_cls_inn;
         SerializedProperty sp_cls_tsf;
         
         // Advanced Serialized properties
@@ -246,6 +247,8 @@ namespace RayFireEditor
         SerializedProperty sp_cn_set;
         SerializedProperty sp_cn_obj;
         
+        SerializedProperty sp_pointRoot;
+        
         private void OnEnable()
         {
             // Get component
@@ -253,7 +256,6 @@ namespace RayFireEditor
             
             // Find Frag Types Serialized properties
             sp_tp              = serializedObject.FindProperty(nameof(shatter.type));
-            sp_interactive     = serializedObject.FindProperty(nameof(shatter.interactive));
             sp_tp_vor_amount   = serializedObject.FindProperty(nameof(shatter.voronoi) + "." + nameof(shatter.voronoi.amount));
             sp_tp_vor_bias     = serializedObject.FindProperty(nameof(shatter.voronoi) + "." + nameof(shatter.voronoi.centerBias));
             sp_tp_spl_axis     = serializedObject.FindProperty(nameof(shatter.splinters) + "." + nameof(shatter.splinters.axis));
@@ -337,6 +339,7 @@ namespace RayFireEditor
             sp_cls_max    = serializedObject.FindProperty(nameof(shatter.clusters) + "." + nameof(shatter.clusters.max));
             sp_cls_red    = serializedObject.FindProperty(nameof(shatter.clusters) + "." + nameof(shatter.clusters.red));
             sp_cls_out    = serializedObject.FindProperty(nameof(shatter.clusters) + "." + nameof(shatter.clusters.outer));
+            sp_cls_inn    = serializedObject.FindProperty(nameof(shatter.clusters) + "." + nameof(shatter.clusters.inner));
             sp_cls_tsf    = serializedObject.FindProperty(nameof(shatter.clusters) + "." + nameof(shatter.clusters.tsf));
                 
             // Advanced Serialized properties
@@ -399,6 +402,31 @@ namespace RayFireEditor
                 onAddCallback       = AddSliceTm,
                 onRemoveCallback    = RemoveSliceTm
             };
+
+            sp_pointRoot = serializedObject.FindProperty(nameof(shatter.clusters) + "." + nameof(shatter.clusters.pointRoot));
+            
+            /*
+            // 1. Get the MonoScript asset tracking this specific class instance
+            MonoScript script = MonoScript.FromScriptableObject(this);
+            Debug.Log (script);
+            
+            // 2. Extract its project path (e.g., "Assets/Tools/MyTool/Editor/MyCustomEditorWindow.cs")
+            string scriptPath = AssetDatabase.GetAssetPath(script);
+            Debug.Log (scriptPath);
+            
+            // 3. Extract the directory name containing the script
+            string scriptDirectory = Path.GetDirectoryName(scriptPath);
+            Debug.Log (scriptDirectory);
+            
+            // 4. Combine it with the relative subpath to your icon
+            // Assumes your icon is in a subfolder named "Icons" next to the script
+            string relativeIconPath = Path.Combine(scriptDirectory, "Icons", "my_icon.png");
+            Debug.Log (relativeIconPath);
+            
+            // 5. Replace Windows backslashes with standard Unity forward slashes
+            relativeIconPath = relativeIconPath.Replace("\\", "/");
+            Debug.Log (relativeIconPath);
+            */
         }
         
         /// /////////////////////////////////////////////////////////
@@ -415,15 +443,15 @@ namespace RayFireEditor
 
             // Set style
             RFUI.SetToggleButtonStyle();
-            
+
             // Space
             GUILayout.Space (8);
-            
+
             GUI_Fragment();
             GUI_Interactive();
             GUI_Batches();
             GUI_Preview();
-
+            
             // Reset scale if fragments were deleted
             ResetScale (shatter, shatter.previewScale);
 
@@ -434,7 +462,7 @@ namespace RayFireEditor
             RFUI.Space ();
             GUI_Advanced();
             RFUI.Space ();
-            
+          
             // Apply changes
             serializedObject.ApplyModifiedProperties();
         }
@@ -511,20 +539,14 @@ namespace RayFireEditor
                 EditorGUILayout.ObjectField (shatter.batches[i].fragRoot.gameObject, typeof(GameObject), false);
                 
                 if (GUILayout.Button (TextSht.str_load, RFUI.buttonStyle, GUILayout.Height (18), GUILayout.Width (50)))
-                {
                     shatter.batches[i].LoadData (shatter);
-                }
                 
                 //if (shatter.batches[i].exported == false)
                 if (GUILayout.Button (TextSht.str_export, RFUI.buttonStyle, GUILayout.Height (18), GUILayout.Width (60)))
-                {
                     RFMeshAsset.ExportBatch (shatter, shatter.batches[i], null);
-                }
 
                 if (GUILayout.Button (TextSht.str_minus, RFUI.buttonStyle, GUILayout.Height (18), GUILayout.Width (18)))
-                {
                     shatter.batches[i].fragRoot = null;
-                }
                 
                 GUILayout.EndHorizontal();
                 GUILayout.Space (1);
@@ -560,8 +582,7 @@ namespace RayFireEditor
                 }
 
                 RFUI.SetDirty (shatter.gameObject);
-                InteractiveChange();
-                //InteractiveScale ();
+                InteractiveScale ();
             }
             
             // Color preview toggle. disabled for interactive mode
@@ -580,21 +601,23 @@ namespace RayFireEditor
             
             RFUI.Space ();
             RFUI.Space ();
-            
-            GUILayout.BeginHorizontal();
-            GUILayout.Label (TextSht.gui_prv_scl, GUILayout.Width (90));
-            EditorGUI.BeginChangeCheck();
-            shatter.previewScale = GUILayout.HorizontalSlider (shatter.previewScale, 0f, 0.99f);
-            if (EditorGUI.EndChangeCheck() == true)
+
+            if (shatter.scalePreview == true)
             {
-                if (shatter.scalePreview == true)
-                    ScalePreview (shatter);
-                RFUI.SetDirty (shatter.gameObject);
-                InteractiveChange();
-                //InteractiveScale ();
-                SceneView.RepaintAll();
+                GUILayout.BeginHorizontal();
+                GUILayout.Label (TextSht.gui_prv_scl, GUILayout.Width (90));
+                EditorGUI.BeginChangeCheck();
+                shatter.previewScale = GUILayout.HorizontalSlider (shatter.previewScale, 0f, 0.99f);
+                if (EditorGUI.EndChangeCheck() == true)
+                {
+                    if (shatter.scalePreview == true)
+                        ScalePreview (shatter);
+                    RFUI.SetDirty (shatter.gameObject);
+                    InteractiveScale();
+                    SceneView.RepaintAll();
+                }
+                EditorGUILayout.EndHorizontal();
             }
-            EditorGUILayout.EndHorizontal();
         }
         
         /// /////////////////////////////////////////////////////////
@@ -733,7 +756,6 @@ namespace RayFireEditor
             RFUI.PropertyField (sp_tp_brk_type, TextSht.gui_tp_brk_type);
             RFUI.Slider (sp_tp_brk_mult, brick_mult_min, brick_mult_max, TextSht.gui_tp_brk_mult);
             if (sp_tp_brk_type.intValue == (int)RFBricks.RFBrickType.ByAmount)
-            //if (shat.bricks.amountType == RFBricks.RFBrickType.ByAmount)
             {
                 RFUI.Caption (TextSht.gui_cap_am);
                 RFUI.IntSlider (sp_tp_brk_am_X, brick_amount_min, brick_amount_max, TextSht.gui_tp_brk_am_X);
@@ -868,26 +890,152 @@ namespace RayFireEditor
             if (shatter.type == FragType.Decompose ||
                 shatter.type == FragType.Slices)
                 return;
-
-            // Interactable properties
-            EditorGUI.BeginChangeCheck();
+            
             RFUI.CaptionBox (TextSht.gui_cap_cls);
+            
+            // Enabling should force full refragment
+            EditorGUI.BeginChangeCheck();
             RFUI.PropertyField (sp_cls_en, TextSht.gui_cls_en);
+            if (EditorGUI.EndChangeCheck() == true)
+                InteractiveChange();
+            
             if (sp_cls_en.boolValue == true)
             {
+                // RFUI.PropertyField (sp_cls_tsf, TextSht.gui_cls_tsf);
+                EditorGUI.BeginChangeCheck();
                 RFUI.PropertyField (sp_cls_red, TextSht.gui_cls_red);
                 RFUI.IntSlider (sp_cls_cnt,    cls_count_min,  cls_count_max,  TextSht.gui_cls_cnt);
                 RFUI.IntSlider (sp_cls_seed,   cls_seed_min,   cls_seed_max,   TextSht.gui_cls_seed);
                 RFUI.IntSlider (sp_cls_layers, cls_layers_min, cls_layers_max, TextSht.gui_cls_debris);
-                // RFUI.PropertyField (sp_cls_tsf, TextSht.gui_cls_tsf);
                 RFUI.Slider (sp_cls_rel,    cls_relax_min,  cls_relax_max,  TextSht.gui_cls_rlx);
                 if (sp_cls_rel.floatValue > 0)
                     RFUI.PropertyField (sp_cls_out, TextSht.gui_cls_out);
+                if (EditorGUI.EndChangeCheck() == true)
+                    InteractiveCluster();
             }
-            if (EditorGUI.EndChangeCheck() == true)
-                InteractiveChange();
+            
+            if (sp_cls_en.boolValue == true)
+                GUI_Acd();
         }
 
+        void GUI_Acd()
+        {
+            RFUI.CaptionBox (TextSht.gui_cap_adv);
+            
+            // Inner
+            EditorGUI.BeginChangeCheck();
+            RFUI.PropertyField (sp_cls_inn,   TextSht.gui_cls_inn);
+            if (EditorGUI.EndChangeCheck() == true)
+                InteractiveCluster();
+            
+            // Point Root
+            GUILayout.BeginHorizontal ();
+            EditorGUI.BeginChangeCheck();
+            RFUI.PropertyField (sp_pointRoot, TextSht.gui_pointRoot);
+            if (EditorGUI.EndChangeCheck() == true)
+            { 
+                // Apply changes
+                serializedObject.ApplyModifiedProperties();
+                RFInteractiveHelper.AddPointHelpers (shatter, shatter.clusters.pointRoot);
+                if (sp_pointRoot.objectReferenceValue != null)
+                    InteractiveCluster();
+                else
+                    InteractiveChange();
+            }
+
+            // Remove Point Root
+            if (GUILayout.Button (TextSht.str_minus, RFUI.buttonStyle, GUILayout.Height (18), GUILayout.Width (18)))
+            {
+                if (sp_pointRoot.objectReferenceValue != null)
+                {
+                    sp_pointRoot.objectReferenceValue = null;
+                    shatter.clusters.pointRoot        = null;
+                    InteractiveChange(); // Cluster update doesnt update custom points
+                }
+            }
+            GUILayout.EndHorizontal();
+            
+            RFUI.Space();
+            
+            // Volume start
+            if (GUILayout.Button (TextSht.str_add, RFUI.buttonStyle, GUILayout.Height (20)))
+                shatter.clusters.AddAcd(); 
+            
+            if (shatter.clusters.AcdState == false)
+                return;
+            
+            RFUI.Space();
+    
+            // Volume bounds list
+            for (int i = 0; i < shatter.clusters.acdList.Count; i++)
+            {
+                GUILayout.BeginHorizontal ();
+                
+                EditorGUI.BeginChangeCheck();
+                shatter.clusters.acdList[i].tp = (RFAcd.RFAcdType)EditorGUILayout.Popup((int)shatter.clusters.acdList[i].tp, RFAcd.options, GUILayout.Width (70));
+                if (EditorGUI.EndChangeCheck() == true)
+                    InteractiveCluster();
+                
+                EditorGUI.BeginChangeCheck();
+                shatter.clusters.acdList[i].Id = EditorGUILayout.IntField (shatter.clusters.acdList[i].id, GUILayout.Width (40));
+                if (EditorGUI.EndChangeCheck() == true)
+                    InteractiveCluster();
+                
+                acdGo = shatter.clusters.acdList[i].go;
+                EditorGUI.BeginChangeCheck();
+                shatter.clusters.acdList[i].go = (GameObject)EditorGUILayout.ObjectField (acdGo, typeof(GameObject), true);
+                if (EditorGUI.EndChangeCheck() == true)
+                    SetObject (i);
+                
+                // Gizmo controls
+                if (shatter.interactive == true)
+                {
+                    EditorGUI.BeginChangeCheck();
+                    shatter.clusters.acdList[i].gz = GUILayout.Toggle (shatter.clusters.acdList[i].gz, TextSht.gui_btn_gizmo, "Button", GUILayout.Height (18), GUILayout.Width (50));
+                    if (EditorGUI.EndChangeCheck() == true)
+                    { 
+                        RFAcd.VolumeGizmo (shatter.clusters.acdList[i]);
+                        RFUI.SetDirty (shatter.gameObject);
+                    }
+                                    
+                    EditorGUI.BeginChangeCheck();
+                    shatter.clusters.acdList[i].col = EditorGUILayout.ColorField(GUIContent.none, shatter.clusters.acdList[i].col, false, false, false, GUILayout.Width (18));
+                    if (EditorGUI.EndChangeCheck() == true)
+                    {
+                        RFAcd.ColorGizmo (shatter.clusters.acdList[i]);
+                        RFUI.SetDirty (shatter.gameObject);
+                    }
+                }
+                
+                if (GUILayout.Button (TextSht.str_minus, RFUI.buttonStyle, GUILayout.Height (18), GUILayout.Width (18)))
+                {
+                    shatter.clusters.RemoveAcd(i);
+                    InteractiveCluster();
+                    return;
+                }
+                
+                GUILayout.EndHorizontal();
+                GUILayout.Space (1);
+            }
+        }
+
+        // Set acd volume object
+        void SetObject(int i)
+        {
+            // Check if object already in list
+            if (RFInteractiveHelper.InListCheck(shatter, i) == true)
+            {
+                RayfireMan.Log (RFLog.sht_dbgn + shatter.clusters.acdList[i].go.name + RFLog.sht_inList, shatter.clusters.acdList[i].go);
+                shatter.clusters.acdList[i].go = acdGo;
+            }
+            else
+            {
+                RFInteractiveHelper.RemoveInteractiveHelper (acdGo);
+                RFInteractiveHelper.AddVolumeHelpers (shatter, shatter.clusters.acdList[i]);
+                InteractiveCluster();
+            }
+        }
+        
         /// /////////////////////////////////////////////////////////
         /// Properties
         /// /////////////////////////////////////////////////////////
@@ -941,10 +1089,11 @@ namespace RayFireEditor
         
         void GUI_Properties()
         {
-            EditorGUI.BeginChangeCheck();
+            
             RFUI.CaptionBox (TextSht.gui_cap_prp);
             RFUI.PropertyField (sp_adv_hrc, TextSht.gui_adv_hierarchy);
             
+            EditorGUI.BeginChangeCheck();
             if (shatter.type != FragType.Decompose)
             {
                 RFUI.PropertyField (sp_adv_slc,       TextSht.gui_adv_slice);
@@ -1044,10 +1193,13 @@ namespace RayFireEditor
             if (tm != null)
             {
                 MeshFilter[] meshFilters = tm.GetComponentsInChildren<MeshFilter>();
-                foreach (var mf in meshFilters)
+                for (int i = 0; i < meshFilters.Length; i++)
                 {
-                    Gizmos.color = new Color (Random.Range (0.2f, 0.8f), Random.Range (0.2f, 0.8f), Random.Range (0.2f, 0.8f));
-                    Gizmos.DrawMesh (mf.sharedMesh, mf.transform.position, mf.transform.rotation, mf.transform.lossyScale * 1.01f);
+                    if (meshFilters[i].sharedMesh != null)
+                    {
+                        Gizmos.color = new Color (Random.Range (0.2f, 0.8f), Random.Range (0.2f, 0.8f), Random.Range (0.2f, 0.8f));
+                        Gizmos.DrawMesh (meshFilters[i].sharedMesh, meshFilters[i].transform.position, meshFilters[i].transform.rotation, meshFilters[i].transform.lossyScale * 1.01f);
+                    }
                 }
             }
         }
@@ -1070,7 +1222,6 @@ namespace RayFireEditor
                 ResetScale (scr, 0f);
         }
         
-        // Reset original object and fragments scale
         static void ResetScale(RayfireShatter scr, float scaleValue)
         {
             // Reset scale
@@ -1099,12 +1250,16 @@ namespace RayFireEditor
         /// Draw
         /// /////////////////////////////////////////////////////////
         
+        
+        
         [DrawGizmo (GizmoType.Selected | GizmoType.NonSelected | GizmoType.Pickable)]
-        static void DrawGizmosSelected (RayfireShatter shatter, GizmoType gizmoType)
+        static void DrawGizmos (RayfireShatter shatter, GizmoType gizmoType)
         {
             // Color preview
-            if (shatter.colorPreview == true)
+            if (shatter.HasBatches == true && shatter.colorPreview == true)
+            {
                 ColorPreview (shatter);
+            }
 
             // HexGrid cloud preview
             if (shatter.type == FragType.Hexagon && shatter.hexagon.enable == true)
@@ -1127,8 +1282,53 @@ namespace RayFireEditor
                 }
             }
         }
+        
+        static void DrawVolume(RayfireShatter shatter)
+        {
+            if (shatter.interactive == true)
+                return;
+            
+            if (shatter.clusters.enable == false)
+                return;
 
-        // Draw In/Out points
+            if (shatter.clusters.AcdState == false)
+                return;
+
+            // Iterate volumes
+            for (int i = 0; i < shatter.clusters.acdList.Count; i++)
+            {
+                if (shatter.clusters.acdList[i].gz == false)
+                    continue;
+                
+                if (shatter.clusters.acdList[i].go == null)
+                    continue;
+                
+                // TODO for all child mfs
+                
+                MeshFilter mf = shatter.clusters.acdList[i].go.GetComponent<MeshFilter>();
+                
+                if (mf == null)
+                    return;
+
+                if (mf.sharedMesh == null)
+                    return;
+                
+                // Get size
+                Vector3 ext = mf.sharedMesh.bounds.extents;
+                Vector3 scl = shatter.clusters.acdList[i].go.transform.lossyScale;
+                ext.x *= scl.x;
+                ext.y *= scl.y;
+                ext.z *= scl.z;
+
+                // Draw
+                Gizmos.matrix = Matrix4x4.TRS (shatter.clusters.acdList[i].go.transform.position, shatter.clusters.acdList[i].go.transform.rotation, Vector3.one);
+                Gizmos.color  = shatter.clusters.acdList[i].col;
+                Gizmos.DrawCube (Vector3.zero, -1f * ext * 2f);
+                //Gizmos.color = RFInteractiveHelper.boxColorOut;
+                Gizmos.DrawWireCube (Vector3.zero, ext * 2f);
+            }
+        }
+        
         static void DrawSpheres(List<Vector3> inBoundPoints, List<Vector3> outBoundPoints, float size)
         {
             if (inBoundPoints != null && inBoundPoints.Count > 0)
@@ -1144,8 +1344,7 @@ namespace RayFireEditor
                     Gizmos.DrawSphere (outBoundPoints[i], size / 2f);
             }
         }
-
-        // Get shatter
+        
         private void OnSceneGUI()
         {
             shatter = (RayfireShatter)target;
@@ -1259,8 +1458,7 @@ namespace RayFireEditor
         /// /////////////////////////////////////////////////////////
         /// Interactive
         /// /////////////////////////////////////////////////////////
-
-        // Property change
+        
         void InteractiveChange()
         {
             if (shatter != null && shatter.interactive == true)
@@ -1270,6 +1468,18 @@ namespace RayFireEditor
       
                 // Refragment
                 shatter.InteractiveChange();
+            }
+        }
+        
+        void InteractiveCluster()
+        {
+            if (shatter != null && shatter.interactive == true)
+            {
+                // Apply changes
+                serializedObject.ApplyModifiedProperties();
+      
+                // Refragment
+                shatter.InteractiveCluster();
             }
         }
 
@@ -1291,12 +1501,12 @@ namespace RayFireEditor
                 return;
             
             if ((Transform)prop.objectReferenceValue != null)
-                shatter.AddInteractiveHelper ((Transform)prop.objectReferenceValue, false);
+                RFInteractiveHelper.AddInteractiveHelper (shatter, (Transform)prop.objectReferenceValue);
             else if (tm != null)
             {
                 RFInteractiveHelper helper = tm.GetComponent<RFInteractiveHelper>();
                 if (helper != null)
-                    helper.shatter = null;
+                    helper.sh = null;
             }
         }
     }

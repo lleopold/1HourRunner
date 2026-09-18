@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace RayFire
 {
+    /// <summary>
+    /// Rayfire Rigid inner surface properties class.
+    /// </summary>
     [System.Serializable]
     public class RFSurface
     {

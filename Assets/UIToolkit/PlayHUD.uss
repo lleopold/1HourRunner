@@ -142,3 +142,17 @@ This was created with the help of Assistant, a Unity Artificial Intelligence pro
 }
 .bar-row:last-child { align-items: center; }
 
+/* Extraction countdown, top-center */
+.extraction {
+    position: absolute;
+    top: 12px;
+    left: 0;
+    right: 0;
+    -unity-text-align: middle-center;
+    font-size: 22px;
+    color: rgb(235, 240, 245);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+.extraction--warn     { color: var(--color-stamina); }
+.extraction--critical { color: var(--color-health); }
+

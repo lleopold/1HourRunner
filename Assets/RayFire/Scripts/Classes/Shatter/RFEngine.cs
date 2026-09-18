@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,54 +14,64 @@ using Object = UnityEngine.Object;
 namespace RayFire
 {
     /// <summary>
-    /// V2 engine class for Rayfire Shatter component.
+    /// Fragmentation engine class for Rayfire Shatter component.
     /// </summary>
     public class RFEngine
     {
-        public GameObject                mainRoot;
-        List<Mesh>                       origMeshes;
-        List<Utils.Mesh>                 utilMeshes;
-        List<Renderer>                   renderers;
-        Dictionary<Transform, Transform> transMap;
-        Matrix4x4                        normalMat;
+        public GameObject mainRoot;
+        RayfireShatter    shatter;
+        
+        readonly List<Mesh>              origMeshes;
+        readonly List<Utils.Mesh>        utilMeshes;
+        readonly List<Renderer>          renderers;
+        readonly List<bool>              skinFlags;
+        readonly List<Matrix4x4>         worldMat;
+        
         Utils.SliceData                  sliceData;
         Utils.Mesh[][]                   utilFrags;
         bool[][]                         edgeFlags;
-        List<bool>                       skinFlags;
-        Utils.MeshMaps[]                 origMaps;
-        Utils.MeshMaps[][]               fragMaps;
+        Dictionary<Transform, Transform> transMap;
+        
+        // Mapping
+        Utils.MeshMaps[]   origMaps;
+        Utils.MeshMaps[][] fragMaps;
+        
+        // Clustering
+        Utils.AdvClustData acd;
+        Utils.Mesh[][]     clsFrags;
+        Vector3[][]        aabbCenters;
         
         // Original root matrices
-        Bounds          bounds = new Bounds ();
-        Matrix4x4       localToWorldMat;
-        List<Matrix4x4> worldMat;
-        Vector3[][]     centroids;
-        Matrix4x4[]     centMatrices;
-        Matrix4x4[]     flatMatrices;
-        Matrix4x4       biasTN;
-        Vector3         biasPos;
-        Vector3         aabbMin;
-        Vector3         aabbMax;
-        Vector3         aabbSize;
-        int             innerSubId;
-        bool            transformed;
-        bool            interactive;
-        int[][]         interVerts;
-        float           interScale;
+        Bounds      bounds;
+        Matrix4x4   biasTN;
+        Matrix4x4   normalMat;
+        Matrix4x4   localToWorldMat;
+        Matrix4x4[] centMatrices;
+        Matrix4x4[] flatMatrices;
+        Vector3[][] centroids;
+        Vector3     biasPos;
+        Vector3     aabbMin;
+        Vector3     aabbMax;
+        Vector3     aabbSize;
+        int         innerSubId;
+        bool        transformed;
         
-        //Vector3[][] sclVerts;
-        //int[][]     sclTris;
+        // Interactive
+        public          bool        interactive;
+        [NonSerialized] float       interScale;
+        [NonSerialized] int[][]     interVerts;
+        [NonSerialized] Vector3[][] sclVerts;
         
-        const float minSize  = 0.005f;
-        const string str_fr = "_fr_";
-        const string str_sh = "_sh_";
+        // Constant
+        const string str_fr    = "_fr_";
+        const string str_sh    = "_sh_";
+        const int    planarVrt = 15;
+        const float  minSize   = 0.005f;
+        const float  planarThr = 0.005f;
+        const float  biasStr   = 1.3f;
+        const float  fragSize  = 0.001f;
+        const bool   planarOff = true;
 
-        static int   planarVrt = 15;
-        static float planarThr = 0.005f;
-        static float biastStr  = 1.3f;
-        static float fragSize  = 0.001f;  
-        static bool  planarOff = true;
-        
         /// /////////////////////////////////
         /// Constructor
         /// /////////////////////////////////
@@ -97,6 +108,9 @@ namespace RayFire
         {
             // Set engine data
             sh.engine = GetEngine (sh.transform, false, sh.advanced.petrify);
+
+            // Set shatter source
+            sh.engine.shatter = sh;
             
             // Set interactive state for engine
             sh.engine.interactive = sh.interactive;
@@ -131,36 +145,26 @@ namespace RayFire
                 sh.engine.SyncAnimation(sh.transform);
 
             // Set interactive data to use at properties change
-            InteractiveSetup (sh, fragments);
+            RFInteractiveHelper.InteractiveSetup (sh, fragments);
         }
         
          // STEP 2. Shatter only. Set properties
         static void SetupShatterFragmentation(RayfireShatter sh)
         {
             // Get separate property. Should be enabled for decompose
-            bool elementSeparate = sh.advanced.separate || sh.type == FragType.Decompose;
-
-            // Get preCap property
-            bool preCap = sh.advanced.inpCap;
-
-            // Set slice type
-            SliceType sliceType = sh.advanced.sliceType;
+            bool      elementSeparate = sh.advanced.separate || sh.type == FragType.Decompose;
+            bool      aabbSeparate    = sh.advanced.ab_sep;
+            bool      preCap          = sh.advanced.inpCap;
+            SliceType sliceType       = sh.advanced.sliceType;
             
             // Adjusted axis scale for Splinter and Slabs frag types
             Vector3 axisScale = GetAxisScale(sh);
 
             // Get aabb transform
-            Transform cutAABB = sh.advanced.CanUseAABB == true
-                ? sh.advanced.ab_obj
-                : null;
-
-            // Get AABB separate state
-            bool aabbSeparate = sh.advanced.ab_sep;
+            Transform cutAABB = sh.advanced.CanUseAABB == true ? sh.advanced.ab_obj : null;
             
             // Get Bias TN
-            sh.engine.biasTN = sh.advanced.CanUseCenter == true
-                ? sh.advanced.centerBias.localToWorldMatrix
-                : Matrix4x4.identity;
+            sh.engine.biasTN = sh.advanced.CanUseCenter == true ? sh.advanced.centerBias.localToWorldMatrix : Matrix4x4.identity;
             
             // Setup fragmentation properties
             SetupFragmentation (sh.engine, sh.transform, elementSeparate, preCap, sliceType, axisScale, cutAABB, aabbSeparate);
@@ -246,8 +250,7 @@ namespace RayFire
                 Transform groupRoot = engine.transMap[engine.renderers[i].transform];
 
                 // Set tag and layer to root.
-                groupRoot.gameObject.layer = layer;
-                groupRoot.gameObject.tag   = tag;
+                SetLayerTag(groupRoot.gameObject, layer, tag);
                 
                 if (engine.skinFlags[i] == false)
                     CreateShatterMeshFragments (engine, groupRoot, i, iMat, inner, planar, shell, ref fragments, layer, tag);
@@ -277,13 +280,6 @@ namespace RayFire
                 // Skip planar fragments
                 if (planar == true && RFShatterAdvanced.IsCoplanar (fragUnityMesh, RFShatterAdvanced.planarThreshold) == true)
                     continue;
-
-                
-                // TEMP
-                /*
-                fragUnityMesh.RecalculateTangents();
-                fragUnityMesh.RecalculateNormals();
-                */
                 
                 // Create fragment object
                 GameObject fragGo = CreateFragmentObj (groupRoot, fragUnityMesh, groupName + (j + 1), layer, tag);
@@ -299,11 +295,6 @@ namespace RayFire
                 // Add renderer and materials
                 MeshRenderer mr = fragGo.AddComponent<MeshRenderer>();
                 mr.sharedMaterials = GetCorrectMaterials (engine.GetMaterials (ind), engine.utilFrags[ind][j], iMat);
-
-                /*
-                Debug.Log (engine.utilFrags[ind][j].GetNumSubMeshes());
-                Debug.Log (fragUnityMesh.subMeshCount);
-                */
                 
                 // Set local fragment position
                 SetLocalPosition (engine, fragGo.transform, ind, j);
@@ -403,11 +394,14 @@ namespace RayFire
                 inpCap    = rg.mshDemol.sht.advanced.inpCap;
                 sliceType = rg.mshDemol.sht.advanced.sliceType;
                 axisScale = GetAxisScale(rg.mshDemol.sht);
+                
+                // Set shatter source
+                engine.shatter = rg.mshDemol.sht;
             }
             
             // Rigid do not use this feature even via Shatter
-            Transform cutAABB      = null;
-            bool      aabbSeparate = false;
+            Transform  cutAABB      = null;
+            const bool aabbSeparate = false;
             
             // Get Bias Always Identity by defaultNt,z
             engine.biasTN = Matrix4x4.identity;
@@ -471,7 +465,7 @@ namespace RayFire
             }
             
             // Instant or multiframe caching. Always instant in case of slices.
-            if (rg.mshDemol.ch.MultiFrameState == false || rg.lim.HasSlicePlanes == true)
+            if (rg.mshDemol.ch.MeshCacheState == false || rg.lim.HasSlicePlanes == true)
             {
                 // Disable clustering if slice
                 if (rg.lim.HasSlicePlanes == true)
@@ -490,25 +484,15 @@ namespace RayFire
         }
         
         // STEP 4. Create Unity Mesh objects
-        public static List<Transform> CreateRigidFragments(RFEngine engine, RayfireRigid rg)
+        public static void CreateRigidFragments(RFEngine engine, RayfireRigid rg)
         {
-            // Get hierarchy type. Always Flat for Rigid
-            FragHierarchyType hierarchy = FragHierarchyType.Flat;
-            
-            // Rigid always fragments with identity scale except skinned mesh
-            bool origScale = engine.HasSkin;
-            
-            // Get inner material
-            Material iMat = rg.materials.iMat;
-            
-            // Get planar filter
-            bool planar = rg.physics.pc;
-            
-            // Hardcoded min Size 
-            float size = minSize;
-            
-            // Get shell properties. Disabled by default.
-            RFShell shell = new RFShell();
+            // Rigid demolition properties
+            FragHierarchyType hierarchy = FragHierarchyType.Flat; // Get hierarchy type. Always Flat for Rigid
+            bool              origScale = engine.HasSkin;         // Rigid always fragments with identity scale except skinned mesh
+            Material          iMat      = rg.materials.iMat;      // Get inner material
+            bool              planar    = rg.physics.pc;          // Get planar filter
+            float             size      = minSize;                // Hardcoded min Size 
+            RFShell           shell     = new RFShell();          // Get shell properties. Disabled by default.
             
             // Set Shatter in case of use
             if (rg.mshDemol.UseShatter == true)
@@ -520,75 +504,65 @@ namespace RayFire
             // Set center matrices for different hierarchy types and create roots
             CreateHierarchy (engine, rg.transform, hierarchy, origScale);
             
-            // Create Unity Mesh objects
-            List<Transform> fragsTms = CreateRigidFragments(engine, rg, iMat, planar, size, shell);
-            
-            // Sync animation TODO test with animated meshes
-            if (rg.mshDemol.engine.HasSkin == true)
-                rg.mshDemol.engine.SyncAnimation(rg.transform);
-            
-            // Set main fragments root after hierarchy created
-            rg.rtC = rg.mshDemol.engine.mainRoot.transform;
-            
-            // Set root to manager
-            RayfireMan.SetFragmentRootParent (rg.rtC, rg.transform.parent);
-            
-            // Ignore neib collisions
-            RFPhysic.SetIgnoreColliders (rg.physics, rg.fragments);
-
-            return fragsTms;
-        }
-        
-        // STEP 4. Create Unity Mesh objects
-        static List<Transform> CreateRigidFragments(RFEngine engine, RayfireRigid rg, Material iMat, bool planar, float size, RFShell shell)
-        {
-            // Fragments list
-            List<Transform> fragments = new List<Transform>();
-            
             // Create RayFire manager if not created
             RayfireMan.RayFireManInit();
-
+            
             // Set fragments list
             rg.fragments = new List<RayfireRigid>();
             
+            // Instant or multiframe fragment. Always instant in case of slices. TODO check for multiframe frag state
+            if (rg.mshDemol.ch.FragCacheState == false || rg.lim.HasSlicePlanes == true)
+            {
+                // Create Unity Mesh objects
+                CreateRigidFragments(engine, rg, iMat, planar, size, shell);
+                        
+                // Save pivots for reset
+                SavePivots (rg);
+                
+                // Sync animation TODO test with animated meshes
+                if (rg.mshDemol.engine.HasSkin == true)
+                    rg.mshDemol.engine.SyncAnimation(rg.transform);
+            
+                // Set main fragments root after hierarchy created
+                rg.rtC = rg.mshDemol.engine.mainRoot.transform;
+            
+                // Set root to manager
+                RayfireMan.SetFragmentRootParent (rg.rtC, rg.transform.parent);
+            
+                // Ignore neib collisions
+                RFPhysic.SetIgnoreColliders (rg.physics, rg.fragments);
+            }
+
+            else
+                engine.StartMultiFrameFragments (engine, rg, iMat, planar, size, shell);
+        }
+        
+        // STEP 4. Create Unity Mesh objects
+        static void CreateRigidFragments(RFEngine engine, RayfireRigid rg, Material iMat, bool planar, float size, RFShell shell)
+        {
             // Create fragments 
             for (int i = 0; i < engine.utilFrags.Length; i++)
             {
                 // Tag and layer
-                int layer = engine.renderers[i].gameObject.layer;
-                if (rg.mshDemol.prp.l == false)
-                    layer = rg.mshDemol.prp.lay;
-                string tag = engine.renderers[i].gameObject.tag;
-                if (rg.mshDemol.prp.t == false)
-                    tag = rg.mshDemol.prp.tag;
-
+                int    layer = rg.mshDemol.prp.l == false ? rg.mshDemol.prp.lay : engine.renderers[i].gameObject.layer;
+                string tag   = rg.mshDemol.prp.t == false ? rg.mshDemol.prp.tag : engine.renderers[i].gameObject.tag;
+                
                 // Get local fragments root
                 Transform groupRoot = engine.transMap[engine.renderers[i].transform];
                 
                 // Set tag and layer to root.
-                groupRoot.gameObject.layer = layer;
-                groupRoot.gameObject.tag   = tag;
+                SetLayerTag (groupRoot.gameObject, layer, tag);
                 
                 // Create fragments
                 if (engine.skinFlags[i] == false)
-                    CreateRigidMeshFragments (engine, rg, groupRoot, i, iMat, planar, size, shell, ref fragments, layer, tag);
+                    CreateRigidMeshFragments (engine, rg, groupRoot, i, iMat, planar, size, shell, layer, tag);
                 else // TODO fix as Mesh method
-                    CreateRigidSkinFragments (engine, rg, groupRoot, i, iMat, planar, ref fragments, layer, tag);
+                    CreateRigidSkinFragments (engine, groupRoot, i, iMat, planar, layer, tag);
             }
-            
-            // Save pivots for reset
-            if (rg.reset.frg == RFReset.FragmentsResetType.Reuse)
-            {
-                rg.pivots = new Vector3[rg.fragments.Count];
-                for (int i = 0; i < rg.fragments.Count; i++)
-                    rg.pivots[i] = rg.fragments[i].tsf.position - rg.tsf.position;
-            }
-
-            return fragments;
         }
         
         // Create Mesh Frags
-        static void CreateRigidMeshFragments(RFEngine engine, RayfireRigid rg, Transform groupRoot, int ind, Material iMat, bool planar, float size, RFShell shell, ref List<Transform> fragments, int layer, string tag)
+        static void CreateRigidMeshFragments(RFEngine engine, RayfireRigid rg, Transform groupRoot, int ind, Material iMat, bool planar, float size, RFShell shell, int layer, string tag)
         {
             // Get name for group frags
             string groupName = engine.GetGroupName (ind) + str_fr;
@@ -608,69 +582,76 @@ namespace RayFire
                     continue;
                 
                 // Get object from pool or create
-                RayfireRigid rfScr = RayfireMan.inst.fragments.rgInst == null
-                    ? RayfireMan.inst.fragments.CreateRigidInstance()
-                    : RayfireMan.inst.fragments.GetPoolObject();
+                RayfireRigid rfScr = CreateRigidMeshFragment (engine, rg, groupRoot, fragUnityMesh, ind, iMat, shell, j);
                 
                 // Set tag and layer to fragment
                 rfScr.name             = groupName + (j + 1);
-                rfScr.gameObject.layer = layer;
-                rfScr.gameObject.tag   = tag;
-                rfScr.rtP              = groupRoot;
-
-                fragUnityMesh.name = rfScr.name;
-                rfScr.tsf.SetParent (groupRoot, false);
-                
-                // Copy properties from parent to fragment node
-                rg.CopyPropertiesTo (rfScr);
-                
-                // Set custom fragment simulation type if not inherited
-                RFPhysic.SetFragmentSimulationType (rfScr, rg.simTp);
-                
-                // Copy particles
-                RFPoolingParticles.CopyParticlesRigid (rg, rfScr);
-                
-                // Copy Renderer properties
-                RFDemolitionMesh.CopyRenderer (rg, rfScr.mRnd, fragUnityMesh.bounds);
-                
-                // Add shell to mesh
-                if (shell.enable == true)
-                    fragUnityMesh = RFShell.AddShell (engine.utilFrags[ind][j], fragUnityMesh, shell.bridge, shell.submesh, shell.Thickness);
-
-                // Set mesh
-                rfScr.mFlt.sharedMesh = fragUnityMesh;
-                
-                // Set collider. IMPORTANT: should be after sharedMesh defined
-                RFPhysic.SetFragmentCollider (rfScr, fragUnityMesh);
-                
-                // Set materials
-                rfScr.mRnd.sharedMaterials = GetCorrectMaterials (engine.GetMaterials (ind), engine.utilFrags[ind][j], iMat);
-
-                // Set local fragment position
-                SetLocalPosition (engine, rfScr.tsf, ind, j);
-                
-                // Turn on
-                rfScr.gameObject.SetActive (true);
-                
-                // Set limitations properties
-                RFDemolitionMesh.SetLimitationProps(rfScr, rg.lim.currentDepth);
-                
-                // Set mass by mass value accordingly to parent
-                if (rfScr.physics.mb == MassType.MassProperty)
-                    RFPhysic.SetMassByParent (rfScr.physics, fragUnityMesh.bounds.size.magnitude, rg.physics.ms, rg.mFlt.sharedMesh.bounds.size.magnitude);
-                else if (rfScr.physics.mb == MassType.RigidBodyComponent && rg.physics.rb != null)
-                    RFPhysic.SetMassByParent (rfScr.physics, fragUnityMesh.bounds.size.magnitude, rg.physics.rb.mass, rg.mFlt.sharedMesh.bounds.size.magnitude);
+                SetLayerTag (rfScr.gameObject, layer, tag);
                 
                 // Collect rigid list
                 rg.fragments.Add (rfScr);
-                
-                // Collect batch data
-                fragments.Add (rfScr.tsf);
             }
         }
         
+        // Create one Mesh Fragment
+        static RayfireRigid CreateRigidMeshFragment(RFEngine engine, RayfireRigid rg, Transform groupRoot, Mesh fragUnityMesh, int ind, Material iMat, RFShell shell, int j)
+        {
+            // Get object from pool or create
+            RayfireRigid rfScr = RayfireMan.inst.fragments.rgInst == null
+                ? RayfireMan.inst.fragments.CreateRigidInstance()
+                : RayfireMan.inst.fragments.GetPoolObject();
+            
+            // Set group parent
+            rfScr.rtP = groupRoot;
+
+            fragUnityMesh.name = rfScr.name;
+            rfScr.tsf.SetParent (groupRoot, false);
+            
+            // Copy properties from parent to fragment node
+            rg.CopyPropertiesTo (rfScr);
+            
+            // Set custom fragment simulation type if not inherited
+            RFPhysic.SetFragmentSimulationType (rfScr, rg.simTp);
+            
+            // Copy particles
+            RFPoolingParticles.CopyParticlesRigid (rg, rfScr);
+            
+            // Copy Renderer properties
+            RFDemolitionMesh.CopyRenderer (rg, rfScr.mRnd, fragUnityMesh.bounds);
+            
+            // Add shell to mesh
+            if (shell.enable == true)
+                fragUnityMesh = RFShell.AddShell (engine.utilFrags[ind][j], fragUnityMesh, shell.bridge, shell.submesh, shell.Thickness);
+
+            // Set mesh
+            rfScr.mFlt.sharedMesh = fragUnityMesh;
+            
+            // Set collider. IMPORTANT: should be after sharedMesh defined
+            RFPhysic.SetFragmentCollider (rfScr, fragUnityMesh);
+            
+            // Set materials
+            rfScr.mRnd.sharedMaterials = GetCorrectMaterials (engine.GetMaterials (ind), engine.utilFrags[ind][j], iMat);
+
+            // Set local fragment position
+            SetLocalPosition (engine, rfScr.tsf, ind, j);
+            
+            // Turn on
+            rfScr.gameObject.SetActive (true);
+            
+            // Set limitations properties
+            RFDemolitionMesh.SetLimitationProps(rfScr, rg.lim.currentDepth);
+            
+            // Set mass by mass value accordingly to parent
+            if (rfScr.physics.mb == MassType.MassProperty)
+                RFPhysic.SetMassByParent (rfScr.physics, fragUnityMesh.bounds.size.magnitude, rg.physics.ms, rg.mFlt.sharedMesh.bounds.size.magnitude);
+            else if (rfScr.physics.mb == MassType.RigidBodyComponent && rg.physics.rb != null)
+                RFPhysic.SetMassByParent (rfScr.physics, fragUnityMesh.bounds.size.magnitude, rg.physics.rb.mass, rg.mFlt.sharedMesh.bounds.size.magnitude);
+
+            return rfScr;
+        }
+
         // Create Skin Frags 
-        static void CreateRigidSkinFragments(RFEngine engine, RayfireRigid rg, Transform groupRoot, int ind, Material iMat, bool planar, ref List<Transform> fragments, int layer, string tag)
+        static void CreateRigidSkinFragments(RFEngine engine, Transform groupRoot, int ind, Material iMat, bool planar, int layer, string tag)
         {
             // Get name for group frags
             string groupName = engine.GetGroupName (ind) + str_fr;
@@ -693,9 +674,17 @@ namespace RayFire
                 
                 // Set Skin data 
                 SetSkinData (engine, fragGo, fragUnityMesh, bones, ind, j, iMat);
-                
-                // Collect batch data
-                fragments.Add (fragGo.transform);
+            }
+        }
+        
+        // Create Mesh Frags
+        static void SavePivots (RayfireRigid rg)
+        {
+            if (rg.reset.frg == RFReset.FragmentsResetType.Reuse)
+            {
+                rg.pivots = new Vector3[rg.fragments.Count];
+                for (int i = 0; i < rg.fragments.Count; i++)
+                    rg.pivots[i] = rg.fragments[i].tsf.position - rg.tsf.position;
             }
         }
         
@@ -744,7 +733,7 @@ namespace RayFire
         static void AddRendererMesh(RFEngine engine, Renderer renderer, bool petrify)
         {
             // Get unity mesh
-            Mesh unityMesh = null;
+            Mesh unityMesh;
             bool skinState = false;
             if (renderer.GetType() == typeof(MeshRenderer))
                 unityMesh = renderer.gameObject.GetComponent<MeshFilter>().sharedMesh;
@@ -792,7 +781,7 @@ namespace RayFire
             // Get min and max
             Utils.Mesh.Transform (engine.utilFrags, engine.normalMat, out engine.aabbMin, out engine.aabbMax);
             
-            // Fix null polys
+            // Fix null polys. Black glowing tris
             if (elementSeparate == false)
                 Utils.Mesh.FixPolys (engine.utilFrags);
             
@@ -808,9 +797,7 @@ namespace RayFire
             SetSliceType (sliceType, engine.utilFrags, engine.edgeFlags);
             
             // Get cutAabb matrix
-            Matrix4x4 cutAABBMat = cutAABB != null
-                ? engine.normalMat * cutAABB.localToWorldMatrix
-                : Matrix4x4.zero;
+            Matrix4x4 cutAABBMat = cutAABB != null ? engine.normalMat * cutAABB.localToWorldMatrix : Matrix4x4.zero;
 
             // Prepare Slice Data Parameters
             Vector3 aabbCentroid = (engine.aabbMin + engine.aabbMax) * 0.5f;
@@ -840,26 +827,24 @@ namespace RayFire
             // Fragment
             engine.utilFrags = Utils.Mesh.Fragment (engine.sliceData, combine, engine.edgeFlags, element * 0.01f, fragSze, faceFlt, planarVert, planarThr, firstPass, decomp);
         }
-        
+
         // STEP 4. Post slicing ops
-        static void PostFragmentation(RFEngine engine, RFSurface material, bool outCap, bool smooth, int clsCount, int clsLayers, int clsSeed, bool clsRed, float clsRlx, bool clsOut, bool clsTsf) 
+        static void PostFragmentation(RFEngine engine, RFSurface material, bool outCap, bool smooth, int clsCount, int clsLayers, int clsSeed, bool clsRed, float clsRlx, bool clsOut, bool clsTsf)
         {
+            // SetNeibData (engine);
+            
             // Clusterize
-            if (clsCount > 1)
-                engine.utilFrags = Utils.Mesh.Clusterize (engine.sliceData, engine.utilFrags, clsSeed, clsCount, clsLayers, clsTsf);
+            Clusterize (engine, clsCount, clsLayers, clsSeed, clsTsf);
             
             // OutCap holes on every fragment and set not capped open edges array
             if (outCap == true)
-            {
-                engine.edgeFlags = new bool[engine.utilFrags.Length][];
                 Utils.Mesh.CheckOpenEdges (engine.utilFrags, engine.edgeFlags, true);
-            }
 
             // Get inner sub id TODO add support for other renderers, not only first renderer materials
             engine.innerSubId = GetInnerSubId(material.iMat, engine.GetMaterials(0));
             
             // Relax verts
-            RelaxVerts (engine, clsCount, clsRlx, clsOut);
+            RelaxVerts (engine, clsCount, clsRlx, clsOut, outCap, smooth);
             
             // Convert indexes and reduce tris. 
             Utils.Mesh.ReduceTris (engine.utilFrags, clsRed);
@@ -883,19 +868,233 @@ namespace RayFire
             engine.UnBakeWorldTransform();
             
             // Restore Maps
-            bool checkOrigVerts = false; // Smooth for outer cluster verts
-            ComputeMaps (engine, material.cC, smooth, checkOrigVerts);
+            ComputeMaps (engine, material.cC, smooth);
             
             // Scale interactive mesh
-            if (engine.interactive == true)
-            {
-                Utils.Mesh.ScaleMeshes (engine.utilFrags, ref engine.interVerts, engine.interScale);
-            }
+            InteractiveMeshScale (engine);
             
             // Centerize
             engine.centroids = Utils.Mesh.Centerize(engine.utilFrags);
         }
 
+        /// /////////////////////////////////
+        /// Clustering
+        /// /////////////////////////////////
+        
+        // Clusterize
+        static void Clusterize (RFEngine engine, int clsCount, int clsLayers, int clsSeed, bool clsTsf)
+        {
+            // Should be at least two clusters
+            if (clsCount < 2)
+                return;
+            
+            // Only shatter component ops
+            if (engine.shatter != null)
+            {
+                // Restore/Backup not clustered fragments fo fast interactive cluster update
+                BackupUtilMeshes (engine);
+
+                // AABB volume
+                VolumeCluster (engine);
+
+                // Custom points
+                PointCluster (engine);
+
+                // Clusterize inner groups
+                InnerCluster (engine);
+            }
+            
+            // Clusterize
+            engine.utilFrags = Utils.Mesh.Clusterize(engine.sliceData, engine.utilFrags, clsSeed, clsCount, clsLayers, clsTsf, engine.acd);
+        }
+
+        // Set neibs data
+        static void SetNeibData(RFEngine engine)
+        {
+            System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
+            stopWatch.Start();
+            
+            // Get neibs data
+            engine.sliceData.BuildNeibghsTree();
+            List<List<List<int>>> neibsData = engine.sliceData.GetNeibghs (engine.utilFrags);
+            
+            
+            
+            stopWatch.Stop();
+            Debug.Log("BuildNeibghsTree" + stopWatch.Elapsed.TotalMilliseconds.ToString("F2") + " ms");
+            
+            
+            for ( int i = 0; i < neibsData.Count(); i++)
+            {
+                for(int j = 0; j < neibsData[i].Count(); j++)
+                {
+                    var fragNeibghs = neibsData[i][j];
+
+                    Debug.Log (fragNeibghs.Count);
+                }
+            }
+            
+        }
+        
+        // Restore/Backup not clustered fragments fo fast interactive cluster update
+        static void BackupUtilMeshes(RFEngine engine)
+        {
+            // Interactive mode only
+            if (engine.shatter.interactive == false)
+                return;
+                
+            // Clone
+            if (engine.clsFrags != null) 
+                engine.utilFrags = CloneUtilMeshes (engine.clsFrags);
+            else 
+                engine.clsFrags = CloneUtilMeshes (engine.utilFrags);
+        }
+        
+        // Volume Clusters
+        static void VolumeCluster(RFEngine engine)
+        {
+            if (engine.shatter.clusters.AcdState == false)
+                return;
+            
+            // Create acd list
+            if (engine.acd == null || engine.aabbCenters == null)
+            {
+                // New acd with aabb
+                engine.acd = new Utils.AdvClustData (engine.utilFrags, true);
+
+                // Generate frags aabb centers array by engine.acd.fragsAABB
+                RFAcd.GetAabbCenters (ref engine.aabbCenters, engine.acd.fragsAABB, engine.normalMat);
+            }
+            
+            // Reset priority state
+            RFShatterCluster.ResetPriorityState (engine.shatter.clusters.acdList);
+            
+            // Check for OBB point overlap
+            for (int a = 0; a < engine.shatter.clusters.acdList.Count; a++)
+            {
+                // Get acd with low id
+                RFAcd lowAcd = engine.shatter.clusters.acdList[engine.shatter.clusters.GetLowestAcdId()];
+                
+                // No object
+                if (lowAcd.go == null)
+                    continue;
+
+                // Prepare list
+                lowAcd.mfs.Clear();
+                
+                // Get list of parent and children meshfilters
+                lowAcd.mfs.Add (lowAcd.go.GetComponent<MeshFilter>());
+                if (lowAcd.go.transform.childCount > 0)
+                    lowAcd.mfs.AddRange (lowAcd.go.GetComponentsInChildren<MeshFilter> (true).ToList());
+                
+                // Set group by acd
+                for (int r = 0; r < lowAcd.mfs.Count; r++)
+                    if (lowAcd.mfs[r] != null && lowAcd.mfs[r].sharedMesh != null)
+                        MeshBoundsToAcd (engine, lowAcd.mfs[r], lowAcd);
+            }
+        }
+
+        // Custom points clusters
+        static void PointCluster(RFEngine engine)
+        {
+            // Has no points
+            if (engine.shatter.HasPoints == false)
+                return;
+            
+            // Enable points overlap check. WARNING: STATIC property, affects voronoi points as well
+            Utils.SliceData.CheckOverlapPoints(true);
+            
+            // Create acd list
+            if (engine.acd == null)
+                engine.acd = new Utils.AdvClustData (engine.utilFrags);
+            
+            // Set custom points
+            Transform[] pointArray = engine.shatter.clusters.pointRoot.GetComponentsInChildren<Transform>();
+            if (pointArray != null)
+            {
+                List<Vector3> clustPoints = new List<Vector3>();
+                for (int i = 0; i < pointArray.Length; i++)
+                    if (pointArray[i] != engine.shatter.clusters.pointRoot)
+                        clustPoints.Add (engine.normalMat.MultiplyPoint (pointArray[i].position));
+                engine.acd.customPoints = clustPoints.ToArray();
+            }
+        }
+        
+        // Inner cluster
+        static void InnerCluster(RFEngine engine)
+        {
+            if (engine.shatter.clusters.inner == false)
+                return;
+            
+            // Create acd list
+            if (engine.acd == null)
+                engine.acd = new Utils.AdvClustData(engine.utilFrags);
+
+            // Mark inner frags
+            for (int i = 0; i < engine.acd.customGroups.Length; i++)
+                for (int j = 0; j < engine.acd.customGroups[i].Length; j++)
+                    if ((int)engine.utilFrags[i][j].GetFragLocation() >= 2)
+                        engine.acd.customGroups[i][j] = RFAcd.innerGroup;
+        }
+        
+        // Set fragment group id by bound and acd
+        static void MeshBoundsToAcd(RFEngine engine, MeshFilter mf, RFAcd acd)
+        {
+            acd.scl = mf.transform.lossyScale;
+            acd.cnt = mf.transform.transform.position;
+            acd.ext = mf.sharedMesh.bounds.extents;
+            acd.rot = mf.transform.rotation;
+
+            // Set extents by scale
+            acd.ext.x *= acd.scl.x;
+            acd.ext.y *= acd.scl.y;
+            acd.ext.z *= acd.scl.z;
+            
+            // Get id by acd type
+            int idByTpe = acd.IdByType;
+           
+            // Get rotated volume matrix
+            Matrix4x4 matrix = Matrix4x4.TRS (acd.cnt, acd.rot, Vector3.one);
+
+            // Set custom groups id
+            for (int i = 0; i < engine.aabbCenters.Length; i++)
+            {
+                for (int j = 0; j < engine.aabbCenters[i].Length; j++)
+                {
+                    // Skip check and change if inner frag for outer type
+                    if (acd.tp == RFAcd.RFAcdType.Outer && (int)engine.utilFrags[i][j].GetFragLocation() >= 2)
+                        continue;
+
+                    // Check for overlap with OBB
+                    if (RFAcd.PointOBB (engine.aabbCenters[i][j], acd.ext, matrix) == true)
+                        engine.acd.customGroups[i][j] = idByTpe;
+                    
+                    /* Debris
+                    else if (acd.gz == true)
+                    {
+                        Vector3 p1 = engine.normalMat.inverse.MultiplyPoint (engine.acd.fragsAABB[i][j].Item1);
+                        Vector3 p2 = engine.normalMat.inverse.MultiplyPoint (engine.acd.fragsAABB[i][j].Item2);
+                        if (RFAcd.PointOBB (p1, acd.ext, matrix) || RFAcd.PointOBB (p2, acd.ext, matrix))
+                            engine.acd.customGroups[i][j] = RFAcd.soloGroup;
+                    }
+                    */
+                }
+            }
+        }
+        
+        // Frag mesh deep copy
+        static Utils.Mesh[][] CloneUtilMeshes(Utils.Mesh[][] source)
+        {
+            Utils.Mesh[][] result = new Utils.Mesh[source.Length][];
+            for (int i = 0; i < source.Length; i++)
+            {
+                result[i] = new Utils.Mesh[source[i].Length];
+                for (int j = 0; j < source[i].Length; j++)
+                    result[i][j] = new Utils.Mesh(source[i][j]);
+            }
+            return result;
+        }
+        
         /// /////////////////////////////////
         /// Fragmentation types
         /// /////////////////////////////////
@@ -907,30 +1106,34 @@ namespace RayFire
             {
                 case FragType.Voronoi:
                 {
+                    Utils.SliceData.CheckOverlapPoints(sh.voronoi.centerBias > 0.6f); // STATIC property
                     sd.UseGizmoAsAABB (sh.advanced.AABBLocalCloud);
                     sd.GenRandomPoints(sh.voronoi.Amount, sh.advanced.Seed);
-                    sd.ApplyCenterBias(biasPos, biastStr, sh.voronoi.centerBias, planarOff);
+                    sd.ApplyCenterBias(biasPos, biasStr, sh.voronoi.centerBias, planarOff);
                     sd.BuildCells();
                     break;
                 }
                 case FragType.Splinters:
                 {
+                    Utils.SliceData.CheckOverlapPoints(sh.splinters.centerBias > 0.6f); // STATIC property
                     sd.UseGizmoAsAABB (sh.advanced.AABBLocalCloud);
                     sd.GenRandomPoints(sh.splinters.Amount, sh.advanced.Seed);
-                    sd.ApplyCenterBias(biasPos, biastStr, sh.splinters.centerBias, planarOff);
+                    sd.ApplyCenterBias(biasPos, biasStr, sh.splinters.centerBias, planarOff);
                     sd.BuildCells();
                     break;
                 }
                 case FragType.Slabs:
                 {
+                    Utils.SliceData.CheckOverlapPoints(sh.slabs.centerBias > 0.6f); // STATIC property
                     sd.UseGizmoAsAABB (sh.advanced.AABBLocalCloud);
                     sd.GenRandomPoints(sh.slabs.Amount, sh.advanced.Seed);
-                    sd.ApplyCenterBias(biasPos, biastStr, sh.slabs.centerBias, planarOff);
+                    sd.ApplyCenterBias(biasPos, biasStr, sh.slabs.centerBias, planarOff);
                     sd.BuildCells();
                     break;
                 }
                 case FragType.Radial:
                 {
+                    Utils.SliceData.CheckOverlapPoints(sh.radial.focus > 0.8f); // STATIC property
                     sd.UseGizmoAsAABB (sh.advanced.AABBLocalCloud);
                     Vector3 aabbAbsSize      = normalMat.inverse *  engine.aabbMax;
                     float   radiusExtraScale = Mathf.Max(aabbAbsSize.x, aabbAbsSize.y, aabbAbsSize.z);
@@ -952,6 +1155,7 @@ namespace RayFire
                 }
                 case FragType.Hexagon:
                 {
+                    Utils.SliceData.CheckOverlapPoints(false); // STATIC property
                     sd.UseGizmoAsAABB (sh.advanced.AABBLocalCloud);
                     List<Vector3> customPnt        = RFHexagon.GetHexPointCLoudV2 (sh.hexagon, sh.CenterPos, sh.CenterDir, sh.bound);
                     List<Vector3> customPointsList = new List<Vector3>();
@@ -959,12 +1163,13 @@ namespace RayFire
                         customPointsList.Add(normalMat.MultiplyPoint(biasTN * customPnt[i]));
                     sd.SetCustomPoints(customPointsList);
                     float centerBias = 0;
-                    sd.ApplyCenterBias(biasPos, biastStr, centerBias, planarOff);
+                    sd.ApplyCenterBias(biasPos, biasStr, centerBias, planarOff);
                     sd.BuildCells();
                     break;
                 }
                 case FragType.Custom:
                 {
+                    Utils.SliceData.CheckOverlapPoints(true); // STATIC property
                     sd.UseGizmoAsAABB (sh.advanced.AABBLocalCloud);
                     List<Vector3> customPnt        = RFCustom.GetCustomPointCLoud (sh.custom, sh.transform, sh.advanced.Seed, sh.bound);
                     List<Vector3> customPointsList = new List<Vector3>();
@@ -972,25 +1177,27 @@ namespace RayFire
                         customPointsList.Add(normalMat.MultiplyPoint(biasTN * customPnt[i]));
                     sd.SetCustomPoints(customPointsList);
                     float centerBias = 0;
-                    sd.ApplyCenterBias(biasPos, biastStr, centerBias, planarOff);
+                    sd.ApplyCenterBias(biasPos, biasStr, centerBias, planarOff);
                     sd.BuildCells();
                     break;
                 }
                 case FragType.Slices:
                 {
-                    Vector3 dir = sh.slice.Axis (sh.transform);
-                    sd.AddPlanes(sh.slice.sliceList.ToArray(), dir, normalMat);
+                    Utils.SliceData.CheckOverlapPoints(false); // STATIC property
+                    sd.AddPlanes(sh.slice.sliceList.ToArray(), sh.slice.Axis (sh.transform), normalMat);
                     break;
                 }
                 
                 case FragType.Tets:
                 {
-                    sd.GenTetrahedrons (sh.tets.Density, (sh.tets.noise * 0.01f), (int)sh.tets.lattice, false);  
+                    Utils.SliceData.CheckOverlapPoints(false); // STATIC property
+                    sd.GenTetrahedrons (sh.tets.Density, sh.tets.noise * 0.01f, (int)sh.tets.lattice, false);  
                     break;
                 }
                 
                 case FragType.Bricks:
                 {
+                    Utils.SliceData.CheckOverlapPoints(false); // STATIC property
                     sd.GenBricks(
                         sh.bricks.Size,
                         sh.bricks.Num, 
@@ -1002,6 +1209,7 @@ namespace RayFire
                 }
                 case FragType.Voxels:
                 {
+                    Utils.SliceData.CheckOverlapPoints(false); // STATIC property
                     sd.GenBricks(
                         sh.voxels.Size,
                         sh.bricks.SplitState, // has 0 vector int
@@ -1032,8 +1240,9 @@ namespace RayFire
             // Set default Rigid fragmentation properties
             else
             {
+                Utils.SliceData.CheckOverlapPoints(rg.mshDemol.bias > 0.6f); // STATIC property
                 rg.mshDemol.engine.sliceData.GenRandomPoints (rg.mshDemol.Amount, rg.mshDemol.Seed);
-                rg.mshDemol.engine.sliceData.ApplyCenterBias (rg.mshDemol.engine.biasPos, biastStr, rg.mshDemol.bias, planarOff);
+                rg.mshDemol.engine.sliceData.ApplyCenterBias (rg.mshDemol.engine.biasPos, biasStr, rg.mshDemol.bias, planarOff);
                 rg.mshDemol.engine.sliceData.BuildCells();
             }
         }
@@ -1114,13 +1323,11 @@ namespace RayFire
         // Create fragment object
         static GameObject CreateFragmentObj(Transform groupRoot, Mesh fragUnityMesh, string name, int layer, string tag)
         {
-            // Create fragment object
             GameObject fragGo = new GameObject (name);
             fragUnityMesh.name = fragGo.name;
             fragGo.layer       = layer;
             fragGo.tag         = tag;
             fragGo.transform.SetParent (groupRoot, false);
-
             return fragGo;
         }
         
@@ -1157,13 +1364,7 @@ namespace RayFire
                     if (materials.Length > origSubID)
                         correctMaterials.Add (materials[origSubID]);
                     else
-                    {
-                        // Check if object has materials
-                        if (materials.Length == 0)
-                            correctMaterials.Add (null);
-                        else
-                            correctMaterials.Add (materials[0]);
-                    }
+                        correctMaterials.Add (materials.Length == 0 ? null : materials[0]);
                 }
                 if (origSubID == -1) // if == -1 then it is inner faces new submesh
                     correctMaterials.Add(innerMaterial);
@@ -1189,22 +1390,20 @@ namespace RayFire
         }
         
         // relax inner cluster verts 
-        static void RelaxVerts(RFEngine engine, int clsCount, float clsRlx, bool clsOut)
+        static void RelaxVerts(RFEngine engine, int clsCount, float clsRlx, bool clsOut, bool outCap, bool smooth)
         {
             if (clsCount > 1 && clsRlx > 0)
             {
-                // Start countdown
-                // System.Diagnostics.Stopwatch stopWatch3 = new System.Diagnostics.Stopwatch();
-                // stopWatch3.Start();
-                
                 BorderType border = BorderType.orig;
                 if (clsOut == true)
                     border = BorderType.smooth;
-                Utils.Mesh.Relax (engine.utilFrags, clsRlx * 5, 3, border); // TODO put iters in UI
                 
-                // stopWatch3.Stop();
-                // Debug.Log("clsRlx " + clsRlx);
-                // Debug.Log("SmoothVerts " + stopWatch3.Elapsed.TotalMilliseconds + " ms.");
+                // Relax inner surface. Inverse Smooth state to unweld shared vertices
+                Utils.Mesh.Relax (engine.utilFrags, clsRlx * 5, 3, border, !smooth); // TODO put iters in UI
+                
+                // OutCap holes on every fragment and set not capped open edges array
+                if (outCap == true)
+                    Utils.Mesh.CheckOpenEdges (engine.utilFrags, engine.edgeFlags, true);
             } 
         }
         
@@ -1241,16 +1440,6 @@ namespace RayFire
         }
         
         // Get minimum size
-        static float GetSizeOld(RayfireShatter sh)
-        {
-            float size = sh.advanced.absSze;
-            if (sh.advanced.relSze > 0)
-                if (size < sh.engine.bounds.size.magnitude * sh.advanced.relSze * 0.01f)
-                    size = sh.engine.bounds.size.magnitude * sh.advanced.relSze * 0.01f;
-            return size;
-        }
-        
-        // Get minimum size
         static float GetSize(RayfireShatter sh, Bounds bounds)
         {
             // Basic filter size by relative value. Size filtering based on 1.1.1 unit because of internal slicing region.
@@ -1266,37 +1455,7 @@ namespace RayFire
             
             return filterSize;
         }
-        
-        /// /////////////////////////////////
-        /// Matrix ops
-        /// /////////////////////////////////
-        
-        // Bake
-        void BakedWorldTransform()
-        {
-            utilFrags = new Utils.Mesh[origMeshes.Count][];
-            for (int i = 0; i < origMeshes.Count; ++i)
-            {
-                utilFrags[i]    = new Utils.Mesh[1];
-                utilFrags[i][0] = new Utils.Mesh (origMeshes[i]);
-                if (skinFlags[i] == false)
-                    utilFrags[i][0].Transform (worldMat[i]);
-                else
-                    utilFrags[i][0].TransformByBones (origMeshes[i].bindposes, ((SkinnedMeshRenderer)renderers[i]).bones, false);
-            }
-        }
 
-        // UnBake
-        void UnBakeWorldTransform()
-        {
-            for (int i = 0; i < utilFrags.Length; ++i)
-                for (int j = 0; j < utilFrags[i].Length; ++j)
-                    if (skinFlags[i] == false)
-                        utilFrags[i][j].Transform (worldMat[i].inverse);
-                    else
-                        utilFrags[i][j].TransformByBones (origMeshes[i].bindposes, ((SkinnedMeshRenderer)renderers[i]).bones, true);
-        }
-        
         /// /////////////////////////////////
         /// Interactive ops
         /// /////////////////////////////////
@@ -1304,6 +1463,10 @@ namespace RayFire
         // Start interactive mode
         public static void InteractiveStart(RayfireShatter sh)
         {
+            // Only in Editor mode
+            if (Application.isEditor == false)
+                return;
+            
             // Check for skinned meshes and enabled petrify property
             PetrifyCheck (sh);
             
@@ -1311,9 +1474,22 @@ namespace RayFire
             FragmentShatter (sh);
             
             // Add helpers
-            AddHelpers (sh);
+            RFInteractiveHelper.AddHelpers (sh);
         }
-      
+        
+        // Stop interactive mode
+        public static void InteractiveStop(RayfireShatter sh)
+        {
+            // Enable own Renderer
+            sh.gameObject.SetActive (true);
+            
+            // Reset
+            sh.engine      = null;
+            sh.intMfs      = null;
+            sh.intMrs      = null;
+            sh.interactive = false;
+        }
+        
         // Property changed
         public static void InteractiveChange(RayfireShatter sh)
         {
@@ -1325,6 +1501,11 @@ namespace RayFire
             
             // Recache with new properties
             sh.engine.interScale  = sh.PreviewScale();
+
+            // Reset advanced clustering
+            sh.engine.acd         = null;
+            sh.engine.clsFrags    = null;
+            sh.engine.aabbCenters = null;
             
             // Setup fragmentation for shatter
             SetupShatterFragmentation(sh);
@@ -1340,6 +1521,74 @@ namespace RayFire
             // Perform slicing ops
             ProcessShatterFragmentation(sh);
             
+            // Common interactive ops
+            InteractivePostOps (sh, false);
+        }
+        
+        // Property changed
+        public static void InteractiveCluster(RayfireShatter sh)
+        {
+            if (sh.interactive == false)
+                return;
+            
+            if (sh.clusters.enable == false)
+                return;
+
+            if (sh.engine == null)
+                return;
+            
+            // Disable clustering
+            if (sh.type == FragType.Decompose || sh.type == FragType.Slices)
+                return;
+            
+            // Reset acd data
+            if (sh.engine.acd != null)
+            {
+                // Reset acd custom points
+                sh.engine.acd.customPoints = null;
+                
+                // Reset acd custom groups
+                RFAcd.ResetCustomGroups (sh.engine.acd.customGroups);
+            }
+            
+            // Perform slicing ops
+            PostFragmentation (sh.engine, sh.material, sh.advanced.outCap, sh.advanced.smooth, sh.clusters.Count, sh.clusters.layers, sh.clusters.Seed, sh.clusters.Reduce, sh.clusters.relax, sh.clusters.outer, false);
+            
+            // Common interactive ops
+            InteractivePostOps (sh, false);
+        }
+        
+        // Fragments rescale without refragment
+        public static void InteractiveScale(RayfireShatter sh)
+        {
+            if (sh.interactive == false)
+                return;
+
+            if (sh.engine == null)
+                return;
+
+            if (sh.engine.utilFrags == null)
+                return;
+            
+            // Recache with new properties
+            sh.engine.interScale = sh.PreviewScale();
+
+            // Restore verts pos from cache
+            ScaleVertsLoad (sh.engine);
+            
+            // Scale interactive mesh
+            Utils.Mesh.ScaleMeshes(sh.engine.utilFrags, ref sh.engine.interVerts, sh.engine.interScale);
+
+            // Centerize
+            sh.engine.centroids = Utils.Mesh.Centerize(sh.engine.utilFrags);
+
+            // Common interactive ops
+            InteractivePostOps (sh, true);
+        }
+
+        // Common interactive ops
+        static void InteractivePostOps(RayfireShatter sh, bool ScalePreview)
+        {
             // Set matrices
             sh.engine.centMatrices = sh.engine.FlatHierarchy(sh.transform, false);
             sh.engine.flatMatrices = GetFlatMatrices (sh.engine.renderers, sh.engine.mainRoot.transform);
@@ -1358,83 +1607,22 @@ namespace RayFire
                 fragUnityMesh.name = sh.intMfs[i].name;
 
                 // Add shell
-                if (sh.shell.enable == true)
-                    fragUnityMesh = RFShell.AddShell (sh.engine.utilFrags[i][0], fragUnityMesh, sh.shell.bridge, sh.shell.submesh, sh.shell.Thickness);
+                if (ScalePreview == false)
+                    if (sh.shell.enable == true)
+                        fragUnityMesh = RFShell.AddShell (sh.engine.utilFrags[i][0], fragUnityMesh, sh.shell.bridge, sh.shell.submesh, sh.shell.Thickness);
                 
                 // Set mesh to meshfilter
                 sh.intMfs[i].sharedMesh = fragUnityMesh;
                 
                 // Add renderer and materials
-                sh.intMrs[i].sharedMaterials = GetCorrectMaterials (sh.engine.GetMaterials (i), sh.engine.utilFrags[i][0], sh.material.iMat);
-                
-                // Set local fragment position
-                SetLocalPosition (sh.engine, sh.intMfs[i].transform, i, 0);
-            }
-
-            sh.engine.utilFrags = null;
-        }
-        
-        // Fragments rescale without fragment
-        public static void InteractiveScale(RayfireShatter sh)
-        {
-            if (sh.interactive == false)
-                return;
-            
-            if (sh.engine == null)
-                return;
-            
-            // Recache with new properties
-            sh.engine.interScale  = sh.PreviewScale();
-            
-            // Restore original scale
-            //for (int i = 0; i < sh.engine.utilFrags.Length; i++)
-            //    sh.engine.utilFrags[i][0].SetData (sh.engine.sclVerts[i], sh.engine.sclTris[i]);
-            
-            // Scale interactive mesh
-            Utils.Mesh.ScaleMeshes(sh.engine.utilFrags, ref sh.engine.interVerts, sh.engine.interScale);
-            
-            // Centerize
-            sh.engine.centroids = Utils.Mesh.Centerize(sh.engine.utilFrags);
-            
-            // Set matrices
-            sh.engine.centMatrices = sh.engine.FlatHierarchy(sh.transform, false);
-            sh.engine.flatMatrices = GetFlatMatrices (sh.engine.renderers, sh.engine.mainRoot.transform);
-
-            // Transform meshes
-            Utils.Mesh.Transform (sh.engine.utilFrags, sh.engine.centMatrices);
-            
-            // Set changed meshes
-            for (int i = 0; i < sh.engine.utilFrags.Length; i++)
-            {
-                if (sh.intMfs[i] == null)
-                    continue;
-                
-                // Create fragment mesh
-                Mesh fragUnityMesh = CreateMesh (sh.engine.utilFrags[i][0], sh.engine.fragMaps[i][0]);
-                fragUnityMesh.name = sh.intMfs[i].name;
-                
-                // Set mesh to meshfilter
-                sh.intMfs[i].sharedMesh = fragUnityMesh;
+                if (ScalePreview == false)
+                    sh.intMrs[i].sharedMaterials = GetCorrectMaterials (sh.engine.GetMaterials (i), sh.engine.utilFrags[i][0], sh.material.iMat);
                 
                 // Set local fragment position
                 SetLocalPosition (sh.engine, sh.intMfs[i].transform, i, 0);
             }
         }
-        
-        
-        // Stop interactive mode
-        public static void InteractiveStop(RayfireShatter sh)
-        {
-            // Enable own Renderer
-            sh.gameObject.SetActive (true);
-            
-            // Reset
-            sh.engine      = null;
-            sh.intMfs      = null;
-            sh.intMrs      = null;
-            sh.interactive = false;
-        }
-        
+ 
         // Create interactively fragments
         public static void InteractiveFragment(RayfireShatter sh)
         {
@@ -1448,82 +1636,38 @@ namespace RayFire
             FragmentShatter (sh);
         }
         
-        // Set interactive data to use at properties change
-        static void InteractiveSetup(RayfireShatter sh, List<Transform> fragments)
-        {
-            if (sh.engine.interactive == false)
-                return;
-            
-            // Disable own Renderers
-            sh.gameObject.SetActive (false);
-            
-            // Get meshfilters to input changed meshes
-            if (sh.intMfs == null) sh.intMfs = new List<MeshFilter>();
-            else sh.intMfs.Clear();
-            if (sh.intMrs == null) sh.intMrs = new List<Renderer>();
-            else sh.intMrs.Clear();
-            for (int i = 0; i < fragments.Count; i++)
-            {
-                sh.intMfs.Add (fragments[i].GetComponent<MeshFilter>());
-                sh.intMrs.Add (fragments[i].GetComponent<Renderer>());
-            }
-        }
-        
-        // Set Fragmentation Type by Shatter
+        // Build combined interactive Mesh
         static void InteractiveCombine(RFEngine engine)
         {
-            // Build combined interactive Mesh
             if (engine.interactive == true)
-            {
                 engine.utilFrags = Utils.Mesh.CombineMeshes (engine.utilFrags, out engine.interVerts);
-                
-                /*
-                // Save scale data
-                engine.sclVerts = new Vector3[engine.utilFrags.Length][];
-                engine.sclTris  = new int[engine.utilFrags.Length][];
-                for (int i = 0; i < engine.utilFrags.Length; i++)
-                {
-                    engine.sclVerts[i] = engine.utilFrags[i][0].GetVerts();
-                    engine.sclTris[i]  = engine.utilFrags[i][0].GetTris();
-                }
-                */
-            }
         }
         
-        // Add helpers
-        static void AddHelpers(RayfireShatter sh)
+        // Save verts data before scaling util frags
+        static void InteractiveMeshScale(RFEngine engine)
         {
-            sh.AddInteractiveHelper (sh.engine.mainRoot.transform, true);
-            if (sh.advanced.centerBias != null)
-                sh.AddInteractiveHelper (sh.advanced.centerBias, false);
-            if (sh.advanced.ab_obj != null)
-                sh.AddInteractiveHelper (sh.advanced.ab_obj, false);
-            if (sh.slice.sliceList != null && sh.slice.sliceList.Count > 0)
-                for (int i = 0; i < sh.slice.sliceList.Count; ++i)
-                    if (sh.slice.sliceList[i] != null)
-                        sh.AddInteractiveHelper (sh.slice.sliceList[i], false);
-
-            if (sh.custom.transforms != null && sh.custom.transforms.Count > 0)
-                for (int i = 0; i < sh.custom.transforms.Count; ++i)
-                    if (sh.custom.transforms[i] != null)
-                        sh.AddInteractiveHelper (sh.custom.transforms[i], false);
+            if (engine.interactive == false)
+                return;
             
-            // TODO check for change in ShatterEditor and add Helper if added at Interactive mode
+            if (engine.utilFrags == null)
+                return;
+            
+            // Cache verts data
+            engine.sclVerts = new Vector3[engine.utilFrags.Length][];
+            for (int i = 0; i < engine.utilFrags.Length; i++)
+                engine.sclVerts[i] = engine.utilFrags[i][0].GetVerts();
+            
+            // Scale down for preview
+            Utils.Mesh.ScaleMeshes (engine.utilFrags, ref engine.interVerts, engine.interScale);
         }
         
-        // Check for skinned meshes and enabled petrify property
-        static void PetrifyCheck(RayfireShatter sh)
+        // Load verts data 
+        static void ScaleVertsLoad(RFEngine engine)
         {
-            if (sh.advanced.petrify == false)
-            {
-                SkinnedMeshRenderer[] skins = sh.gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
-                if (skins != null && skins.Length > 0)
-                {
-                    sh.advanced.petrify = true;
-                    RayfireMan.Log (RFLog.sht_dbgn + sh.name + RFLog.sht_petr, sh.gameObject);
-                }
-            }
-        } 
+            if (engine.sclVerts != null)
+                for (int i = 0; i < engine.utilFrags.Length; i++)
+                    engine.utilFrags[i][0].SetData (engine.sclVerts[i], engine.utilFrags[i][0].GetTris());
+        }
         
         /// /////////////////////////////////////////////////////////
         /// Hierarchy
@@ -1532,7 +1676,7 @@ namespace RayFire
         // Set center matrices for different hierarchy types
         static void CreateHierarchy(RFEngine engine, Transform tm, FragHierarchyType hierarchy, bool origScale)
         {
-            // Check if has skinned meshes and use Instance hierarchy if has
+            // Check if it has skinned meshes and use Instance hierarchy if it has
             if (engine.HasSkin == true)
             {
                 origScale = true;
@@ -1540,9 +1684,8 @@ namespace RayFire
             }
 
             // Just one object, no need to copy
-            if (hierarchy == FragHierarchyType.Copy)
-                if (engine.renderers.Count == 1)
-                    hierarchy = FragHierarchyType.Flat;
+            if (hierarchy == FragHierarchyType.Copy && engine.renderers.Count == 1)
+                hierarchy = FragHierarchyType.Flat;
             
             // Set centers based on hierarchy type
             switch (hierarchy)
@@ -1580,8 +1723,8 @@ namespace RayFire
                 engine.mainRoot.name += "_frags";
             else
                 engine.mainRoot.name += "_interactive";
-            engine.mainRoot.layer = tm.gameObject.layer;
-            engine.mainRoot.tag   = tm.gameObject.tag;
+            
+            SetLayerTag (engine.mainRoot, tm.gameObject.layer, tm.gameObject.tag);
         }
         
         // instantiate root structure. Only option for skinned mesh fragmentation
@@ -1759,9 +1902,37 @@ namespace RayFire
             }
             rootGO = gameObject2;
         }
-
+        
+        /// /////////////////////////////////
+        /// Matrix ops
+        /// /////////////////////////////////
+        
+        void BakedWorldTransform()
+        {
+            utilFrags = new Utils.Mesh[origMeshes.Count][];
+            for (int i = 0; i < origMeshes.Count; ++i)
+            {
+                utilFrags[i]    = new Utils.Mesh[1];
+                utilFrags[i][0] = new Utils.Mesh (origMeshes[i]);
+                if (skinFlags[i] == false)
+                    utilFrags[i][0].Transform (worldMat[i]);
+                else
+                    utilFrags[i][0].TransformByBones (origMeshes[i].bindposes, ((SkinnedMeshRenderer)renderers[i]).bones, false);
+            }
+        }
+        
+        void UnBakeWorldTransform()
+        {
+            for (int i = 0; i < utilFrags.Length; ++i)
+                for (int j = 0; j < utilFrags[i].Length; ++j)
+                    if (skinFlags[i] == false)
+                        utilFrags[i][j].Transform (worldMat[i].inverse);
+                    else
+                        utilFrags[i][j].TransformByBones (origMeshes[i].bindposes, ((SkinnedMeshRenderer)renderers[i]).bones, true);
+        }
+        
         /// /////////////////////////////////////////////////////////
-        /// Multiframe
+        /// Multiframe mesh
         /// /////////////////////////////////////////////////////////
         
         // Start MultiFrame Caching coroutine
@@ -1771,22 +1942,16 @@ namespace RayFire
         }
         
         // Cor to fragment mesh over several frames
-        IEnumerator RuntimeCachingCor (RayfireRigid scr, bool combine, bool decomp, int element, int faceFlt, bool outCap, bool smooth, int clsCount, int clsLayers, int clsSeed, bool clsRed, float clsRlx, bool clsOut, bool clsTsf)
+        IEnumerator RuntimeCachingCor (RayfireRigid rg, bool combine, bool decomp, int element, int faceFlt, bool outCap, bool smooth, int clsCount, int clsLayers, int clsSeed, bool clsRed, float clsRlx, bool clsOut, bool clsTsf)
         {
-            // Caching in progress
-            scr.mshDemol.ch.inProgress = true;
-            
-            // Object should be demolished when cached all meshes but not during caching
-            bool demolitionShouldLocal = scr.lim.demolitionShould == true;
-            scr.lim.demolitionShould = false;
+            // Prepare Rigid for caching, get demolition state
+            bool demolitionShouldLocal = RFRuntimeCaching.PreOps (rg);
             
             // Total amount of frag points
-            int num = scr.mshDemol.engine.sliceData.GetNumCells();
+            int num = rg.mshDemol.engine.sliceData.GetNumCells();
             
             // Set list with amount of mesh for every frame
-            List<int> batchAmount = scr.mshDemol.ch.tp == CachingType.ByFrames
-                ? RFRuntimeCaching.GetBatchByFrames(scr.mshDemol.ch.frm, num)
-                : RFRuntimeCaching.GetBatchByFragments(scr.mshDemol.ch.frg, num);
+            List<int> batchAmount = RFRuntimeCaching.GetBatchAmount (rg, num);
             
             // List of fragments for every batch
             List<RayFire.Utils.Mesh[][]> perFrameFrags = new List<RayFire.Utils.Mesh[][]>();
@@ -1796,20 +1961,19 @@ namespace RayFire
             for (int i = 0; i < batchAmount.Count; i++)
             {
                 // Check for stop
-                if (scr.mshDemol.ch.stop == true)
+                if (rg.mshDemol.ch.stop == true)
                 {
-                    scr.mshDemol.ch.stop       = false;
-                    scr.mshDemol.ch.inProgress = false;
+                    rg.mshDemol.ch.Stop();
                     yield break;
                 }
                 
                 // Disable all points
                 for (int p = 0; p < num; p++)
-                    scr.mshDemol.engine.sliceData.Enable (p, false);
+                    rg.mshDemol.engine.sliceData.Enable (p, false);
                 
                 // Enable batch points
                 for (int p = 0; p < batchAmount[i]; p++)
-                    scr.mshDemol.engine.sliceData.Enable (batchStart + p, true);
+                    rg.mshDemol.engine.sliceData.Enable (batchStart + p, true);
 
                 // Iterate batch start for next batch
                 batchStart += batchAmount[i];
@@ -1818,43 +1982,22 @@ namespace RayFire
                 bool firstPass = i == 0;
                 
                 // Fragment
-                perFrameFrags.Add(Utils.Mesh.Fragment (scr.mshDemol.engine.sliceData, combine, scr.mshDemol.engine.edgeFlags, element * 0.01f, fragSize, faceFlt, planarVrt, planarThr, firstPass, decomp));
+                perFrameFrags.Add(Utils.Mesh.Fragment (rg.mshDemol.engine.sliceData, combine, rg.mshDemol.engine.edgeFlags, element * 0.01f, fragSize, faceFlt, planarVrt, planarThr, firstPass, decomp));
 
                 yield return null;
             }
             
             // Combine all batches
-            scr.mshDemol.engine.utilFrags = CombineFrags (perFrameFrags);
-            
-            // Start countdown
-            // System.Diagnostics.Stopwatch stopWatch3 = new System.Diagnostics.Stopwatch();
-            // stopWatch3.Start();
+            rg.mshDemol.engine.utilFrags = CombineFrags (perFrameFrags);
             
             // STEP 4. Post slicing ops
-            PostFragmentation (scr.mshDemol.engine, scr.materials, outCap, smooth, clsCount, clsLayers, clsSeed, clsRed, clsRlx, clsOut, clsTsf);
-            
-            // stopWatch3.Stop();
-            // Debug.Log("PostFragmentation " + stopWatch3.Elapsed.TotalMilliseconds + " ms.");
+            PostFragmentation (rg.mshDemol.engine, rg.materials, outCap, smooth, clsCount, clsLayers, clsSeed, clsRed, clsRlx, clsOut, clsTsf);
             
             // Wait a frame after PostFragmentation calculations
             yield return null;
             
-            // Set demolition ready state
-            if (scr.mshDemol.ch.skp == false && demolitionShouldLocal == true)
-            {
-                scr.lim.demolitionShould = true;
-                
-                // Add to demolition cor
-                RayfireMan.inst.AddToDemolitionCor(scr);
-            }
-            
-            // Reset damage
-            if (scr.mshDemol.ch.skp == true && demolitionShouldLocal == true)
-                scr.damage.LocalReset();
-            
-            // Caching finished
-            scr.mshDemol.ch.inProgress = false;
-            scr.mshDemol.ch.wasUsed    = true;
+            // Post caching ops
+            RFRuntimeCaching.PostOps (rg, demolitionShouldLocal);
         } 
         
         // Combine array of multiframe fragments
@@ -1889,6 +2032,119 @@ namespace RayFire
             return meshArray;
         }
         
+        /// /////////////////////////////////////////////////////////
+        /// Multiframe fragments
+        /// /////////////////////////////////////////////////////////
+        
+        // Start MultiFrame fragments coroutine
+        void StartMultiFrameFragments(RFEngine engine, RayfireRigid rg, Material iMat, bool planar, float size, RFShell shell)
+        {
+            rg.StartCoroutine (RuntimeFragmentsCor(engine, rg, iMat, planar, size, shell));
+        }
+        
+        // Cor to fragment mesh over several frames
+        IEnumerator RuntimeFragmentsCor (RFEngine engine, RayfireRigid rg, Material iMat, bool planar, float size, RFShell shell)
+        {
+            // Rigid demolition always use flat hierarchy, all frags with one root
+            int ind = 0;
+            
+            // Total amount of frag meshes
+            int num = engine.utilFrags[ind].Length;
+            
+            // Prepare Rigid for caching, get demolition state
+            bool demolitionShouldLocal = RFRuntimeCaching.PreOps (rg);
+            
+            // Set list with amount of mesh for every frame
+            List<int> batchAmount = RFRuntimeCaching.GetBatchAmount (rg, num);
+            
+            // Tag and layer
+            int    layer = rg.mshDemol.prp.l == false ? rg.mshDemol.prp.lay : engine.renderers[ind].gameObject.layer;
+            string tag   = rg.mshDemol.prp.t == false ? rg.mshDemol.prp.tag : engine.renderers[ind].gameObject.tag;
+                
+            // Get local fragments root
+            Transform groupRoot = engine.transMap[engine.renderers[ind].transform];
+
+            // Deactivate, layer, tag
+            groupRoot.gameObject.SetActive (false);
+            SetLayerTag (groupRoot.gameObject, layer, tag);
+            
+            // Get name for group frags
+            string groupName = engine.GetGroupName (ind) + str_fr;
+            
+            // List of fragments after every batch
+            List<RayfireRigid> tempFrags = new List<RayfireRigid>();
+            
+            // Iterate every frame. Calc local frame meshes
+            int batchStart = 0;
+            for (int i = 0; i < batchAmount.Count; i++)
+            {
+                // Check for stop
+                if (rg.mshDemol.ch.stop == true)
+                {
+                    rg.mshDemol.ch.Stop();
+                    yield break;
+                }
+                
+                // Create fragments
+                for (int j = 0; j < batchAmount[i]; j++)
+                {
+                    // Fragment mesh index to create
+                    int fragIndex = batchStart + j;
+                    
+                    // Create fragment mesh
+                    Mesh fragUnityMesh = CreateMesh (engine.utilFrags[ind][fragIndex], engine.fragMaps[ind][fragIndex]);
+                
+                    // Skip small fragments
+                    if (size > 0 && size > fragUnityMesh.bounds.size.magnitude)
+                        continue;
+                
+                    // Skip planar fragments
+                    if (planar == true && RFShatterAdvanced.IsCoplanar (fragUnityMesh, RFShatterAdvanced.planarThreshold) == true)
+                        continue;
+                
+                    // Get object from pool or create
+                    RayfireRigid rfScr = CreateRigidMeshFragment (engine, rg, groupRoot, fragUnityMesh, ind, iMat, shell, fragIndex);
+                
+                    // Set tag and layer to fragment
+                    rfScr.name = groupName + (fragIndex + 1);
+                    SetLayerTag (rfScr.gameObject, layer, tag);
+                
+                    // Collect rigid list
+                    tempFrags.Add (rfScr);
+                }
+                
+                // Iterate batch start for next batch
+                batchStart += batchAmount[i];
+                
+                yield return null;
+            }
+            
+            // Combine all batches
+            rg.fragments.AddRange (tempFrags);
+            
+            // Save pivots for reset
+            SavePivots (rg);
+            
+            // Sync animation TODO test with animated meshes
+            //if (rg.mshDemol.engine.HasSkin == true)
+            //    rg.mshDemol.engine.SyncAnimation(rg.transform);
+            
+            // Set main fragments root after hierarchy created
+            rg.rtC = rg.mshDemol.engine.mainRoot.transform;
+            
+            // Set root to manager
+            RayfireMan.SetFragmentRootParent (rg.rtC, rg.transform.parent);
+            
+            // Ignore neib collisions
+            RFPhysic.SetIgnoreColliders (rg.physics, rg.fragments);
+            
+            // Wait a frame after PostFragmentation
+            yield return null;
+            
+            // Post caching ops
+            RFRuntimeCaching.PostOps (rg, demolitionShouldLocal);
+        } 
+        
         /// /////////////////////////////////
         /// Maps ops
         /// /////////////////////////////////
@@ -1908,9 +2164,7 @@ namespace RayFire
 
         static void ComputeInnerUV(RFEngine engine, Matrix4x4 rootMat, float uvScale, Vector2 uvAreaBegin, Vector2 uvAreaEnd)
         {
-            Vector3 aabbMin = new Vector3();
-            Vector3 aabbMax = new Vector3();
-            Utils.Mesh.GetAABB(engine.utilFrags, out aabbMin, out aabbMax, rootMat.inverse);
+            Utils.Mesh.GetAABB(engine.utilFrags, out Vector3 aabbMin, out Vector3 aabbMax, rootMat.inverse);
             engine.fragMaps = new Utils.MeshMaps[engine.utilFrags.Length][];
             for (int i = 0; i < engine.utilFrags.Length; ++i)
             {
@@ -1927,24 +2181,20 @@ namespace RayFire
         {
             for (int i = 0; i < engine.utilFrags.Length; ++i)
             {
-                Matrix4x4 bakeTN = engine.GetWorldMatrix(i);
+                Matrix4x4 bakeTN = engine.renderers[i].transform.localToWorldMatrix;
                 for (int t = 0; t < engine.utilFrags[i].Length; ++t)
                 {
                     engine.fragMaps[i][t].BuildBary (engine.utilMeshes[i], engine.utilFrags[i][t]);
-
                     if (engine.skinFlags[i] == false)
                         engine.fragMaps[i][t].ComputeNormals (engine.origMaps[i], engine.utilMeshes[i], engine.utilFrags[i][t], bakeTN, null, null, smoothInner, checkOrigVerts);
                     else
                         engine.fragMaps[i][t].ComputeNormals (engine.origMaps[i], engine.utilMeshes[i], engine.utilFrags[i][t], bakeTN, engine.origMeshes[i].bindposes, ((SkinnedMeshRenderer)engine.renderers[i]).bones, smoothInner, checkOrigVerts);
-
                     engine.fragMaps[i][t].RestoreOrigUV (engine.origMaps[i], engine.utilMeshes[i], engine.utilFrags[i][t]);
                     engine.fragMaps[i][t].ComputeVertexColors (engine.origMaps[i], engine.utilMeshes[i], engine.utilFrags[i][t], innerColor);
                     engine.fragMaps[i][t].ComputeTangents (engine.origMaps[i], engine.utilMeshes[i], engine.utilFrags[i][t], bakeTN, checkOrigVerts);
                 }
             }
         }
-
-        Matrix4x4 GetWorldMatrix(int i) => this.renderers[i].transform.localToWorldMatrix;
         
         /// /////////////////////////////////
         /// Skinned ops
@@ -2051,7 +2301,27 @@ namespace RayFire
                 }
             }
         }
+        
+        // Check for skinned meshes and enabled petrify property
+        static void PetrifyCheck(RayfireShatter sh)
+        {
+            if (sh.advanced.petrify == false)
+            {
+                SkinnedMeshRenderer[] skins = sh.gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
+                if (skins != null && skins.Length > 0)
+                {
+                    sh.advanced.petrify = true;
+                    RayfireMan.Log (RFLog.sht_dbgn + sh.name + RFLog.sht_petr, sh.gameObject);
+                }
+            }
+        }
 
+        static void SetLayerTag(GameObject go, int layer, string tag)
+        {
+            go.layer = layer;
+            go.tag   = tag;
+        }
+        
         /// /////////////////////////////////
         /// Getters
         /// /////////////////////////////////
@@ -2078,15 +2348,18 @@ namespace RayFire
 {
     public class RFEngine
     {
+        public bool        interactive;
+
         public GameObject                       mainRoot;
         List<Renderer>                     renderers;
         public static void InitLibrary() {}
         public static void FragmentShatter (RayfireShatter sh) {}
         public static void FragmentRigid (RayfireRigid rg) {}
-        public static List<Transform> CreateRigidFragments (RFEngine engine, RayfireRigid rg) {return null;}
+        public static void CreateRigidFragments (RFEngine engine, RayfireRigid rg) {return null;}
         public static void CacheRuntime(RayfireRigid rg) {}
         public static void InteractiveStart(RayfireShatter scr) {}
         public static void InteractiveChange(RayfireShatter scr) {}
+        public static void InteractiveCluster(RayfireShatter scr) {}
         public static void InteractiveScale(RayfireShatter scr) {}
         public static void InteractiveStop(RayfireShatter sh) {}
         public static void InteractiveFragment(RayfireShatter sh) {}

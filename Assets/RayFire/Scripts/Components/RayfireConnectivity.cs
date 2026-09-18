@@ -960,7 +960,7 @@ namespace RayFire
                     cluster.childClusters[i].rigid.gameObject.transform.parent = RayfireMan.inst.parent.transform;
 
                 // Activation fade
-                if (cluster.childClusters[i].rigid.fading.onActivation == true)
+                if (cluster.childClusters[i].rigid.fading.act == true)
                     cluster.childClusters[i].rigid.Fade();
             }
         }

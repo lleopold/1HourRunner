@@ -17,6 +17,7 @@ public class UIT_ChooseLevel : MonoBehaviour
     {
         new LevelDef("Level_1", "Container Port",  "Container port at sunset.", "OUTDOOR", 0.35f, 0.40f, 0.55f),
         new LevelDef("Level_2", "Industrial Yard", "Industrial yard, tighter combat.", "INDOOR",  0.60f, 0.70f, 0.35f),
+        new LevelDef("Level_3", "Blocked Street",  "Sealed street. Survive to extraction.", "OUTDOOR", 0.45f, 0.55f, 0.40f),
     };
 
     private int _current = -1;       // hover preview index (visual only)

@@ -210,6 +210,20 @@ namespace RayFire
                     rigidbodies.Add (rb);
             }
         }
+        
+        // Get ID
+        public static int GetId(GameObject go)
+        {
+            int id = 0;
+            
+            #if UNITY_6000_5_OR_NEWER 
+                id = go.GetEntityId().GetHashCode();
+            #else
+            id = go.GetInstanceID();
+            #endif
+            
+            return id;
+        } 
 
         // Apply explosion force, vector and rotation to projectiles
         void SetForce()
@@ -230,8 +244,8 @@ namespace RayFire
                     continue;
 
                 // Instance id for same random values
-                int instanceId = rb.GetInstanceID();
-
+                int instanceId = GetId (rb.gameObject);
+                
                 // Set same random state
                 Random.InitState (instanceId + seed);
 

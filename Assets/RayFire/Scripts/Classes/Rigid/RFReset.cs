@@ -214,7 +214,7 @@ namespace RayFire
         public static void ResetFade (RayfireRigid scr)
         {
             // Was excluded
-            if (scr.fading.fadeType == FadeType.SimExclude)
+            if (scr.fading.ftp == FadeType.SimExclude)
             {
                 // Null check because of Planar check fragments without collider
                 if (scr.physics.mc != null)
@@ -222,7 +222,7 @@ namespace RayFire
             }   
                
             // Was fall down
-            else if (scr.fading.fadeType == FadeType.FallDown)
+            else if (scr.fading.ftp == FadeType.FallDown)
             {
                 // Null check because of Planar check fragments without collider
                 if (scr.physics.mc != null)
@@ -232,14 +232,14 @@ namespace RayFire
             } 
             
             // Was scaled down
-            else if (scr.fading.fadeType == FadeType.ScaleDown)
+            else if (scr.fading.ftp == FadeType.ScaleDown)
             {
                 scr.tsf.localScale = scr.physics.initScale;
                 scr.gameObject.SetActive (true);
             }
             
             // Was moved down
-            if (scr.fading.fadeType == FadeType.MoveDown)
+            if (scr.fading.ftp == FadeType.MoveDown)
             {
                 // Null check because of Planar check fragments without collider
                 if (scr.physics.mc != null)
@@ -253,15 +253,15 @@ namespace RayFire
             }
 
             // Was destroyed
-            else if (scr.fading.fadeType == FadeType.Destroy)
+            else if (scr.fading.ftp == FadeType.Destroy)
                 scr.gameObject.SetActive (true);
             
             // Was set static
-            if (scr.fading.fadeType == FadeType.SetStatic)
+            if (scr.fading.ftp == FadeType.SetStatic)
                 scr.gameObject.SetActive (true);
             
             // Was set static
-            if (scr.fading.fadeType == FadeType.SetKinematic)
+            if (scr.fading.ftp == FadeType.SetKinematic)
                 scr.gameObject.SetActive (true);
         }
         
@@ -404,7 +404,7 @@ namespace RayFire
             // Stop all cors in case object restarted
             scr.StopAllCoroutines();
             scr.corState                    = false;
-            scr.activation.inactiveCorState = false;
+            scr.activation.inaCorState = false;
             scr.fading.offsetCorState       = false;
 
             if (scr.activation.cnt != null)
@@ -624,7 +624,7 @@ namespace RayFire
                 scr.fragments = null;
 
                 // Subtract amount of deleted fragments
-                RayfireMan.inst.advancedDemolitionProperties.ChangeCurrentAmount (-fragmentNum);
+                RayfireMan.inst.adp.ChangeCurrentAmount (-fragmentNum);
 
                 // Destroy descendants
                 if (scr.lim.desc != null && scr.lim.desc.Count > 0)
@@ -654,7 +654,7 @@ namespace RayFire
                     scr.lim.desc.Clear();
                     
                     // Subtract amount of deleted fragments
-                    RayfireMan.inst.advancedDemolitionProperties.ChangeCurrentAmount (-descendantNum);
+                    RayfireMan.inst.adp.ChangeCurrentAmount (-descendantNum);
                 }
             }
         }
@@ -685,7 +685,7 @@ namespace RayFire
         static void ReuseFragments (RayfireRigid scr)
         {
             // Sub amount
-            RayfireMan.inst.advancedDemolitionProperties.ChangeCurrentAmount (-scr.fragments.Count);
+            RayfireMan.inst.adp.ChangeCurrentAmount (-scr.fragments.Count);
             
             // Activate root
             if (scr.rtC != null)

@@ -1,11 +1,13 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace RayFire
 {
+    /// <summary>
+    /// Rayfire Rigid cluster demolition class.
+    /// </summary>
     [Serializable]
     public class RFDemolitionCluster
     {

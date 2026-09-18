@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
-using RandomUnity = UnityEngine.Random;
 
 namespace RayFire
 {
@@ -50,100 +48,7 @@ namespace RayFire
             return dict;
         }
     }
-
-    /// /////////////////////////////////////////////////////////
-    /// Fragments Clustering
-    /// /////////////////////////////////////////////////////////
     
-    /// <summary>
-    /// Rayfire Shatter pos fragmentation cluster class.
-    /// </summary>
-    [Serializable]
-    public class RFShatterCluster
-    {
-        public bool  enable;
-        public int   count;
-        public int   seed;
-        public float relax;
-        public int   amount;
-        public int   layers;
-        public float scale;
-        public int   min;
-        public int   max;
-        public bool  red;
-        public bool  outer;
-        public bool  tsf;       // One Shard Transfer
-
-        public RFShatterCluster()
-        {
-            enable = false;
-            count  = 10;
-            seed   = 1;
-            relax  = 0;
-            layers = 0;
-            amount = 0;
-            scale  = 1f;
-            min    = 1;
-            max    = 3;
-            red    = true;
-            outer  = false;
-            tsf    = true;
-        }
-        
-        public RFShatterCluster (RFShatterCluster src)
-        {
-            enable = src.enable;
-            count  = src.count;
-            seed   = src.seed;
-            relax  = src.relax;
-            layers = src.layers;
-            amount = src.amount;
-            scale  = src.scale;
-            min    = src.min;
-            max    = src.max;
-            red    = src.red;
-            outer  = src.outer;
-            tsf    = src.tsf;
-        }
-        
-        public static void Copy (RFShatterCluster trg, RFShatterCluster src)
-        {
-            trg.enable = src.enable;
-            trg.count  = src.count;
-            trg.seed   = src.seed;
-            trg.relax  = src.relax;
-            trg.layers = src.layers;
-            trg.amount = src.amount;
-            trg.scale  = src.scale;
-            trg.min    = src.min;
-            trg.max    = src.max;
-            trg.red    = src.red;
-            trg.outer  = src.outer;
-            trg.tsf    = src.tsf;
-        }
-        
-        // Get seed
-        public int Seed { get {
-            if (seed == 0)
-                return RandomUnity.Range (0, 1000);
-            return seed;
-        }}
-        
-        // Get Count
-        public int Count { get {
-            if (enable == false)
-                return 0;
-            return count;
-        }}
-        
-        // Get Reduce
-        public bool Reduce { get {
-            if (enable == false)
-                return false;
-            return red;
-        }}
-    }
-
     /// /////////////////////////////////////////////////////////
     /// Shatter
     /// /////////////////////////////////////////////////////////

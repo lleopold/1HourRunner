@@ -297,14 +297,14 @@ namespace RayFire
             // Set dampen
             if (dampenType == RFParticleCollisionMatType.ByPhysicalMaterial)
             {
-                dampenMin = RayfireMan.inst.materialPresets.DynamicFriction (matTyp);
+                dampenMin = RayfireMan.inst.mp.DynamicFriction (matTyp);
                 dampenMax = dampenMin * 0.05f + dampenMin;
             }
 
             // Set bounce
             if (bounceType == RFParticleCollisionMatType.ByPhysicalMaterial)
             {
-                bounceMin = RayfireMan.inst.materialPresets.Bounciness(matTyp);
+                bounceMin = RayfireMan.inst.mp.Bounciness(matTyp);
                 bounceMax = bounceMin * 0.05f + bounceMin;
             }
         }

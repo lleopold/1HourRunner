@@ -8,7 +8,6 @@ namespace RayFire
     [HelpURL (RFLog.sht_link)]
     public class RayfireShatter : MonoBehaviour
     {
-        
         // UI
         public FragType          type;
         public RFVoronoi         voronoi;
@@ -199,78 +198,35 @@ namespace RayFire
         /// Interactive
         /// /////////////////////////////////////////////////////////
         
-        // Fragment all meshes into own mesh
-        public void InteractiveStart()
-        {
-            // Only in Editor mode
-            if (Application.isEditor == false)
-                return;
-            
-            // Start Interactive mode
-            RFEngine.InteractiveStart (this);;
-        }
-
-        // Property changed
+        // Interactive methods
+        public void InteractiveStart()    { RFEngine.InteractiveStart (this);; }
         public void InteractiveChange()
         {
+            //System.Diagnostics.Stopwatch stopWatch = RayfireMan.WatchStart();
             RFEngine.InteractiveChange (this);
+            //RayfireMan.WatchStop(stopWatch, "Interactive Change ", gameObject);
         }
-        
-        // Property changed
-        public void InteractiveScale()
+        public void InteractiveCluster()
         {
-            RFEngine.InteractiveScale (this);
+            //System.Diagnostics.Stopwatch stopWatch = RayfireMan.WatchStart();
+            RFEngine.InteractiveCluster (this);
+            //RayfireMan.WatchStop(stopWatch, "Interactive Cluster ", gameObject);
         }
-
-        // Create interactively cached fragments
-        public void InteractiveFragment()
-        {
-            RFEngine.InteractiveFragment(this);
-        }
-        
-        // Revert original mesh
-        public void InteractiveStop()
-        {
-            RFEngine.InteractiveStop (this);
-        }
-        
-        // Set original renderer state
-        public void OriginalRenderer(bool state)
-        {
-            if (meshRenderer != null)
-                meshRenderer.enabled = state;
-            if (skinnedMeshRend != null)
-                skinnedMeshRend.enabled = state;
-        }
+        public void InteractiveScale()    { RFEngine.InteractiveScale (this); }
+        public void InteractiveFragment() { RFEngine.InteractiveFragment(this); }
+        public void InteractiveStop()     { RFEngine.InteractiveStop (this); }
         
         // Final preview scale
         public float PreviewScale()
         {
-            if (scalePreview == false)
-                return 1f;
-            return Mathf.Lerp (1f, 0.3f, previewScale);
-        }
-        
-        // Add interactive helper component
-        public void AddInteractiveHelper(Transform target, bool preview)
-        {
-            RFInteractiveHelper helper = target.gameObject.GetComponent<RFInteractiveHelper>();
-            if (helper == null)
-                helper = target.gameObject.AddComponent<RFInteractiveHelper>();
-                
-            helper.interactive = true;
-            helper.previewGo   = preview;
-            helper.shatter     = this;
-            helper.shatterGo   = gameObject;
+            return scalePreview == false ? 1f : Mathf.Lerp (1f, 0.3f, previewScale);
         }
         
         /// /////////////////////////////////////////////////////////
         /// Getters
         /// /////////////////////////////////////////////////////////
         
-        public bool HasBatches { get {
-            if (batches != null && batches.Count > 0)
-                return true;
-            return false; }}
+        public bool HasBatches { get { return batches != null && batches.Count > 0; }}
+        public bool HasPoints { get { return clusters.pointRoot != null && clusters.pointRoot.childCount > 1; }}
     }
 }

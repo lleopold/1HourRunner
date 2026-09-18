@@ -17,6 +17,8 @@ namespace RayFireEditor
         const int   rate_max     = 60;
         const float thresh_min   = 0;
         const float thresh_max   = 0.05f;
+        const float speed_min    = 0f;
+        const float speed_max    = 2f;
         
         // Serialized properties
         SerializedProperty sp_mode;
@@ -24,14 +26,17 @@ namespace RayFireEditor
         SerializedProperty sp_rec_clip;
         SerializedProperty sp_rec_dur;
         SerializedProperty sp_rec_rate;
+        SerializedProperty sp_rec_dml;
         SerializedProperty sp_rec_reduce;
         SerializedProperty sp_rec_thresh;
         SerializedProperty sp_rec_str;
         SerializedProperty sp_rec_stop;
         SerializedProperty sp_pla_start;
+        SerializedProperty sp_pla_speed;
         SerializedProperty sp_pla_clip;
         SerializedProperty sp_pla_cont;
         SerializedProperty sp_pla_rigid;
+        SerializedProperty sp_pla_mark;
 
         private void OnEnable()
         {
@@ -43,14 +48,16 @@ namespace RayFireEditor
             sp_rec_clip   = serializedObject.FindProperty(nameof(recorder.clipName));
             sp_rec_dur    = serializedObject.FindProperty(nameof(recorder.duration));
             sp_rec_rate   = serializedObject.FindProperty(nameof(recorder.rate));
+            sp_rec_dml    = serializedObject.FindProperty(nameof(recorder.demolition));
             sp_rec_reduce = serializedObject.FindProperty(nameof(recorder.reduceKeys));
             sp_rec_thresh = serializedObject.FindProperty(nameof(recorder.threshold));
             sp_pla_start  = serializedObject.FindProperty(nameof(recorder.playOnStart));
+            sp_pla_speed  = serializedObject.FindProperty(nameof(recorder.speed));
             sp_pla_clip   = serializedObject.FindProperty(nameof(recorder.animationClip));
             sp_pla_cont   = serializedObject.FindProperty(nameof(recorder.controller));
             sp_pla_rigid  = serializedObject.FindProperty(nameof(recorder.rigidAction));
+            sp_pla_mark   = serializedObject.FindProperty(nameof(recorder.playMark));
         }
-
 
         /// /////////////////////////////////////////////////////////
         /// Inspector
@@ -61,10 +68,11 @@ namespace RayFireEditor
             // Update changed properties
             serializedObject.Update();
             
+            RFUI.Space ();
             RFUI.PropertyField (sp_mode, TextRec.gui_mode);
             if (recorder.mode == RayfireRecorder.AnimatorType.Record)
                 GUI_Record();
-            if (recorder.mode == RayfireRecorder.AnimatorType.Play)
+            else if (recorder.mode == RayfireRecorder.AnimatorType.Play)
                 GUI_Play();
             
             // Apply changes
@@ -81,13 +89,11 @@ namespace RayFireEditor
 
             GUI_RecordStart();
             GUI_RecordButtons();
-            RFUI.Space ();
-                
             RFUI.PropertyField (sp_rec_clip, TextRec.gui_rec_clip);
             RFUI.Slider (sp_rec_dur, duration_min, duration_max, TextRec.gui_rec_dur);
             RFUI.IntSlider (sp_rec_rate, rate_min, rate_max, TextRec.gui_rec_rate);
+            RFUI.PropertyField (sp_rec_dml, TextRec.gui_rec_dml);
             RFUI.PropertyField (sp_rec_reduce, TextRec.gui_rec_reduce);
-            
             if (recorder.reduceKeys == true)
             {
                 EditorGUI.indentLevel++;
@@ -143,25 +149,81 @@ namespace RayFireEditor
         
         void GUI_Play()
         {
+            // Playback slider
+            GUI_Mark();
+    
+            RFUI.Space ();
             RFUI.Caption (TextRec.gui_cap_props);
             if (Application.isPlaying == false)
                 RFUI.PropertyField (sp_pla_start, TextRec.gui_pla_start);
             
             GUI_PlayButtons();
             
+            EditorGUI.BeginChangeCheck();
+            RFUI.Slider (sp_pla_speed, speed_min, speed_max, TextRec.gui_pla_speed);
+            if (EditorGUI.EndChangeCheck() == true)
+                recorder.Speed = sp_pla_speed.floatValue;
+
             RFUI.PropertyField (sp_pla_clip, TextRec.gui_pla_clip);
             RFUI.PropertyField (sp_pla_cont, TextRec.gui_pla_cont);
 
             RFUI.Caption (TextRec.gui_cap_rigid);
             RFUI.PropertyField (sp_pla_rigid, TextRec.gui_pla_rigid);
         }
-        
+
+        void GUI_Mark()
+        {
+            if (Application.isPlaying == true)
+            {
+                EditorGUI.BeginChangeCheck();
+                RFUI.Slider (sp_pla_mark, 0, 1, TextRec.gui_pla_mark);
+                if (EditorGUI.EndChangeCheck() == true)
+                    recorder.Mark (sp_pla_mark.floatValue);
+            }
+        }
+
         void GUI_PlayButtons()
         {
-            if (Application.isPlaying == true && recorder.playOnStart == false && recorder.recorder == false)
+            if (Application.isPlaying == true && recorder.recorder == false)
             {
-                if (GUILayout.Button (TextRec.gui_btn_pla_start, GUILayout.Height (25)))
-                    recorder.StartPlay();
+                if (recorder.playState == false && recorder.playOnStart == false)
+                {
+                    if (GUILayout.Button (TextRec.gui_btn_pla_start, GUILayout.Height (25)))
+                        recorder.StartPlay();
+                }
+                if (recorder.playState == true)
+                {
+                    if (recorder.pauseState == false)
+                    {
+                        if (GUILayout.Button (TextRec.gui_btn_pla_pause, GUILayout.Height (25)))
+                        {
+                            recorder.Pause (true);
+                            sp_pla_mark.floatValue = recorder.animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+                        }
+                    }
+                    if (recorder.pauseState == true)
+                    {
+                        if (GUILayout.Button (TextRec.gui_btn_pla_unpause, GUILayout.Height (25)))
+                        {
+                            recorder.Pause (false);
+                            sp_pla_mark.floatValue = recorder.animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+                        }
+                    }
+                    
+                    GUILayout.BeginHorizontal ();
+                    if (GUILayout.Button (TextRec.gui_btn_pla_restart, GUILayout.Height (25)))
+                    {
+                        recorder.Restart (0f);
+                        sp_pla_mark.floatValue = 0;
+                    }
+                    if (GUILayout.Button (TextRec.gui_btn_pla_reset, GUILayout.Height (25)))
+                    {
+                        recorder.ResetPlay();
+                        sp_pla_mark.floatValue = 0;
+                    }
+                    GUILayout.EndHorizontal();
+                }
+               
                 RFUI.Space ();
             }
         }

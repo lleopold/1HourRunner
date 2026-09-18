@@ -7,6 +7,9 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace RayFire
 {
+    /// <summary>
+    /// Rayfire Rigid and RigidRoot physics properties class.
+    /// </summary>
     [Serializable]
     public class RFPhysic
     {
@@ -262,10 +265,10 @@ namespace RayFire
                 #if UNITY_6000_0_OR_NEWER   
                 
                 if (scr.physics.mc != null)
-                    m = scr.physics.mc.bounds.size.magnitude * RayfireMan.inst.materialPresets.Density(scr.physics.mt) * 0.8f;
+                    m = scr.physics.mc.bounds.size.magnitude * RayfireMan.inst.mp.Density(scr.physics.mt) * 0.8f;
                 #else
                 
-                scr.physics.rb.SetDensity(RayfireMan.inst.materialPresets.Density(scr.physics.mt));
+                scr.physics.rb.SetDensity(RayfireMan.inst.mp.Density(scr.physics.mt));
                 m = scr.physics.rb.mass;
                 
                 #endif
@@ -298,7 +301,7 @@ namespace RayFire
                 #if UNITY_6000_0_OR_NEWER 
                 
                 if (shard.col != null)
-                    m = shard.col.bounds.size.magnitude * RayfireMan.inst.materialPresets.Density(physics.mt) * 0.8f;
+                    m = shard.col.bounds.size.magnitude * RayfireMan.inst.mp.Density(physics.mt) * 0.8f;
                 
                 #else
                 
@@ -350,8 +353,8 @@ namespace RayFire
         {
             if (scr.simTp != SimType.Inactive)
             {
-                scr.physics.rb.linearDamping        = RayfireMan.inst.materialPresets.Drag(scr.physics.mt);
-                scr.physics.rb.angularDamping = RayfireMan.inst.materialPresets.AngularDrag(scr.physics.mt);
+                scr.physics.rb.linearDamping        = RayfireMan.inst.mp.Drag(scr.physics.mt);
+                scr.physics.rb.angularDamping = RayfireMan.inst.mp.AngularDrag(scr.physics.mt);
             }
             else
             {
@@ -752,9 +755,9 @@ namespace RayFire
         public static void SetPhysics(List<RFShard> shards, RFPhysic physic)
         {
             // Set phys props
-            float density     = RayfireMan.inst.materialPresets.Density (physic.mt);
-            float drag        = RayfireMan.inst.materialPresets.Drag (physic.mt);
-            float dragAngular = RayfireMan.inst.materialPresets.AngularDrag (physic.mt);
+            float density     = RayfireMan.inst.mp.Density (physic.mt);
+            float drag        = RayfireMan.inst.mp.Drag (physic.mt);
+            float dragAngular = RayfireMan.inst.mp.AngularDrag (physic.mt);
             
             // Add Collider and Rigid body if has no Rigid component
             for (int i = 0; i < shards.Count; i++)
@@ -791,10 +794,10 @@ namespace RayFire
             SetSimulationType (shard.rb, shard.sm, ObjectType.Mesh, physic.gr, physic.si, physic.st);
             
             // Set density. After collider defined
-            SetDensity (shard, physic, RayfireMan.inst.materialPresets.Density (physic.mt));
+            SetDensity (shard, physic, RayfireMan.inst.mp.Density (physic.mt));
             
             // Set drag properties
-            SetDrag (shard, RayfireMan.inst.materialPresets.Drag (physic.mt), RayfireMan.inst.materialPresets.AngularDrag (physic.mt));
+            SetDrag (shard, RayfireMan.inst.mp.Drag (physic.mt), RayfireMan.inst.mp.AngularDrag (physic.mt));
         }
 
         /// /////////////////////////////////////////////////////////
@@ -973,8 +976,8 @@ namespace RayFire
         /// /////////////////////////////////////////////////////////
         
         public bool HasIgnore { get { return ign != null && ign.Count > 0; } }
-        public bool Destructible { get { return RayfireMan.inst.materialPresets.Destructible(mt); } }
-        public int  Solidity     { get { return RayfireMan.inst.materialPresets.Solidity(mt); } }
+        public bool Destructible { get { return RayfireMan.inst.mp.Destructible(mt); } }
+        public int  Solidity     { get { return RayfireMan.inst.mp.Solidity(mt); } }
 
         // Get Destructible state
         public bool HasClusterColliders

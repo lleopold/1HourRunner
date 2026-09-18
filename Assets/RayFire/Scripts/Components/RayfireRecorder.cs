@@ -39,11 +39,14 @@ namespace RayFire
             if (tm.parent != recRootTm)
             {
                 Transform lastParent = tm.parent;
-                while (recRootTm != lastParent)
+                if (lastParent != null)
                 {
-                    name       = name.Insert (0, "/");
-                    name       = name.Insert (0, lastParent.name);
-                    lastParent = lastParent.parent;
+                    while (recRootTm != lastParent)
+                    {
+                        name       = name.Insert (0, "/");
+                        name       = name.Insert (0, lastParent.name);
+                        lastParent = lastParent.parent;
+                    }
                 }
             }
         }
@@ -79,7 +82,7 @@ namespace RayFire
         public enum RigidActionType
         {
             Disable      = 0,
-            SetKinematik = 2
+            SetKinematic = 2
         }
         
         // Main
@@ -92,14 +95,21 @@ namespace RayFire
         public int    rate       = 15;
         public bool   reduceKeys = true;
         public float  threshold;
-        
         public bool   demolition;
 
         // Playback
         public bool                      playOnStart;
+        public float                     speed = 1f;
         public AnimationClip             animationClip;
         public RuntimeAnimatorController controller;
         public RigidActionType           rigidAction;
+        
+        
+        public float playMark;
+        
+        
+        [NonSerialized] public bool playState;
+        [NonSerialized] public bool pauseState;
         
         // Public Non Serialized
         [NonSerialized] public bool  recorder;
@@ -109,7 +119,7 @@ namespace RayFire
         [NonSerialized] public List<GameObject>   pfList;
         [NonSerialized]        string             assetFolder;
         [NonSerialized]        float              stepTime;
-        [NonSerialized]        Animator           animator;
+        [NonSerialized] public Animator           animator;
         [NonSerialized]        List<Transform>    tmList;
         [NonSerialized]        List<RFCache>      cacheList;
         [NonSerialized]        List<float>        timeList;
@@ -205,7 +215,23 @@ namespace RayFire
                 // Create animator
                 if (animator == null)
                     animator = gameObject.AddComponent<Animator>();
+                        
+                        
+                        
+                #if UNITY_6000_0_OR_NEWER
+
                 animator.updateMode = AnimatorUpdateMode.Fixed;
+                
+                 /*
+                 error CS0619: 'AnimatorUpdateMode.AnimatePhysics' is obsolete: 'Enum member AnimatorUpdateMode.AnimatePhysics 
+                 has been deprecated. Use AnimatorUpdateMode.Fixed to evaluate in FixedUpdate time 
+                 and Animator.animatePhysics to sync transforms for physics. (UnityUpgradable) -> Fixed'
+                 */
+                
+                #else
+                animator.updateMode = AnimatorUpdateMode.AnimatePhysics;
+                #endif
+
 
                 // Set defined controller
                 animator.runtimeAnimatorController = controller;
@@ -253,9 +279,12 @@ namespace RayFire
                 return;
             
             // Set demolition parent to parent of demolished object in order to record animation clip
-            RayfireMan.inst.advancedDemolitionProperties.parent       = FragmentParentType.GlobalParent;
-            RayfireMan.inst.advancedDemolitionProperties.globalParent = transform;
-            
+            if (RayfireMan.inst != null && demolition == true)
+            {
+                RayfireMan.inst.adp.parent       = FragmentParentType.GlobalParent;
+                RayfireMan.inst.adp.globalParent = transform;
+            }
+
             // Start recording cor
             StartCoroutine (RecordCor());
         }
@@ -327,11 +356,92 @@ namespace RayFire
         /// Play
         /// //////////////////////////////////////////////////
         
-        // Start play
         public void StartPlay()
         {
-            if (mode == AnimatorType.Play)
+            if (animator == null)
+                return;
+                
+            if (mode == AnimatorType.Play && playState == false)
+            {
+                playState      = true;
+                animator.speed = Speed;
                 animator.Play (animationClip.name);
+            }
+        }
+
+        public void Pause(bool PauseState)
+        {
+            if (animator == null)
+                return;
+            
+            if (mode == AnimatorType.Play)
+            {
+                animator.speed = PauseState == true ? 0f : Speed;
+                pauseState     = PauseState;
+            }
+        }
+        
+        public void Restart (float RestartState)
+        {
+            if (animator == null)
+                return;
+            
+            if (mode == AnimatorType.Play)
+            {
+                animator.Play (animationClip.name, -1, RestartState);
+                pauseState     = false;
+                animator.speed = Speed;
+            }
+        }
+        
+        public void Mark (float MarkState)
+        {
+            if (animator == null)
+                return;
+            
+            if (mode == AnimatorType.Play)
+            {
+                pauseState     = true;
+                animator.speed = 0f;
+                animator.Play (animationClip.name, -1, MarkState);
+            }
+        }
+        
+        public void ResetPlay ()
+        {
+            if (animator == null)
+                return;
+            
+            if (mode == AnimatorType.Play)
+            {
+                animator.Play (animationClip.name, -1, 0f);
+                pauseState     = true;
+                animator.speed = 0f;
+            }
+        }
+        
+        /// //////////////////////////////////////////////////
+        /// Getters
+        /// //////////////////////////////////////////////////
+        
+        // Get Destructible state
+        public float Speed
+        {
+            get 
+            { 
+                if (speed < 0)
+                    speed = 0f;
+                return speed; 
+            }
+            set 
+            {
+                speed = value;
+                if (speed < 0)
+                    speed = 0f;
+                if (mode == AnimatorType.Play && Application.isPlaying == true)
+                    if (animator != null)
+                        animator.speed = speed;
+            }
         }
         
         /// //////////////////////////////////////////////////
@@ -346,7 +456,7 @@ namespace RayFire
             
             // Get all Rigids
             rigids = gameObject.GetComponentsInChildren<RayfireRigid>().ToList();
-
+            
             // Setup
             PrepareRigidRecord (rigids);
         }
@@ -363,16 +473,19 @@ namespace RayFire
                     // Used by Recorder record
                     rigidList[i].physics.rec = true;
                     
-                    // One level of demolition TEMP
-                    // rigids[i].limitations.depth = 1;
-                    
                     // Do not destroy after demolition
                     rigidList[i].reset.act     = RFReset.PostDemolitionType.DeactivateToReset;
                     rigidList[i].lim.desc = new List<RayfireRigid>();
                     
                     // Subscribe to demolition
                     #if UNITY_EDITOR
+                    
                     rigidList[i].demolitionEvent.LocalEvent += RigidDemolition;
+                    
+                    // Set global parent
+                    RayfireMan.inst.adp.parent       = FragmentParentType.GlobalParent;
+                    RayfireMan.inst.adp.globalParent = transform;
+                    
                     #endif                    
                 }
             }
@@ -398,10 +511,11 @@ namespace RayFire
                         }
                         
                         // Check for kinematic state
-                        else if (rigidAction == RigidActionType.SetKinematik)
+                        else if (rigidAction == RigidActionType.SetKinematic)
                         {
                             rigid.simTp = SimType.Kinematic;
-                            RFPhysic.SetSimulationType (rigid.physics.rb, rigid.simTp, rigid.objTp, rigid.physics.gr, rigid.physics.si, rigid.physics.st);
+                            if (rigid.physics.rb != null)
+                                RFPhysic.SetSimulationType (rigid.physics.rb, rigid.simTp, rigid.objTp, rigid.physics.gr, rigid.physics.si, rigid.physics.st);
                         }
                     }
                 }
@@ -435,8 +549,6 @@ namespace RayFire
                 RFRecorder.ExportAssets (rigid, this);
                 #endif   
             }
-            
-            // TODO other demolition types support
         }
     }
 }

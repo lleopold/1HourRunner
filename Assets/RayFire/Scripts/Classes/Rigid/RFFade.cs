@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
@@ -14,16 +15,16 @@ namespace RayFire
     public class RFFade
     {
         // UI
-        public bool           onDemolition;
-        public bool           onActivation; 
-        public float          byOffset;
-        public FadeType       fadeType;
-        public float          fadeTime;
-        public RFFadeLifeType lifeType;
-        public float          lifeTime;
-        public float          lifeVariation;
-        public float          sizeFilter;
-        public int            shardAmount;
+        [FormerlySerializedAs ("onDemolition")]  public bool           dml;
+        [FormerlySerializedAs ("onActivation")]  public bool           act; 
+        [FormerlySerializedAs ("byOffset")]      public float          ofs;
+        [FormerlySerializedAs ("fadeType")]      public FadeType       ftp;
+        [FormerlySerializedAs ("fadeTime")]      public float          ftm;
+        [FormerlySerializedAs ("lifeType")]      public RFFadeLifeType ltp;
+        [FormerlySerializedAs ("lifeTime")]      public float          ltm;
+        [FormerlySerializedAs ("lifeVariation")] public float          lvr;
+        [FormerlySerializedAs ("sizeFilter")]    public float          sfl;
+        [FormerlySerializedAs ("shardAmount")]   public int            shr;
         
         // Non Serialized
         [NonSerialized] public int         state; // 1-Living, 2-Fading, 3-Faded
@@ -46,16 +47,16 @@ namespace RayFire
         
         void InitValues()
         {
-            onDemolition  = true;
-            onActivation  = false;
-            byOffset      = 0f;
-            fadeType      = FadeType.None;
-            fadeTime      = 5f;
-            lifeType      = RFFadeLifeType.ByLifeTime;
-            lifeTime      = 7f;
-            lifeVariation = 3f;
-            sizeFilter    = 0f;
-            shardAmount   = 5;
+            dml = true;
+            act = false;
+            ofs = 0f;
+            ftp = FadeType.None;
+            ftm = 5f;
+            ltp = RFFadeLifeType.ByLifeTime;
+            ltm = 7f;
+            lvr = 3f;
+            sfl = 0f;
+            shr = 5;
         }
         
         // Reset
@@ -77,16 +78,16 @@ namespace RayFire
         // Copy from
         public void CopyFrom (RFFade source)
         {
-            onDemolition  = source.onDemolition;
-            onActivation  = source.onActivation;
-            byOffset      = source.byOffset;
-            lifeType      = source.lifeType;
-            lifeTime      = source.lifeTime;
-            lifeVariation = source.lifeVariation;
-            fadeType      = source.fadeType;
-            fadeTime      = source.fadeTime;
-            sizeFilter    = source.sizeFilter;
-            shardAmount   = source.shardAmount;
+            dml = source.dml;
+            act = source.act;
+            ofs = source.ofs;
+            ltp = source.ltp;
+            ltm = source.ltm;
+            lvr = source.lvr;
+            ftp = source.ftp;
+            ftm = source.ftm;
+            sfl = source.sfl;
+            shr = source.shr;
 
             LocalReset();
         }
@@ -99,7 +100,7 @@ namespace RayFire
         public void DemolitionFade (List<RayfireRigid> fadeObjects)
         {
             // No fading
-            if (fadeType == FadeType.None)
+            if (ftp == FadeType.None)
                 return;
 
             // No objects
@@ -173,7 +174,7 @@ namespace RayFire
         public static void FadeRigid (RayfireRigid scr)
         {
             // No fading
-            if (scr.fading.fadeType == FadeType.None)
+            if (scr.fading.ftp == FadeType.None)
                 return;
 
             // Object inactive, Skip
@@ -185,12 +186,12 @@ namespace RayFire
                 scr.Initialize();
 
             // Size check
-            if (scr.fading.sizeFilter > 0 && scr.lim.bboxSize > scr.fading.sizeFilter)
+            if (scr.fading.sfl > 0 && scr.lim.bboxSize > scr.fading.sfl)
                 return;
             
             // Shard amount check
-            if (scr.fading.shardAmount > 0 && scr.objTp == ObjectType.ConnectedCluster)
-                if (scr.clsDemol.cluster.shards.Count > scr.fading.shardAmount)
+            if (scr.fading.shr > 0 && scr.objTp == ObjectType.ConnectedCluster)
+                if (scr.clsDemol.cluster.shards.Count > scr.fading.shr)
                     return;
 
             // Object living, fading or faded
@@ -208,7 +209,7 @@ namespace RayFire
         public static void FadeShard (RayfireRigidRoot scr, RFShard shard)
         {
             // No fading
-            if (scr.fading.fadeType == FadeType.None)
+            if (scr.fading.ftp == FadeType.None)
                 return;
             
             // Shard living, fading or faded
@@ -216,7 +217,7 @@ namespace RayFire
                 return;
             
             // Size check
-            if (scr.fading.sizeFilter > 0 && shard.sz > scr.fading.sizeFilter)
+            if (scr.fading.sfl > 0 && shard.sz > scr.fading.sfl)
                 return;
             
             // Start life coroutine
@@ -226,7 +227,7 @@ namespace RayFire
         // Fade Cluster's detached rigid fragments or Shards if cluster has RigidRoot parent
         public static void FadeClusterShards(RayfireRigid scr, List<RFShard> fadeShards)
         {
-            if (scr.fading.onDemolition == true)
+            if (scr.fading.dml == true)
             {
                 // Fading for detached fragments
                 if (scr.rigidRoot == null)
@@ -250,16 +251,16 @@ namespace RayFire
         static IEnumerator LivingCor (RayfireRigidRoot root, RFShard shard)
         {
             // Wait for simulation get rest
-            if (root.fading.lifeType == RFFadeLifeType.BySimulationAndLifeTime)
+            if (root.fading.ltp == RFFadeLifeType.BySimulationAndLifeTime)
                 yield return root.StartCoroutine(SimulationLivingCor (shard.tm));
 
             // Set living
             shard.fade = 1;
             
             // Get final life duration
-            float lifeDuration = root.fading.lifeTime;
-            if (root.fading.lifeVariation > 0)
-                lifeDuration += Random.Range (0f, root.fading.lifeVariation);
+            float lifeDuration = root.fading.ltm;
+            if (root.fading.lvr > 0)
+                lifeDuration += Random.Range (0f, root.fading.lvr);
             
             // Wait lifetime
             if (lifeDuration > 0)
@@ -273,23 +274,23 @@ namespace RayFire
             RFFadingEvent.InvokeGlobalEvent (shard.tm);
             
             // Exclude from simulation and keep object in scene
-            if (root.fading.fadeType == FadeType.SimExclude)
+            if (root.fading.ftp == FadeType.SimExclude)
                 SimExclude (root, shard);
             
             // Exclude from simulation, fall underground, destroy
-            else if (root.fading.fadeType == FadeType.FallDown)
+            else if (root.fading.ftp == FadeType.FallDown)
                 root.StartCoroutine (FallDownCor (root, shard));
             
             // Start scale down and destroy
-            else if (root.fading.fadeType == FadeType.ScaleDown)
+            else if (root.fading.ftp == FadeType.ScaleDown)
                 root.StartCoroutine (ScaleDownCor (root, shard));
 
             // Exclude from simulation, Move down and destroy
-            else if (root.fading.fadeType == FadeType.MoveDown)
+            else if (root.fading.ftp == FadeType.MoveDown)
                 root.StartCoroutine (MoveDownCor (root, shard));
             
             // // Destroy/Deactivate
-            else if (root.fading.fadeType == FadeType.Destroy)
+            else if (root.fading.ftp == FadeType.Destroy)
             {
                 // Set faded and destroy
                 shard.fade = 3;
@@ -297,7 +298,7 @@ namespace RayFire
             }
             
             // Static object
-            else if (root.fading.fadeType == FadeType.SetStatic)
+            else if (root.fading.ftp == FadeType.SetStatic)
             {
                 // Set faded and destroy rigidbody
                 shard.fade = 3;
@@ -305,7 +306,7 @@ namespace RayFire
             }
 
             // Kinematic object
-            else if (root.fading.fadeType == FadeType.SetKinematic)
+            else if (root.fading.ftp == FadeType.SetKinematic)
             {
                 // Set faded and set kinematic
                 shard.fade           = 3;
@@ -383,7 +384,7 @@ namespace RayFire
                 DisableClusterColliders (rigid);
             
             // Wait to fall down
-            yield return new WaitForSeconds (rigid.fading.fadeTime);
+            yield return new WaitForSeconds (rigid.fading.ftm);
             
             // Set faded
             rigid.fading.state = 3;
@@ -407,7 +408,7 @@ namespace RayFire
                 shard.col.enabled = false;
 
             // Wait to fall down
-            yield return new WaitForSeconds (root.fading.fadeTime);
+            yield return new WaitForSeconds (root.fading.ftm);
             
             // Faded
             shard.fade = 3;
@@ -425,7 +426,7 @@ namespace RayFire
         {
             // Scale object down during fade time
             float   waitStep   = 0.04f;
-            int     steps      = (int)(scr.fading.fadeTime / waitStep);
+            int     steps      = (int)(scr.fading.ftm / waitStep);
             Vector3 vectorStep = scr.tsf.localScale / steps;
 
             // Wait
@@ -461,7 +462,7 @@ namespace RayFire
         {
             // Scale object down during fade time
             float   waitStep   = 0.04f;
-            int     steps      = (int)(root.fading.fadeTime / waitStep);
+            int     steps      = (int)(root.fading.ftm / waitStep);
             Vector3 vectorStep = shard.tm.localScale / steps;
             
             // Wait
@@ -510,7 +511,7 @@ namespace RayFire
             // Scale object down during fade time
             float   extraSize  = 1.2f;
             float   waitStep   = 0.03f;
-            int     steps      = (int)(rigid.fading.fadeTime / waitStep);
+            int     steps      = (int)(rigid.fading.ftm / waitStep);
             Vector3 vectorStep = rigid.lim.bboxSize * extraSize / steps * Vector3.down;
             
             // Turn off collider
@@ -564,7 +565,7 @@ namespace RayFire
             // Scale object down during fade time
             float   extraSize  = 1.2f;
             float   waitStep   = 0.03f;
-            int     steps      = (int)(root.fading.fadeTime / waitStep);
+            int     steps      = (int)(root.fading.ftm / waitStep);
             Vector3 vectorStep = shard.sz * extraSize / steps * Vector3.down;
             
             // Turn off collider
@@ -575,7 +576,7 @@ namespace RayFire
             WaitForSeconds wait = new WaitForSeconds (waitStep);
             
             // Wait to fall down
-            yield return new WaitForSeconds (root.fading.fadeTime);
+            yield return new WaitForSeconds (root.fading.ftm);
             
             // Move down for size distance
             while (steps > 0)
@@ -628,12 +629,12 @@ namespace RayFire
                 root.offsetFadeShards.Clear();
 
             // Collect rigidRoot shards with offset fade
-            if (root.fading.byOffset > 0)
+            if (root.fading.ofs > 0)
             {
                 root.offsetFadeShards.Capacity = root.rigidRootShards.Count;
                 for (int i = 0; i < root.rigidRootShards.Count; i++)
                 {
-                    root.rigidRootShards[i].fo  = root.fading.byOffset;
+                    root.rigidRootShards[i].fo  = root.fading.ofs;
                     root.rigidRootShards[i].pos = root.rigidRootShards[i].tm.position;
                     root.rigidRootShards[i].los = root.rigidRootShards[i].tm.localPosition;
                     root.offsetFadeShards.Add (root.rigidRootShards[i]);
@@ -642,9 +643,9 @@ namespace RayFire
 
             // Collect meshRoot shards with offset fade
             for (int i = 0; i < root.meshRootShards.Count; i++)
-                if (root.meshRootShards[i].rigid.fading.byOffset > 0)
+                if (root.meshRootShards[i].rigid.fading.ofs > 0)
                 {
-                    root.meshRootShards[i].fo  = root.meshRootShards[i].rigid.fading.byOffset;
+                    root.meshRootShards[i].fo  = root.meshRootShards[i].rigid.fading.ofs;
                     root.meshRootShards[i].pos = root.meshRootShards[i].tm.position;
                     root.meshRootShards[i].los = root.meshRootShards[i].tm.localPosition;
                     root.offsetFadeShards.Add (root.meshRootShards[i]);

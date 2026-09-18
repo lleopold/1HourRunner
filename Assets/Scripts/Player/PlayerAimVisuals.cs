@@ -44,6 +44,8 @@ namespace ZombieGame
         [Tooltip("Half length of the bright band, as a fraction of the edge.")]
         [SerializeField] private float _pulseHalfLen = 0.11f;
         [SerializeField] private float _pulseWidthMul = 2.0f;
+        [Tooltip("Damage multiplier when the band centre is exactly on the target (1 = no bonus).")]
+        [SerializeField] private float _timingMaxMultiplier = 2.5f;
 
         // ── Target grid reveal window ────────────────────────────────────────────────
         [Header("Target Grid")]
@@ -99,6 +101,13 @@ namespace ZombieGame
         public float CurrentDistanceMultiplier { get; set; } = 1f;
         public bool IsPointBlank { get; set; }
         public float CurrentTargetDistance { get; set; } = -1f;
+
+        /// <summary>
+        /// 0 = the pulse band is not over the target (or not fully aimed), 1 = band centre exactly on it.
+        /// The visible band IS the window — see <see cref="ComputeTimingScore"/>.
+        /// </summary>
+        public float TimingScore { get; private set; }
+        public float TimingMaxMultiplier => _timingMaxMultiplier;
 
         public LineRenderer LineRendererLeft { get; private set; }
         public LineRenderer LineRendererRight { get; private set; }
@@ -193,6 +202,7 @@ namespace ZombieGame
                 UpdateSmoke(false);
                 _gridWasLocked = false;
                 _gridFlashT = 0f;
+                TimingScore = 0f;
                 CurrentAngle = _gameStats._precisionStartingAim;
             }
 
@@ -331,8 +341,20 @@ namespace ZombieGame
 
         private void UpdatePulse()
         {
+            // The band IS the timing window, so it only exists once fully aimed — it pops in at lock
+            // and always starts its sweep at the feet.
+            if (FocusProgress() < _lockThreshold)
+            {
+                _pulseLeft.enabled = _pulseRight.enabled = false;
+                _pulsePos = 0f;
+                TimingScore = 0f;
+                return;
+            }
+
             _pulsePos += _pulseSpeed * Time.deltaTime;
             if (_pulsePos - _pulseHalfLen > 1f) _pulsePos = 0f;   // gone off the tip -> restart at feet
+
+            TimingScore = ComputeTimingScore();
 
             // Rebuilt each frame so Pulse Color edits apply live.
             var pg = WindowGradient(_pulseColor, 1f, 0f);
@@ -341,6 +363,18 @@ namespace ZombieGame
 
             PlacePulse(_pulseLeft, _baseP, _leftTip);
             PlacePulse(_pulseRight, _baseP, _rightTip);
+        }
+
+        /// <summary>
+        /// How centred the travelling band is on the in-cone target. Only called while locked.
+        /// Falls to 0 at the band's own edges, so the window the player sees is the window that scores.
+        /// </summary>
+        private float ComputeTimingScore()
+        {
+            if (CurrentTargetDistance <= 0f) return 0f;
+
+            float targetFrac = CurrentTargetDistance / ComputeVLength();
+            return Mathf.Clamp01(1f - Mathf.Abs(_pulsePos - targetFrac) / _pulseHalfLen);
         }
 
         private void PlacePulse(LineRenderer lr, Vector3 a, Vector3 b)

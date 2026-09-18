@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace RayFire
 {
@@ -11,26 +12,26 @@ namespace RayFire
     public class RayfireMan : MonoBehaviour
     {
         // UI
-        public bool                       setGravity;
-        public float                      multiplier       = 1f;
-        public RigidbodyInterpolation     interpolation    = RigidbodyInterpolation.None;
-        public float                      colliderSize     = 0.05f;
-        public MeshColliderCookingOptions cookingOptions   = (MeshColliderCookingOptions)30;
-        public CollisionDetectionMode     meshCollision    = CollisionDetectionMode.Discrete;
-        public CollisionDetectionMode     clusterCollision = CollisionDetectionMode.Discrete;
-        public float                      minimumMass      = 0.1f;
-        public float                      maximumMass      = 400f;
-        public RFMaterialPresets          materialPresets  = new RFMaterialPresets();
-        public GameObject                 parent;
-        public float                      globalSolidity               = 1f;
-        public float                      timeQuota                    = 0.03f;
-        public QuotaType                  quotaAction                  = QuotaType.Skip;
-        public RFManDemolition            advancedDemolitionProperties = new RFManDemolition();
-        public RFPoolingFragment          fragments                    = new RFPoolingFragment();
-        public RFPoolingParticles         particles                    = new RFPoolingParticles();
-        public bool                       debugState                   = true;
-        public bool                       debugBuild;
-        public bool                       debugEditor;
+        public                                                         bool                       setGravity;
+        public                                                         float                      multiplier       = 1f;
+        public                                                         RigidbodyInterpolation     interpolation    = RigidbodyInterpolation.None;
+        public                                                         float                      colliderSize     = 0.05f;
+        public                                                         MeshColliderCookingOptions cookingOptions   = (MeshColliderCookingOptions)30;
+        public                                                         CollisionDetectionMode     meshCollision    = CollisionDetectionMode.Discrete;
+        public                                                         CollisionDetectionMode     clusterCollision = CollisionDetectionMode.Discrete;
+        public                                                         float                      minimumMass      = 0.1f;
+        public                                                         float                      maximumMass      = 400f;
+        [FormerlySerializedAs ("materialPresets")] public              RFMaterialPresets          mp               = new RFMaterialPresets();
+        public                                                         GameObject                 parent;
+        public                                                         float                      globalSolidity = 1f;
+        public                                                         float                      timeQuota      = 0.03f;
+        public                                                         QuotaType                  quotaAction    = QuotaType.Skip;
+        [FormerlySerializedAs ("advancedDemolitionProperties")] public RFManDemolition            adp            = new RFManDemolition();
+        public                                                         RFPoolingFragment          fragments      = new RFPoolingFragment();
+        public                                                         RFPoolingParticles         particles      = new RFPoolingParticles();
+        public                                                         bool                       debugState     = true;
+        public                                                         bool                       debugBuild;
+        public                                                         bool                       debugEditor;
         
         // Coroutines
         public List<RFPhysic>     physicList   = new List<RFPhysic>();
@@ -38,7 +39,6 @@ namespace RayFire
         public List<RFFadeBatch>  fadeLiveList = new List<RFFadeBatch>();
         public List<RayfireRigid> fadeOffList  = new List<RayfireRigid>();
         public List<RayfireRigid> offActList   = new List<RayfireRigid>();
-        public List<RayfireRigid> velActList   = new List<RayfireRigid>();
         
         // Non Serialized
         [NonSerialized] public Transform transForm;
@@ -53,7 +53,7 @@ namespace RayFire
         // Static
         public static RayfireMan inst;
         public const  int        buildMajor = 2;
-        public const  int        buildMinor = 08;
+        public const  int        buildMinor = 11;
         
         public static MeshColliderCookingOptions cookingOptionsStatic = (MeshColliderCookingOptions)30;
         public static int                        coplanarVertLimit    = 30;
@@ -175,13 +175,13 @@ namespace RayFire
             transForm = GetComponent<Transform>();
 
             // Reset amount
-            advancedDemolitionProperties.ResetCurrentAmount();
+            adp.ResetCurrentAmount();
 
             // Set gravity
             SetGravity();
 
             // Set Physic Materials if needed
-            materialPresets.SetMaterials();
+            mp.SetMaterials();
 
             // Set static properties
             colliderSizeStatic   = colliderSize;
@@ -205,8 +205,6 @@ namespace RayFire
         // Collect Rigid.Physics for Velocity cache
         public void AddToPhysicCor (RayfireRigid rigid)
         {
-            // TODO collect only if demolition, cluster, velocity act
-            
             // Only for Clusters
             if (rigid.objTp != ObjectType.ConnectedCluster && rigid.objTp != ObjectType.NestedCluster)
                 return;
@@ -483,7 +481,7 @@ namespace RayFire
                     }
                     
                     // Check
-                    if (Vector3.Distance (fadeOffList[i].tsf.position, fadeOffList[i].physics.initPosition) > fadeOffList[i].fading.byOffset)
+                    if (Vector3.Distance (fadeOffList[i].tsf.position, fadeOffList[i].physics.initPosition) > fadeOffList[i].fading.ofs)
                     {
                         fadeOffList[i].Fade();
                         fadeOffList.RemoveAt (i);
@@ -545,7 +543,7 @@ namespace RayFire
                         // Not inactive anymore
                         if (rigid.act.activated == true)
                         {
-                            rigid.act.offsetCorState = false;
+                            rigid.act.ofsCorState = false;
                             offActList.RemoveAt (i);
                             continue;
                         }
@@ -579,11 +577,11 @@ namespace RayFire
         public void AddToOffsetActivationCor(RayfireRigid rigid)
         {
             // Already in list
-            if (rigid.act.offsetCorState == true)
+            if (rigid.act.ofsCorState == true)
                 return;
             
             // Add at 0 index
-            rigid.act.offsetCorState = true;
+            rigid.act.ofsCorState = true;
             offActList.Insert (0, rigid);
         }
 
@@ -593,28 +591,6 @@ namespace RayFire
                 offActList.RemoveAt (offActList.IndexOf (rigid));
         }
         
-        /// /////////////////////////////////////////////////////////
-        /// Rigid Velocity Activation coroutine
-        /// /////////////////////////////////////////////////////////
-        
-        // Add Rigid object to inactive
-        public void AddToVelocityActivationCor(RayfireRigid rigid)
-        {
-            // Already in list
-            if (rigid.act.velocityCorState == true)
-                return;
-            
-            // Add at 0 index
-            rigid.act.velocityCorState = true;
-            velActList.Insert (0, rigid);
-        }
-
-        public void RemoveVelocityActivationCor(RayfireRigid rigid)
-        {
-            if (velActList.Contains (rigid) == true)
-                velActList.RemoveAt (velActList.IndexOf (rigid));
-        }
-
         /// /////////////////////////////////////////////////////////
         /// Other
         /// /////////////////////////////////////////////////////////
@@ -636,9 +612,9 @@ namespace RayFire
         
         // Max fragments amount check
         public static bool MaxAmountCheck { get {
-            if (inst.advancedDemolitionProperties.currentAmount < inst.advancedDemolitionProperties.maximumAmount)
+            if (inst.adp.currentAmount < inst.adp.maximumAmount)
                 return true;
-            inst.advancedDemolitionProperties.AmountWarning();
+            inst.adp.AmountWarning();
             return false;
         }}
         
@@ -735,19 +711,19 @@ namespace RayFire
                 return;
             
             // Storage
-            if (inst.advancedDemolitionProperties.parent == FragmentParentType.Manager)
+            if (inst.adp.parent == FragmentParentType.Manager)
                 tm.parent = inst.storage.storageRoot;
             
             // Global parent
-            else if (inst.advancedDemolitionProperties.parent == FragmentParentType.GlobalParent)
+            else if (inst.adp.parent == FragmentParentType.GlobalParent)
             {
-                tm.parent = inst.advancedDemolitionProperties.globalParent == null 
+                tm.parent = inst.adp.globalParent == null 
                     ? inst.storage.storageRoot 
-                    : inst.advancedDemolitionProperties.globalParent;
+                    : inst.adp.globalParent;
             } 
 
             // Local parent
-            else if (inst.advancedDemolitionProperties.parent == FragmentParentType.LocalParent)
+            else if (inst.adp.parent == FragmentParentType.LocalParent)
             {
                 // Storage if no local parent
                 if (original == null || original.parent == null)
@@ -768,15 +744,15 @@ namespace RayFire
                 return;
             
             // Storage
-            if (inst.advancedDemolitionProperties.parent == FragmentParentType.Manager)
+            if (inst.adp.parent == FragmentParentType.Manager)
                 tm.parent = inst.storage.storageRoot;
             
             // Global parent
-            else if (inst.advancedDemolitionProperties.parent == FragmentParentType.GlobalParent && inst.advancedDemolitionProperties.globalParent != null)
-                tm.parent = inst.advancedDemolitionProperties.globalParent;
+            else if (inst.adp.parent == FragmentParentType.GlobalParent && inst.adp.globalParent != null)
+                tm.parent = inst.adp.globalParent;
             
             // Local parent
-            else if (inst.advancedDemolitionProperties.parent == FragmentParentType.LocalParent)
+            else if (inst.adp.parent == FragmentParentType.LocalParent)
                 tm.parent = parentTm;
 
             // Register in storage
@@ -790,12 +766,12 @@ namespace RayFire
                 return;
             
             // Storage
-            if (inst.advancedDemolitionProperties.parent == FragmentParentType.Manager)
+            if (inst.adp.parent == FragmentParentType.Manager)
                 tm.parent = inst.storage.storageRoot;
             
             // Global parent
-            else if (inst.advancedDemolitionProperties.parent == FragmentParentType.GlobalParent && inst.advancedDemolitionProperties.globalParent != null)
-                tm.parent = inst.advancedDemolitionProperties.globalParent;
+            else if (inst.adp.parent == FragmentParentType.GlobalParent && inst.adp.globalParent != null)
+                tm.parent = inst.adp.globalParent;
             
             // Local parent is default root location
             
@@ -807,7 +783,7 @@ namespace RayFire
         public static Transform GetParentByManager(RayfireRigid scr)
         {
             // Manager parent
-            if (inst != null && inst.advancedDemolitionProperties.parent == FragmentParentType.Manager)
+            if (inst != null && inst.adp.parent == FragmentParentType.Manager)
                 return inst.storage.storageRoot;
             
             // Parent of main cluster
@@ -827,7 +803,7 @@ namespace RayFire
         {
             // Decrement total amount.
             if (Application.isPlaying == true && scr.lim.currentDepth != 0)
-                inst.advancedDemolitionProperties.currentAmount--;
+                inst.adp.currentAmount--;
             
             // Deactivate
             scr.gameObject.SetActive (false);
@@ -878,11 +854,24 @@ namespace RayFire
                 Destroy (tm.gameObject, time);
             }
         }
-        
+
         /// /////////////////////////////////////////////////////////
         /// Debug
         /// /////////////////////////////////////////////////////////
-        
+
+        // Time test        
+        public static System.Diagnostics.Stopwatch WatchStart()
+        {
+            System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
+            stopWatch.Start();
+            return stopWatch;
+        }
+        public static void WatchStop(System.Diagnostics.Stopwatch stopWatch, string str, GameObject go = null)
+        {
+            stopWatch.Stop();
+            Debug.Log(str + stopWatch.Elapsed.TotalMilliseconds.ToString("F2") + " ms", go);
+        }
+
         // Debug message
         public static void Log (string str, UnityEngine.Object go = null)
         {

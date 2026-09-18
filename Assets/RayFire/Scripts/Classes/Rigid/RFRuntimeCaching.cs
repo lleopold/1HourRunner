@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -13,6 +12,7 @@ namespace RayFire
         [FormerlySerializedAs ("frames")]              public int         frm;
         [FormerlySerializedAs ("fragments")]           public int         frg;
         [FormerlySerializedAs ("skipFirstDemolition")] public bool        skp;
+        public bool obj = false;
 
         [NonSerialized] public bool inProgress;
         [NonSerialized] public bool wasUsed;
@@ -50,8 +50,14 @@ namespace RayFire
         /// Static
         /// /////////////////////////////////////////////////////////
         
+        // Get batch list
+        public static List<int> GetBatchAmount(RayfireRigid rg, int num)
+        {
+            return rg.mshDemol.ch.tp == CachingType.ByFrames ? GetBatchByFrames (rg.mshDemol.ch.frm,  num) : GetBatchByFragments (rg.mshDemol.ch.frg, num);
+        }
+        
         // Get batches amount for continuous fragmentation
-        public static List<int> GetBatchByFrames (int frames, int amount)
+        static List<int> GetBatchByFrames (int frames, int amount)
         {
             // Get basic list
             int       div         = amount / frames;
@@ -75,7 +81,7 @@ namespace RayFire
         }
         
         // Get batches amount for continuous fragmentation
-        public static List<int> GetBatchByFragments (int fragments, int amount)
+        static List<int> GetBatchByFragments (int fragments, int amount)
         {
             // Get basic list
             int       steps         = amount / fragments;
@@ -120,11 +126,43 @@ namespace RayFire
             go.transform.parent = RayfireMan.inst.transform;
             return go;
         }
+
+        // Prepare Rigid for caching
+        public static bool PreOps(RayfireRigid scr)
+        {
+            // Caching in progress
+            scr.mshDemol.ch.inProgress = true;
+            
+            // Object should be demolished when cached all meshes but not during caching
+            bool demolitionShouldLocal = scr.lim.demolitionShould == true;
+            scr.lim.demolitionShould = false;
+            
+            return demolitionShouldLocal;
+        }
         
-         /// /////////////////////////////////////////////////////////
+        // Post caching ops
+        public static void PostOps(RayfireRigid scr, bool demolitionShouldLocal)
+        {
+            // Set demolition ready state and Add to demolition cor
+            if (scr.mshDemol.ch.skp == false && demolitionShouldLocal == true)
+            {
+                scr.lim.demolitionShould = true;
+                RayfireMan.inst.AddToDemolitionCor(scr);
+            }
+            
+            // Reset damage
+            if (scr.mshDemol.ch.skp == true && demolitionShouldLocal == true)
+                scr.damage.LocalReset();
+            
+            // Caching finished
+            scr.mshDemol.ch.inProgress = false;
+            scr.mshDemol.ch.wasUsed    = true;
+        }
+        
+        /// /////////////////////////////////////////////////////////
         /// Methods
         /// /////////////////////////////////////////////////////////
-         
+        
         // Stop runtime caching and reset it
         public void StopRuntimeCaching()
         {
@@ -132,14 +170,14 @@ namespace RayFire
                 stop = true;
         }
          
-        public bool MultiFrameState
+        public void Stop()
         {
-            get
-            {
-                if (tp == CachingType.Disabled)
-                    return false;
-                return true;
-            }
+            stop       = false;
+            inProgress = false;
         }
+         
+        public bool MeshCacheState { get { return tp != CachingType.Disabled; } }
+        public bool FragCacheState { get { return tp != CachingType.Disabled && obj == true; } }
+        
     }
 }

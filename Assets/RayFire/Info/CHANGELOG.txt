@@ -1,5 +1,37 @@
+    
+  [2.12] July 17
+ 
+ - Shatter. Advanced Clustering properties.
+ - Shatter. Inner property to clusterize all inner fragments. 
+ - Shatter. Point Root property to use as source of Custom Cluster Points.
+ - Shatter. Volume properties to use object mesh bounds to clusterize fragment groups.
+ - Shatter. Interactive scale preview performance improvement. 
+ - Shatter. Vertex amount optimization for Relaxed clusters.
+ - Shatter. Overlapped voronoi point cloud crash fix.
+ - Shatter. Inner fragment check fix.
+ - Bomb. Explode on Collision property.
+   
+  [2.11] June 21
+  
+ - Unyielding. Align buttons. Allows to quickly align gizmo over Top, Bottom, Left and Right sides. 
+ - Unity 6.0 to 6.5 fix.
 
-  [2.08]  
+  [2.10] June 17
+  
+ - Recorder. Rigid Mesh demolition record support. New Demolition toggle property.
+ - Recorder. Playback Speed property. Public .Speed get/set property.
+ - Recorder. Pause and Unpause playback buttons. Public method .Pause(bool PauseState)
+ - Recorder. Reset playback button. Public method .ResetPlay ()
+ - Recorder. Restart playback button. Public method .Restart (float RestartState)
+ - Recorder. Playback preview slider. Public method .Mark (float MarkState)
+ - Rigid. Gameobjects fragment caching. New Gameobjects toggle in Runtime Caching properties.
+ - Rigid. RFCollapse.ShardCollapse (RayfireRigid scr) public static method.
+ - Rigid. Support for RigidRoot setup as demolition reference.
+ - Shatter. Output Cap property support for relaxed clusters.
+ - Man. Material presets UI fix. 
+ - Unity 6.5 support.
+
+  [2.09] May 13
     
  - Shatter. Tetrahedron fragmentation type.
  - Shatter. Vertex Relax for cluster inner surface.
@@ -15,7 +47,6 @@
  - Rigid. Child Fragments reset support with Fragments Reuse mode.
  - Man. Fix for several managers in scene.
  - Man. Fix for fragments Local Parent.  
- - Man. Material presets UI fix.  
  - Man. Fragments Shadows Size threshold default value increased from 0.05 to 0.2 units.  
  - Debris/Dust. Pooling Reuse fix with disabled pooling.
  - Blade. Default Box collider by slicing plane type. 
@@ -85,3 +116,5 @@
  
  IMPORTANT: For those who updates from older Rayfire for Unity plugin:
  Components will require checkup for correct properties because of internal code changes that were postponed as much as possible before.
+ 
+ 

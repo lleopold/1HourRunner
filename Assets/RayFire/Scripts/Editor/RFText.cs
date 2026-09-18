@@ -43,9 +43,6 @@ namespace RayFireEditor
         public const string rot_fld_lim = "rf_tl"; public const string rot_fld_cls = "rf_tc";
         public const string rot_fld_clp = "rf_ts"; public const string rot_fld_fad = "rf_tf";
         public const string rot_fld_res = "rf_te";
-        
-        // Unyielding
-        public const string uny_fld_ali = "rf_ua";
     }
     
     /// <summary>
@@ -181,6 +178,7 @@ namespace RayFireEditor
         public static readonly GUIContent gui_cap_prop        = new GUIContent ("  Properties",  "");
         public static readonly GUIContent gui_heightOffset    = new GUIContent ("Height Offset", "Allows to offset downward Explosion position over global Y axis.");
         public static readonly GUIContent gui_delay           = new GUIContent ("Delay",         "Explosion delay in seconds.");
+        public static readonly GUIContent gui_atCol           = new GUIContent ("At Collision",  "Explode Bomb on collision.");
         public static readonly GUIContent gui_atStart         = new GUIContent ("At Start",      "Automatically explode Bomb at Gameobject activation.");
         public static readonly GUIContent gui_destroy         = new GUIContent ("Destroy",       "Destroy Gameobject after explosion.");
         public static readonly GUIContent gui_obst_enable     = new GUIContent ("Enable",        "Enable other colliders in scene as obstacles for explosion.");
@@ -345,7 +343,7 @@ namespace RayFireEditor
         // GUI
         public static readonly GUIContent gui_cap_event     = new GUIContent ("  Emit Event",           "");
         public static readonly GUIContent gui_main_dml      = new GUIContent ("Demolition",             "Emit particles when object with Rayfire Rigid component demolishes. Particles will be emitted from fragments.");
-        public static readonly GUIContent gui_main_act      = new GUIContent ("Activation",             "Emit particles when object with Rayfire Rigid activated to Dynamic state from Inactive or Kinematik states.");
+        public static readonly GUIContent gui_main_act      = new GUIContent ("Activation",             "Emit particles when object with Rayfire Rigid activated to Dynamic state from Inactive or Kinematic states.");
         public static readonly GUIContent gui_main_imp      = new GUIContent ("Impact",                 "Emit particles by Rayfire Gun shot at impact position.");
         public static readonly GUIContent gui_cap_debris    = new GUIContent ("  Debris",               "");
         public static readonly GUIContent gui_main_ref      = new GUIContent ("Reference",              "Debris reference");
@@ -420,9 +418,9 @@ namespace RayFireEditor
         public static readonly GUIContent gui_ren_prob      = new GUIContent ("Light Probes",           "");
         public static readonly GUIContent gui_ren_vect      = new GUIContent ("Motion Vectors",         "");
         public static readonly GUIContent gui_ren_t         = new GUIContent ("Set Tag",                "");
-        public static readonly GUIContent gui_ren_tag       = new GUIContent ("    Tag",                    "");
+        public static readonly GUIContent gui_ren_tag       = new GUIContent ("    Tag",                "");
         public static readonly GUIContent gui_ren_l         = new GUIContent ("Set Layer",              "");
-        public static readonly GUIContent gui_ren_lay       = new GUIContent ("    Layer",                  "");
+        public static readonly GUIContent gui_ren_lay       = new GUIContent ("    Layer",              "");
     }
     
     /// <summary>
@@ -454,7 +452,7 @@ namespace RayFireEditor
         // GUI
         public static readonly GUIContent gui_cap_event     = new GUIContent ("  Emit Event",          "");
         public static readonly GUIContent gui_main_dml      = new GUIContent ("Demolition",            "Emit particles when object with Rayfire Rigid component demolishes. Particles will be emitted from fragments.");
-        public static readonly GUIContent gui_main_act      = new GUIContent ("Activation",            "Emit particles when object with Rayfire Rigid activated to Dynamic state from Inactive or Kinematik states.");
+        public static readonly GUIContent gui_main_act      = new GUIContent ("Activation",            "Emit particles when object with Rayfire Rigid activated to Dynamic state from Inactive or Kinematic states.");
         public static readonly GUIContent gui_main_imp      = new GUIContent ("Impact",                "Emit particles by Rayfire Gun shot at impact position.");
         public static readonly GUIContent gui_cap_dust      = new GUIContent ("  Dust",                "");
         public static readonly GUIContent gui_main_op       = new GUIContent ("Opacity",               "");
@@ -640,9 +638,9 @@ namespace RayFireEditor
         public static readonly GUIContent gui_cap_other   = new GUIContent ("      Other",      "");
         public static readonly GUIContent gui_fl_distance = new GUIContent ("Distance",         "");
         public static readonly GUIContent gui_fl_color    = new GUIContent ("Color",            "");
-        public static readonly GUIContent gui_cap_filt    = new GUIContent ("  Filters",      "");
+        public static readonly GUIContent gui_cap_filt    = new GUIContent ("  Filters",        "");
         public static readonly GUIContent gui_tag         = new GUIContent ("Tag",              "");
-        public static readonly GUIContent gui_mask        = new GUIContent ("Mask",            "");
+        public static readonly GUIContent gui_mask        = new GUIContent ("Mask",             "");
     }
     
     /// <summary>
@@ -661,8 +659,7 @@ namespace RayFireEditor
         public const string str_vel        = "Velocity Cache: ";
         public const string str_fade       = "Fade list: ";
         public const string str_build      = "Plugin build: ";
-        public const string str_v2         = "V2 engine build: ";
-        public const string str_url        = "https://assetstore.unity.com/packages/tools/game-toolkits/rayfire-for-unity-148690#releases";
+        public const string str_url        = "https://assetstore.unity.com/packages/tools/game-toolkits/rayfire-2-342492";
 
         // Buttons
         public static readonly GUIContent gui_btn_dest_frags = new GUIContent ("Destroy All Fragments", "");
@@ -723,7 +720,6 @@ namespace RayFireEditor
         public static readonly GUIContent gui_adv_global  = new GUIContent ("    Global Parent",        "Defines parent for all new fragments.");
         public static readonly GUIContent gui_adv_current = new GUIContent ("Current Amount",           "Amount of created fragments.");
         public static readonly GUIContent gui_adv_amount  = new GUIContent ("Maximum Amount",           tlp_adv_amount);
-        public static readonly GUIContent gui_adv_bad     = new GUIContent ("Bad Mesh Try",             "Defines parent for all new fragments.");
         public static readonly GUIContent gui_cap_shad    = new GUIContent ("  Shadows",                "");
         public static readonly GUIContent gui_adv_size    = new GUIContent ("Size Threshold",           "Disable Shadow Casting for all objects with size less than this value.");
         public static readonly GUIContent gui_cap_pol     = new GUIContent ("  Pooling",                "");
@@ -732,7 +728,7 @@ namespace RayFireEditor
         public static readonly GUIContent gui_pol_reu     = new GUIContent ("    Reuse",                "Do not destroy objects and send them back to pool until Max Capacity value will be reached");
         public static readonly GUIContent gui_pol_min     = new GUIContent ("    Capacity Min",         "");
         public static readonly GUIContent gui_pol_max     = new GUIContent ("    Capacity Max",         "");
-        public static readonly GUIContent gui_cap_inf     = new GUIContent ("  Info",                  "");
+        public static readonly GUIContent gui_cap_inf     = new GUIContent ("  Info",                   "");
         public static readonly GUIContent gui_cap_abt     = new GUIContent ("  About",                  "");
         public static readonly GUIContent gui_dbg_msg     = new GUIContent ("Debug Messages",           "");
         public static readonly GUIContent gui_dbg_edt     = new GUIContent ("Only In Editor",           "");
@@ -749,9 +745,13 @@ namespace RayFireEditor
         public const string rec = "Recording...   ";
      
         // Buttons
-        public static readonly GUIContent gui_btn_rec_start = new GUIContent ("Start Record", "");
-        public static readonly GUIContent gui_btn_rec_stop  = new GUIContent ("Stop Record",  "");
-        public static readonly GUIContent gui_btn_pla_start = new GUIContent ("Start Play",   "");
+        public static readonly GUIContent gui_btn_rec_start   = new GUIContent ("Start Record", "");
+        public static readonly GUIContent gui_btn_rec_stop    = new GUIContent ("Stop Record",  "");
+        public static readonly GUIContent gui_btn_pla_start   = new GUIContent ("Start Play",   "Evaluate public method .StartPlay()");
+        public static readonly GUIContent gui_btn_pla_pause   = new GUIContent ("Pause",        "Evaluate public method .Pause(true);");
+        public static readonly GUIContent gui_btn_pla_restart = new GUIContent ("Restart",      "Evaluate public method .Restart(0f)");
+        public static readonly GUIContent gui_btn_pla_reset   = new GUIContent ("Reset",        "Evaluate public method .ResetPlay()");
+        public static readonly GUIContent gui_btn_pla_unpause = new GUIContent ("Unpause",      "Evaluate public method .Pause(false);");
         
         // GUI
         public static readonly GUIContent gui_mode       = new GUIContent ("Mode",            "");
@@ -760,13 +760,16 @@ namespace RayFireEditor
         public static readonly GUIContent gui_rec_clip   = new GUIContent ("Clip Name",       "");
         public static readonly GUIContent gui_rec_dur    = new GUIContent ("Duration",        "Maximum duration for recorded animation clip.");
         public static readonly GUIContent gui_rec_rate   = new GUIContent ("Rate",            "Amount of keys per second.");
+        public static readonly GUIContent gui_rec_dml    = new GUIContent ("Demolition",      "Record Mesh demolition");    
         public static readonly GUIContent gui_rec_reduce = new GUIContent ("Reduce Keys",     "Optimize amount of keys for still objects.");
         public static readonly GUIContent gui_rec_thresh = new GUIContent ("Threshold",       "Reduce Keys threshold.");
         public static readonly GUIContent gui_pla_start  = new GUIContent ("On Start",        "Automatically start playback at Start.");
+        public static readonly GUIContent gui_pla_speed  = new GUIContent ("Speed",           "");
         public static readonly GUIContent gui_pla_clip   = new GUIContent ("Clip",            "");
         public static readonly GUIContent gui_pla_cont   = new GUIContent ("Controller",      "");
         public static readonly GUIContent gui_cap_rigid  = new GUIContent ("  Rayfire Rigid", "");
         public static readonly GUIContent gui_pla_rigid  = new GUIContent ("Action",          "");
+        public static readonly GUIContent gui_pla_mark   = new GUIContent ("",          "");
     }
     
     /// <summary>
@@ -774,20 +777,19 @@ namespace RayFireEditor
     /// </summary>
     public static class TextRst
     {
-        // GUI
-        public static readonly GUIContent gui_rigid     = new GUIContent ("RayFire Rigid", "");
-        public static readonly GUIContent gui_cap_props = new GUIContent ("  Properties",  "");
-        public static readonly GUIContent gui_prp_en    = new GUIContent ("Enable",        "Allows to Reset, Fade or perform Post demolition action when Rigid object breaks restriction.");
-        public static readonly GUIContent gui_prp_act   = new GUIContent ("Action",        "");
-        public static readonly GUIContent gui_prp_del   = new GUIContent ("Delay",         "Action delay in seconds.");
-        public static readonly GUIContent gui_prp_int   = new GUIContent ("Interval",      "How often component will check if object broke restriction.");
-        public static readonly GUIContent gui_cap_dst   = new GUIContent ("  Distance",    "");
-        public static readonly GUIContent gui_dst_pos   = new GUIContent ("Position",      "Restriction will break if distance between object and Initial/Target position will be higher than this value.");
-        public static readonly GUIContent gui_dst_val   = new GUIContent ("Distance",      "Object will break restriction if will be moved for this distance.");
-        public static readonly GUIContent gui_dst_trg   = new GUIContent ("Target",        "");
-        public static readonly GUIContent gui_cap_tri   = new GUIContent ("  Trigger",    "");
-        public static readonly GUIContent gui_tri_reg   = new GUIContent ("Region",        "");
-        public static readonly GUIContent gui_tri_col   = new GUIContent ("Collider",      "");
+        public static readonly GUIContent gui_rigid   = new GUIContent ("RayFire Rigid", "");
+        public static readonly GUIContent gui_cap_prp = new GUIContent ("  Properties",  "");
+        public static readonly GUIContent gui_prp_en  = new GUIContent ("Enable",        "Allows to Reset, Fade or perform Post demolition action when Rigid object breaks restriction.");
+        public static readonly GUIContent gui_prp_act = new GUIContent ("Action",        "");
+        public static readonly GUIContent gui_prp_del = new GUIContent ("Delay",         "Action delay in seconds.");
+        public static readonly GUIContent gui_prp_int = new GUIContent ("Interval",      "How often component will check if object broke restriction.");
+        public static readonly GUIContent gui_cap_dst = new GUIContent ("  Distance",    "");
+        public static readonly GUIContent gui_dst_pos = new GUIContent ("Position",      "Restriction will break if distance between object and Initial/Target position will be higher than this value.");
+        public static readonly GUIContent gui_dst_val = new GUIContent ("Distance",      "Object will break restriction if will be moved for this distance.");
+        public static readonly GUIContent gui_dst_trg = new GUIContent ("Target",        "");
+        public static readonly GUIContent gui_cap_tri = new GUIContent ("  Trigger",     "");
+        public static readonly GUIContent gui_tri_reg = new GUIContent ("Region",        "");
+        public static readonly GUIContent gui_tri_col = new GUIContent ("Collider",      "");
     }
 
     /// <summary>
@@ -819,21 +821,20 @@ namespace RayFireEditor
     /// </summary>
     public static class TextAcv
     {
-        public static readonly GUIContent gui_act     = new GUIContent ("Activation",      "Allows to activate ( make dynamic ) inactive and kinematic objects.");
-        public static readonly GUIContent gui_cap_act = new GUIContent ("  Activation By", "");
-        public static readonly GUIContent gui_act_off = new GUIContent ("Offset",          "Inactive object will be activated if will be pushed from it's original position farther than By Offset value.");
-        public static readonly GUIContent gui_act_loc = new GUIContent ("    Local",       "Activation By Local Offset relative to parent.");
-        public static readonly GUIContent gui_act_vel = new GUIContent ("Velocity",        "Inactive object will be activated when it's velocity will be higher than By Velocity value when pushed by other dynamic objects.");
-        public static readonly GUIContent gui_act_dmg = new GUIContent ("Damage",          "Inactive object will be activated if will get total damage higher than this value.");
-        public static readonly GUIContent gui_act_act = new GUIContent ("Activator",       "Inactive object will be activated by overlapping with object with RayFire Activator component.");
-        public static readonly GUIContent gui_act_imp = new GUIContent ("Gun Impact",      "Inactive object will be activated when it will be shot by RayFire Gun component.");
-        public static readonly GUIContent gui_act_con = new GUIContent ("Connectivity",    "Inactive object will be activated by Connectivity component if it will not be connected with Unyielding zone.");
-        public static readonly GUIContent gui_act_uny = new GUIContent ("    Unyielding",  "Allows to define Inactive/Kinematic object as Unyielding to check for connection with other Inactive/Kinematic objects with enabled By Connectivity activation type.");
-        public static readonly GUIContent gui_act_atb = new GUIContent ("    Activatable", "Unyielding object can not be activate by default. When On allows to activate Unyielding objects as well.");
+        public static readonly GUIContent gui_act     = new GUIContent ("Activation",        "Allows to activate ( make dynamic ) inactive and kinematic objects.");
+        public static readonly GUIContent gui_cap_act = new GUIContent ("  Activation By",   "");
+        public static readonly GUIContent gui_act_off = new GUIContent ("Offset",            "Inactive object will be activated if will be pushed from it's original position farther than By Offset value.");
+        public static readonly GUIContent gui_act_loc = new GUIContent ("    Local",         "Activation By Local Offset relative to parent.");
+        public static readonly GUIContent gui_act_vel = new GUIContent ("Velocity",          "Inactive object will be activated when it's velocity will be higher than By Velocity value when pushed by other dynamic objects.");
+        public static readonly GUIContent gui_act_dmg = new GUIContent ("Damage",            "Inactive object will be activated if will get total damage higher than this value.");
+        public static readonly GUIContent gui_act_act = new GUIContent ("Activator",         "Inactive object will be activated by overlapping with object with RayFire Activator component.");
+        public static readonly GUIContent gui_act_imp = new GUIContent ("Gun Impact",        "Inactive object will be activated when it will be shot by RayFire Gun component.");
+        public static readonly GUIContent gui_act_con = new GUIContent ("Connectivity",      "Inactive object will be activated by Connectivity component if it will not be connected with Unyielding zone.");
+        public static readonly GUIContent gui_act_uny = new GUIContent ("    Unyielding",    "Allows to define Inactive/Kinematic object as Unyielding to check for connection with other Inactive/Kinematic objects with enabled By Connectivity activation type.");
+        public static readonly GUIContent gui_act_atb = new GUIContent ("    Activatable",   "Unyielding object can not be activate by default. When On allows to activate Unyielding objects as well.");
         public static readonly GUIContent gui_cap_pst = new GUIContent ("  Post Activation", "");
-        public static readonly GUIContent gui_act_l   = new GUIContent ("Change Layer",    "Change layer for activated objects.");
-        public static readonly GUIContent gui_act_lay = new GUIContent ("Layer",           "Custom layer for activated objects.");
-
+        public static readonly GUIContent gui_act_l   = new GUIContent ("Change Layer",      "Change layer for activated objects.");
+        public static readonly GUIContent gui_act_lay = new GUIContent ("Layer",             "Custom layer for activated objects.");
     }
 
     /// <summary>
@@ -872,9 +873,10 @@ namespace RayFireEditor
         public static readonly GUIContent gui_cap_adv     = new GUIContent ("  Advanced",         "");
         public static readonly GUIContent gui_msh_sim     = new GUIContent ("Fragments Sim Type", "Simulation type for demolished fragments."); 
         public static readonly GUIContent gui_msh_cnv     = new GUIContent ("Convert",            "Convert fragments after fragmentation to Connected CLuster or MeshRoot with Connectivity Setup.");
-        public static readonly GUIContent gui_msh_rnt     = new GUIContent ("Runtime Caching",    ""); 
+        public static readonly GUIContent gui_msh_rnt     = new GUIContent ("Runtime Caching",    "Cache small portions of fragment meshes."); 
         public static readonly GUIContent gui_msh_rnt_fr  = new GUIContent ("  Frames",           "");
         public static readonly GUIContent gui_msh_rnt_fg  = new GUIContent ("  Fragments",        "");
+        public static readonly GUIContent gui_msh_rnt_ob  = new GUIContent ("  Objects",          "Cache GameObject fragments.");
         public static readonly GUIContent gui_msh_rnt_sk  = new GUIContent ("  Skip First",       "Only initiate Runtime Caching on first demolition and demolish at second.");
         public static readonly GUIContent gui_msh_adv     = new GUIContent ("Properties",         "");
         public static readonly GUIContent gui_msh_adv_slc = new GUIContent ("Slice Type",         TextSht.tlp_slice);
@@ -927,8 +929,8 @@ namespace RayFireEditor
         public static readonly GUIContent gui_fad       = new GUIContent ("Fading",        "");
         public static readonly GUIContent gui_cap_ini   = new GUIContent ("  Initiate",    "");
         public static readonly GUIContent gui_fad_dml   = new GUIContent ("On Demolition", "Fading will be applied to fragments that will be created after this object will be demolished.");
-        public static readonly GUIContent gui_fad_act   = new GUIContent ("On Activation", "Fading will be applied to this object after it will be activated, turned to Dynamic from Inactive or Kinematik simulation type.");
-        public static readonly GUIContent gui_fad_ofs   = new GUIContent ("By Offset",     "Fading will be applied to this object after it will be moved to Offset distance from its Initiaization position.");
+        public static readonly GUIContent gui_fad_act   = new GUIContent ("On Activation", "Fading will be applied to this object after it will be activated, turned to Dynamic from Inactive or Kinematic simulation type.");
+        public static readonly GUIContent gui_fad_ofs   = new GUIContent ("By Offset",     "Fading will be applied to this object after it will be moved to Offset distance from its Initialization position.");
         public static readonly GUIContent gui_cap_tp    = new GUIContent ("  Type",        "");
         public static readonly GUIContent gui_fad_tp    = new GUIContent ("Type",          "");
         public static readonly GUIContent gui_fad_tm    = new GUIContent ("Time",          "Fading duration time.");
@@ -1026,7 +1028,6 @@ namespace RayFireEditor
         public static readonly GUIContent gui_mat     = new GUIContent ("Materials",            "");
         public static readonly GUIContent gui_mat_scl = new GUIContent ("Mapping Scale",        "Mapping scale for inner surface");
         public static readonly GUIContent gui_mat_inn = new GUIContent ("Inner Surface",        "Material for inner fragments surface");
-        public static readonly GUIContent gui_mat_out = new GUIContent ("Outer",                "Material for outer fragments surface");
         public static readonly GUIContent gui_dmg     = new GUIContent ("Damage",               "Allows to demolish object by it's own floating Damage value.");
         public static readonly GUIContent gui_dmg_en  = new GUIContent ("Enable",               "");
         public static readonly GUIContent gui_dmg_max = new GUIContent ("Max Damage",           "Defines maximum allowed damage for object to be demolished.");
@@ -1056,21 +1057,19 @@ namespace RayFireEditor
         // Buttons
         public static readonly GUIContent gui_btn_frag  = new GUIContent ("Fragment",       "");
         public static readonly GUIContent gui_btn_inter = new GUIContent ("Interactive",    "Preview fragments as one mesh.");
+        public static readonly GUIContent gui_btn_gizmo = new GUIContent ("Gizmo",          "Preview volume gizmo");
         public static readonly GUIContent gui_btn_scale = new GUIContent ("Scale",          "");
         public static readonly GUIContent gui_btn_color = new GUIContent ("Color",          "");
-        public static readonly GUIContent gui_btn_show  = new GUIContent (" Show   ",       "");
         public static readonly GUIContent gui_btn_uvedt = new GUIContent ("Open UV Editor", "");
-        
-        
+        public static readonly GUIContent gui_btn_sel   = new GUIContent ("Select Shatter",       "");
         
         // Strings
         public const string str_points = "    In/Out points: ";
-        public const string str_move   = "Center Move";
-        public const string str_rotate = "Center Rotate";
         public const string str_delete = "Delete";
         public const string str_load   = "Load";
         public const string str_export = "Export";
         public const string str_minus  = "-";
+        public const string str_add = "Add Volume";
         
         // Tooltips
         const string tlp_eng = " Max: Original fragmentation engine which was ported from 3ds Max. \n" +
@@ -1087,7 +1086,6 @@ namespace RayFireEditor
                                   " Flat: All fragments will be parented to one main root.";
         const string tlp_ptr =    " Enabled: Fragment Skinned meshes to not skinned fragments with Mesh Filter. \n" +
                                   " Disabled: Fragment Skinned meshes and bind fragments to bones.";
-        
         
         public static readonly GUIContent gui_cap_prv         = new GUIContent ("  Preview",            "");
         public static readonly GUIContent gui_prv_scl         = new GUIContent ("Scale Preview",        "");
@@ -1108,7 +1106,6 @@ namespace RayFireEditor
         public static readonly GUIContent gui_cap_rings       = new GUIContent ("      Rings",          "");
         public static readonly GUIContent gui_tp_rad_rings    = new GUIContent ("Rings",                "");
         public static readonly GUIContent gui_tp_rad_focus    = new GUIContent ("Focus",                "");
-        public static readonly GUIContent gui_tp_rad_str      = new GUIContent ("Focus Strength",       "");
         public static readonly GUIContent gui_tp_rad_randRing = new GUIContent ("Random Rings",         "");
         public static readonly GUIContent gui_cap_rays        = new GUIContent ("      Rays",           "");
         public static readonly GUIContent gui_tp_rad_rays     = new GUIContent ("Rays",                 "");
@@ -1161,9 +1158,8 @@ namespace RayFireEditor
         public static readonly GUIContent gui_mat_uvMax       = new GUIContent ("    Max",              "");
         public static readonly GUIContent gui_cap_cls         = new GUIContent ("  Clusters",           "Allows to glue groups of fragments into single mesh by deleting shared faces.");
         public static readonly GUIContent gui_cls_en          = new GUIContent ("Enable",               "Allows to glue groups of fragments into single mesh by deleting shared faces.");
-        public static readonly GUIContent gui_cls_cnt         = new GUIContent ("Count",                "Amount of clusters defined by random point cloud.");
+        public static readonly GUIContent gui_cls_cnt         = new GUIContent ("Points",               "Amount of clusters defined by random point cloud.");
         public static readonly GUIContent gui_cls_seed        = new GUIContent ("Seed",                 "Random seed for clusters point cloud generator.");
-        public static readonly GUIContent gui_cls_rel         = new GUIContent ("Relax",                "Smooth strength for cluster inner surface.");
         public static readonly GUIContent gui_cls_debris      = new GUIContent ("Debris",               "Preserve some fragments at the edges of clusters to create small debris around big chunks.");
         public static readonly GUIContent gui_cls_amount      = new GUIContent ("Amount",               "Amount of debris in last layer in percents relative to amount of fragments in cluster.");
         public static readonly GUIContent gui_cls_layers      = new GUIContent ("Layers",               "Amount of debris layers at cluster border.");
@@ -1173,17 +1169,15 @@ namespace RayFireEditor
         public static readonly GUIContent gui_cls_red         = new GUIContent ("Reduce Tris",          "Remove all extra triangles from glued fragments and optimize topology.");
         public static readonly GUIContent gui_cls_rlx         = new GUIContent ("Relax",                "Smooth cluster inner surface.");
         public static readonly GUIContent gui_cls_out         = new GUIContent ("  Outer",              "Affect outer vertices.");
+        public static readonly GUIContent gui_cls_inn         = new GUIContent ("Inner",                "Glue inner fragments.");
         public static readonly GUIContent gui_cls_tsf         = new GUIContent ("Transfer",             "Retransfer shards between clusters based on amount of neighbours in clusters.");
+        public static readonly GUIContent gui_cap_adv         = new GUIContent ("  Advanced",           "");
+        public static readonly GUIContent gui_pointRoot       = new GUIContent ("Custom Points",        "Children gameobjects of defined object will be used as custom Cluster points.");
         
         public static readonly GUIContent gui_cap_prp         = new GUIContent ("  Properties",            "");
-        public static readonly GUIContent gui_engine          = new GUIContent ("Engine",                  tlp_eng);
-        public static readonly GUIContent gui_mode            = new GUIContent ("Mode",                    "");
         public static readonly GUIContent gui_adv_seed        = new GUIContent ("Seed",                    "Seed for point cloud generator. Set to 0 to get random point cloud every time.");
-        public static readonly GUIContent gui_adv_copy        = new GUIContent ("Copy",                    "Copy components from original object to fragments");
         public static readonly GUIContent gui_adv_smooth      = new GUIContent ("Smooth",                  "Smooth fragments inner surface.");
         public static readonly GUIContent gui_adv_ptr         = new GUIContent ("Petrify",                 tlp_ptr);
-        public static readonly GUIContent gui_adv_children    = new GUIContent ("Children",                "Fragment all children meshes.");
-        public static readonly GUIContent gui_adv_col         = new GUIContent ("Collinear",               "Remove vertices which lay on straight edge.");
         public static readonly GUIContent gui_adv_dec         = new GUIContent ("Decompose",               "Check output fragments and separate not connected parts of meshes into separate fragments.");
         public static readonly GUIContent gui_adv_input       = new GUIContent ("Input Cap",               "Create extra triangles to connect open edges and close input mesh volume for correct fragmentation.");
         public static readonly GUIContent gui_adv_output      = new GUIContent ("Output Cap",              "Create extra triangles to connect open edges and close output fragment mesh volume.");
@@ -1199,10 +1193,7 @@ namespace RayFireEditor
         public static readonly GUIContent gui_adv_planar      = new GUIContent ("Planar",                  "Do not output planar fragments which mesh vertices lie in the same plane.");
         public static readonly GUIContent gui_adv_rel         = new GUIContent ("Relative Size",           "Do not output small fragments. Measures is percentage relative to original object size.");
         public static readonly GUIContent gui_adv_abs         = new GUIContent ("Absolute Size",           "Do not output small fragments which size in world units is less than this value.");
-        public static readonly GUIContent gui_cap_edt         = new GUIContent ("  Editor",                "");
         public static readonly GUIContent gui_adv_element     = new GUIContent ("    Element Size",        tlp_tp_elm);
-        public static readonly GUIContent gui_adv_remove      = new GUIContent ("Remove Double Faces",     "Delete faces which overlap with each other.");
-        public static readonly GUIContent gui_adv_face        = new GUIContent ("Triangles",               "Filter out meshes with less or equal amount of triangles than defined value");
         public static readonly GUIContent gui_adv_hierarchy   = new GUIContent ("Hierarchy",               tlp_hierar);
         public static readonly GUIContent gui_adv_separate    = new GUIContent ("Separate Elements",       "Fragment every not connected group of triangles separately. ");
         public static readonly GUIContent gui_adv_combine     = new GUIContent ("    Combine",             "Combine fragments meshes from separated elements per Voronoi point cell. ");
@@ -1210,7 +1201,6 @@ namespace RayFireEditor
         public static readonly GUIContent gui_adv_scl         = new GUIContent ("Original Scale",          "Set the same scale to fragments root.");
         public static readonly GUIContent gui_cap_shl         = new GUIContent ("  Shell",                 "");
         public static readonly GUIContent gui_shl_en          = new GUIContent ("Add",                     "Cut mesh surface, then add shell to fragments.");
-        public static readonly GUIContent gui_shl_fr          = new GUIContent ("First",                   "Add shell to original mesh, then fragment.");
         public static readonly GUIContent gui_shl_br          = new GUIContent ("Bridge",                  "Create bridge between outer and inner surface");
         public static readonly GUIContent gui_shl_sub         = new GUIContent ("Merge Submeshes",         "");
         public static readonly GUIContent gui_shl_thick       = new GUIContent ("Thickness",               "Shell thickness");
@@ -1219,18 +1209,11 @@ namespace RayFireEditor
         public static readonly GUIContent gui_aabb_sep        = new GUIContent ("Separate",                "");
         public static readonly GUIContent gui_aabb_cld        = new GUIContent ("Local Cloud",             "Generate Voronoi Point Cloud inside partial fragmentation gizmo.");
         public static readonly GUIContent gui_aabb_obj        = new GUIContent ("Source",                  "");
-        public static readonly GUIContent gui_cap_exp         = new GUIContent ("  Export",                "Export fragments meshes to Unity Asset and reference to this asset.");
-        public static readonly GUIContent gui_exp_src         = new GUIContent ("Source",                  "");
-        public static readonly GUIContent gui_exp_sfx         = new GUIContent ("Suffix",                  "");
         public static readonly GUIContent gui_cap_cent        = new GUIContent ("  Center",                "");
-        public static readonly GUIContent gui_cn_pos          = new GUIContent ("Position",                "");
-        public static readonly GUIContent gui_cn_rot          = new GUIContent ("Rotation",                "");
-        public static readonly GUIContent gui_cn_res          = new GUIContent ("Reset",                   "");
         public static readonly GUIContent gui_cn_set          = new GUIContent ("Set",                     "");
         public static readonly GUIContent gui_cn_obj          = new GUIContent ("Transform",               "");
-        public static readonly GUIContent gui_cap_col         = new GUIContent ("  Colliders",             "");
-        public static readonly GUIContent gui_pr_adv_bake     = new GUIContent ("Bake",                    "Prepares fragment meshes for use with a MeshCollider.");
-        public static readonly GUIContent gui_cap_info        = new GUIContent ("  Info",                  "");
+        
+        public static readonly GUIContent gui_acd_tp          = new GUIContent ("Gizmo",               "");
     }
     
     /// <summary>
@@ -1326,10 +1309,14 @@ namespace RayFireEditor
         // Strings
         public const string rec_move = "Center Move";
         public const string rec_bnd  = "Change Bounds";
+        public const string uny_top  = "Top";
+        public const string uny_lef  = "Left ";
+        public const string uny_rig  = "Right";
+        public const string uny_bot  = "Bottom";
         
         // Button
         public static readonly GUIContent gui_btn_act = new GUIContent ("   Activate   ", "Activate.");
-        public static readonly GUIContent gui_btn_res = new GUIContent ("   Reset   ",    "Reset.");
+        public static readonly GUIContent gui_btn_res = new GUIContent ("      Reset       ",    "Reset Size and Center.");
         public static readonly GUIContent gui_btn_cnt = new GUIContent ("Show Center",    "Show Center.");
         
         // GUI
@@ -1342,6 +1329,7 @@ namespace RayFireEditor
         public static readonly GUIContent gui_size    = new GUIContent ("Size",            "Unyielding gizmo size.");
         public static readonly GUIContent gui_center  = new GUIContent ("Center",          "Unyielding gizmo center.");
         public static readonly GUIContent gui_al_sz   = new GUIContent ("Size",            "Align size.");
+        public static readonly GUIContent gui_cap_alg = new GUIContent ("  Align",         "");
     }
     
     /// <summary>

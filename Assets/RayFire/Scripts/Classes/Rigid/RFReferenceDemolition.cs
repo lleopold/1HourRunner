@@ -7,6 +7,9 @@ using Random = UnityEngine.Random;
 
 namespace RayFire
 {
+    /// <summary>
+    /// Rayfire Rigid reference demolition class.
+    /// </summary>
     [Serializable]
     public class RFReferenceDemolition
     {
@@ -17,12 +20,12 @@ namespace RayFire
         }
 
         // UI
-        public GameObject       rfs;
-        public List<GameObject> rnd;
-        public ActionType       act;
-        public bool             add;
-        public bool             scl;
-        public bool             mat;
+        public GameObject       rfs;    // Reference
+        public List<GameObject> rnd;    // Random references
+        public ActionType       act;    // Action
+        public bool             add;    // Add Rigid
+        public bool             scl;    // Inherit scale
+        public bool             mat;    // Inherit material
         
         /// /////////////////////////////////////////////////////////
         /// Constructor
@@ -126,8 +129,20 @@ namespace RayFire
                 RayfireRigid refScr = refGo.gameObject.GetComponent<RayfireRigid>();
                 if (refScr != null && refScr.initialized == true)
                 {
-                    RayfireMan.Log (RFLog.rig_dbgn + scr.name + RFLog.rig_init, scr.gameObject);
-                    return true;
+                    RayfireMan.Log (RFLog.rig_dbgn + scr.name + RFLog.rig_init1, scr.gameObject);
+                    return false;
+                }
+                
+                // Check if reference has RigidRoot TODO optimize
+                RayfireRigidRoot rootScr = null;
+                if (refScr == null)
+                {
+                    rootScr = refGo.gameObject.GetComponent<RayfireRigidRoot>();
+                    if (rootScr != null && rootScr.initialized == true)
+                    {
+                        RayfireMan.Log (RFLog.rig_dbgn + scr.name + RFLog.rig_init2, scr.gameObject);
+                        return false;
+                    }
                 }
                 
                 // Set object to swap
@@ -150,98 +165,75 @@ namespace RayFire
                 scr.fragments = new List<RayfireRigid>();
                 
                 // Check root for rigid props
-                RayfireRigid instScr = instGo.gameObject.GetComponent<RayfireRigid>();
+                RayfireRigid rigid = instGo.gameObject.GetComponent<RayfireRigid>();
 
                 // Reference Root has not rigid. Add to
-                if (instScr == null && scr.refDemol.add == true)
-                {
-                    // Add rigid and copy
-                    instScr = instGo.gameObject.AddComponent<RayfireRigid>();
-
-                    // Copy rigid
-                    scr.CopyPropertiesTo (instScr);
-
-                    // Disable runtime demolition for default rigid
-                    instScr.dmlTp = DemolitionType.None;
-
-                    // Set fragments sim type
-                    RFPhysic.SetFragmentSimulationType (instScr, scr.simTp);
-                    
-                    // Copy particles from demolished rigid to instanced rigid
-                    RFPoolingParticles.CopyParticlesRigid (scr, instScr);   
-                    
-                    // Single mesh
-                    if (instGo.transform.childCount == 0)
-                    {
-                        instScr.objTp = ObjectType.Mesh;
-                    }
-
-                    // Multiple meshes
-                    if (instGo.transform.childCount > 0)
-                    {
-                        instScr.objTp = ObjectType.MeshRoot;
-                    }
-                }
+                AddRigid (rigid, instGo, scr);
 
                 // Activate and init rigid
                 instGo.transform.gameObject.SetActive (true);
 
+                // Initialize rigidroot
+                if (rootScr != null)
+                {
+                    instGo.gameObject.GetComponent<RayfireRigidRoot>().Initialize();
+                }
+                
                 // Reference has rigid
-                if (instScr != null)
+                else if (rigid != null)
                 {
                     // Init if not initialized yet
-                    instScr.Initialize();
+                    rigid.Initialize();
                     
                     // Create rigid for root children
-                    if (instScr.objTp == ObjectType.MeshRoot)
+                    if (rigid.objTp == ObjectType.MeshRoot)
                     {
                         // Collect referenced fragments
-                        scr.fragments.AddRange (instScr.fragments);
+                        scr.fragments.AddRange (rigid.fragments);
                     }
 
                     // Get ref rigid
-                    else if (instScr.objTp == ObjectType.Mesh || instScr.objTp == ObjectType.SkinnedMesh)
+                    else if (rigid.objTp == ObjectType.Mesh || rigid.objTp == ObjectType.SkinnedMesh)
                     {
                         // Disable runtime caching
-                        instScr.mshDemol.ch.tp = CachingType.Disabled;
+                        rigid.mshDemol.ch.tp = CachingType.Disabled;
                         
                         // Instance has no meshes
-                        if (instScr.mFlt == null && instScr.skr == null)
+                        if (rigid.mFlt == null && rigid.skr == null)
                             return true;
                         
                         // Demolish mesh instance
-                        RFDemolitionMesh.DemolishMesh(instScr);
+                        RFDemolitionMesh.DemolishMesh(rigid);
                         
                         // Collect fragments
-                        if (instScr.HasFragments == true)
-                            scr.fragments.AddRange (instScr.fragments);
+                        if (rigid.HasFragments == true)
+                            scr.fragments.AddRange (rigid.fragments);
                         
                         // Destroy instance
-                        RayfireMan.DestroyFragment (instScr, instScr.rtP, 1f);
+                        RayfireMan.DestroyFragment (rigid, rigid.rtP, 1f);
                     }
 
                     // Get ref rigid
-                    else if (instScr.objTp == ObjectType.NestedCluster || instScr.objTp == ObjectType.ConnectedCluster)
+                    else if (rigid.objTp == ObjectType.NestedCluster || rigid.objTp == ObjectType.ConnectedCluster)
                     {
-                        instScr.Default();
+                        rigid.Default();
                         
                         // Copy contact data
-                        instScr.lim.contactPoint   = scr.lim.contactPoint;
-                        instScr.lim.contactVector3 = scr.lim.contactVector3;
-                        instScr.lim.contactNormal  = scr.lim.contactNormal;
-                        
+                        RFLimitations.Copy(scr.lim, rigid.lim);
+  
                         // Demolish
-                        RFDemolitionCluster.DemolishCluster (instScr);
+                        RFDemolitionCluster.DemolishCluster (rigid);
                         
                         // Collect new fragments
-                        scr.fragments.AddRange (instScr.fragments);
+                        scr.fragments.AddRange (rigid.fragments);
                         
                         // Collect demolished cluster
-                        if (instScr.clsDemol.cluster.shards.Count > 0)
-                            scr.fragments.Add (instScr);
+                        if (rigid.clsDemol.cluster.shards.Count > 0)
+                            scr.fragments.Add (rigid);
                     }
                 }
-
+                
+                // Clean object
                 else
                 {
                     Rigidbody rb = instGo.GetComponent<Rigidbody>();
@@ -256,6 +248,41 @@ namespace RayFire
             return true;
         }
 
+        // Add rigid if has no
+        static void AddRigid(RayfireRigid rigid, GameObject instGo, RayfireRigid scr)
+        {
+            // Reference Root has not rigid. Add to
+            if (rigid == null && scr.refDemol.add == true)
+            {
+                // Add rigid and copy
+                rigid = instGo.gameObject.AddComponent<RayfireRigid>();
+
+                // Copy rigid
+                scr.CopyPropertiesTo (rigid);
+
+                // Disable runtime demolition for default rigid
+                rigid.dmlTp = DemolitionType.None;
+
+                // Set fragments sim type
+                RFPhysic.SetFragmentSimulationType (rigid, scr.simTp);
+                    
+                // Copy particles from demolished rigid to instanced rigid
+                RFPoolingParticles.CopyParticlesRigid (scr, rigid);   
+                    
+                // Single mesh
+                if (instGo.transform.childCount == 0)
+                {
+                    rigid.objTp = ObjectType.Mesh;
+                }
+
+                // Multiple meshes
+                if (instGo.transform.childCount > 0)
+                {
+                    rigid.objTp = ObjectType.MeshRoot;
+                }
+            }
+        }
+        
         // Get final instance accordingly to action type
         static GameObject GetInstance (RayfireRigid scr, GameObject refGo)
         {

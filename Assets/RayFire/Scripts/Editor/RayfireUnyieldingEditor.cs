@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
-using UnityEditor.SceneManagement;
 using RayFire;
 
 namespace RayFireEditor
@@ -15,7 +14,8 @@ namespace RayFireEditor
         BoxBoundsHandle   m_BoundsHandle = new BoxBoundsHandle();
 
         // Foldout
-        static bool fld_ali;
+        static string undo = "Align";
+        int           last_align;
         
         // Serialized properties
         SerializedProperty sp_uny;
@@ -42,8 +42,8 @@ namespace RayFireEditor
             sp_al_sz  = serializedObject.FindProperty(nameof(uny.alSz));
             sp_cent   = serializedObject.FindProperty(nameof(uny.showCenter));
             
-            // Foldout
-            if (EditorPrefs.HasKey (TextKeys.uny_fld_ali) == true) fld_ali = EditorPrefs.GetBool (TextKeys.uny_fld_ali);
+            // Color
+            m_BoundsHandle.wireframeColor = RFUI.color_orange;
         }
         
         /// /////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@ namespace RayFireEditor
             GUI_Button();
             GUI_Properties();
             GUI_Gizmo();
-            // GUI_Align();
+            GUI_Align();
             
             // Apply changes
             serializedObject.ApplyModifiedProperties();
@@ -114,7 +114,11 @@ namespace RayFireEditor
                 Undo.RecordObjects (targets, TextUny.gui_btn_res.text);
                 foreach (RayfireUnyielding scr in targets)
                 {
-                    scr.centerPosition = Vector3.zero;
+                    scr.centerPosition     = Vector3.zero;
+                    scr.size               = Vector3.one;
+                    sp_center.vector3Value = Vector3.zero;
+                    sp_size.vector3Value   = Vector3.one;
+                    
                     RFUI.SetDirty (scr.gameObject);
                 }
             }
@@ -123,58 +127,73 @@ namespace RayFireEditor
 
         void GUI_Align()
         {
-            SetFoldoutPref (ref fld_ali, TextKeys.uny_fld_ali, "Align");
-            if (fld_ali == true)
+            if (Application.isPlaying == true)
+                return;
+            
+            RFUI.CaptionBox (TextUny.gui_cap_alg);
+            RFUI.Space();
+            
+            EditorGUI.BeginChangeCheck();
+            if (GUILayout.Button (TextUny.uny_top, GUILayout.Height (22)))
             {
-                RFUI.Space();
-                
-                EditorGUI.BeginChangeCheck();
-                
-                if (GUILayout.Button ("Up", GUILayout.Height (22)))
-                {
-                    Undo.RecordObjects (targets, "Align");
-                    SetUnyGizmo (1);
-                }
-
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button ("Left   -X  ", GUILayout.Height (22)))
-                {
-                    Undo.RecordObjects (targets, "Align");
-                    SetUnyGizmo (4);
-                }
-                if (GUILayout.Button ("Right    X", GUILayout.Height (22)))
-                {
-                    Undo.RecordObjects (targets, "Align");
-                    SetUnyGizmo (3);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button ("  Back -Z   ", GUILayout.Height (22)))
-                {
-                    Undo.RecordObjects (targets, "Align");
-                    SetUnyGizmo (6);
-                }
-                if (GUILayout.Button ("Forward Z", GUILayout.Height (22)))
-                {
-                    Undo.RecordObjects (targets, "Align");
-                    SetUnyGizmo (5);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                if (GUILayout.Button ("Down", GUILayout.Height (22)))
-                {
-                    Undo.RecordObjects (targets, "Align");
-                    SetUnyGizmo (2);
-                }
-
-                if (EditorGUI.EndChangeCheck())
-                    SceneView.RepaintAll();
-                
-                RFUI.Space();
-
-                RFUI.PropertyField (sp_al_sz, TextUny.gui_al_sz);
+                Undo.RecordObjects (targets, undo);
+                SetUnyGizmo (1);
             }
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button (TextUny.uny_lef, GUILayout.Height (22)))
+            {
+                Undo.RecordObjects (targets, undo);
+                SetUnyGizmo (GetAlign(0));
+            }
+            if (GUILayout.Button (TextUny.uny_rig, GUILayout.Height (22)))
+            {
+                Undo.RecordObjects (targets, undo);
+                SetUnyGizmo (GetAlign(1));
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            if (GUILayout.Button (TextUny.uny_bot, GUILayout.Height (22)))
+            {
+                Undo.RecordObjects (targets, undo);
+                SetUnyGizmo (2);
+            }
+
+            if (EditorGUI.EndChangeCheck())
+                SceneView.RepaintAll();
+            
+            RFUI.Space();
+
+            EditorGUI.BeginChangeCheck();
+            RFUI.PropertyField (sp_al_sz, TextUny.gui_al_sz);
+            if (EditorGUI.EndChangeCheck() == true)
+            {
+                if (sp_al_sz.floatValue <= 0)
+                    sp_al_sz.floatValue = 0.01f;
+                
+                SetUnyGizmo (last_align);
+                SceneView.RepaintAll();
+                
+                // Apply changes
+                serializedObject.ApplyModifiedProperties();
+            } 
+        }
+
+        int GetAlign(int alignButton)
+        {
+            if (SceneView.lastActiveSceneView == null)
+                return 3;
+            
+            Vector3 toCamera = (SceneView.lastActiveSceneView.camera.transform.position - uny.gameObject.transform.position).normalized;
+            float angle1 = Vector3.Angle(uny.gameObject.transform.right, toCamera);
+            if (angle1 < 45)  return alignButton == 0 ? 6 : 5;
+            if (angle1 > 135) return alignButton == 0 ? 5 : 6;
+            float angle2 = Vector3.Angle(uny.gameObject.transform.forward, toCamera);    
+            if (angle2 < 45)  return alignButton == 0 ? 3 : 4;
+            if (angle2 > 135) return alignButton == 0 ? 4 : 3;
+            if (angle1 < 90 && angle2 > 90) return alignButton == 0 ? 4 : 3;
+            if (angle1 < 90 && angle2 < 90) return alignButton == 0 ? 3 : 4;
+            return alignButton == 0 ? 5 : 6;
         }
         
         /// /////////////////////////////////////////////////////////
@@ -186,7 +205,7 @@ namespace RayFireEditor
         {
             if (targ.enabled && targ.showGizmo == true)
             {
-                Gizmos.color  = RFUI.color_blue;
+                Gizmos.color  = RFUI.color_orange;
                 Gizmos.matrix = targ.transform.localToWorldMatrix;
                 Gizmos.DrawWireCube (targ.centerPosition, targ.size);
             }
@@ -196,8 +215,8 @@ namespace RayFireEditor
         {
             if (uny.enabled && uny.showGizmo == true)
             {
-                Transform transform      = uny.transform;
-                centerWorldPos  = transform.TransformPoint (uny.centerPosition);
+                Transform transform = uny.transform;
+                centerWorldPos = transform.TransformPoint (uny.centerPosition);
 
                 // Point3 handle
                 if (uny.showCenter == true)
@@ -211,10 +230,9 @@ namespace RayFireEditor
                 }
                 
                 Handles.matrix = uny.transform.localToWorldMatrix;
-                m_BoundsHandle.wireframeColor = RFUI.color_blue;
                 m_BoundsHandle.center         = uny.centerPosition;
                 m_BoundsHandle.size           = uny.size;
-
+                
                 // Draw the handle
                 EditorGUI.BeginChangeCheck();
                 m_BoundsHandle.DrawHandle();
@@ -232,6 +250,8 @@ namespace RayFireEditor
             Transform tm               = uny.transform;
             Bounds    bound            = RFCluster.GetChildrenBound (tm);
             Vector3   localBoundCenter = tm.InverseTransformPoint(bound.center);
+
+            uny.alSz = sp_al_sz.floatValue;
             float     al_size          = Mathf.Abs (uny.alSz);
             
             uny.size.x = bound.size.x / tm.localScale.x;
@@ -258,9 +278,12 @@ namespace RayFireEditor
                 // Set size in units
                 uny.size.x = al_size;
                 
+                sp_size.vector3Value = uny.size;
+                
                 // Set center position in local space to center
                 uny.centerPosition.z = localBoundCenter.z;
                 uny.centerPosition.y = localBoundCenter.y;
+                
                 if (state == 3)
                     uny.centerPosition.x = localBoundCenter.x + Mathf.Abs(bound.size.x / 2f / tm.localScale.x) - al_size / 2f;
                 if (state == 4)
@@ -281,6 +304,12 @@ namespace RayFireEditor
                 if (state == 6)
                     uny.centerPosition.z = localBoundCenter.x - Mathf.Abs(bound.size.z / 2f / tm.localScale.z) + al_size / 2f;
             }
+
+            last_align = state;
+            
+            // Update Ui props
+            sp_size.vector3Value   = uny.size;
+            sp_center.vector3Value = uny.centerPosition;
         }
 
         /// /////////////////////////////////////////////////////////

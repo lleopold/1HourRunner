@@ -77,6 +77,7 @@ namespace RayFire
         public AudioClip      clip;
         public int            mask      = -1;
         public string         tagFilter = "Untagged";
+        public bool           colEx;
         
         public AnimationCurve curve = new AnimationCurve (
             new Keyframe (0,    1, -1, 0), new Keyframe (0.5f, 1, 0, 0),
@@ -136,7 +137,13 @@ namespace RayFire
             clip            = scr.clip;
             volume          = scr.volume;
         }
-
+        
+        // Collision detonation
+        void OnCollisionEnter(Collision collision)
+        {
+            CollisionDetonation (collision);
+        }
+        
         /// /////////////////////////////////////////////////////////
         /// Explode
         /// /////////////////////////////////////////////////////////
@@ -740,6 +747,17 @@ namespace RayFire
         {
             float f = -Vector3.Dot(plNorm, (pos - plPos)) / Vector3.Dot(plNorm, plNorm);
             return pos + f * plNorm;
+        }
+        
+        // Collision detonation
+        void CollisionDetonation(Collision collision)
+        {
+            if (colEx == true)
+                if (collision.relativeVelocity.magnitude > 0.01f)
+                {
+                    Explode();
+                    colEx = false;
+                }   
         }
     }
 }
