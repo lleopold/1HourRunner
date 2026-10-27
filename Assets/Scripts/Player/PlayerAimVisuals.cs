@@ -557,6 +557,7 @@ namespace ZombieGame
             _meshColliderAimingCircle.sharedMesh = _meshAimingCircle;
 
             _aimingCircleTrigger?.SetConeShape(angle, vLength + _pointyTipFactor);
+            _aimingCircleTrigger?.PruneOutsideCone();
         }
 
         private void CreateAimingCircle()

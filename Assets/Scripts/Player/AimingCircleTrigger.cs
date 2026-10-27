@@ -37,7 +37,11 @@ public class AimingCircleTrigger : MonoBehaviour
             RemoveZombie(other);
     }
 
-    void FixedUpdate()
+    // Driven from PlayerAimVisuals every frame right after SetConeShape, so the set is pruned
+    // against the current cone before anything reads it. Physics reports overlaps wider than the
+    // cone (convex cooking + the swept kinematic trigger), and the collider mesh is rebuilt every
+    // frame, so those false positives keep re-entering - the cone test is the authority.
+    public void PruneOutsideCone()
     {
         if (_zombiesInside.Count == 0) return;
 
