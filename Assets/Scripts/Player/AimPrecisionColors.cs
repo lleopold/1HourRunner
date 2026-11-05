@@ -103,6 +103,10 @@ namespace ZombieGame
             return r;
         }
 
+        /// <summary>Outline color for the zombie the next shot rolls against. Cyan stays readable
+        /// against the red/yellow/green/white hit-chance scale used for everyone else.</summary>
+        public static readonly Color PrimaryTargetOutline = new Color(0f, 0.9f, 1f);
+
         /// <summary>Outline color straight from a <see cref="HitChanceResult"/> — white only at point blank.</summary>
         public static Color GetOutlineColor(HitChanceResult r) => GetOutlineColor(r.Value, r.IsPointBlank);
 

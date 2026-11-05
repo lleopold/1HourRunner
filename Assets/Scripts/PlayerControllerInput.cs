@@ -237,6 +237,9 @@ namespace ZombieGame
             var inside = _aimVisuals?.AimingCircleTrigger?.GetZombiesInside();
             if (inside == null) return;
 
+            // The zombie the next shot rolls against first — marked apart from the hit-chance scale.
+            GameObject primary = _weaponController.GetPrimaryTarget(inside);
+
             float closestHc = 1f;
             float closestDistMult = 1f;
             bool closestPb = false;
@@ -252,7 +255,9 @@ namespace ZombieGame
                 var hcr = AimPrecisionColors.ComputeHitChance(_aimVisuals.CurrentAngle, dist, wCfg, pCfg);
 
                 enemy.SetOutline(true);
-                enemy.SetOutlineColor(AimPrecisionColors.GetOutlineColor(hcr));
+                enemy.SetOutlineColor(c.gameObject == primary
+                    ? AimPrecisionColors.PrimaryTargetOutline
+                    : AimPrecisionColors.GetOutlineColor(hcr));
 
                 if (dist < closestDist) { closestDist = dist; closestHc = hcr.Value; closestDistMult = hcr.DistanceMultiplier; closestPb = hcr.IsPointBlank; }
             }

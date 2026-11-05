@@ -237,7 +237,7 @@ namespace ZombieGame
 
         // ── Roll helpers ──────────────────────────────────────────────────────
 
-        private GameObject GetPrimaryTarget(HashSet<Collider> zombies)
+        public GameObject GetPrimaryTarget(HashSet<Collider> zombies)
         {
             // Controller mode: use locked target if it is still in the gizmo
             if (_targeting != null && _targeting.CurrentAimingType == AimingType.ControllerRightStick)
